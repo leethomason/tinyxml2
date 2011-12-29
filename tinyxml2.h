@@ -6,11 +6,26 @@ namespace tinyxml2
 {
 
 
+
+// internal - move to separate namespace
+struct CharBuffer
+{
+	size_t  length;
+	char	mem[1];
+
+	static CharBuffer* Construct( const char* in );
+	static void Free( CharBuffer* );
+};
+
+
+/*
 class Element
 {
 public:
 	Element
 };
+*/
+
 
 
 class XMLDocument
@@ -22,12 +37,13 @@ public:
 
 private:
 	XMLDocument( const XMLDocument& );	// not implemented
+	CharBuffer* charBuffer;
 };
 
 
 
-
-
 };	// tinyxml2
+
+
 
 #endif // TINYXML2_INCLUDED
