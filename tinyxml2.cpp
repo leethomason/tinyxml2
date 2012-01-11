@@ -74,6 +74,13 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 
 void XMLNode::Print( FILE* fp, int depth )
 {
+	for( XMLNode* node = firstChild; node; node=node->next ) {
+		node->Print( fp, depth );
+	}
+}
+
+void XMLNode::PrintSpace( FILE* fp, int depth ) 
+{
 	for( int i=0; i<depth; ++i ) {
 		fprintf( fp, "    " );
 	}
@@ -138,6 +145,7 @@ char* XMLComment::ParseDeep( char* p )
 XMLDocument::XMLDocument() : 
 	charBuffer( 0 )
 {
+	root = new XMLNode( this );
 }
 
 
@@ -153,8 +161,11 @@ bool XMLDocument::Parse( const char* p )
 {
 	charBuffer = CharBuffer::Construct( p );
 	XMLNode* node = 0;
+	
 	char* q = Identify( charBuffer->mem, &node );
+	root->InsertEndChild( node );
 	node->ParseDeep( q );
+
 	return true;
 }
 
@@ -184,13 +195,19 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 	// - Everthing else is unknown to tinyxml.
 	//
 
-	const char* xmlHeader = { "<?xml" };
-	const char* commentHeader = { "<!--" };
-	const char* dtdHeader = { "<!" };
-	const char* cdataHeader = { "<![CDATA[" };
+	static const char* xmlHeader = { "<?xml" };
+	static const char* commentHeader = { "<!--" };
+	static const char* dtdHeader = { "<!" };
+	static const char* cdataHeader = { "<![CDATA[" };
 
-	if ( XMLNode::StringEqual( p, xmlHeader, 5 ) ) {
+	static const int xmlHeaderLen = 5;
+	static const int commentHeaderLen = 4;
+	static const int dtdHeaderLen = 2;
+	static const int cdataHeaderLen = 9;
+
+	if ( XMLNode::StringEqual( p, commentHeader, commentHeaderLen ) ) {
 		returnNode = new XMLComment( this );
+		p += commentHeaderLen;
 	}
 	else {
 		TIXMLASSERT( 0 );

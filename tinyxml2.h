@@ -48,7 +48,7 @@ class XMLNode
 public:
 
 	XMLNode* InsertEndChild( XMLNode* addThis );
-	void Print( FILE* cfile, int depth );			// prints leading spaces.
+	virtual void Print( FILE* cfile, int depth );
 
 protected:
 	XMLNode( XMLDocument* );
@@ -90,6 +90,7 @@ protected:
 	XMLNode*		next;
 
 private:
+	void PrintSpace( FILE* cfile, int depth );			// prints leading spaces.
 
 };
 
@@ -100,7 +101,7 @@ public:
 	XMLComment( XMLDocument* doc );
 	virtual ~XMLComment();
 
-	void Print( FILE* cfile, int depth );
+	virtual void Print( FILE* cfile, int depth );
 
 protected:
 	char* ParseDeep( char* );
