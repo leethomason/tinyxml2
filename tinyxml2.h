@@ -27,6 +27,7 @@
 
 namespace tinyxml2
 {
+class XMLDocument*;
 
 // internal - move to separate namespace
 struct CharBuffer
@@ -47,8 +48,12 @@ public:
 	static XMLNode* Identify( const char* p );
 
 protected:
-	static const char* SkipWhiteSpace( const char* p );
-	static char* SkipWhiteSpace( char* p ) { return (char*) SkipWhiteSpace( (const char*)p ); }
+	XMLNode( XMLDocument* );
+	virtual ~XMLNode();
+
+	// Utility
+	static const char* SkipWhiteSpace( const char* p )	{ while( isspace( *p ) ) { ++p; } return p; }
+	static char* SkipWhiteSpace( char* p )				{ while( isspace( *p ) ) { ++p; } return p; }
 
 	inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
 		int n = 0;
@@ -61,6 +66,26 @@ protected:
 		return false;
 	}
 
+	/* Parses text. (Not a text node.)
+	   - [ ] EOL normalization.
+	   - [x] Trim leading whitespace
+	   - [ ] Trim trailing whitespace.
+	   - [ ] Leaves inner whitespace
+	   - [ ] Inserts one space between lines.
+	*/
+	const char* ParseText( char* in, const char* endTag, char** next );
+
+	virtual char* ParseDeep( char* )	{ TIXMLASSERT( 0 ); }
+
+	XMLDocument*	document;
+	XMLNode*		parent;
+
+	XMLNode*		firstChild;
+	XMLNode*		lastChild;
+
+	XMLNode*		prev;
+	XMLNode*		next;
+
 private:
 
 };
@@ -68,7 +93,12 @@ private:
 
 class XMLComment : public XMLNode
 {
+public:
+	XMLComment( XMLDocument* doc );
+	virtual ~XMLComment();
 
+private:
+	char* value;
 };
 
 
@@ -76,12 +106,21 @@ class XMLDocument
 {
 public:
 	XMLDocument();
+	~XMLDocument();
 
 	bool Parse( const char* );
 
-private:
-	XMLDocument( const XMLDocument& );	// not implemented
+	XMLNode* Root()				{ return root; }
+	XMLNode* RootElement();
 
+	XMLNode* InsertEndChild( XMLNode* addThis );
+
+private:
+	XMLDocument( const XMLDocument& );	// intentionally not implemented
+
+	virtual char* ParseDeep( char* );
+
+	XMLNode*	root;
 	CharBuffer* charBuffer;
 };
 
