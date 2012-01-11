@@ -2,6 +2,8 @@
 #define TINYXML2_INCLUDED
 
 #include <limits.h>
+#include <ctype.h>
+#include <stdio.h>
 
 #if defined( _DEBUG ) || defined( DEBUG ) || defined (__DEBUG__)
 	#ifndef DEBUG
@@ -27,7 +29,7 @@
 
 namespace tinyxml2
 {
-class XMLDocument*;
+class XMLDocument;
 
 // internal - move to separate namespace
 struct CharBuffer
@@ -45,7 +47,8 @@ class XMLNode
 	friend class XMLDocument;
 public:
 
-	static XMLNode* Identify( const char* p );
+	XMLNode* InsertEndChild( XMLNode* addThis );
+	void Print( FILE* cfile, int depth );			// prints leading spaces.
 
 protected:
 	XMLNode( XMLDocument* );
@@ -97,8 +100,13 @@ public:
 	XMLComment( XMLDocument* doc );
 	virtual ~XMLComment();
 
+	void Print( FILE* cfile, int depth );
+
+protected:
+	char* ParseDeep( char* );
+
 private:
-	char* value;
+	const char* value;
 };
 
 
@@ -109,24 +117,18 @@ public:
 	~XMLDocument();
 
 	bool Parse( const char* );
+	void Print( FILE* cfile=stdout, int depth=0 );
 
 	XMLNode* Root()				{ return root; }
 	XMLNode* RootElement();
 
-	XMLNode* InsertEndChild( XMLNode* addThis );
-
 private:
 	XMLDocument( const XMLDocument& );	// intentionally not implemented
-
-	virtual char* ParseDeep( char* );
+	char* Identify( char* p, XMLNode** node );
 
 	XMLNode*	root;
 	CharBuffer* charBuffer;
 };
-
-
-
-
 
 
 };	// tinyxml2

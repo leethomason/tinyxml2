@@ -58,7 +58,7 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 		lastChild = addThis;
 
 		addThis->parent = this;
-		addThis->next = null;
+		addThis->next = 0;
 	}
 	else {
 		TIXMLASSERT( firstChild == 0 );
@@ -66,7 +66,16 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 
 		addThis->parent = this;
 		addThis->prev = 0;
-		addThis->next = null;
+		addThis->next = 0;
+	}
+	return addThis;
+}
+
+
+void XMLNode::Print( FILE* fp, int depth )
+{
+	for( int i=0; i<depth; ++i ) {
+		fprintf( fp, "    " );
 	}
 }
 
@@ -77,7 +86,7 @@ const char* XMLNode::ParseText( char* p, const char* endTag, char** next )
 
 	char* start = SkipWhiteSpace( p );
 	if ( !start )
-		return;
+		return 0;
 
 	char endChar = *endTag;
 	p = start;
@@ -104,13 +113,20 @@ XMLComment::XMLComment( XMLDocument* doc ) : XMLNode( doc )
 }
 
 
-virtual XMLComment::~XMLComment()
+XMLComment::~XMLComment()
 {
 
 }
 
 
-virtual char* XMLComment::ParseDeep( char* p )
+void XMLComment::Print( FILE* fp, int depth )
+{
+	XMLNode::Print( fp, depth );
+	fprintf( fp, "<!-- %s -->\n", value );
+}
+
+
+char* XMLComment::ParseDeep( char* p )
 {
 	// Comment parses as text.
 	value = ParseText( p, "-->", &p );
@@ -135,19 +151,20 @@ XMLDocument::~XMLDocument()
 
 bool XMLDocument::Parse( const char* p )
 {
-	charBuffer = CharBuffer.Construct( p );
+	charBuffer = CharBuffer::Construct( p );
 	XMLNode* node = 0;
-	Identify( charBuffer., node );
-	node->Parse( p );
+	char* q = Identify( charBuffer->mem, &node );
+	node->ParseDeep( q );
+	return true;
 }
 
 
-XMLComment* XMLDocument::newComment( XMLNode* parent )
+void XMLDocument::Print( FILE* fp, int depth ) 
 {
-	
+	for( XMLNode* node = root->firstChild; node; node=node->next ) {
+		node->Print( fp, depth );
+	}
 }
-
-
 
 
 char* XMLDocument::Identify( char* p, XMLNode** node ) 
@@ -173,7 +190,7 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 	const char* cdataHeader = { "<![CDATA[" };
 
 	if ( XMLNode::StringEqual( p, xmlHeader, 5 ) ) {
-		returnNode = new XMLComment();
+		returnNode = new XMLComment( this );
 	}
 	else {
 		TIXMLASSERT( 0 );
