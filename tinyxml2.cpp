@@ -7,6 +7,12 @@
 
 using namespace tinyxml2;
 
+static const char LINE_FEED				= (char)0x0a;				// all line endings are normalized to LF
+static const char LF = LINE_FEED;
+static const char CARRIAGE_RETURN		= (char)0x0d;			// CR gets filtered out
+static const char CR = CARRIAGE_RETURN;
+
+
 // --------- CharBuffer ----------- //
 /*static*/ CharBuffer* CharBuffer::Construct( const char* in )
 {
@@ -91,25 +97,54 @@ const char* XMLNode::ParseText( char* p, const char* endTag, char** next )
 {
 	TIXMLASSERT( endTag && *endTag );
 
-	char* start = SkipWhiteSpace( p );
-	if ( !start )
-		return 0;
+	char* start = p;
+	char* q = p;		// q (target) <= p (src) in same buffer.
+	char  endChar = *endTag;
+	int   length = strlen( endTag );	
+	char* nextTag = 0;
 
-	char endChar = *endTag;
-	p = start;
-	int length = strlen( endTag );
-
+	// Inner loop of text parsing.
 	while ( *p ) {
-		if ( *p == endChar ) {
-			if ( strncmp( p, endTag, length ) == 0 ) {
-				*p = 0;
-				*next = p + length;
-				return start;
-			}
+		if ( *p == endChar && strncmp( p, endTag, length ) == 0 ) {
+			*q = 0;
+			nextTag = p + length;
+			break;
 		}
-		++p;
+		else if ( *p == CR ) {
+			// CR-LF pair becomes LF
+			// CR alone becomes LF
+			// LF-CR becomes LF
+			if ( *(p+1) == LF ) {
+				p += 2;
+			}
+			else {
+				++p;
+			}
+			*q = LF;
+		}
+		else if ( *p == LF ) {
+			if ( *(p+1) == CR ) {
+				p += 2;
+			}
+			else {
+				++p;
+			}
+			*q = LF;
+		}
+		else {
+			*q = *p;
+			++p;
+		}
+		++q;
 	}	
-	return 0;
+
+	// Error? If we don't have a text tag, something went wrong. (Although 
+	// what the nextTag points at may be null.)
+	if ( nextTag == 0 ) {
+		return 0;
+	}
+	*next = nextTag;
+	return start;
 }
 
 
@@ -129,7 +164,7 @@ XMLComment::~XMLComment()
 void XMLComment::Print( FILE* fp, int depth )
 {
 	XMLNode::Print( fp, depth );
-	fprintf( fp, "<!-- %s -->\n", value );
+	fprintf( fp, "<!--%s-->\n", value );
 }
 
 

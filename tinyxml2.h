@@ -68,13 +68,13 @@ protected:
 		}
 		return false;
 	}
+	inline static int IsUTF8Continuation( char p ) { return p & 0x80; }
 
 	/* Parses text. (Not a text node.)
 	   - [ ] EOL normalization.
-	   - [x] Trim leading whitespace
-	   - [ ] Trim trailing whitespace.
-	   - [ ] Leaves inner whitespace
-	   - [ ] Inserts one space between lines.
+	   - [X] Do not trim leading whitespace
+	   - [X] Do not trim trailing whitespace.
+	   - [X] Leaves inner whitespace
 	*/
 	const char* ParseText( char* in, const char* endTag, char** next );
 
