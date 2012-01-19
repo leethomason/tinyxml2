@@ -15,10 +15,20 @@ int main( int argc, const char* argv )
 		doc.Parse( test );
 		doc.Print( stdout );
 	}
-#endif
 	{
 		static const char* test = "<!--hello world\n"
-			                      "          line 2\r-->";
+			                      "          line 2\r"
+			                      "          line 3\r\n"
+			                      "          line 4\n\r"
+			                      "          line 5\r-->";
+
+		XMLDocument doc;
+		doc.Parse( test );
+		doc.Print( stdout );
+	}
+#endif
+	{
+		static const char* test = "<element />";
 
 		XMLDocument doc;
 		doc.Parse( test );

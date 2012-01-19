@@ -30,6 +30,10 @@
 namespace tinyxml2
 {
 class XMLDocument;
+class XMLElement;
+class XMLAttribute;
+class XMLComment;
+class XMLNode;
 
 // internal - move to separate namespace
 struct CharBuffer
@@ -42,19 +46,13 @@ struct CharBuffer
 };
 
 
-class XMLNode
+class XMLBase
 {
-	friend class XMLDocument;
 public:
-
-	XMLNode* InsertEndChild( XMLNode* addThis );
-	virtual void Print( FILE* cfile, int depth );
+	XMLBase() {}
+	virtual ~XMLBase() {}
 
 protected:
-	XMLNode( XMLDocument* );
-	virtual ~XMLNode();
-
-	// Utility
 	static const char* SkipWhiteSpace( const char* p )	{ while( isspace( *p ) ) { ++p; } return p; }
 	static char* SkipWhiteSpace( char* p )				{ while( isspace( *p ) ) { ++p; } return p; }
 
@@ -68,17 +66,32 @@ protected:
 		}
 		return false;
 	}
-	inline static int IsUTF8Continuation( char p ) { return p & 0x80; }
+	inline static int IsUTF8Continuation( unsigned char p ) { return p & 0x80; }
+	inline static int IsAlphaNum( unsigned char anyByte )	{ return ( anyByte <= 127 ) ? isalnum( anyByte ) : 1; }
+	inline static int IsAlpha( unsigned char anyByte )		{ return ( anyByte <= 127 ) ? isalpha( anyByte ) : 1; }
 
-	/* Parses text. (Not a text node.)
-	   - [ ] EOL normalization.
-	   - [X] Do not trim leading whitespace
-	   - [X] Do not trim trailing whitespace.
-	   - [X] Leaves inner whitespace
-	*/
 	const char* ParseText( char* in, const char* endTag, char** next );
+	const char* ParseName( char* in, char** next );
+	char* Identify( XMLDocument* document, char* p, XMLNode** node );
+};
+
+
+class XMLNode : public XMLBase
+{
+	friend class XMLDocument;
+	friend class XMLElement;
+public:
+	virtual ~XMLNode();
+
+	XMLNode* InsertEndChild( XMLNode* addThis );
+	virtual void Print( FILE* cfile, int depth );
+
+	virtual XMLElement* ToElement() { return 0; }
 
 	virtual char* ParseDeep( char* )	{ TIXMLASSERT( 0 ); }
+
+protected:
+	XMLNode( XMLDocument* );
 
 	XMLDocument*	document;
 	XMLNode*		parent;
@@ -103,15 +116,56 @@ public:
 
 	virtual void Print( FILE* cfile, int depth );
 
-protected:
+	const char* Value() const { return value; }
+
 	char* ParseDeep( char* );
+
+protected:
 
 private:
 	const char* value;
 };
 
 
-class XMLDocument
+class XMLAttribute : public XMLBase
+{
+	friend class XMLElement;
+public:
+	XMLAttribute( XMLElement* element ) : value( 0 ), next( 0 ) {}
+	virtual ~XMLAttribute()	{}
+
+private:
+	char* ParseDeep( char* p );
+
+	const char* value;
+	XMLAttribute* next;
+};
+
+
+class XMLElement : public XMLNode
+{
+public:
+	XMLElement( XMLDocument* doc );
+	virtual ~XMLElement();
+
+	const char* Name() const { return name; }
+
+	virtual XMLElement* ToElement() { return this; }
+	bool Closing() const			{ return closing; }
+
+	char* ParseDeep( char* p );
+
+protected:
+
+private:
+	const char* name;
+	bool closing;
+	XMLAttribute* rootAttribute;
+	XMLAttribute* lastAttribute;
+};
+
+
+class XMLDocument : public XMLBase
 {
 public:
 	XMLDocument();
@@ -123,9 +177,15 @@ public:
 	XMLNode* Root()				{ return root; }
 	XMLNode* RootElement();
 
+	enum {
+		ERROR_ELEMENT_MISMATCH,
+		ERROR_PARSING_ELEMENT,
+		ERROR_PARSING_ATTRIBUTE
+	};
+	void SetError( int error, const char* str1, const char* str2 )	{}
+
 private:
 	XMLDocument( const XMLDocument& );	// intentionally not implemented
-	char* Identify( char* p, XMLNode** node );
 
 	XMLNode*	root;
 	CharBuffer* charBuffer;
