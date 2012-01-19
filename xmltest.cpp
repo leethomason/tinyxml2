@@ -28,11 +28,15 @@ int main( int argc, const char* argv )
 	}
 #endif
 	{
-		static const char* test = "<element />";
-
-		XMLDocument doc;
-		doc.Parse( test );
-		doc.Print( stdout );
+		static const char* test[] = {	"<element />",
+									    "<element></element>",
+										0
+		};
+		for( const char* t=test[0]; *t; ++t ) {
+			XMLDocument doc;
+			doc.Parse( t );
+			doc.Print( stdout );
+		}
 	}
 	return 0;
 }

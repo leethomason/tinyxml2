@@ -143,15 +143,21 @@ char* XMLBase::Identify( XMLDocument* document, char* p, XMLNode** node )
 	static const char* commentHeader	= { "<!--" };
 	static const char* dtdHeader		= { "<!" };
 	static const char* cdataHeader		= { "<![CDATA[" };
+	static const char* elementHeader	= { "<" };	// and a header for everything else; check last.
 
 	static const int xmlHeaderLen		= 5;
 	static const int commentHeaderLen	= 4;
 	static const int dtdHeaderLen		= 2;
 	static const int cdataHeaderLen		= 9;
+	static const int elementHeaderLen	= 1;
 
-	if ( XMLNode::StringEqual( p, commentHeader, commentHeaderLen ) ) {
+	if ( StringEqual( p, commentHeader, commentHeaderLen ) ) {
 		returnNode = new XMLComment( document );
 		p += commentHeaderLen;
+	}
+	else if ( StringEqual( p, elementHeader, elementHeaderLen ) ) {
+		returnNode = new XMLElement( document );
+		p += elementHeaderLen;
 	}
 	else {
 		TIXMLASSERT( 0 );
@@ -222,6 +228,7 @@ void XMLNode::Print( FILE* fp, int depth )
 	}
 }
 
+
 void XMLNode::PrintSpace( FILE* fp, int depth ) 
 {
 	for( int i=0; i<depth; ++i ) {
@@ -267,6 +274,12 @@ char* XMLAttribute::ParseDeep( char* p )
 	value = ParseText( p, endTag, &p );
 	if ( !value ) return 0;
 	return p;
+}
+
+
+void XMLAttribute::Print( FILE* cfile )
+{
+	fprintf( cfile, "\"%s\"", value );
 }
 
 
@@ -385,6 +398,29 @@ char* XMLElement::ParseDeep( char* p )
 }
 
 
+void XMLElement::Print( FILE* cfile, int depth )
+{
+	PrintSpace( cfile, depth );
+	fprintf( cfile, "<%s", Name() );
+
+	for( XMLAttribute* attrib=rootAttribute; attrib; attrib=attrib->next ) {
+		fprintf( cfile, " " );
+		attrib->Print( cfile );
+	}
+
+	if ( firstChild ) {
+		fprintf( cfile, ">/n" );
+		for( XMLNode* node=firstChild; node; node=node->next ) {
+			node->Print( cfile, depth+1 );
+		}
+		fprintf( cfile, "</%s>", Name() );
+	}
+	else {
+		fprintf( cfile, "/>\n" );
+	}
+}
+
+
 // --------- XMLDocument ----------- //
 XMLDocument::XMLDocument() : 
 	charBuffer( 0 )
@@ -407,10 +443,12 @@ bool XMLDocument::Parse( const char* p )
 	XMLNode* node = 0;
 	
 	char* q = Identify( this, charBuffer->mem, &node );
-	root->InsertEndChild( node );
-	node->ParseDeep( q );
-
-	return true;
+	if ( node ) {
+		root->InsertEndChild( node );
+		node->ParseDeep( q );
+		return true;
+	}
+	return false;
 }
 
 

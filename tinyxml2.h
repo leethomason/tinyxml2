@@ -133,6 +133,7 @@ class XMLAttribute : public XMLBase
 public:
 	XMLAttribute( XMLElement* element ) : value( 0 ), next( 0 ) {}
 	virtual ~XMLAttribute()	{}
+	virtual void Print( FILE* cfile );
 
 private:
 	char* ParseDeep( char* p );
@@ -149,6 +150,7 @@ public:
 	virtual ~XMLElement();
 
 	const char* Name() const { return name; }
+	virtual void Print( FILE* cfile, int depth );
 
 	virtual XMLElement* ToElement() { return this; }
 	bool Closing() const			{ return closing; }
