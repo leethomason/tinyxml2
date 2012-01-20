@@ -48,6 +48,7 @@ struct CharBuffer
 // FIXME: refactor to be the basis for all string handling.
 class StrPair
 {
+public:
 	enum {
 		NEEDS_FLUSH = 0x01,
 		NEEDS_ENTITY_PROCESSING = 0x02,
@@ -55,7 +56,7 @@ class StrPair
 	};
 
 	StrPair() : flags( 0 ), start( 0 ), end( 0 ) {}
-	void Init( const char* start, char* end, int flags; ) {
+	void Init( const char* start, char* end, int flags ) {
 		this->start = start; this->end = end; this->flags = flags | NEEDS_FLUSH;
 	}
 	const char* GetStr();
@@ -80,6 +81,9 @@ protected:
 
 	inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
 		int n = 0;
+		if ( p == q ) {
+			return true;
+		}
 		while( *p && *q && *p == *q && n<nChar ) {
 			++p; ++q; ++n;
 		}
@@ -138,14 +142,14 @@ public:
 
 	virtual void Print( FILE* cfile, int depth );
 
-	const char* Value() const { return value; }
+	const char* Value() { return value.GetStr(); }
 
 	char* ParseDeep( char* );
 
 protected:
 
 private:
-	const char* value;
+	StrPair value;
 };
 
 
@@ -153,14 +157,14 @@ class XMLAttribute : public XMLBase
 {
 	friend class XMLElement;
 public:
-	XMLAttribute( XMLElement* element ) : value( 0 ), next( 0 ) {}
+	XMLAttribute( XMLElement* element ) : next( 0 ) {}
 	virtual ~XMLAttribute()	{}
 	virtual void Print( FILE* cfile );
 
 private:
 	char* ParseDeep( char* p );
 
-	const char* value;
+	StrPair value;
 	XMLAttribute* next;
 };
 
@@ -171,7 +175,7 @@ public:
 	XMLElement( XMLDocument* doc );
 	virtual ~XMLElement();
 
-	const char* Name() const { return name; }
+	const char* Name() { return name.GetStr(); }
 	virtual void Print( FILE* cfile, int depth );
 
 	virtual XMLElement* ToElement() { return this; }
@@ -182,7 +186,7 @@ public:
 protected:
 
 private:
-	const char* name;
+	StrPair name;
 	bool closing;
 	XMLAttribute* rootAttribute;
 	XMLAttribute* lastAttribute;
