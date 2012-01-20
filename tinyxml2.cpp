@@ -88,6 +88,8 @@ const char* XMLBase::ParseText( char* p, const char* endTag, char** next )
 }
 
 
+char* XMLBase::ParseName( char* in, StrPair* pair );
+
 const char* XMLBase::ParseName( char* p, char** next )
 {
 	char* start = p;
@@ -115,10 +117,10 @@ const char* XMLBase::ParseName( char* p, char** next )
 	*p = 0;
 
 	if ( p > start ) {
-		*next = p;
+		*next = p+1;
 		return start;
 	}
-	return p+1;
+	return 0;
 }
 
 

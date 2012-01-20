@@ -45,6 +45,28 @@ struct CharBuffer
 	static void Free( CharBuffer* );
 };
 
+// FIXME: refactor to be the basis for all string handling.
+class StrPair
+{
+	enum {
+		NEEDS_FLUSH = 0x01,
+		NEEDS_ENTITY_PROCESSING = 0x02,
+		NEEDS_NEWLINE_NORMALIZATION = 0x04
+	};
+
+	StrPair() : flags( 0 ), start( 0 ), end( 0 ) {}
+	void Init( const char* start, char* end, int flags; ) {
+		this->start = start; this->end = end; this->flags = flags | NEEDS_FLUSH;
+	}
+	const char* GetStr();
+
+private:
+	// After parsing, if *end != 0, it can be set to zero.
+	int flags;
+	const char* start;	
+	char* end;
+};
+
 
 class XMLBase
 {
@@ -71,7 +93,7 @@ protected:
 	inline static int IsAlpha( unsigned char anyByte )		{ return ( anyByte <= 127 ) ? isalpha( anyByte ) : 1; }
 
 	const char* ParseText( char* in, const char* endTag, char** next );
-	const char* ParseName( char* in, char** next );
+	char* ParseName( char* in, StrPair* pair );
 	char* Identify( XMLDocument* document, char* p, XMLNode** node );
 };
 

@@ -28,7 +28,7 @@ int main( int argc, const char* argv )
 	}
 #endif
 	{
-		static const char* test[] = {	"<element />",
+		static const char* test[] = {	//"<element />",
 									    "<element></element>",
 										0
 		};
