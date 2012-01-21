@@ -7,10 +7,12 @@
 
 using namespace tinyxml2;
 
-static const char LINE_FEED				= (char)0x0a;				// all line endings are normalized to LF
+static const char LINE_FEED				= (char)0x0a;			// all line endings are normalized to LF
 static const char LF = LINE_FEED;
 static const char CARRIAGE_RETURN		= (char)0x0d;			// CR gets filtered out
 static const char CR = CARRIAGE_RETURN;
+static const char SINGLE_QUOTE			= '\'';
+static const char DOUBLE_QUOTE			= '\"';
 
 
 // --------- CharBuffer ----------- //
@@ -31,60 +33,66 @@ static const char CR = CARRIAGE_RETURN;
 }
 
 
+const char* StrPair::GetStr()
+{
+	if ( flags & NEEDS_FLUSH ) {
+		*end = 0;
+
+		if ( flags & ( NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION ) ) {
+			char* p = start;
+			char* q = start;
+
+			while( p < end ) {
+				if ( *p == CR ) {
+					// CR-LF pair becomes LF
+					// CR alone becomes LF
+					// LF-CR becomes LF
+					if ( *(p+1) == LF ) {
+						p += 2;
+					}
+					else {
+						++p;
+					}
+					*q = LF;
+				}
+				else if ( *p == LF ) {
+					if ( *(p+1) == CR ) {
+						p += 2;
+					}
+					else {
+						++p;
+					}
+					*q = LF;
+				}
+				else {
+					*q = *p;
+					++p;
+				}
+			}
+		}
+		flags = 0;
+	}
+	return start;
+}
+
+
 // --------- XMLBase ----------- //
-const char* XMLBase::ParseText( char* p, const char* endTag, char** next )
+char* XMLBase::ParseText( char* p, StrPair* pair, const char* endTag )
 {
 	TIXMLASSERT( endTag && *endTag );
 
 	char* start = p;
-	char* q = p;		// q (target) <= p (src) in same buffer.
 	char  endChar = *endTag;
 	int   length = strlen( endTag );	
-	char* nextTag = 0;
-	*next = 0;
 
 	// Inner loop of text parsing.
 	while ( *p ) {
 		if ( *p == endChar && strncmp( p, endTag, length ) == 0 ) {
-			*q = 0;
-			nextTag = p + length;
+			pair->Set( start, p, StrPair::NEEDS_ENTITY_PROCESSING | StrPair::NEEDS_NEWLINE_NORMALIZATION );
 			break;
 		}
-		else if ( *p == CR ) {
-			// CR-LF pair becomes LF
-			// CR alone becomes LF
-			// LF-CR becomes LF
-			if ( *(p+1) == LF ) {
-				p += 2;
-			}
-			else {
-				++p;
-			}
-			*q = LF;
-		}
-		else if ( *p == LF ) {
-			if ( *(p+1) == CR ) {
-				p += 2;
-			}
-			else {
-				++p;
-			}
-			*q = LF;
-		}
-		else {
-			*q = *p;
-			++p;
-		}
-		++q;
 	}	
-
-	// Error? If we don't have a text tag, something went wrong. (Although 
-	// what the nextTag points at may be null.)
-	if ( nextTag == 0 ) {
-		return 0;
-	}
-	*next = nextTag;
-	return start;
+	return p;
 }
 
 
@@ -92,7 +100,6 @@ char* XMLBase::ParseName( char* p, StrPair* pair )
 {
 	char* start = p;
 	char* nextTag = 0;
-	*next = 0;
 
 	start = p;
 	if ( !start || !(*start) ) {
@@ -112,11 +119,10 @@ char* XMLBase::ParseName( char* p, StrPair* pair )
 	{
 		++p;
 	}
-	*p = 0;
 
 	if ( p > start ) {
-		*next = p+1;
-		return start;
+		pair->Set( start, p, 0 );
+		return p;
 	}
 	return 0;
 }
@@ -241,7 +247,7 @@ void XMLNode::PrintSpace( FILE* fp, int depth )
 
 // --------- XMLComment ---------- //
 
-XMLComment::XMLComment( XMLDocument* doc ) : XMLNode( doc ), value( 0 )
+XMLComment::XMLComment( XMLDocument* doc ) : XMLNode( doc )
 {
 }
 
@@ -261,8 +267,7 @@ void XMLComment::Print( FILE* fp, int depth )
 char* XMLComment::ParseDeep( char* p )
 {
 	// Comment parses as text.
-	value = ParseText( p, "-->", &p );
-	return p;
+	return ParseText( p, &value, "-->" );
 }
 
 
@@ -271,8 +276,8 @@ char* XMLAttribute::ParseDeep( char* p )
 {
 	char endTag[2] = { *p, 0 };
 	++p;
-	value = ParseText( p, endTag, &p );
-	if ( !value ) return 0;
+	p = ParseText( p, &value, endTag );
+	if ( value.Empty() ) return 0;
 	return p;
 }
 
@@ -285,7 +290,6 @@ void XMLAttribute::Print( FILE* cfile )
 
 // --------- XMLElement ---------- //
 XMLElement::XMLElement( XMLDocument* doc ) : XMLNode( doc ),
-	name( 0 ),
 	closing( false ),
 	rootAttribute( 0 ),
 	lastAttribute( 0 )
@@ -326,25 +330,24 @@ char* XMLElement::ParseDeep( char* p )
 		++p;
 	}
 
-	name = ParseName( p, &p );
-	if ( !name ) return 0;
+	p = ParseName( p, &name );
+	if ( name.Empty() ) return 0;
 
 	// Read the attributes.
 	while( p ) {
 		p = SkipWhiteSpace( p );
 		if ( !p || !(*p) ) {
-			document->SetError( XMLDocument::ERROR_PARSING_ELEMENT, start, name );
+			document->SetError( XMLDocument::ERROR_PARSING_ELEMENT, start, name.GetStr() );
 			return 0;
 		}
-		const char* saveP = p;
 
 		// attribute.
-		if ( *p == '\'' || *p == '\"' ) {
+		if ( *p == SINGLE_QUOTE || *p == DOUBLE_QUOTE ) {
 			XMLAttribute* attrib = new XMLAttribute( this );
 			p = attrib->ParseDeep( p );
 			if ( !p ) {
 				delete attrib;
-				document->SetError( XMLDocument::ERROR_PARSING_ATTRIBUTE, start, saveP );
+				document->SetError( XMLDocument::ERROR_PARSING_ATTRIBUTE, start, p );
 				return 0;
 			}
 			if ( rootAttribute ) {
@@ -356,17 +359,22 @@ char* XMLElement::ParseDeep( char* p )
 				rootAttribute = lastAttribute = attrib;
 			}
 		}
+		// end of the tag
 		else if ( *p == '/' && *(p+1) == '>' ) {
-			// end tag.
 			if ( closing ) {
 				document->SetError( XMLDocument::ERROR_PARSING_ELEMENT, start, p );
 				return 0;
 			}
 			return p+2;	// done; sealed element.
 		}
+		// end of the tag
 		else if ( *p == '>' ) {
 			++p;
 			break;
+		}
+		else {
+			document->SetError( XMLDocument::ERROR_PARSING_ELEMENT, start, p );
+			return 0;
 		}
 	}
 
@@ -374,18 +382,18 @@ char* XMLElement::ParseDeep( char* p )
 		XMLNode* node = 0;
 		p = Identify( document, p, &node );
 		if ( p && node ) {
-			node->ParseDeep( p );
+			p = node->ParseDeep( p );
 
 			XMLElement* element = node->ToElement();
 			if ( element && element->Closing() ) {
 				if ( StringEqual( element->Name(), this->Name() ) ) {
 					// All good, this is closing tag.
 					delete node;
-					p = 0;
 				}
 				else {
 					document->SetError( XMLDocument::ERROR_PARSING_ELEMENT, start, p );
 					delete node;
+					p = 0;
 				}
 				return p;
 			}

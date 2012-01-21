@@ -50,21 +50,25 @@ class StrPair
 {
 public:
 	enum {
-		NEEDS_FLUSH = 0x01,
-		NEEDS_ENTITY_PROCESSING = 0x02,
-		NEEDS_NEWLINE_NORMALIZATION = 0x04
+		NEEDS_ENTITY_PROCESSING			= 0x01,
+		NEEDS_NEWLINE_NORMALIZATION		= 0x02
 	};
 
 	StrPair() : flags( 0 ), start( 0 ), end( 0 ) {}
-	void Init( const char* start, char* end, int flags ) {
+	void Set( char* start, char* end, int flags ) {
 		this->start = start; this->end = end; this->flags = flags | NEEDS_FLUSH;
 	}
 	const char* GetStr();
+	bool Empty() const { return start == end; }
 
 private:
+	enum {
+		NEEDS_FLUSH = 0x100
+	};
+
 	// After parsing, if *end != 0, it can be set to zero.
 	int flags;
-	const char* start;	
+	char* start;	
 	char* end;
 };
 
@@ -96,7 +100,7 @@ protected:
 	inline static int IsAlphaNum( unsigned char anyByte )	{ return ( anyByte <= 127 ) ? isalnum( anyByte ) : 1; }
 	inline static int IsAlpha( unsigned char anyByte )		{ return ( anyByte <= 127 ) ? isalpha( anyByte ) : 1; }
 
-	const char* ParseText( char* in, const char* endTag, char** next );
+	char* ParseText( char* in, StrPair* pair, const char* endTag );
 	char* ParseName( char* in, StrPair* pair );
 	char* Identify( XMLDocument* document, char* p, XMLNode** node );
 };
