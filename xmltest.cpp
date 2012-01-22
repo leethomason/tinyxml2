@@ -29,12 +29,13 @@ int main( int argc, const char* argv )
 #endif
 	{
 		static const char* test[] = {	//"<element />",
-									    "<element></element>",
+									   // "<element></element>",
+									    "<element><subelement/></element>",
 										0
 		};
-		for( const char* t=test[0]; *t; ++t ) {
+		for( int i=0; test[i]; ++i ) {
 			XMLDocument doc;
-			doc.Parse( t );
+			doc.Parse( test[i] );
 			doc.Print( stdout );
 		}
 	}
