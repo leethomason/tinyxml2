@@ -288,6 +288,9 @@ char* XMLComment::ParseDeep( char* p )
 // --------- XMLAttribute ---------- //
 char* XMLAttribute::ParseDeep( char* p )
 {
+	p = ParseText( p, &name, "=" );
+	if ( !p || !*p ) return 0;
+
 	char endTag[2] = { *p, 0 };
 	++p;
 	p = ParseText( p, &value, endTag );
@@ -298,7 +301,8 @@ char* XMLAttribute::ParseDeep( char* p )
 
 void XMLAttribute::Print( FILE* cfile )
 {
-	fprintf( cfile, "\"%s\"", value );
+	// fixme: sort out single vs. double quote
+	fprintf( cfile, "%s=\"%s\"", name.GetStr(), value.GetStr() );
 }
 
 
@@ -351,7 +355,7 @@ char* XMLElement::ParseDeep( char* p )
 		}
 
 		// attribute.
-		if ( *p == SINGLE_QUOTE || *p == DOUBLE_QUOTE ) {
+		if ( IsAlpha( *p ) ) {
 			XMLAttribute* attrib = new XMLAttribute( this );
 			p = attrib->ParseDeep( p );
 			if ( !p ) {
@@ -459,6 +463,7 @@ bool XMLDocument::Parse( const char* p )
 	charBuffer = CharBuffer::Construct( p );
 	XMLNode* node = 0;
 	
+	// fixme: clean up
 	char* q = Identify( this, charBuffer->mem, &node );
 	while ( node ) {
 		root->InsertEndChild( node );

@@ -28,13 +28,15 @@ int main( int argc, const char* argv )
 	}
 #endif
 	{
-		static const char* test[] = {	"<!--single element-->",
+		static const char* test[] = {	//"<!--single element-->",
 										"<element />",
 									    "<element></element>",
-										"<!--single sub-element-->",
+										//"<!--single sub-element-->",
 									    "<element><subelement/></element>",
 									    "<element><subelement></subelement></element>",
 									    "<!--comment beside elements--><element><subelement></subelement></element>",
+									    "<!--comment beside elements, this time with spaces-->  \n <element>  <subelement> \n </subelement> </element>",
+									    "<element attrib1='foo' attrib2=\"bar\" ></element>",
 										0
 		};
 		for( int i=0; test[i]; ++i ) {

@@ -169,6 +169,7 @@ public:
 private:
 	char* ParseDeep( char* p );
 
+	StrPair name;
 	StrPair value;
 	XMLAttribute* next;
 };
