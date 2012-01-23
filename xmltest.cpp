@@ -28,15 +28,20 @@ int main( int argc, const char* argv )
 	}
 #endif
 	{
-		static const char* test[] = {	//"<element />",
-									   // "<element></element>",
+		static const char* test[] = {	"<!--single element-->",
+										"<element />",
+									    "<element></element>",
+										"<!--single sub-element-->",
 									    "<element><subelement/></element>",
+									    "<element><subelement></subelement></element>",
+									    "<!--comment beside elements--><element><subelement></subelement></element>",
 										0
 		};
 		for( int i=0; test[i]; ++i ) {
 			XMLDocument doc;
 			doc.Parse( test[i] );
 			doc.Print( stdout );
+			printf( "----------------------------------------------\n" );
 		}
 	}
 	return 0;

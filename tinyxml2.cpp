@@ -67,6 +67,7 @@ const char* StrPair::GetStr()
 				else {
 					*q = *p;
 					++p;
+					++q;
 				}
 			}
 		}
@@ -89,8 +90,9 @@ char* XMLBase::ParseText( char* p, StrPair* pair, const char* endTag )
 	while ( *p ) {
 		if ( *p == endChar && strncmp( p, endTag, length ) == 0 ) {
 			pair->Set( start, p, StrPair::NEEDS_ENTITY_PROCESSING | StrPair::NEEDS_NEWLINE_NORMALIZATION );
-			break;
+			return p + length;
 		}
+		++p;
 	}	
 	return p;
 }
@@ -99,7 +101,6 @@ char* XMLBase::ParseText( char* p, StrPair* pair, const char* endTag )
 char* XMLBase::ParseName( char* p, StrPair* pair )
 {
 	char* start = p;
-	char* nextTag = 0;
 
 	start = p;
 	if ( !start || !(*start) ) {
@@ -273,7 +274,7 @@ XMLComment::~XMLComment()
 void XMLComment::Print( FILE* fp, int depth )
 {
 	XMLNode::Print( fp, depth );
-	fprintf( fp, "<!--%s-->\n", value );
+	fprintf( fp, "<!--%s-->\n", value.GetStr() );
 }
 
 
@@ -425,11 +426,11 @@ void XMLElement::Print( FILE* cfile, int depth )
 	}
 
 	if ( firstChild ) {
-		fprintf( cfile, ">/n" );
+		fprintf( cfile, ">\n" );
 		for( XMLNode* node=firstChild; node; node=node->next ) {
 			node->Print( cfile, depth+1 );
 		}
-		fprintf( cfile, "</%s>", Name() );
+		fprintf( cfile, "</%s>\n", Name() );
 	}
 	else {
 		fprintf( cfile, "/>\n" );
@@ -459,10 +460,13 @@ bool XMLDocument::Parse( const char* p )
 	XMLNode* node = 0;
 	
 	char* q = Identify( this, charBuffer->mem, &node );
-	if ( node ) {
+	while ( node ) {
 		root->InsertEndChild( node );
-		node->ParseDeep( q );
-		return true;
+		q = node->ParseDeep( q );
+		node = 0;
+		if ( q && *q ) {
+			q = Identify( this, q, &node );
+		}
 	}
 	return false;
 }
