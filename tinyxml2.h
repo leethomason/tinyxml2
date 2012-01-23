@@ -122,6 +122,7 @@ public:
 
 protected:
 	XMLNode( XMLDocument* );
+	void Unlink( XMLNode* child );
 
 	XMLDocument*	document;
 	XMLNode*		parent;

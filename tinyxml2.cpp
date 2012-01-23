@@ -188,18 +188,30 @@ XMLNode::XMLNode( XMLDocument* doc ) :
 
 XMLNode::~XMLNode()
 {
-	XMLNode* node=firstChild;
-	while( node ) {
-		XMLNode* temp = node->next;
+	//printf( "~XMLNode %x\n", this );
+	while( firstChild ) {
+		XMLNode* node = firstChild;
+		Unlink( node );
 		delete node;
-		node = temp;
 	}
-	if ( prev ) {
-		prev->next = next;
+}
+
+
+void XMLNode::Unlink( XMLNode* child )
+{
+	TIXMLASSERT( child->parent == this );
+	if ( child == firstChild ) 
+		firstChild = firstChild->next;
+	if ( child == lastChild ) 
+		lastChild = lastChild->prev;
+
+	if ( child->prev ) {
+		child->prev->next = child->next;
 	}
-	if ( next ) {
-		next->prev = prev;
+	if ( child->next ) {
+		child->next->prev = child->prev;
 	}
+	child->parent = 0;
 }
 
 
@@ -254,6 +266,7 @@ XMLComment::XMLComment( XMLDocument* doc ) : XMLNode( doc )
 
 XMLComment::~XMLComment()
 {
+	//printf( "~XMLComment\n" );
 }
 
 
@@ -299,18 +312,13 @@ XMLElement::XMLElement( XMLDocument* doc ) : XMLNode( doc ),
 
 XMLElement::~XMLElement()
 {
+	//printf( "~XMLElemen %x\n",this );
+
 	XMLAttribute* attribute = rootAttribute;
 	while( attribute ) {
 		XMLAttribute* next = attribute->next;
 		delete attribute;
 		attribute = next;
-	}
-
-	XMLNode* child = firstChild;
-	while( child ) {
-		XMLNode* next = child->next;
-		delete child;
-		child = next;
 	}
 }
 
