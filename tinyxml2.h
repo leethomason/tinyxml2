@@ -34,6 +34,7 @@ class XMLElement;
 class XMLAttribute;
 class XMLComment;
 class XMLNode;
+class XMLText;
 
 // internal - move to separate namespace
 struct CharBuffer
@@ -116,7 +117,9 @@ public:
 	XMLNode* InsertEndChild( XMLNode* addThis );
 	virtual void Print( FILE* cfile, int depth );
 
-	virtual XMLElement* ToElement() { return 0; }
+	virtual XMLElement* ToElement()		{ return 0; }
+	virtual XMLText*	ToText()		{ return 0; }
+	virtual XMLComment* ToComment()		{ return 0; }
 
 	virtual char* ParseDeep( char* )	{ TIXMLASSERT( 0 ); }
 
@@ -139,6 +142,25 @@ private:
 };
 
 
+class XMLText : public XMLNode
+{
+public:
+	XMLText( XMLDocument* doc )	: XMLNode( doc )	{}
+	virtual ~XMLText()								{}
+
+	virtual void Print( FILE* cfile, int depth );
+	const char* Value() { return value.GetStr(); }
+	virtual XMLText*	ToText()		{ return this; }
+
+	char* ParseDeep( char* );
+
+protected:
+
+private:
+	StrPair value;
+};
+
+
 class XMLComment : public XMLNode
 {
 public:
@@ -146,6 +168,7 @@ public:
 	virtual ~XMLComment();
 
 	virtual void Print( FILE* cfile, int depth );
+	virtual XMLComment*	ToComment()		{ return this; }
 
 	const char* Value() { return value.GetStr(); }
 

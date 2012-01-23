@@ -132,9 +132,9 @@ char* XMLBase::ParseName( char* p, StrPair* pair )
 char* XMLBase::Identify( XMLDocument* document, char* p, XMLNode** node ) 
 {
 	XMLNode* returnNode = 0;
-
+	char* start = p;
 	p = XMLNode::SkipWhiteSpace( p );
-	if( !p || !*p || *p != '<' )
+	if( !p || !*p )
 	{
 		return 0;
 	}
@@ -165,6 +165,12 @@ char* XMLBase::Identify( XMLDocument* document, char* p, XMLNode** node )
 	else if ( StringEqual( p, elementHeader, elementHeaderLen ) ) {
 		returnNode = new XMLElement( document );
 		p += elementHeaderLen;
+	}
+	// fixme: better text detection
+	else if ( (*p != '<') && IsAlphaNum( *p ) ) {
+		// fixme: this is filtering out empty text...should it?
+		returnNode = new XMLText( document );
+		p = start;	// Back it up, all the text counts.
 	}
 	else {
 		TIXMLASSERT( 0 );
@@ -256,6 +262,22 @@ void XMLNode::PrintSpace( FILE* fp, int depth )
 }
 
 
+// --------- XMLText ---------- //
+char* XMLText::ParseDeep( char* p )
+{
+	p = ParseText( p, &value, "<" );
+	// consumes the end tag.
+	if ( p && *p ) {
+		return p-1;
+	}
+	return 0;
+}
+
+
+void XMLText::Print( FILE* cfile, int depth )
+{
+	fprintf( cfile, value.GetStr() );
+}
 
 
 // --------- XMLComment ---------- //
@@ -430,11 +452,19 @@ void XMLElement::Print( FILE* cfile, int depth )
 	}
 
 	if ( firstChild ) {
-		fprintf( cfile, ">\n" );
+		// fixme: once text is on, it should stay on, and not use newlines.
+		bool useNewline = firstChild->ToText() == 0;
+
+		fprintf( cfile, ">", Name() );
+		if ( useNewline ) fprintf( cfile, "\n" );
+
 		for( XMLNode* node=firstChild; node; node=node->next ) {
 			node->Print( cfile, depth+1 );
 		}
+
 		fprintf( cfile, "</%s>\n", Name() );
+		// fixme: see note above
+		//if ( useNewline ) fprintf( cfile, "\n" );
 	}
 	else {
 		fprintf( cfile, "/>\n" );
