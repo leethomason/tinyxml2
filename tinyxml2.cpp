@@ -250,10 +250,10 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 }
 
 
-void XMLNode::Print( FILE* fp, int depth )
+void XMLNode::Print( XMLStreamer* streamer )
 {
 	for( XMLNode* node = firstChild; node; node=node->next ) {
-		node->Print( fp, depth );
+		node->Print( streamer );
 	}
 }
 
@@ -276,14 +276,14 @@ char* XMLNode::ParseDeep( char* p )
 	return 0;
 }
 
-
+/*
 void XMLNode::PrintSpace( FILE* fp, int depth ) 
 {
 	for( int i=0; i<depth; ++i ) {
 		fprintf( fp, "    " );
 	}
 }
-
+*/
 
 // --------- XMLText ---------- //
 char* XMLText::ParseDeep( char* p )
@@ -297,10 +297,10 @@ char* XMLText::ParseDeep( char* p )
 }
 
 
-void XMLText::Print( FILE* cfile, int depth )
+void XMLText::Print( XMLStreamer* streamer )
 {
 	const char* v = value.GetStr();
-	fprintf( cfile, v );
+	streamer->PushText( v );
 }
 
 
@@ -317,10 +317,11 @@ XMLComment::~XMLComment()
 }
 
 
-void XMLComment::Print( FILE* fp, int depth )
+void XMLComment::Print( XMLStreamer* streamer )
 {
-	XMLNode::Print( fp, depth );
-	fprintf( fp, "<!--%s-->\n", value.GetStr() );
+//	XMLNode::Print( fp, depth );
+//	fprintf( fp, "<!--%s-->\n", value.GetStr() );
+	streamer->PushComment( value.GetStr() );
 }
 
 
@@ -345,10 +346,11 @@ char* XMLAttribute::ParseDeep( char* p )
 }
 
 
-void XMLAttribute::Print( FILE* cfile )
+void XMLAttribute::Print( XMLStreamer* streamer )
 {
 	// fixme: sort out single vs. double quote
-	fprintf( cfile, "%s=\"%s\"", name.GetStr(), value.GetStr() );
+	//fprintf( cfile, "%s=\"%s\"", name.GetStr(), value.GetStr() );
+	streamer->PushAttribute( name.GetStr(), value.GetStr() );
 }
 
 
@@ -460,19 +462,26 @@ char* XMLElement::ParseDeep( char* p )
 }
 
 
-void XMLElement::Print( FILE* cfile, int depth )
+void XMLElement::Print( XMLStreamer* streamer )
 {
-	if ( !parent || !parent->IsTextParent() ) {
-		PrintSpace( cfile, depth );
-	}
-	fprintf( cfile, "<%s", Name() );
+	//if ( !parent || !parent->IsTextParent() ) {
+	//	PrintSpace( cfile, depth );
+	//}
+	//fprintf( cfile, "<%s", Name() );
+	streamer->OpenElement( Name(), IsTextParent() );
 
 	for( XMLAttribute* attrib=rootAttribute; attrib; attrib=attrib->next ) {
-		fprintf( cfile, " " );
-		attrib->Print( cfile );
+		//fprintf( cfile, " " );
+		attrib->Print( streamer );
+
 	}
 
-	if ( firstChild ) {
+	for( XMLNode* node=firstChild; node; node=node->next ) {
+		node->Print( streamer );
+	}
+	streamer->CloseElement();
+
+/*	if ( firstChild ) {
 		fprintf( cfile, ">", Name() );
 		if ( !IsTextParent() ) {
 			fprintf( cfile, "\n" );
@@ -492,7 +501,7 @@ void XMLElement::Print( FILE* cfile, int depth )
 		if ( !IsTextParent() ) {
 			fprintf( cfile, "\n" );
 		}
-	}
+	}*/
 }
 
 
@@ -520,10 +529,13 @@ bool XMLDocument::Parse( const char* p )
 }
 
 
-void XMLDocument::Print( FILE* fp, int depth ) 
+void XMLDocument::Print( XMLStreamer* streamer ) 
 {
+	XMLStreamer stdStreamer( stdout );
+	if ( !streamer )
+		streamer = &stdStreamer;
 	for( XMLNode* node = firstChild; node; node=node->next ) {
-		node->Print( fp, depth );
+		node->Print( streamer );
 	}
 }
 
@@ -533,3 +545,133 @@ void XMLDocument::SetError( int error, const char* str1, const char* str2 )
 	printf( "ERROR: id=%d '%s' '%s'\n", error, str1, str2 );
 }
 
+
+StringStack::StringStack()
+{
+	mem = new char[INIT];
+	*mem = 0;
+	inUse = 1;	// always has a null
+	allocated = INIT;
+	nPositive = 0;
+}
+
+
+void StringStack::Push( const char* str ) {
+	int needed = strlen( str ) + 1;
+	if ( needed > 1 )
+		nPositive++;
+	if ( inUse+needed > allocated ) {
+		// fixme: power of 2
+		// less stupid allocation
+		int more = inUse+needed + 1000;
+
+		char* newMem = new char[more];
+		memcpy( newMem, mem, inUse );
+		delete [] mem;
+		mem = newMem;
+	}
+	strcpy( mem+inUse, str );
+	inUse += needed;
+}
+
+
+const char* StringStack::Pop() {
+	TIXMLASSERT( inUse > 1 );
+	const char* p = mem+inUse-2;
+	if ( *p ) {
+		nPositive--;
+	}
+	while( *p ) {					// stack starts with a null, don't need to check for 'mem'
+		TIXMLASSERT( p > mem );
+		--p;
+	}
+	inUse = p-mem+1;
+	return p+1;
+}
+
+
+XMLStreamer::XMLStreamer( FILE* file ) : fp( file ), depth( 0 ), elementJustOpened( false )
+{
+}
+
+
+void XMLStreamer::PrintSpace( int depth )
+{
+	for( int i=0; i<depth; ++i ) {
+		fprintf( fp, "    " );
+	}
+}
+
+
+void XMLStreamer::OpenElement( const char* name, bool textParent )
+{
+	if ( elementJustOpened ) {
+		SealElement();
+	}
+	stack.Push( name );
+	text.Push( textParent ? "T" : "" );
+
+	PrintSpace( depth );
+	fprintf( fp, "<%s", name );
+	elementJustOpened = true;
+	++depth;
+}
+
+
+void XMLStreamer::PushAttribute( const char* name, const char* value )
+{
+	TIXMLASSERT( elementJustOpened );
+	fprintf( fp, " %s=\"%s\"", name, value );
+}
+
+
+void XMLStreamer::CloseElement()
+{
+	--depth;
+	const char* name = stack.Pop();
+	text.Pop();
+
+	if ( elementJustOpened ) {
+		fprintf( fp, "/>" );
+		if ( text.NumPositive() == 0 ) {
+			fprintf( fp, "\n" );
+		}
+	}
+	else {
+		PrintSpace( depth );
+		fprintf( fp, "</%s>", name );
+		if ( text.NumPositive() == 0 ) {
+			fprintf( fp, "\n" );
+		}
+	}
+	elementJustOpened = false;
+}
+
+
+void XMLStreamer::SealElement()
+{
+	elementJustOpened = false;
+	fprintf( fp, ">" );
+	if ( text.NumPositive() == 0 ) {
+		fprintf( fp, "\n" );
+	}
+}
+
+
+void XMLStreamer::PushText( const char* text )
+{
+	if ( elementJustOpened ) {
+		SealElement();
+	}
+	fprintf( fp, "%s", text );
+}
+
+
+void XMLStreamer::PushComment( const char* comment )
+{
+	if ( elementJustOpened ) {
+		SealElement();
+	}
+	PrintSpace( depth );
+	fprintf( fp, "<!--%s-->\n", comment );
+}

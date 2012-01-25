@@ -36,6 +36,8 @@ class XMLComment;
 class XMLNode;
 class XMLText;
 
+class XMLStreamer;
+
 // internal - move to separate namespace
 struct CharBuffer
 {
@@ -106,6 +108,7 @@ protected:
 	char* Identify( XMLDocument* document, char* p, XMLNode** node );
 };
 
+
 class XMLNode : public XMLBase
 {
 	friend class XMLDocument;
@@ -114,7 +117,7 @@ public:
 	virtual ~XMLNode();
 
 	XMLNode* InsertEndChild( XMLNode* addThis );
-	virtual void Print( FILE* cfile, int depth );
+	virtual void Print( XMLStreamer* streamer );
 
 	virtual XMLElement* ToElement()		{ return 0; }
 	virtual XMLText*	ToText()		{ return 0; }
@@ -142,8 +145,6 @@ protected:
 	XMLNode*		next;
 
 private:
-	void PrintSpace( FILE* cfile, int depth );			// prints leading spaces.
-
 };
 
 
@@ -153,7 +154,7 @@ public:
 	XMLText( XMLDocument* doc )	: XMLNode( doc )	{}
 	virtual ~XMLText()								{}
 
-	virtual void Print( FILE* cfile, int depth );
+	virtual void Print( XMLStreamer* streamer );
 	const char* Value() { return value.GetStr(); }
 	virtual XMLText*	ToText()		{ return this; }
 
@@ -172,7 +173,7 @@ public:
 	XMLComment( XMLDocument* doc );
 	virtual ~XMLComment();
 
-	virtual void Print( FILE* cfile, int depth );
+	virtual void Print( XMLStreamer* );
 	virtual XMLComment*	ToComment()		{ return this; }
 
 	const char* Value() { return value.GetStr(); }
@@ -192,7 +193,7 @@ class XMLAttribute : public XMLBase
 public:
 	XMLAttribute( XMLElement* element ) : next( 0 ) {}
 	virtual ~XMLAttribute()	{}
-	virtual void Print( FILE* cfile );
+	virtual void Print( XMLStreamer* streamer );
 
 private:
 	char* ParseDeep( char* p );
@@ -210,7 +211,7 @@ public:
 	virtual ~XMLElement();
 
 	const char* Name() { return name.GetStr(); }
-	virtual void Print( FILE* cfile, int depth );
+	virtual void Print( XMLStreamer* );
 
 	virtual XMLElement* ToElement() { return this; }
 	virtual bool IsClosingElement() const { return closing; }
@@ -236,7 +237,7 @@ public:
 	~XMLDocument();
 
 	bool Parse( const char* );
-	void Print( FILE* cfile=stdout, int depth=0 );
+	void Print( XMLStreamer* streamer=0 );
 
 	/*
 	XMLNode* Root()				{ return root; }
@@ -252,6 +253,54 @@ public:
 private:
 	XMLDocument( const XMLDocument& );	// intentionally not implemented
 	CharBuffer* charBuffer;
+};
+
+
+class StringStack
+{
+public:
+	StringStack();
+	~StringStack() { delete[] mem; }
+
+	void Push( const char* str );
+	const char* Pop();
+
+	int NumPositive() const { return nPositive; }
+
+private:
+	enum { 
+		INIT=10		// fixme, super small for testing
+	};
+	char* mem;
+	int inUse;			// includes null
+	int allocated;		// bytes allocated
+	int nPositive;		// number of strings with len > 0
+};
+
+
+class XMLStreamer
+{
+public:
+	XMLStreamer( FILE* file );
+	~XMLStreamer()	{}
+
+	void OpenElement( const char* name, bool textParent );
+	void PushAttribute( const char* name, const char* value );
+	void CloseElement();
+
+	void PushText( const char* text );
+	void PushComment( const char* comment );
+
+private:
+	void SealElement();
+	void PrintSpace( int depth );
+
+	FILE* fp;
+	int depth;
+	bool elementJustOpened;
+
+	StringStack stack;
+	StringStack text;
 };
 
 
