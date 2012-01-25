@@ -186,6 +186,7 @@ char* XMLBase::Identify( XMLDocument* document, char* p, XMLNode** node )
 XMLNode::XMLNode( XMLDocument* doc ) :
 	document( doc ),
 	parent( 0 ),
+	isTextParent( false ),
 	firstChild( 0 ), lastChild( 0 ),
 	prev( 0 ), next( 0 )
 {
@@ -242,6 +243,9 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 		addThis->prev = 0;
 		addThis->next = 0;
 	}
+	if ( addThis->ToText() ) {
+		SetTextParent();
+	}
 	return addThis;
 }
 
@@ -251,6 +255,25 @@ void XMLNode::Print( FILE* fp, int depth )
 	for( XMLNode* node = firstChild; node; node=node->next ) {
 		node->Print( fp, depth );
 	}
+}
+
+
+char* XMLNode::ParseDeep( char* p )
+{
+	while( p && *p ) {
+		XMLNode* node = 0;
+		p = Identify( document, p, &node );
+		if ( p && node ) {
+			p = node->ParseDeep( p );
+			// FIXME: is it the correct closing element?
+			if ( node->IsClosingElement() ) {
+				delete node;
+				return p;
+			}
+			this->InsertEndChild( node );
+		}
+	}
+	return 0;
 }
 
 
@@ -276,7 +299,8 @@ char* XMLText::ParseDeep( char* p )
 
 void XMLText::Print( FILE* cfile, int depth )
 {
-	fprintf( cfile, value.GetStr() );
+	const char* v = value.GetStr();
+	fprintf( cfile, v );
 }
 
 
@@ -350,23 +374,10 @@ XMLElement::~XMLElement()
 }
 
 
-char* XMLElement::ParseDeep( char* p )
+char* XMLElement::ParseAttributes( char* p, bool* closedElement )
 {
-	// Read the element name.
-	p = SkipWhiteSpace( p );
-	if ( !p ) return 0;
 	const char* start = p;
-
-	// The closing element is the </element> form. It is
-	// parsed just like a regular element then deleted from
-	// the DOM.
-	if ( *p == '/' ) {
-		closing = true;
-		++p;
-	}
-
-	p = ParseName( p, &name );
-	if ( name.Empty() ) return 0;
+	*closedElement = false;
 
 	// Read the attributes.
 	while( p ) {
@@ -400,6 +411,7 @@ char* XMLElement::ParseDeep( char* p )
 				document->SetError( XMLDocument::ERROR_PARSING_ELEMENT, start, p );
 				return 0;
 			}
+			*closedElement = true;
 			return p+2;	// done; sealed element.
 		}
 		// end of the tag
@@ -412,38 +424,47 @@ char* XMLElement::ParseDeep( char* p )
 			return 0;
 		}
 	}
+	return p;
+}
 
-	while( p && *p ) {
-		XMLNode* node = 0;
-		p = Identify( document, p, &node );
-		if ( p && node ) {
-			p = node->ParseDeep( p );
 
-			XMLElement* element = node->ToElement();
-			if ( element && element->Closing() ) {
-				if ( StringEqual( element->Name(), this->Name() ) ) {
-					// All good, this is closing tag.
-					delete node;
-				}
-				else {
-					document->SetError( XMLDocument::ERROR_PARSING_ELEMENT, start, p );
-					delete node;
-					p = 0;
-				}
-				return p;
-			}
-			else {
-				this->InsertEndChild( node );
-			}
-		}
+//
+//	<ele></ele>
+//	<ele>foo<b>bar</b></ele>
+//
+char* XMLElement::ParseDeep( char* p )
+{
+	// Read the element name.
+	p = SkipWhiteSpace( p );
+	if ( !p ) return 0;
+	const char* start = p;
+
+	// The closing element is the </element> form. It is
+	// parsed just like a regular element then deleted from
+	// the DOM.
+	if ( *p == '/' ) {
+		closing = true;
+		++p;
 	}
-	return 0;
+
+	p = ParseName( p, &name );
+	if ( name.Empty() ) return 0;
+
+	bool elementClosed=false;
+	p = ParseAttributes( p, &elementClosed );
+	if ( !p || !*p || elementClosed || closing ) 
+		return p;
+
+	p = XMLNode::ParseDeep( p );
+	return p;
 }
 
 
 void XMLElement::Print( FILE* cfile, int depth )
 {
-	PrintSpace( cfile, depth );
+	if ( !parent || !parent->IsTextParent() ) {
+		PrintSpace( cfile, depth );
+	}
 	fprintf( cfile, "<%s", Name() );
 
 	for( XMLAttribute* attrib=rootAttribute; attrib; attrib=attrib->next ) {
@@ -452,38 +473,39 @@ void XMLElement::Print( FILE* cfile, int depth )
 	}
 
 	if ( firstChild ) {
-		// fixme: once text is on, it should stay on, and not use newlines.
-		bool useNewline = firstChild->ToText() == 0;
-
 		fprintf( cfile, ">", Name() );
-		if ( useNewline ) fprintf( cfile, "\n" );
+		if ( !IsTextParent() ) {
+			fprintf( cfile, "\n" );
+		}
 
 		for( XMLNode* node=firstChild; node; node=node->next ) {
 			node->Print( cfile, depth+1 );
 		}
 
-		fprintf( cfile, "</%s>\n", Name() );
-		// fixme: see note above
-		//if ( useNewline ) fprintf( cfile, "\n" );
+		fprintf( cfile, "</%s>", Name() );
+		if ( !IsTextParent() ) {
+			fprintf( cfile, "\n" );
+		}
 	}
 	else {
-		fprintf( cfile, "/>\n" );
+		fprintf( cfile, "/>" );
+		if ( !IsTextParent() ) {
+			fprintf( cfile, "\n" );
+		}
 	}
 }
 
 
 // --------- XMLDocument ----------- //
-XMLDocument::XMLDocument() : 
+XMLDocument::XMLDocument() :
+	XMLNode( this ),
 	charBuffer( 0 )
 {
-	root = new XMLNode( this );
 }
 
 
 XMLDocument::~XMLDocument()
 {
-	delete root;
-	delete charBuffer;
 }
 
 
@@ -493,25 +515,21 @@ bool XMLDocument::Parse( const char* p )
 	charBuffer = CharBuffer::Construct( p );
 	XMLNode* node = 0;
 	
-	// fixme: clean up
-	char* q = Identify( this, charBuffer->mem, &node );
-	while ( node ) {
-		root->InsertEndChild( node );
-		q = node->ParseDeep( q );
-		node = 0;
-		if ( q && *q ) {
-			q = Identify( this, q, &node );
-		}
-	}
-	return false;
+	char* q = ParseDeep( charBuffer->mem );
+	return true;
 }
 
 
 void XMLDocument::Print( FILE* fp, int depth ) 
 {
-	for( XMLNode* node = root->firstChild; node; node=node->next ) {
+	for( XMLNode* node = firstChild; node; node=node->next ) {
 		node->Print( fp, depth );
 	}
 }
 
+
+void XMLDocument::SetError( int error, const char* str1, const char* str2 )
+{
+	printf( "ERROR: id=%d '%s' '%s'\n", error, str1, str2 );
+}
 

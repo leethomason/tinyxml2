@@ -39,6 +39,8 @@ int main( int argc, const char* argv )
 									    "<element attrib1='foo' attrib2=\"bar\" ></element>",
 									    "<element attrib1='foo' attrib2=\"bar\" ><subelement attrib3='yeehaa' /></element>",
 										"<element>Text inside element.</element>",
+										"<element><b></b></element>",
+										"<element>Text inside and <b>bolded</b> in the element.</element>",
 										0
 		};
 		for( int i=0; test[i]; ++i ) {

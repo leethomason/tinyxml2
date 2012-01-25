@@ -106,7 +106,6 @@ protected:
 	char* Identify( XMLDocument* document, char* p, XMLNode** node );
 };
 
-
 class XMLNode : public XMLBase
 {
 	friend class XMLDocument;
@@ -121,7 +120,12 @@ public:
 	virtual XMLText*	ToText()		{ return 0; }
 	virtual XMLComment* ToComment()		{ return 0; }
 
-	virtual char* ParseDeep( char* )	{ TIXMLASSERT( 0 ); }
+	// fixme: guarentee null terminator to avoid internal checks
+	virtual char* ParseDeep( char* );
+
+	void SetTextParent()		{ isTextParent = true; } 
+	bool IsTextParent() const	{ return isTextParent; }
+	virtual bool IsClosingElement() const { return false; }
 
 protected:
 	XMLNode( XMLDocument* );
@@ -129,6 +133,7 @@ protected:
 
 	XMLDocument*	document;
 	XMLNode*		parent;
+	bool			isTextParent;
 
 	XMLNode*		firstChild;
 	XMLNode*		lastChild;
@@ -208,13 +213,15 @@ public:
 	virtual void Print( FILE* cfile, int depth );
 
 	virtual XMLElement* ToElement() { return this; }
-	bool Closing() const			{ return closing; }
+	virtual bool IsClosingElement() const { return closing; }
 
 	char* ParseDeep( char* p );
 
 protected:
 
 private:
+	char* ParseAttributes( char* p, bool *closedElement );
+
 	StrPair name;
 	bool closing;
 	XMLAttribute* rootAttribute;
@@ -222,7 +229,7 @@ private:
 };
 
 
-class XMLDocument : public XMLBase
+class XMLDocument : public XMLNode
 {
 public:
 	XMLDocument();
@@ -231,20 +238,19 @@ public:
 	bool Parse( const char* );
 	void Print( FILE* cfile=stdout, int depth=0 );
 
+	/*
 	XMLNode* Root()				{ return root; }
 	XMLNode* RootElement();
-
+	*/
 	enum {
 		ERROR_ELEMENT_MISMATCH,
 		ERROR_PARSING_ELEMENT,
 		ERROR_PARSING_ATTRIBUTE
 	};
-	void SetError( int error, const char* str1, const char* str2 )	{}
+	void SetError( int error, const char* str1, const char* str2 );
 
 private:
 	XMLDocument( const XMLDocument& );	// intentionally not implemented
-
-	XMLNode*	root;
 	CharBuffer* charBuffer;
 };
 
