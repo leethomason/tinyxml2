@@ -628,11 +628,38 @@ void XMLStreamer::PrintSpace( int depth )
 }
 
 
-void XMLStreamer::PrintString( const char* )
+void XMLStreamer::PrintString( const char* p )
 {
+	// Look for runs of bytes between entities to print.
+	const char* q = p;
 
+	while ( *q ) {
+		if ( *q < ENTITY_RANGE ) {
+			// Check for entities. If one is found, flush
+			// the stream up until the entity, write the 
+			// entity, and keep looking.
+			if ( entityFlag[*q] ) {
+				while ( p < q ) {
+					fputc( *p, fp );
+					++p;
+				}
+				for( int i=0; i<NUM_ENTITIES; ++i ) {
+					if ( entities[i].value == *q ) {
+						fprintf( fp, "&%s;", entities[i].pattern );
+						break;
+					}
+				}
+				++p;
+			}
+		}
+		++q;
+	}
+	// Flush the remaining string. This will be the entire
+	// string if an entity wasn't found.
+	if ( q-p > 0 ) {
+		fprintf( fp, "%s", p );
+	}
 }
-
 
 void XMLStreamer::OpenElement( const char* name, bool textParent )
 {
@@ -645,6 +672,7 @@ void XMLStreamer::OpenElement( const char* name, bool textParent )
 	stack.Push( name );
 	text.Push( textParent ? "T" : "" );
 
+	// fixme: can names have entities?
 	fprintf( fp, "<%s", name );
 	elementJustOpened = true;
 	++depth;
@@ -654,6 +682,7 @@ void XMLStreamer::OpenElement( const char* name, bool textParent )
 void XMLStreamer::PushAttribute( const char* name, const char* value )
 {
 	TIXMLASSERT( elementJustOpened );
+	// fixme: supports entities?
 	fprintf( fp, " %s=\"%s\"", name, value );
 }
 
@@ -675,6 +704,7 @@ void XMLStreamer::CloseElement()
 		if ( wasPositive == 0 ) {
 			PrintSpace( depth );
 		}
+		// fixme can names have entities?
 		fprintf( fp, "</%s>", name );
 		if ( text.NumPositive() == 0 ) {
 			fprintf( fp, "\n" );
@@ -699,7 +729,7 @@ void XMLStreamer::PushText( const char* text )
 	if ( elementJustOpened ) {
 		SealElement();
 	}
-	fprintf( fp, "%s", text );
+	PrintString( text );
 }
 
 

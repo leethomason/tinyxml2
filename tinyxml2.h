@@ -301,7 +301,7 @@ private:
 	int depth;
 	bool elementJustOpened;
 	enum {
-		ENTITY_RANGE = 64,
+		ENTITY_RANGE = 64
 	};
 	bool entityFlag[ENTITY_RANGE];
 
