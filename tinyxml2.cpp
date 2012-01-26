@@ -14,6 +14,22 @@ static const char CR = CARRIAGE_RETURN;
 static const char SINGLE_QUOTE			= '\'';
 static const char DOUBLE_QUOTE			= '\"';
 
+struct Entity {
+	const char* pattern;
+	int length;
+	char value;
+};
+
+static const int NUM_ENTITIES = 5;
+static const Entity entities[NUM_ENTITIES] = 
+{
+	{ "quot", 4,	'\"' },
+	{ "amp", 3,		'&'  },
+	{ "apos", 4,	'\'' },
+	{ "lt",	2, 		'<'	 },
+	{ "gt",	2,		'>'	 }
+};
+
 
 // --------- CharBuffer ----------- //
 /*static*/ CharBuffer* CharBuffer::Construct( const char* in )
@@ -37,13 +53,14 @@ const char* StrPair::GetStr()
 {
 	if ( flags & NEEDS_FLUSH ) {
 		*end = 0;
+		flags ^= NEEDS_FLUSH;
 
-		if ( flags & ( NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION ) ) {
+		if ( flags ) {
 			char* p = start;
 			char* q = start;
 
 			while( p < end ) {
-				if ( *p == CR ) {
+				if ( (flags & NEEDS_NEWLINE_NORMALIZATION) && *p == CR ) {
 					// CR-LF pair becomes LF
 					// CR alone becomes LF
 					// LF-CR becomes LF
@@ -55,7 +72,7 @@ const char* StrPair::GetStr()
 					}
 					*q = LF;
 				}
-				else if ( *p == LF ) {
+				else if ( (flags & NEEDS_NEWLINE_NORMALIZATION) && *p == LF ) {
 					if ( *(p+1) == CR ) {
 						p += 2;
 					}
@@ -64,12 +81,32 @@ const char* StrPair::GetStr()
 					}
 					*q = LF;
 				}
+				else if ( (flags & NEEDS_ENTITY_PROCESSING) && *p == '&' ) {
+					int i=0;
+					for( i=0; i<NUM_ENTITIES; ++i ) {
+						if (    strncmp( p+1, entities[i].pattern, entities[i].length ) == 0
+							 && *(p+entities[i].length+1) == ';' ) 
+						{
+							// Found an entity convert;
+							*q = entities[i].value;
+							++q;
+							p += entities[i].length + 2;
+							break;
+						}
+					}
+					if ( i == NUM_ENTITIES ) {
+						// fixme: treat as error?
+						++p;
+						++q;
+					}
+				}
 				else {
 					*q = *p;
 					++p;
 					++q;
 				}
 			}
+			*q = 0;
 		}
 		flags = 0;
 	}
@@ -276,15 +313,6 @@ char* XMLNode::ParseDeep( char* p )
 	return 0;
 }
 
-/*
-void XMLNode::PrintSpace( FILE* fp, int depth ) 
-{
-	for( int i=0; i<depth; ++i ) {
-		fprintf( fp, "    " );
-	}
-}
-*/
-
 // --------- XMLText ---------- //
 char* XMLText::ParseDeep( char* p )
 {
@@ -480,28 +508,6 @@ void XMLElement::Print( XMLStreamer* streamer )
 		node->Print( streamer );
 	}
 	streamer->CloseElement();
-
-/*	if ( firstChild ) {
-		fprintf( cfile, ">", Name() );
-		if ( !IsTextParent() ) {
-			fprintf( cfile, "\n" );
-		}
-
-		for( XMLNode* node=firstChild; node; node=node->next ) {
-			node->Print( cfile, depth+1 );
-		}
-
-		fprintf( cfile, "</%s>", Name() );
-		if ( !IsTextParent() ) {
-			fprintf( cfile, "\n" );
-		}
-	}
-	else {
-		fprintf( cfile, "/>" );
-		if ( !IsTextParent() ) {
-			fprintf( cfile, "\n" );
-		}
-	}*/
 }
 
 

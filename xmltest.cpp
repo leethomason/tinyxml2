@@ -32,15 +32,16 @@ int main( int argc, const char* argv )
 									    //"<element></element>",
 										//"<element><subelement/></element>",
 									    //"<element><subelement></subelement></element>",
-									    "<element><subelement><subsub/></subelement></element>",
-									    "<!--comment beside elements--><element><subelement></subelement></element>",
+									   // "<element><subelement><subsub/></subelement></element>",
+									    //"<!--comment beside elements--><element><subelement></subelement></element>",
 									    //"<!--comment beside elements, this time with spaces-->  \n <element>  <subelement> \n </subelement> </element>",
-									    "<element attrib1='foo' attrib2=\"bar\" ></element>",
-									    "<element attrib1='foo' attrib2=\"bar\" ><subelement attrib3='yeehaa' /></element>",
+									    //"<element attrib1='foo' attrib2=\"bar\" ></element>",
+									    //"<element attrib1='foo' attrib2=\"bar\" ><subelement attrib3='yeehaa' /></element>",
 										//"<element>Text inside element.</element>",
 										//"<element><b></b></element>",
-										"<element>Text inside and <b>bolded</b> in the element.</element>",
-										"<outer><element>Text inside and <b>bolded</b> in the element.</element></outer>",
+										//"<element>Text inside and <b>bolded</b> in the element.</element>",
+										//"<outer><element>Text inside and <b>bolded</b> in the element.</element></outer>",
+										"<element>This &amp; That.</element>",
 										0
 		};
 		for( int i=0; test[i]; ++i ) {
