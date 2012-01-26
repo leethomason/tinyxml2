@@ -295,10 +295,15 @@ public:
 private:
 	void SealElement();
 	void PrintSpace( int depth );
+	void PrintString( const char* );	// prints out, after detecting entities.
 
 	FILE* fp;
 	int depth;
 	bool elementJustOpened;
+	enum {
+		ENTITY_RANGE = 64,
+	};
+	bool entityFlag[ENTITY_RANGE];
 
 	StringStack stack;
 	StringStack text;

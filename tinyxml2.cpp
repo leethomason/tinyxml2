@@ -608,6 +608,15 @@ const char* StringStack::Pop() {
 
 XMLStreamer::XMLStreamer( FILE* file ) : fp( file ), depth( 0 ), elementJustOpened( false )
 {
+	for( int i=0; i<ENTITY_RANGE; ++i ) {
+		entityFlag[i] = false;
+	}
+	for( int i=0; i<NUM_ENTITIES; ++i ) {
+		TIXMLASSERT( entities[i].value < ENTITY_RANGE );
+		if ( entities[i].value < ENTITY_RANGE ) {
+			entityFlag[ entities[i].value ] = true;
+		}
+	}
 }
 
 
@@ -616,6 +625,12 @@ void XMLStreamer::PrintSpace( int depth )
 	for( int i=0; i<depth; ++i ) {
 		fprintf( fp, "    " );
 	}
+}
+
+
+void XMLStreamer::PrintString( const char* )
+{
+
 }
 
 
