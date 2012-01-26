@@ -548,11 +548,19 @@ void XMLDocument::SetError( int error, const char* str1, const char* str2 )
 
 StringStack::StringStack()
 {
-	mem = new char[INIT];
-	*mem = 0;
+	*pool = 0;
+	mem = pool;
 	inUse = 1;	// always has a null
 	allocated = INIT;
 	nPositive = 0;
+}
+
+
+StringStack::~StringStack()
+{
+	if ( mem != pool ) {
+		delete [] mem;
+	}
 }
 
 
@@ -567,7 +575,9 @@ void StringStack::Push( const char* str ) {
 
 		char* newMem = new char[more];
 		memcpy( newMem, mem, inUse );
-		delete [] mem;
+		if ( mem != pool ) {
+			delete [] mem;
+		}
 		mem = newMem;
 	}
 	strcpy( mem+inUse, str );
@@ -608,10 +618,12 @@ void XMLStreamer::OpenElement( const char* name, bool textParent )
 	if ( elementJustOpened ) {
 		SealElement();
 	}
+	if ( text.NumPositive() == 0 ) {
+		PrintSpace( depth );
+	}
 	stack.Push( name );
 	text.Push( textParent ? "T" : "" );
 
-	PrintSpace( depth );
 	fprintf( fp, "<%s", name );
 	elementJustOpened = true;
 	++depth;
@@ -629,6 +641,7 @@ void XMLStreamer::CloseElement()
 {
 	--depth;
 	const char* name = stack.Pop();
+	int wasPositive = text.NumPositive();
 	text.Pop();
 
 	if ( elementJustOpened ) {
@@ -638,7 +651,9 @@ void XMLStreamer::CloseElement()
 		}
 	}
 	else {
-		PrintSpace( depth );
+		if ( wasPositive == 0 ) {
+			PrintSpace( depth );
+		}
 		fprintf( fp, "</%s>", name );
 		if ( text.NumPositive() == 0 ) {
 			fprintf( fp, "\n" );

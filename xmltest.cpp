@@ -40,6 +40,7 @@ int main( int argc, const char* argv )
 										//"<element>Text inside element.</element>",
 										//"<element><b></b></element>",
 										"<element>Text inside and <b>bolded</b> in the element.</element>",
+										"<outer><element>Text inside and <b>bolded</b> in the element.</element></outer>",
 										0
 		};
 		for( int i=0; test[i]; ++i ) {

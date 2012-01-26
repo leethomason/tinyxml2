@@ -256,11 +256,12 @@ private:
 };
 
 
+// FIXME: break out into string pointer stack
 class StringStack
 {
 public:
 	StringStack();
-	~StringStack() { delete[] mem; }
+	~StringStack();
 
 	void Push( const char* str );
 	const char* Pop();
@@ -272,11 +273,11 @@ private:
 		INIT=10		// fixme, super small for testing
 	};
 	char* mem;
+	char pool[INIT];
 	int inUse;			// includes null
 	int allocated;		// bytes allocated
 	int nPositive;		// number of strings with len > 0
 };
-
 
 class XMLStreamer
 {
