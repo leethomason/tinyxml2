@@ -42,6 +42,7 @@ int main( int argc, const char* argv )
 										//"<element>Text inside and <b>bolded</b> in the element.</element>",
 										//"<outer><element>Text inside and <b>bolded</b> in the element.</element></outer>",
 										"<element>This &amp; That.</element>",
+										"<element attrib='This&lt;That' />",
 										0
 		};
 		for( int i=0; test[i]; ++i ) {

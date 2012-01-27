@@ -23,14 +23,15 @@ struct Entity {
 static const int NUM_ENTITIES = 5;
 static const Entity entities[NUM_ENTITIES] = 
 {
-	{ "quot", 4,	'\"' },
+	{ "quot", 4,	DOUBLE_QUOTE },
 	{ "amp", 3,		'&'  },
-	{ "apos", 4,	'\'' },
+	{ "apos", 4,	SINGLE_QUOTE },
 	{ "lt",	2, 		'<'	 },
 	{ "gt",	2,		'>'	 }
 };
 
 
+#if 0
 // --------- CharBuffer ----------- //
 /*static*/ CharBuffer* CharBuffer::Construct( const char* in )
 {
@@ -47,6 +48,7 @@ static const Entity entities[NUM_ENTITIES] =
 {
 	free( cb );
 }
+#endif
 
 
 const char* StrPair::GetStr()
@@ -115,7 +117,8 @@ const char* StrPair::GetStr()
 
 
 // --------- XMLBase ----------- //
-char* XMLBase::ParseText( char* p, StrPair* pair, const char* endTag )
+// fixme: should take in the entity/newline flags as param
+char* XMLBase::ParseText( char* p, StrPair* pair, const char* endTag, int strFlags )
 {
 	TIXMLASSERT( endTag && *endTag );
 
@@ -126,7 +129,7 @@ char* XMLBase::ParseText( char* p, StrPair* pair, const char* endTag )
 	// Inner loop of text parsing.
 	while ( *p ) {
 		if ( *p == endChar && strncmp( p, endTag, length ) == 0 ) {
-			pair->Set( start, p, StrPair::NEEDS_ENTITY_PROCESSING | StrPair::NEEDS_NEWLINE_NORMALIZATION );
+			pair->Set( start, p, strFlags );
 			return p + length;
 		}
 		++p;
@@ -233,12 +236,18 @@ XMLNode::XMLNode( XMLDocument* doc ) :
 
 XMLNode::~XMLNode()
 {
-	//printf( "~XMLNode %x\n", this );
+	ClearChildren();
+}
+
+
+void XMLNode::ClearChildren()
+{
 	while( firstChild ) {
 		XMLNode* node = firstChild;
 		Unlink( node );
 		delete node;
 	}
+	firstChild = lastChild = 0;
 }
 
 
@@ -316,7 +325,7 @@ char* XMLNode::ParseDeep( char* p )
 // --------- XMLText ---------- //
 char* XMLText::ParseDeep( char* p )
 {
-	p = ParseText( p, &value, "<" );
+	p = ParseText( p, &value, "<", StrPair::TEXT_ELEMENT );
 	// consumes the end tag.
 	if ( p && *p ) {
 		return p-1;
@@ -356,19 +365,19 @@ void XMLComment::Print( XMLStreamer* streamer )
 char* XMLComment::ParseDeep( char* p )
 {
 	// Comment parses as text.
-	return ParseText( p, &value, "-->" );
+	return ParseText( p, &value, "-->", StrPair::COMMENT );
 }
 
 
 // --------- XMLAttribute ---------- //
 char* XMLAttribute::ParseDeep( char* p )
 {
-	p = ParseText( p, &name, "=" );
+	p = ParseText( p, &name, "=", StrPair::ATTRIBUTE_NAME );
 	if ( !p || !*p ) return 0;
 
 	char endTag[2] = { *p, 0 };
 	++p;
-	p = ParseText( p, &value, endTag );
+	p = ParseText( p, &value, endTag, StrPair::ATTRIBUTE_VALUE );
 	if ( value.Empty() ) return 0;
 	return p;
 }
@@ -513,24 +522,45 @@ void XMLElement::Print( XMLStreamer* streamer )
 
 // --------- XMLDocument ----------- //
 XMLDocument::XMLDocument() :
-	XMLNode( this ),
+	XMLNode( 0 ),
 	charBuffer( 0 )
 {
+	document = this;	// avoid warning about 'this' in initializer list
 }
 
 
 XMLDocument::~XMLDocument()
 {
+	delete [] charBuffer;
 }
 
+
+void XMLDocument::InitDocument()
+{
+	errorID = NO_ERROR;
+	errorStr1 = 0;
+	errorStr2 = 0;
+
+	delete [] charBuffer;
+	charBuffer = 0;
+
+}
 
 
 bool XMLDocument::Parse( const char* p )
 {
-	charBuffer = CharBuffer::Construct( p );
+	ClearChildren();
+	InitDocument();
+
+	if ( !p || !*p ) {
+		return true;	// correctly parse an empty string?
+	}
+	size_t len = strlen( p );
+	charBuffer = new char[ len+1 ];
+	memcpy( charBuffer, p, len+1 );
 	XMLNode* node = 0;
 	
-	char* q = ParseDeep( charBuffer->mem );
+	char* q = ParseDeep( charBuffer );
 	return true;
 }
 
@@ -548,7 +578,10 @@ void XMLDocument::Print( XMLStreamer* streamer )
 
 void XMLDocument::SetError( int error, const char* str1, const char* str2 )
 {
-	printf( "ERROR: id=%d '%s' '%s'\n", error, str1, str2 );
+	errorID = error;
+	printf( "ERROR: id=%d '%s' '%s'\n", error, str1, str2 );	// fixme: remove
+	errorStr1 = str1;
+	errorStr2 = str2;
 }
 
 
@@ -682,8 +715,9 @@ void XMLStreamer::OpenElement( const char* name, bool textParent )
 void XMLStreamer::PushAttribute( const char* name, const char* value )
 {
 	TIXMLASSERT( elementJustOpened );
-	// fixme: supports entities?
-	fprintf( fp, " %s=\"%s\"", name, value );
+	fprintf( fp, " %s=\"", name );
+	PrintString( value );
+	fprintf( fp, "\"" );
 }
 
 

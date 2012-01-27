@@ -38,6 +38,7 @@ class XMLText;
 
 class XMLStreamer;
 
+/*
 // internal - move to separate namespace
 struct CharBuffer
 {
@@ -47,14 +48,19 @@ struct CharBuffer
 	static CharBuffer* Construct( const char* in );
 	static void Free( CharBuffer* );
 };
+*/
 
-// FIXME: refactor to be the basis for all string handling.
 class StrPair
 {
 public:
 	enum {
 		NEEDS_ENTITY_PROCESSING			= 0x01,
-		NEEDS_NEWLINE_NORMALIZATION		= 0x02
+		NEEDS_NEWLINE_NORMALIZATION		= 0x02,
+
+		TEXT_ELEMENT		= NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
+		ATTRIBUTE_NAME		= 0,
+		ATTRIBUTE_VALUE		= NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
+		COMMENT				= NEEDS_NEWLINE_NORMALIZATION,
 	};
 
 	StrPair() : flags( 0 ), start( 0 ), end( 0 ) {}
@@ -103,7 +109,7 @@ protected:
 	inline static int IsAlphaNum( unsigned char anyByte )	{ return ( anyByte <= 127 ) ? isalnum( anyByte ) : 1; }
 	inline static int IsAlpha( unsigned char anyByte )		{ return ( anyByte <= 127 ) ? isalpha( anyByte ) : 1; }
 
-	char* ParseText( char* in, StrPair* pair, const char* endTag );
+	char* ParseText( char* in, StrPair* pair, const char* endTag, int strFlags );
 	char* ParseName( char* in, StrPair* pair );
 	char* Identify( XMLDocument* document, char* p, XMLNode** node );
 };
@@ -132,7 +138,7 @@ public:
 
 protected:
 	XMLNode( XMLDocument* );
-	void Unlink( XMLNode* child );
+	void ClearChildren();
 
 	XMLDocument*	document;
 	XMLNode*		parent;
@@ -145,6 +151,7 @@ protected:
 	XMLNode*		next;
 
 private:
+	void Unlink( XMLNode* child );
 };
 
 
@@ -233,10 +240,13 @@ private:
 class XMLDocument : public XMLNode
 {
 public:
-	XMLDocument();
+	XMLDocument(); 
 	~XMLDocument();
 
 	bool Parse( const char* );
+	bool Load( const char* );
+	bool Load( FILE* );
+
 	void Print( XMLStreamer* streamer=0 );
 
 	/*
@@ -244,15 +254,25 @@ public:
 	XMLNode* RootElement();
 	*/
 	enum {
+		NO_ERROR = 0,
 		ERROR_ELEMENT_MISMATCH,
 		ERROR_PARSING_ELEMENT,
 		ERROR_PARSING_ATTRIBUTE
 	};
 	void SetError( int error, const char* str1, const char* str2 );
+	
+	int GetErrorID() const { return errorID; }
+	const char* GetErrorStr1() const { return errorStr1; }
+	const char* GetErrorStr2() const { return errorStr2; }
 
 private:
 	XMLDocument( const XMLDocument& );	// intentionally not implemented
-	CharBuffer* charBuffer;
+	void InitDocument();
+
+	bool errorID;
+	const char* errorStr1;
+	const char* errorStr2;
+	char* charBuffer;
 };
 
 
