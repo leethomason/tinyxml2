@@ -31,26 +31,6 @@ static const Entity entities[NUM_ENTITIES] =
 };
 
 
-#if 0
-// --------- CharBuffer ----------- //
-/*static*/ CharBuffer* CharBuffer::Construct( const char* in )
-{
-	size_t len = strlen( in );
-	size_t size = len + sizeof( CharBuffer );
-	CharBuffer* cb = (CharBuffer*) malloc( size );
-	cb->length = len;
-	strcpy( cb->mem, in );
-	return cb;
-}
-
-
-/*static*/ void CharBuffer::Free( CharBuffer* cb )
-{
-	free( cb );
-}
-#endif
-
-
 const char* StrPair::GetStr()
 {
 	if ( flags & NEEDS_FLUSH ) {
@@ -237,6 +217,9 @@ XMLNode::XMLNode( XMLDocument* doc ) :
 XMLNode::~XMLNode()
 {
 	ClearChildren();
+	if ( parent ) {
+		parent->Unlink( this );
+	}
 }
 
 
@@ -547,7 +530,7 @@ void XMLDocument::InitDocument()
 }
 
 
-bool XMLDocument::Parse( const char* p )
+int XMLDocument::Parse( const char* p )
 {
 	ClearChildren();
 	InitDocument();
@@ -561,7 +544,7 @@ bool XMLDocument::Parse( const char* p )
 	XMLNode* node = 0;
 	
 	char* q = ParseDeep( charBuffer );
-	return true;
+	return errorID;
 }
 
 
@@ -607,7 +590,7 @@ void StringStack::Push( const char* str ) {
 	int needed = strlen( str ) + 1;
 	if ( needed > 1 )
 		nPositive++;
-	if ( inUse+needed > allocated ) {
+	if ( inUse+needed >= allocated ) {
 		// fixme: power of 2
 		// less stupid allocation
 		int more = inUse+needed + 1000;
@@ -636,6 +619,55 @@ const char* StringStack::Pop() {
 	}
 	inUse = p-mem+1;
 	return p+1;
+}
+
+
+StringPtrStack::StringPtrStack()
+{
+	*pool = 0;
+	mem = pool;
+	inUse = 0;
+	allocated = INIT;
+	nPositive = 0;
+}
+
+
+StringPtrStack::~StringPtrStack()
+{
+	if ( mem != pool ) {
+		delete [] mem;
+	}
+}
+
+
+void StringPtrStack::Push( const char* str ) {
+	int needed = inUse + 1;
+	if ( str )
+		nPositive++;
+	if ( inUse+needed >= allocated ) {
+		// fixme: power of 2
+		// less stupid allocation
+		int more = inUse+needed + 1000;
+
+		char** newMem = new char*[more];
+		memcpy( newMem, mem, inUse*sizeof(char*) );
+		if ( mem != pool ) {
+			delete [] mem;
+		}
+		mem = newMem;
+	}
+	mem[inUse] = (char*)str;
+	inUse++;
+}
+
+
+const char* StringPtrStack::Pop() {
+	TIXMLASSERT( inUse > 0 );
+	inUse--;
+	const char* result = mem[inUse];
+	if ( result ) 
+		nPositive--;
+	return result;
 }
 
 

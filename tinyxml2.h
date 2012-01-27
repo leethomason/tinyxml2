@@ -243,16 +243,12 @@ public:
 	XMLDocument(); 
 	~XMLDocument();
 
-	bool Parse( const char* );
-	bool Load( const char* );
-	bool Load( FILE* );
+	int Parse( const char* );
+	int Load( const char* );
+	int Load( FILE* );
 
 	void Print( XMLStreamer* streamer=0 );
 
-	/*
-	XMLNode* Root()				{ return root; }
-	XMLNode* RootElement();
-	*/
 	enum {
 		NO_ERROR = 0,
 		ERROR_ELEMENT_MISMATCH,
@@ -261,6 +257,7 @@ public:
 	};
 	void SetError( int error, const char* str1, const char* str2 );
 	
+	bool Error() const { return errorID != NO_ERROR; }
 	int GetErrorID() const { return errorID; }
 	const char* GetErrorStr1() const { return errorStr1; }
 	const char* GetErrorStr2() const { return errorStr2; }
@@ -269,14 +266,13 @@ private:
 	XMLDocument( const XMLDocument& );	// intentionally not implemented
 	void InitDocument();
 
-	bool errorID;
+	int errorID;
 	const char* errorStr1;
 	const char* errorStr2;
 	char* charBuffer;
 };
 
 
-// FIXME: break out into string pointer stack
 class StringStack
 {
 public:
@@ -298,6 +294,30 @@ private:
 	int allocated;		// bytes allocated
 	int nPositive;		// number of strings with len > 0
 };
+
+
+class StringPtrStack
+{
+public:
+	StringPtrStack();
+	~StringPtrStack();
+
+	void Push( const char* str );
+	const char* Pop();
+
+	int NumPositive() const { return nPositive; }
+
+private:
+	enum { 
+		INIT=10		// fixme, super small for testing
+	};
+	char** mem;
+	char* pool[INIT];
+	int inUse;			
+	int allocated;		// bytes allocated
+	int nPositive;		// number of non-null pointers
+};
+
 
 class XMLStreamer
 {
@@ -325,7 +345,7 @@ private:
 	};
 	bool entityFlag[ENTITY_RANGE];
 
-	StringStack stack;
+	StringPtrStack stack;
 	StringStack text;
 };
 
