@@ -273,11 +273,72 @@ private:
 };
 
 
+template <class T, int INIT>
+class DynArray
+{
+public:
+	DynArray< T, INIT >() 
+	{
+		mem = pool;
+		allocated = INIT;
+		size = 0;
+	}
+	~DynArray()
+	{
+		if ( mem != pool ) {
+			delete mem;
+		}
+	}
+	void Push( T t )
+	{
+		EnsureCapacity( size+1 );
+		mem[size++] = t;
+	}
+
+	T* PushArr( int count )
+	{
+		EnsureCapacity( size+count );
+		T* ret = &mem[size];
+		size += count;
+		return ret;
+	}
+	T Pop() {
+		return mem[--size];
+	}
+	void PopArr( int count ) 
+	{
+		TIXMLASSERT( size >= count );
+		size -= count;
+	}
+	int Size() const { return size; }
+	const T* Mem() const { return mem; }
+	T* Mem() { return mem; }
+
+
+private:
+	void EnsureCapacity( int cap ) {
+		if ( cap > allocated ) {
+			int newAllocated = cap * 2;
+			T* newMem = new T[newAllocated];
+			memcpy( newMem, mem, sizeof(T)*size );	// warning: not using constructors, only works for PODs
+			if ( mem != pool ) delete [] mem;
+			mem = newMem;
+			allocated = newAllocated;
+		}
+	}
+
+	T* mem;
+	T pool[INIT];
+	int allocated;		// objects allocated
+	int size;			// number objects in use
+};
+
+
 class StringStack
 {
 public:
 	StringStack();
-	~StringStack();
+	virtual ~StringStack();
 
 	void Push( const char* str );
 	const char* Pop();
@@ -285,37 +346,8 @@ public:
 	int NumPositive() const { return nPositive; }
 
 private:
-	enum { 
-		INIT=10		// fixme, super small for testing
-	};
-	char* mem;
-	char pool[INIT];
-	int inUse;			// includes null
-	int allocated;		// bytes allocated
+	DynArray< char, 50 > mem;
 	int nPositive;		// number of strings with len > 0
-};
-
-
-class StringPtrStack
-{
-public:
-	StringPtrStack();
-	~StringPtrStack();
-
-	void Push( const char* str );
-	const char* Pop();
-
-	int NumPositive() const { return nPositive; }
-
-private:
-	enum { 
-		INIT=10		// fixme, super small for testing
-	};
-	char** mem;
-	char* pool[INIT];
-	int inUse;			
-	int allocated;		// bytes allocated
-	int nPositive;		// number of non-null pointers
 };
 
 
@@ -345,7 +377,7 @@ private:
 	};
 	bool entityFlag[ENTITY_RANGE];
 
-	StringPtrStack stack;
+	DynArray< const char*, 40 > stack;
 	StringStack text;
 };
 

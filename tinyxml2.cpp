@@ -570,104 +570,37 @@ void XMLDocument::SetError( int error, const char* str1, const char* str2 )
 
 StringStack::StringStack()
 {
-	*pool = 0;
-	mem = pool;
-	inUse = 1;	// always has a null
-	allocated = INIT;
 	nPositive = 0;
+	mem.Push( 0 );	// start with null. makes later code simpler.
 }
 
 
 StringStack::~StringStack()
 {
-	if ( mem != pool ) {
-		delete [] mem;
-	}
 }
 
 
 void StringStack::Push( const char* str ) {
 	int needed = strlen( str ) + 1;
-	if ( needed > 1 )
+	char* p = mem.PushArr( needed );
+	strcpy( p, str );
+	if ( needed > 1 ) 
 		nPositive++;
-	if ( inUse+needed >= allocated ) {
-		// fixme: power of 2
-		// less stupid allocation
-		int more = inUse+needed + 1000;
-
-		char* newMem = new char[more];
-		memcpy( newMem, mem, inUse );
-		if ( mem != pool ) {
-			delete [] mem;
-		}
-		mem = newMem;
-	}
-	strcpy( mem+inUse, str );
-	inUse += needed;
 }
 
 
 const char* StringStack::Pop() {
-	TIXMLASSERT( inUse > 1 );
-	const char* p = mem+inUse-2;
+	TIXMLASSERT( mem.Size() > 1 );
+	const char* p = mem.Mem() + mem.Size() - 2;	// end of final string.
 	if ( *p ) {
 		nPositive--;
 	}
 	while( *p ) {					// stack starts with a null, don't need to check for 'mem'
-		TIXMLASSERT( p > mem );
+		TIXMLASSERT( p > mem.Mem() );
 		--p;
 	}
-	inUse = p-mem+1;
+	mem.PopArr( strlen(p)+1 );
 	return p+1;
-}
-
-
-StringPtrStack::StringPtrStack()
-{
-	*pool = 0;
-	mem = pool;
-	inUse = 0;
-	allocated = INIT;
-	nPositive = 0;
-}
-
-
-StringPtrStack::~StringPtrStack()
-{
-	if ( mem != pool ) {
-		delete [] mem;
-	}
-}
-
-
-void StringPtrStack::Push( const char* str ) {
-	int needed = inUse + 1;
-	if ( str )
-		nPositive++;
-	if ( inUse+needed >= allocated ) {
-		// fixme: power of 2
-		// less stupid allocation
-		int more = inUse+needed + 1000;
-
-		char** newMem = new char*[more];
-		memcpy( newMem, mem, inUse*sizeof(char*) );
-		if ( mem != pool ) {
-			delete [] mem;
-		}
-		mem = newMem;
-	}
-	mem[inUse] = (char*)str;
-	inUse++;
-}
-
-
-const char* StringPtrStack::Pop() {
-	TIXMLASSERT( inUse > 0 );
-	inUse--;
-	const char* result = mem[inUse];
-	if ( result ) 
-		nPositive--;
-	return result;
 }
 
 
