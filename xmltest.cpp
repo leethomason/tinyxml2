@@ -52,5 +52,14 @@ int main( int argc, const char* argv )
 			printf( "----------------------------------------------\n" );
 		}
 	}
+	{
+		static const char* test = "<element>Text before.</element>";
+		XMLDocument doc;
+		doc.Parse( test );
+		XMLElement* root = doc.FirstChildElement();
+		XMLElement* newElement = doc.NewElement( "Subelement" );
+		root->InsertEndChild( newElement );
+		doc.Print();
+	}
 	return 0;
 }

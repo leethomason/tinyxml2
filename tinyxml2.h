@@ -1,9 +1,23 @@
 #ifndef TINYXML2_INCLUDED
 #define TINYXML2_INCLUDED
 
+/*
+	TODO
+	- const and non-const versions of API
+	- memory pool the class construction
+	- attribute accessors
+	- node navigation
+	- handles
+	- visit pattern - change streamer?
+	- make constructors protected
+	- hide copy constructor
+	- hide = operator
+*/
+
 #include <limits.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <memory.h>
 
 #if defined( _DEBUG ) || defined( DEBUG ) || defined (__DEBUG__)
 	#ifndef DEBUG
@@ -38,18 +52,6 @@ class XMLText;
 
 class XMLStreamer;
 
-/*
-// internal - move to separate namespace
-struct CharBuffer
-{
-	size_t  length;
-	char	mem[1];
-
-	static CharBuffer* Construct( const char* in );
-	static void Free( CharBuffer* );
-};
-*/
-
 class StrPair
 {
 public:
@@ -70,6 +72,8 @@ public:
 	const char* GetStr();
 	bool Empty() const { return start == end; }
 
+	void SetInternedStr( const char* str ) { this->start = (char*) str; this->end = 0; this->flags = 0; }
+
 private:
 	enum {
 		NEEDS_FLUSH = 0x100
@@ -81,6 +85,121 @@ private:
 	char* end;
 };
 
+
+template <class T, int INIT>
+class DynArray
+{
+public:
+	DynArray< T, INIT >() 
+	{
+		mem = pool;
+		allocated = INIT;
+		size = 0;
+	}
+	~DynArray()
+	{
+		if ( mem != pool ) {
+			delete mem;
+		}
+	}
+	void Push( T t )
+	{
+		EnsureCapacity( size+1 );
+		mem[size++] = t;
+	}
+
+	T* PushArr( int count )
+	{
+		EnsureCapacity( size+count );
+		T* ret = &mem[size];
+		size += count;
+		return ret;
+	}
+	T Pop() {
+		return mem[--size];
+	}
+	void PopArr( int count ) 
+	{
+		TIXMLASSERT( size >= count );
+		size -= count;
+	}
+
+	bool Empty() const { return size == 0; }
+	T& operator[](int i) { TIXMLASSERT( i>= 0 && i < size ); return mem[i]; }
+	const T& operator[](int i) const { TIXMLASSERT( i>= 0 && i < size ); return mem[i]; }
+	int Size() const { return size; }
+	const T* Mem() const { return mem; }
+	T* Mem() { return mem; }
+
+
+private:
+	void EnsureCapacity( int cap ) {
+		if ( cap > allocated ) {
+			int newAllocated = cap * 2;
+			T* newMem = new T[newAllocated];
+			memcpy( newMem, mem, sizeof(T)*size );	// warning: not using constructors, only works for PODs
+			if ( mem != pool ) delete [] mem;
+			mem = newMem;
+			allocated = newAllocated;
+		}
+	}
+
+	T* mem;
+	T pool[INIT];
+	int allocated;		// objects allocated
+	int size;			// number objects in use
+};
+
+
+/*
+class StringStack
+{
+public:
+	StringStack();
+	virtual ~StringStack();
+
+	void Push( const char* str );
+	const char* Pop();
+
+	int NumPositive() const { return nPositive; }
+
+private:
+	DynArray< char, 50 > mem;
+	int nPositive;		// number of strings with len > 0
+};
+*/
+
+/*
+class StringPool
+{
+public:
+	enum { INIT_SIZE=20 };
+
+	StringPool() : size( 0 ) { 
+		const char** mem = pool.PushArr( INIT_SIZE );
+		memset( (void*)mem, 0, sizeof(char)*INIT_SIZE );
+	}
+	~StringPool() {}
+
+	const char* Intern( const char* str );
+
+private:
+	// FNV hash
+	int Hash( const char* s ) {
+		#define FNV_32_PRIME ((int)0x01000193)
+		int hval = 0;
+	    while (*s) {
+			hval *= FNV_32_PRIME;
+			hval ^= (int)*s++;
+		}
+		return hval;
+	}
+
+	int size;
+	DynArray< const char*, INIT_SIZE > pool;		// the hash table
+	StringStack store;								// memory for the interned strings
+};
+*/
 
 class XMLBase
 {
@@ -125,9 +244,15 @@ public:
 	XMLNode* InsertEndChild( XMLNode* addThis );
 	virtual void Print( XMLStreamer* streamer );
 
+	const char* Value() const			{ return value.GetStr(); }
+	void SetValue( const char* val )	{ value.SetInternedStr( val ); }
+
 	virtual XMLElement* ToElement()		{ return 0; }
 	virtual XMLText*	ToText()		{ return 0; }
 	virtual XMLComment* ToComment()		{ return 0; }
+
+	XMLNode* FirstChild()	{ return firstChild; }
+	XMLElement* FirstChildElement( const char* value=0 );
 
 	// fixme: guarentee null terminator to avoid internal checks
 	virtual char* ParseDeep( char* );
@@ -143,6 +268,7 @@ protected:
 	XMLDocument*	document;
 	XMLNode*		parent;
 	bool			isTextParent;
+	mutable StrPair			value;
 
 	XMLNode*		firstChild;
 	XMLNode*		lastChild;
@@ -157,29 +283,31 @@ private:
 
 class XMLText : public XMLNode
 {
+	friend class XMLBase;
+	friend class XMLDocument;
 public:
-	XMLText( XMLDocument* doc )	: XMLNode( doc )	{}
 	virtual ~XMLText()								{}
-
 	virtual void Print( XMLStreamer* streamer );
 	const char* Value() { return value.GetStr(); }
+	void SetValue( const char* );
+
 	virtual XMLText*	ToText()		{ return this; }
 
 	char* ParseDeep( char* );
 
 protected:
+	XMLText( XMLDocument* doc )	: XMLNode( doc )	{}
 
 private:
-	StrPair value;
 };
 
 
 class XMLComment : public XMLNode
 {
+	friend class XMLBase;
+	friend class XMLDocument;
 public:
-	XMLComment( XMLDocument* doc );
 	virtual ~XMLComment();
-
 	virtual void Print( XMLStreamer* );
 	virtual XMLComment*	ToComment()		{ return this; }
 
@@ -188,9 +316,10 @@ public:
 	char* ParseDeep( char* );
 
 protected:
+	XMLComment( XMLDocument* doc );
+
 
 private:
-	StrPair value;
 };
 
 
@@ -213,24 +342,29 @@ private:
 
 class XMLElement : public XMLNode
 {
+	friend class XMLBase;
+	friend class XMLDocument;
 public:
-	XMLElement( XMLDocument* doc );
 	virtual ~XMLElement();
 
-	const char* Name() { return name.GetStr(); }
+	const char* Name() const		{ return Value(); }
+	void SetName( const char* str )	{ SetValue( str ); }
+
 	virtual void Print( XMLStreamer* );
 
 	virtual XMLElement* ToElement() { return this; }
-	virtual bool IsClosingElement() const { return closing; }
 
+	// internal:
+	virtual bool IsClosingElement() const { return closing; }
 	char* ParseDeep( char* p );
 
 protected:
+	XMLElement( XMLDocument* doc );
 
 private:
 	char* ParseAttributes( char* p, bool *closedElement );
 
-	StrPair name;
+	mutable StrPair name;
 	bool closing;
 	XMLAttribute* rootAttribute;
 	XMLAttribute* lastAttribute;
@@ -249,6 +383,8 @@ public:
 
 	void Print( XMLStreamer* streamer=0 );
 
+	XMLElement* NewElement( const char* name );
+
 	enum {
 		NO_ERROR = 0,
 		ERROR_ELEMENT_MISMATCH,
@@ -262,6 +398,8 @@ public:
 	const char* GetErrorStr1() const { return errorStr1; }
 	const char* GetErrorStr2() const { return errorStr2; }
 
+//	const char* Intern( const char* );
+
 private:
 	XMLDocument( const XMLDocument& );	// intentionally not implemented
 	void InitDocument();
@@ -270,84 +408,7 @@ private:
 	const char* errorStr1;
 	const char* errorStr2;
 	char* charBuffer;
-};
-
-
-template <class T, int INIT>
-class DynArray
-{
-public:
-	DynArray< T, INIT >() 
-	{
-		mem = pool;
-		allocated = INIT;
-		size = 0;
-	}
-	~DynArray()
-	{
-		if ( mem != pool ) {
-			delete mem;
-		}
-	}
-	void Push( T t )
-	{
-		EnsureCapacity( size+1 );
-		mem[size++] = t;
-	}
-
-	T* PushArr( int count )
-	{
-		EnsureCapacity( size+count );
-		T* ret = &mem[size];
-		size += count;
-		return ret;
-	}
-	T Pop() {
-		return mem[--size];
-	}
-	void PopArr( int count ) 
-	{
-		TIXMLASSERT( size >= count );
-		size -= count;
-	}
-	int Size() const { return size; }
-	const T* Mem() const { return mem; }
-	T* Mem() { return mem; }
-
-
-private:
-	void EnsureCapacity( int cap ) {
-		if ( cap > allocated ) {
-			int newAllocated = cap * 2;
-			T* newMem = new T[newAllocated];
-			memcpy( newMem, mem, sizeof(T)*size );	// warning: not using constructors, only works for PODs
-			if ( mem != pool ) delete [] mem;
-			mem = newMem;
-			allocated = newAllocated;
-		}
-	}
-
-	T* mem;
-	T pool[INIT];
-	int allocated;		// objects allocated
-	int size;			// number objects in use
-};
-
-
-class StringStack
-{
-public:
-	StringStack();
-	virtual ~StringStack();
-
-	void Push( const char* str );
-	const char* Pop();
-
-	int NumPositive() const { return nPositive; }
-
-private:
-	DynArray< char, 50 > mem;
-	int nPositive;		// number of strings with len > 0
+	//StringStack stringPool;
 };
 
 
@@ -368,6 +429,13 @@ private:
 	void SealElement();
 	void PrintSpace( int depth );
 	void PrintString( const char* );	// prints out, after detecting entities.
+	bool TextOnStack() const { 
+		for( int i=0; i<text.Size(); ++i ) { 
+			if ( text[i] == 'T' ) 
+				return true; 
+		} 
+		return false; 
+	}
 
 	FILE* fp;
 	int depth;
@@ -377,8 +445,8 @@ private:
 	};
 	bool entityFlag[ENTITY_RANGE];
 
-	DynArray< const char*, 40 > stack;
-	StringStack text;
+	DynArray< const char*, 10 > stack;
+	DynArray< char, 10 > text;
 };
 
 

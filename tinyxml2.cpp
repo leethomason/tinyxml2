@@ -95,6 +95,32 @@ const char* StrPair::GetStr()
 	return start;
 }
 
+/*
+const char* StringPool::Intern( const char* str )
+{
+	// Treat the array as a linear, inplace hash table.
+	// Nothing can get deleted, so that's handy.
+	if ( size > pool.Size()*3/4 ) {
+		DynArray< const char*, 20 > store;
+		for( int i=0; i<pool.Size(); ++i ) {
+			if ( pool[i] != 0 ) {
+				store.Push( pool[i] );
+			}
+		}
+		int newSize = pool.Size() * 2;
+		pool.PopArr( pool.Size() );
+
+		const char** mem = pool.PushArr( newSize );
+		memset( (void*)mem, 0, sizeof(char)*newSize );
+
+		while ( !store.Empty() ) {
+			Intern( store.Pop() );
+		}
+	}
+
+}
+*/
+
 
 // --------- XMLBase ----------- //
 // fixme: should take in the entity/newline flags as param
@@ -276,6 +302,20 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 		SetTextParent();
 	}
 	return addThis;
+}
+
+
+XMLElement* XMLNode::FirstChildElement( const char* value )
+{
+	for( XMLNode* node=firstChild; node; node=node->next ) {
+		XMLElement* element = node->ToElement();
+		if ( element ) {
+			if ( !value || StringEqual( element->Name(), value ) ) {
+				return element;
+			}
+		}
+	}
+	return 0;
 }
 
 
@@ -530,6 +570,14 @@ void XMLDocument::InitDocument()
 }
 
 
+XMLElement* XMLDocument::NewElement( const char* name )
+{
+	XMLElement* ele = new XMLElement( this );
+	ele->SetName( name );
+	return ele;
+}
+
+
 int XMLDocument::Parse( const char* p )
 {
 	ClearChildren();
@@ -568,6 +616,7 @@ void XMLDocument::SetError( int error, const char* str1, const char* str2 )
 }
 
 
+/*
 StringStack::StringStack()
 {
 	nPositive = 0;
@@ -602,6 +651,7 @@ const char* StringStack::Pop() {
 	mem.PopArr( strlen(p)+1 );
 	return p+1;
 }
+*/
 
 
 XMLStreamer::XMLStreamer( FILE* file ) : fp( file ), depth( 0 ), elementJustOpened( false )
@@ -664,11 +714,11 @@ void XMLStreamer::OpenElement( const char* name, bool textParent )
 	if ( elementJustOpened ) {
 		SealElement();
 	}
-	if ( text.NumPositive() == 0 ) {
+	if ( !TextOnStack() ) {
 		PrintSpace( depth );
 	}
 	stack.Push( name );
-	text.Push( textParent ? "T" : "" );
+	text.Push( textParent ? 'T' : 'e' );
 
 	// fixme: can names have entities?
 	fprintf( fp, "<%s", name );
@@ -690,22 +740,22 @@ void XMLStreamer::CloseElement()
 {
 	--depth;
 	const char* name = stack.Pop();
-	int wasPositive = text.NumPositive();
+	bool wasText = TextOnStack();
 	text.Pop();
 
 	if ( elementJustOpened ) {
 		fprintf( fp, "/>" );
-		if ( text.NumPositive() == 0 ) {
+		if ( !wasText ) {
 			fprintf( fp, "\n" );
 		}
 	}
 	else {
-		if ( wasPositive == 0 ) {
+		if ( !wasText ) {
 			PrintSpace( depth );
 		}
 		// fixme can names have entities?
 		fprintf( fp, "</%s>", name );
-		if ( text.NumPositive() == 0 ) {
+		if ( !TextOnStack() ) {
 			fprintf( fp, "\n" );
 		}
 	}
@@ -717,7 +767,7 @@ void XMLStreamer::SealElement()
 {
 	elementJustOpened = false;
 	fprintf( fp, ">" );
-	if ( text.NumPositive() == 0 ) {
+	if ( !TextOnStack() ) {
 		fprintf( fp, "\n" );
 	}
 }
