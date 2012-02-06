@@ -572,10 +572,16 @@ XMLDocument::~XMLDocument()
 	ClearChildren();
 	delete [] charBuffer;
 
-	TIXMLASSERT( textPool.NAlloc() == 0 );
-	TIXMLASSERT( elementPool.NAlloc() == 0 );
-	TIXMLASSERT( commentPool.NAlloc() == 0 );
-	TIXMLASSERT( attributePool.NAlloc() == 0 );
+	/*
+	textPool.Trace( "text" );
+	elementPool.Trace( "element" );
+	commentPool.Trace( "comment" );
+	attributePool.Trace( "attribute" );
+	*/
+	TIXMLASSERT( textPool.CurrentAllocs() == 0 );
+	TIXMLASSERT( elementPool.CurrentAllocs() == 0 );
+	TIXMLASSERT( commentPool.CurrentAllocs() == 0 );
+	TIXMLASSERT( attributePool.CurrentAllocs() == 0 );
 }
 
 

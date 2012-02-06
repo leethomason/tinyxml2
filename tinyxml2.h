@@ -4,7 +4,7 @@
 /*
 	TODO
 	- const and non-const versions of API
-	- memory pool the class construction
+	X memory pool the class construction
 	- attribute accessors
 	- node navigation
 	- handles
@@ -12,17 +12,7 @@
 	- make constructors protected
 	- hide copy constructor
 	- hide = operator
-	- #define to remove mem-pooling, and make thread safe
 	- UTF8 support: isAlpha, etc.
-
-	(No reason to ever cast to base)
-	XMLBase -> Utility
-
-	XMLNode
-		Document
-		Pooled
-			Element
-			Text
 */
 
 #include <limits.h>
@@ -176,7 +166,7 @@ template< int SIZE >
 class MemPoolT : public MemPool
 {
 public:
-	MemPoolT() : root( 0 ), nAlloc( 0 )	{}
+	MemPoolT() : root(0), currentAllocs(0), nAllocs(0), maxAllocs(0)	{}
 	~MemPoolT() {
 		// Delete the blocks.
 		for( int i=0; i<blockPtrs.Size(); ++i ) {
@@ -185,7 +175,7 @@ public:
 	}
 
 	virtual int ItemSize() const	{ return SIZE; }
-	int NAlloc() const				{ return nAlloc; }
+	int CurrentAllocs() const		{ return currentAllocs; }
 
 	virtual void* Alloc() {
 		if ( !root ) {
@@ -201,16 +191,23 @@ public:
 		}
 		void* result = root;
 		root = root->next;
-		++nAlloc;
+
+		++currentAllocs;
+		if ( currentAllocs > maxAllocs ) maxAllocs = currentAllocs;
+		nAllocs++;
 		return result;
 	}
 	virtual void Free( void* mem ) {
 		if ( !mem ) return;
-		--nAlloc;
+		--currentAllocs;
 		Chunk* chunk = (Chunk*)mem;
 		memset( chunk, 0xfe, sizeof(Chunk) );
 		chunk->next = root;
 		root = chunk;
+	}
+	void Trace( const char* name ) {
+		printf( "Mempool %s watermark=%d current=%d size=%d nAlloc=%d blocks=%d\n",
+				 name, maxAllocs, currentAllocs, SIZE, nAllocs, blockPtrs.Size() );
 	}
 
 private:
@@ -224,7 +221,10 @@ private:
 	};
 	DynArray< Block*, 10 > blockPtrs;
 	Chunk* root;
-	int nAlloc;
+
+	int currentAllocs;
+	int nAllocs;
+	int maxAllocs;
 };
 
 
