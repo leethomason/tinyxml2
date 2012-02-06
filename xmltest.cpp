@@ -61,5 +61,11 @@ int main( int argc, const char* argv )
 		root->InsertEndChild( newElement );
 		doc.Print();
 	}
+	{
+		XMLDocument* doc = new XMLDocument();
+		static const char* test = "<element><sub/></element>";
+		doc->Parse( test );
+		delete doc;
+	}
 	return 0;
 }

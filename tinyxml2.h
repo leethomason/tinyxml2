@@ -12,6 +12,17 @@
 	- make constructors protected
 	- hide copy constructor
 	- hide = operator
+	- #define to remove mem-pooling, and make thread safe
+	- UTF8 support: isAlpha, etc.
+
+	(No reason to ever cast to base)
+	XMLBase -> Utility
+
+	XMLNode
+		Document
+		Pooled
+			Element
+			Text
 */
 
 #include <limits.h>
@@ -150,6 +161,72 @@ private:
 	int size;			// number objects in use
 };
 
+class MemPool
+{
+public:
+	MemPool() {}
+	virtual ~MemPool() {}
+
+	virtual int ItemSize() const = 0;
+	virtual void* Alloc() = 0;
+	virtual void Free( void* ) = 0; 
+};
+
+template< int SIZE >
+class MemPoolT : public MemPool
+{
+public:
+	MemPoolT() : root( 0 ), nAlloc( 0 )	{}
+	~MemPoolT() {
+		// Delete the blocks.
+		for( int i=0; i<blockPtrs.Size(); ++i ) {
+			delete blockPtrs[i];
+		}
+	}
+
+	virtual int ItemSize() const	{ return SIZE; }
+	int NAlloc() const				{ return nAlloc; }
+
+	virtual void* Alloc() {
+		if ( !root ) {
+			// Need a new block.
+			Block* block = new Block();
+			blockPtrs.Push( block );
+
+			for( int i=0; i<COUNT-1; ++i ) {
+				block->chunk[i].next = &block->chunk[i+1];
+			}
+			block->chunk[COUNT-1].next = 0;
+			root = block->chunk;
+		}
+		void* result = root;
+		root = root->next;
+		++nAlloc;
+		return result;
+	}
+	virtual void Free( void* mem ) {
+		if ( !mem ) return;
+		--nAlloc;
+		Chunk* chunk = (Chunk*)mem;
+		memset( chunk, 0xfe, sizeof(Chunk) );
+		chunk->next = root;
+		root = chunk;
+	}
+
+private:
+	enum { COUNT = 1024/SIZE };
+	union Chunk {
+		Chunk* next;
+		char mem[SIZE];
+	};
+	struct Block {
+		Chunk chunk[COUNT];
+	};
+	DynArray< Block*, 10 > blockPtrs;
+	Chunk* root;
+	int nAlloc;
+};
+
 
 /*
 class StringStack
@@ -204,10 +281,11 @@ private:
 class XMLBase
 {
 public:
+
+public:
 	XMLBase() {}
 	virtual ~XMLBase() {}
 
-protected:
 	static const char* SkipWhiteSpace( const char* p )	{ while( isspace( *p ) ) { ++p; } return p; }
 	static char* SkipWhiteSpace( char* p )				{ while( isspace( *p ) ) { ++p; } return p; }
 
@@ -228,18 +306,20 @@ protected:
 	inline static int IsAlphaNum( unsigned char anyByte )	{ return ( anyByte <= 127 ) ? isalnum( anyByte ) : 1; }
 	inline static int IsAlpha( unsigned char anyByte )		{ return ( anyByte <= 127 ) ? isalpha( anyByte ) : 1; }
 
-	char* ParseText( char* in, StrPair* pair, const char* endTag, int strFlags );
-	char* ParseName( char* in, StrPair* pair );
-	char* Identify( XMLDocument* document, char* p, XMLNode** node );
+	static char* ParseText( char* in, StrPair* pair, const char* endTag, int strFlags );
+	static char* ParseName( char* in, StrPair* pair );
+
+private:
 };
 
 
-class XMLNode : public XMLBase
+class XMLNode
 {
 	friend class XMLDocument;
 	friend class XMLElement;
 public:
-	virtual ~XMLNode();
+	//void* operator new( size_t size, MemPool* pool );
+	//void operator delete( void* mem, MemPool* pool );
 
 	XMLNode* InsertEndChild( XMLNode* addThis );
 	virtual void Print( XMLStreamer* streamer );
@@ -263,6 +343,8 @@ public:
 
 protected:
 	XMLNode( XMLDocument* );
+	virtual ~XMLNode();
+	
 	void ClearChildren();
 
 	XMLDocument*	document;
@@ -277,6 +359,7 @@ protected:
 	XMLNode*		next;
 
 private:
+	MemPool*		memPool;
 	void Unlink( XMLNode* child );
 };
 
@@ -286,7 +369,6 @@ class XMLText : public XMLNode
 	friend class XMLBase;
 	friend class XMLDocument;
 public:
-	virtual ~XMLText()								{}
 	virtual void Print( XMLStreamer* streamer );
 	const char* Value() { return value.GetStr(); }
 	void SetValue( const char* );
@@ -297,6 +379,7 @@ public:
 
 protected:
 	XMLText( XMLDocument* doc )	: XMLNode( doc )	{}
+	virtual ~XMLText()								{}
 
 private:
 };
@@ -307,7 +390,6 @@ class XMLComment : public XMLNode
 	friend class XMLBase;
 	friend class XMLDocument;
 public:
-	virtual ~XMLComment();
 	virtual void Print( XMLStreamer* );
 	virtual XMLComment*	ToComment()		{ return this; }
 
@@ -317,7 +399,7 @@ public:
 
 protected:
 	XMLComment( XMLDocument* doc );
-
+	virtual ~XMLComment();
 
 private:
 };
@@ -327,11 +409,11 @@ class XMLAttribute : public XMLBase
 {
 	friend class XMLElement;
 public:
-	XMLAttribute( XMLElement* element ) : next( 0 ) {}
-	virtual ~XMLAttribute()	{}
 	virtual void Print( XMLStreamer* streamer );
 
 private:
+	XMLAttribute( XMLElement* element ) : next( 0 ) {}
+	virtual ~XMLAttribute()	{}
 	char* ParseDeep( char* p );
 
 	StrPair name;
@@ -345,8 +427,6 @@ class XMLElement : public XMLNode
 	friend class XMLBase;
 	friend class XMLDocument;
 public:
-	virtual ~XMLElement();
-
 	const char* Name() const		{ return Value(); }
 	void SetName( const char* str )	{ SetValue( str ); }
 
@@ -360,11 +440,11 @@ public:
 
 protected:
 	XMLElement( XMLDocument* doc );
+	virtual ~XMLElement();
 
 private:
 	char* ParseAttributes( char* p, bool *closedElement );
 
-	mutable StrPair name;
 	bool closing;
 	XMLAttribute* rootAttribute;
 	XMLAttribute* lastAttribute;
@@ -373,6 +453,7 @@ private:
 
 class XMLDocument : public XMLNode
 {
+	friend class XMLElement;
 public:
 	XMLDocument(); 
 	~XMLDocument();
@@ -398,9 +479,10 @@ public:
 	const char* GetErrorStr1() const { return errorStr1; }
 	const char* GetErrorStr2() const { return errorStr2; }
 
-//	const char* Intern( const char* );
+	char* Identify( char* p, XMLNode** node );
 
 private:
+
 	XMLDocument( const XMLDocument& );	// intentionally not implemented
 	void InitDocument();
 
@@ -409,6 +491,11 @@ private:
 	const char* errorStr2;
 	char* charBuffer;
 	//StringStack stringPool;
+
+	MemPoolT< sizeof(XMLElement) >	elementPool;
+	MemPoolT< sizeof(XMLAttribute) > attributePool;
+	MemPoolT< sizeof(XMLText) >		textPool;
+	MemPoolT< sizeof(XMLComment) >	commentPool;
 };
 
 

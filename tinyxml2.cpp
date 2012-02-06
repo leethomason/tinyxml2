@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <new.h>
+
+//#pragma warning ( disable : 4291 )
 
 using namespace tinyxml2;
 
@@ -123,7 +126,7 @@ const char* StringPool::Intern( const char* str )
 
 
 // --------- XMLBase ----------- //
-// fixme: should take in the entity/newline flags as param
+
 char* XMLBase::ParseText( char* p, StrPair* pair, const char* endTag, int strFlags )
 {
 	TIXMLASSERT( endTag && *endTag );
@@ -175,11 +178,11 @@ char* XMLBase::ParseName( char* p, StrPair* pair )
 }
 
 
-char* XMLBase::Identify( XMLDocument* document, char* p, XMLNode** node ) 
+char* XMLDocument::Identify( char* p, XMLNode** node ) 
 {
 	XMLNode* returnNode = 0;
 	char* start = p;
-	p = XMLNode::SkipWhiteSpace( p );
+	p = XMLBase::SkipWhiteSpace( p );
 	if( !p || !*p )
 	{
 		return 0;
@@ -204,18 +207,20 @@ char* XMLBase::Identify( XMLDocument* document, char* p, XMLNode** node )
 	static const int cdataHeaderLen		= 9;
 	static const int elementHeaderLen	= 1;
 
-	if ( StringEqual( p, commentHeader, commentHeaderLen ) ) {
-		returnNode = new XMLComment( document );
+	if ( XMLBase::StringEqual( p, commentHeader, commentHeaderLen ) ) {
+		returnNode = new (commentPool.Alloc()) XMLComment( this );
+		returnNode->memPool = &commentPool;
 		p += commentHeaderLen;
 	}
-	else if ( StringEqual( p, elementHeader, elementHeaderLen ) ) {
-		returnNode = new XMLElement( document );
+	else if ( XMLBase::StringEqual( p, elementHeader, elementHeaderLen ) ) {
+		returnNode = new (elementPool.Alloc()) XMLElement( this );
+		returnNode->memPool = &elementPool;
 		p += elementHeaderLen;
 	}
 	// fixme: better text detection
-	else if ( (*p != '<') && IsAlphaNum( *p ) ) {
-		// fixme: this is filtering out empty text...should it?
-		returnNode = new XMLText( document );
+	else if ( (*p != '<') && XMLBase::IsAlphaNum( *p ) ) {
+		returnNode = new (textPool.Alloc()) XMLText( this );
+		returnNode->memPool = &textPool;
 		p = start;	// Back it up, all the text counts.
 	}
 	else {
@@ -254,7 +259,13 @@ void XMLNode::ClearChildren()
 	while( firstChild ) {
 		XMLNode* node = firstChild;
 		Unlink( node );
-		delete node;
+		
+		//delete node;
+		// placement new!
+		MemPool* pool = node->memPool;
+		node->~XMLNode();
+		pool->Free( node );
+		// fixme: memory never free'd. 
 	}
 	firstChild = lastChild = 0;
 }
@@ -310,7 +321,7 @@ XMLElement* XMLNode::FirstChildElement( const char* value )
 	for( XMLNode* node=firstChild; node; node=node->next ) {
 		XMLElement* element = node->ToElement();
 		if ( element ) {
-			if ( !value || StringEqual( element->Name(), value ) ) {
+			if ( !value || XMLBase::StringEqual( element->Name(), value ) ) {
 				return element;
 			}
 		}
@@ -331,12 +342,15 @@ char* XMLNode::ParseDeep( char* p )
 {
 	while( p && *p ) {
 		XMLNode* node = 0;
-		p = Identify( document, p, &node );
+		p = document->Identify( p, &node );
 		if ( p && node ) {
 			p = node->ParseDeep( p );
 			// FIXME: is it the correct closing element?
 			if ( node->IsClosingElement() ) {
-				delete node;
+				//delete node;
+				MemPool* pool = node->memPool;
+				node->~XMLNode();	// fixme linked list memory not free
+				pool->Free( node );
 				return p;
 			}
 			this->InsertEndChild( node );
@@ -348,7 +362,7 @@ char* XMLNode::ParseDeep( char* p )
 // --------- XMLText ---------- //
 char* XMLText::ParseDeep( char* p )
 {
-	p = ParseText( p, &value, "<", StrPair::TEXT_ELEMENT );
+	p = XMLBase::ParseText( p, &value, "<", StrPair::TEXT_ELEMENT );
 	// consumes the end tag.
 	if ( p && *p ) {
 		return p-1;
@@ -388,19 +402,19 @@ void XMLComment::Print( XMLStreamer* streamer )
 char* XMLComment::ParseDeep( char* p )
 {
 	// Comment parses as text.
-	return ParseText( p, &value, "-->", StrPair::COMMENT );
+	return XMLBase::ParseText( p, &value, "-->", StrPair::COMMENT );
 }
 
 
 // --------- XMLAttribute ---------- //
 char* XMLAttribute::ParseDeep( char* p )
 {
-	p = ParseText( p, &name, "=", StrPair::ATTRIBUTE_NAME );
+	p = XMLBase::ParseText( p, &name, "=", StrPair::ATTRIBUTE_NAME );
 	if ( !p || !*p ) return 0;
 
 	char endTag[2] = { *p, 0 };
 	++p;
-	p = ParseText( p, &value, endTag, StrPair::ATTRIBUTE_VALUE );
+	p = XMLBase::ParseText( p, &value, endTag, StrPair::ATTRIBUTE_VALUE );
 	if ( value.Empty() ) return 0;
 	return p;
 }
@@ -443,15 +457,16 @@ char* XMLElement::ParseAttributes( char* p, bool* closedElement )
 
 	// Read the attributes.
 	while( p ) {
-		p = SkipWhiteSpace( p );
+		p = XMLBase::SkipWhiteSpace( p );
 		if ( !p || !(*p) ) {
-			document->SetError( XMLDocument::ERROR_PARSING_ELEMENT, start, name.GetStr() );
+			document->SetError( XMLDocument::ERROR_PARSING_ELEMENT, start, Name() );
 			return 0;
 		}
 
 		// attribute.
-		if ( IsAlpha( *p ) ) {
+		if ( XMLBase::IsAlpha( *p ) ) {
 			XMLAttribute* attrib = new XMLAttribute( this );
+
 			p = attrib->ParseDeep( p );
 			if ( !p ) {
 				delete attrib;
@@ -497,7 +512,7 @@ char* XMLElement::ParseAttributes( char* p, bool* closedElement )
 char* XMLElement::ParseDeep( char* p )
 {
 	// Read the element name.
-	p = SkipWhiteSpace( p );
+	p = XMLBase::SkipWhiteSpace( p );
 	if ( !p ) return 0;
 	const char* start = p;
 
@@ -509,8 +524,8 @@ char* XMLElement::ParseDeep( char* p )
 		++p;
 	}
 
-	p = ParseName( p, &name );
-	if ( name.Empty() ) return 0;
+	p = XMLBase::ParseName( p, &value );
+	if ( value.Empty() ) return 0;
 
 	bool elementClosed=false;
 	p = ParseAttributes( p, &elementClosed );
@@ -554,7 +569,13 @@ XMLDocument::XMLDocument() :
 
 XMLDocument::~XMLDocument()
 {
+	ClearChildren();
 	delete [] charBuffer;
+
+	TIXMLASSERT( textPool.NAlloc() == 0 );
+	TIXMLASSERT( elementPool.NAlloc() == 0 );
+	TIXMLASSERT( commentPool.NAlloc() == 0 );
+	TIXMLASSERT( attributePool.NAlloc() == 0 );
 }
 
 
@@ -572,7 +593,8 @@ void XMLDocument::InitDocument()
 
 XMLElement* XMLDocument::NewElement( const char* name )
 {
-	XMLElement* ele = new XMLElement( this );
+	XMLElement* ele = new (elementPool.Alloc()) XMLElement( this );
+	ele->memPool = &elementPool;
 	ele->SetName( name );
 	return ele;
 }
