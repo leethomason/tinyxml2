@@ -17,6 +17,9 @@ static const char CR = CARRIAGE_RETURN;
 static const char SINGLE_QUOTE			= '\'';
 static const char DOUBLE_QUOTE			= '\"';
 
+#define DELETE_NODE( node ) { MemPool* pool = node->memPool; node->~XMLNode(); pool->Free( node ); }
+#define DELETE_ATTRIBUTE( attrib ) { MemPool* pool = attrib->memPool; attrib->~XMLAttribute(); pool->Free( attrib ); }
+
 struct Entity {
 	const char* pattern;
 	int length;
@@ -260,12 +263,7 @@ void XMLNode::ClearChildren()
 		XMLNode* node = firstChild;
 		Unlink( node );
 		
-		//delete node;
-		// placement new!
-		MemPool* pool = node->memPool;
-		node->~XMLNode();
-		pool->Free( node );
-		// fixme: memory never free'd. 
+		DELETE_NODE( node );
 	}
 	firstChild = lastChild = 0;
 }
@@ -347,10 +345,7 @@ char* XMLNode::ParseDeep( char* p )
 			p = node->ParseDeep( p );
 			// FIXME: is it the correct closing element?
 			if ( node->IsClosingElement() ) {
-				//delete node;
-				MemPool* pool = node->memPool;
-				node->~XMLNode();	// fixme linked list memory not free
-				pool->Free( node );
+				DELETE_NODE( node );
 				return p;
 			}
 			this->InsertEndChild( node );
@@ -444,7 +439,7 @@ XMLElement::~XMLElement()
 	XMLAttribute* attribute = rootAttribute;
 	while( attribute ) {
 		XMLAttribute* next = attribute->next;
-		delete attribute;
+		DELETE_ATTRIBUTE( attribute );
 		attribute = next;
 	}
 }
@@ -465,11 +460,12 @@ char* XMLElement::ParseAttributes( char* p, bool* closedElement )
 
 		// attribute.
 		if ( XMLBase::IsAlpha( *p ) ) {
-			XMLAttribute* attrib = new XMLAttribute( this );
+			XMLAttribute* attrib = new (document->attributePool.Alloc() ) XMLAttribute( this );
+			attrib->memPool = &document->attributePool;
 
 			p = attrib->ParseDeep( p );
 			if ( !p ) {
-				delete attrib;
+				DELETE_ATTRIBUTE( attrib );
 				document->SetError( XMLDocument::ERROR_PARSING_ATTRIBUTE, start, p );
 				return 0;
 			}

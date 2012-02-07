@@ -206,8 +206,8 @@ public:
 		root = chunk;
 	}
 	void Trace( const char* name ) {
-		printf( "Mempool %s watermark=%d current=%d size=%d nAlloc=%d blocks=%d\n",
-				 name, maxAllocs, currentAllocs, SIZE, nAllocs, blockPtrs.Size() );
+		printf( "Mempool %s watermark=%d [%dk] current=%d size=%d nAlloc=%d blocks=%d\n",
+				 name, maxAllocs, maxAllocs*SIZE/1024, currentAllocs, SIZE, nAllocs, blockPtrs.Size() );
 	}
 
 private:
@@ -419,6 +419,7 @@ private:
 	StrPair name;
 	StrPair value;
 	XMLAttribute* next;
+	MemPool* memPool;
 };
 
 
