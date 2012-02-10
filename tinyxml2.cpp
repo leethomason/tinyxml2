@@ -128,9 +128,9 @@ const char* StringPool::Intern( const char* str )
 */
 
 
-// --------- XMLBase ----------- //
+// --------- XMLUtil ----------- //
 
-char* XMLBase::ParseText( char* p, StrPair* pair, const char* endTag, int strFlags )
+char* StrPair::ParseText( char* p, const char* endTag, int strFlags )
 {
 	TIXMLASSERT( endTag && *endTag );
 
@@ -141,7 +141,7 @@ char* XMLBase::ParseText( char* p, StrPair* pair, const char* endTag, int strFla
 	// Inner loop of text parsing.
 	while ( *p ) {
 		if ( *p == endChar && strncmp( p, endTag, length ) == 0 ) {
-			pair->Set( start, p, strFlags );
+			Set( start, p, strFlags );
 			return p + length;
 		}
 		++p;
@@ -150,7 +150,7 @@ char* XMLBase::ParseText( char* p, StrPair* pair, const char* endTag, int strFla
 }
 
 
-char* XMLBase::ParseName( char* p, StrPair* pair )
+char* StrPair::ParseName( char* p )
 {
 	char* start = p;
 
@@ -159,12 +159,12 @@ char* XMLBase::ParseName( char* p, StrPair* pair )
 		return 0;
 	}
 
-	if ( !IsAlpha( *p ) ) {
+	if ( !XMLUtil::IsAlpha( *p ) ) {
 		return 0;
 	}
 
 	while( *p && (
-			   IsAlphaNum( (unsigned char) *p ) 
+			   XMLUtil::IsAlphaNum( (unsigned char) *p ) 
 			|| *p == '_'
 			|| *p == '-'
 			|| *p == '.'
@@ -174,7 +174,7 @@ char* XMLBase::ParseName( char* p, StrPair* pair )
 	}
 
 	if ( p > start ) {
-		pair->Set( start, p, 0 );
+		Set( start, p, 0 );
 		return p;
 	}
 	return 0;
@@ -185,7 +185,7 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 {
 	XMLNode* returnNode = 0;
 	char* start = p;
-	p = XMLBase::SkipWhiteSpace( p );
+	p = XMLUtil::SkipWhiteSpace( p );
 	if( !p || !*p )
 	{
 		return 0;
@@ -210,18 +210,18 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 	static const int cdataHeaderLen		= 9;
 	static const int elementHeaderLen	= 1;
 
-	if ( XMLBase::StringEqual( p, commentHeader, commentHeaderLen ) ) {
+	if ( XMLUtil::StringEqual( p, commentHeader, commentHeaderLen ) ) {
 		returnNode = new (commentPool.Alloc()) XMLComment( this );
 		returnNode->memPool = &commentPool;
 		p += commentHeaderLen;
 	}
-	else if ( XMLBase::StringEqual( p, elementHeader, elementHeaderLen ) ) {
+	else if ( XMLUtil::StringEqual( p, elementHeader, elementHeaderLen ) ) {
 		returnNode = new (elementPool.Alloc()) XMLElement( this );
 		returnNode->memPool = &elementPool;
 		p += elementHeaderLen;
 	}
 	// fixme: better text detection
-	else if ( (*p != '<') && XMLBase::IsAlphaNum( *p ) ) {
+	else if ( (*p != '<') && XMLUtil::IsAlphaNum( *p ) ) {
 		returnNode = new (textPool.Alloc()) XMLText( this );
 		returnNode->memPool = &textPool;
 		p = start;	// Back it up, all the text counts.
@@ -232,6 +232,20 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 
 	*node = returnNode;
 	return p;
+}
+
+
+bool XMLDocument::Accept( XMLVisitor* visitor ) const
+{
+	if ( visitor->VisitEnter( *this ) )
+	{
+		for ( const XMLNode* node=FirstChild(); node; node=node->NextSibling() )
+		{
+			if ( !node->Accept( visitor ) )
+				break;
+		}
+	}
+	return visitor->VisitExit( *this );
 }
 
 
@@ -314,17 +328,38 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 }
 
 
-XMLElement* XMLNode::FirstChildElement( const char* value )
+const XMLElement* XMLNode::FirstChildElement( const char* value ) const
 {
 	for( XMLNode* node=firstChild; node; node=node->next ) {
 		XMLElement* element = node->ToElement();
 		if ( element ) {
-			if ( !value || XMLBase::StringEqual( element->Name(), value ) ) {
+			if ( !value || XMLUtil::StringEqual( element->Name(), value ) ) {
 				return element;
 			}
 		}
 	}
 	return 0;
+}
+
+
+const XMLElement* XMLNode::LastChildElement( const char* value ) const
+{
+	for( XMLNode* node=lastChild; node; node=node->prev ) {
+		XMLElement* element = node->ToElement();
+		if ( element ) {
+			if ( !value || XMLUtil::StringEqual( element->Name(), value ) ) {
+				return element;
+			}
+		}
+	}
+	return 0;
+}
+
+
+void XMLNode::DeleteChild( XMLNode* node )
+{
+	TIXMLASSERT( node->parent == this );
+	TIXMLASSERT( 0 );
 }
 
 
@@ -357,7 +392,7 @@ char* XMLNode::ParseDeep( char* p )
 // --------- XMLText ---------- //
 char* XMLText::ParseDeep( char* p )
 {
-	p = XMLBase::ParseText( p, &value, "<", StrPair::TEXT_ELEMENT );
+	p = value.ParseText( p, "<", StrPair::TEXT_ELEMENT );
 	// consumes the end tag.
 	if ( p && *p ) {
 		return p-1;
@@ -370,6 +405,12 @@ void XMLText::Print( XMLStreamer* streamer )
 {
 	const char* v = value.GetStr();
 	streamer->PushText( v );
+}
+
+
+bool XMLText::Accept( XMLVisitor* visitor ) const
+{
+	return visitor->Visit( *this );
 }
 
 
@@ -397,19 +438,25 @@ void XMLComment::Print( XMLStreamer* streamer )
 char* XMLComment::ParseDeep( char* p )
 {
 	// Comment parses as text.
-	return XMLBase::ParseText( p, &value, "-->", StrPair::COMMENT );
+	return value.ParseText( p, "-->", StrPair::COMMENT );
+}
+
+
+bool XMLComment::Accept( XMLVisitor* visitor ) const
+{
+	return visitor->Visit( *this );
 }
 
 
 // --------- XMLAttribute ---------- //
 char* XMLAttribute::ParseDeep( char* p )
 {
-	p = XMLBase::ParseText( p, &name, "=", StrPair::ATTRIBUTE_NAME );
+	p = name.ParseText( p, "=", StrPair::ATTRIBUTE_NAME );
 	if ( !p || !*p ) return 0;
 
 	char endTag[2] = { *p, 0 };
 	++p;
-	p = XMLBase::ParseText( p, &value, endTag, StrPair::ATTRIBUTE_VALUE );
+	p = value.ParseText( p, endTag, StrPair::ATTRIBUTE_VALUE );
 	if ( value.Empty() ) return 0;
 	return p;
 }
@@ -452,14 +499,14 @@ char* XMLElement::ParseAttributes( char* p, bool* closedElement )
 
 	// Read the attributes.
 	while( p ) {
-		p = XMLBase::SkipWhiteSpace( p );
+		p = XMLUtil::SkipWhiteSpace( p );
 		if ( !p || !(*p) ) {
 			document->SetError( XMLDocument::ERROR_PARSING_ELEMENT, start, Name() );
 			return 0;
 		}
 
 		// attribute.
-		if ( XMLBase::IsAlpha( *p ) ) {
+		if ( XMLUtil::IsAlpha( *p ) ) {
 			XMLAttribute* attrib = new (document->attributePool.Alloc() ) XMLAttribute( this );
 			attrib->memPool = &document->attributePool;
 
@@ -508,7 +555,7 @@ char* XMLElement::ParseAttributes( char* p, bool* closedElement )
 char* XMLElement::ParseDeep( char* p )
 {
 	// Read the element name.
-	p = XMLBase::SkipWhiteSpace( p );
+	p = XMLUtil::SkipWhiteSpace( p );
 	if ( !p ) return 0;
 	const char* start = p;
 
@@ -520,7 +567,7 @@ char* XMLElement::ParseDeep( char* p )
 		++p;
 	}
 
-	p = XMLBase::ParseName( p, &value );
+	p = value.ParseName( p );
 	if ( value.Empty() ) return 0;
 
 	bool elementClosed=false;
@@ -539,7 +586,7 @@ void XMLElement::Print( XMLStreamer* streamer )
 	//	PrintSpace( cfile, depth );
 	//}
 	//fprintf( cfile, "<%s", Name() );
-	streamer->OpenElement( Name(), IsTextParent() );
+	streamer->OpenElement( Name() );
 
 	for( XMLAttribute* attrib=rootAttribute; attrib; attrib=attrib->next ) {
 		//fprintf( cfile, " " );
@@ -551,6 +598,21 @@ void XMLElement::Print( XMLStreamer* streamer )
 		node->Print( streamer );
 	}
 	streamer->CloseElement();
+}
+
+
+bool XMLElement::Accept( XMLVisitor* visitor ) const
+{
+	if ( visitor->VisitEnter( *this, rootAttribute ) ) 
+	{
+		for ( const XMLNode* node=FirstChild(); node; node=node->NextSibling() )
+		{
+			if ( !node->Accept( visitor ) )
+				break;
+		}
+	}
+	return visitor->VisitExit( *this );
+
 }
 
 
@@ -678,7 +740,7 @@ const char* StringStack::Pop() {
 */
 
 
-XMLStreamer::XMLStreamer( FILE* file ) : fp( file ), depth( 0 ), elementJustOpened( false )
+XMLStreamer::XMLStreamer( FILE* file ) : fp( file ), depth( 0 ), elementJustOpened( false ), textDepth( -1 )
 {
 	for( int i=0; i<ENTITY_RANGE; ++i ) {
 		entityFlag[i] = false;
@@ -733,18 +795,18 @@ void XMLStreamer::PrintString( const char* p )
 	}
 }
 
-void XMLStreamer::OpenElement( const char* name, bool textParent )
+void XMLStreamer::OpenElement( const char* name )
 {
 	if ( elementJustOpened ) {
 		SealElement();
 	}
-	if ( !TextOnStack() ) {
+	stack.Push( name );
+
+	if ( textDepth < 0 && depth > 0) {
+		fprintf( fp, "\n" );
 		PrintSpace( depth );
 	}
-	stack.Push( name );
-	text.Push( textParent ? 'T' : 'e' );
 
-	// fixme: can names have entities?
 	fprintf( fp, "<%s", name );
 	elementJustOpened = true;
 	++depth;
@@ -764,25 +826,22 @@ void XMLStreamer::CloseElement()
 {
 	--depth;
 	const char* name = stack.Pop();
-	bool wasText = TextOnStack();
-	text.Pop();
 
 	if ( elementJustOpened ) {
 		fprintf( fp, "/>" );
-		if ( !wasText ) {
-			fprintf( fp, "\n" );
-		}
 	}
 	else {
-		if ( !wasText ) {
+		if ( textDepth < 0 ) {
+			fprintf( fp, "\n" );
 			PrintSpace( depth );
 		}
-		// fixme can names have entities?
 		fprintf( fp, "</%s>", name );
-		if ( !TextOnStack() ) {
-			fprintf( fp, "\n" );
-		}
 	}
+
+	if ( textDepth == depth )
+		textDepth = -1;
+	if ( depth == 0 )
+		fprintf( fp, "\n" );
 	elementJustOpened = false;
 }
 
@@ -791,14 +850,13 @@ void XMLStreamer::SealElement()
 {
 	elementJustOpened = false;
 	fprintf( fp, ">" );
-	if ( !TextOnStack() ) {
-		fprintf( fp, "\n" );
-	}
 }
 
 
 void XMLStreamer::PushText( const char* text )
 {
+	textDepth = depth-1;
+
 	if ( elementJustOpened ) {
 		SealElement();
 	}

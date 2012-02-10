@@ -12,7 +12,7 @@
 	- make constructors protected
 	- hide copy constructor
 	- hide = operator
-	- UTF8 support: isAlpha, etc.
+	X UTF8 support: isAlpha, etc.
 */
 
 #include <limits.h>
@@ -74,6 +74,9 @@ public:
 	bool Empty() const { return start == end; }
 
 	void SetInternedStr( const char* str ) { this->start = (char*) str; this->end = 0; this->flags = 0; }
+	char* ParseText( char* in, const char* endTag, int strFlags );
+	char* ParseName( char* in );
+
 
 private:
 	enum {
@@ -278,16 +281,59 @@ private:
 };
 */
 
-class XMLBase
+
+/**
+	Implements the interface to the "Visitor pattern" (see the Accept() method.)
+	If you call the Accept() method, it requires being passed a XMLVisitor
+	class to handle callbacks. For nodes that contain other nodes (Document, Element)
+	you will get called with a VisitEnter/VisitExit pair. Nodes that are always leaves
+	are simply called with Visit().
+
+	If you return 'true' from a Visit method, recursive parsing will continue. If you return
+	false, <b>no children of this node or its sibilings</b> will be Visited.
+
+	All flavors of Visit methods have a default implementation that returns 'true' (continue 
+	visiting). You need to only override methods that are interesting to you.
+
+	Generally Accept() is called on the TiXmlDocument, although all nodes suppert Visiting.
+
+	You should never change the document from a callback.
+
+	@sa XMLNode::Accept()
+*/
+class XMLVisitor
 {
 public:
+	virtual ~XMLVisitor() {}
 
+	/// Visit a document.
+	virtual bool VisitEnter( const XMLDocument& /*doc*/ )			{ return true; }
+	/// Visit a document.
+	virtual bool VisitExit( const XMLDocument& /*doc*/ )			{ return true; }
+
+	/// Visit an element.
+	virtual bool VisitEnter( const XMLElement& /*element*/, const XMLAttribute* /*firstAttribute*/ )	{ return true; }
+	/// Visit an element.
+	virtual bool VisitExit( const XMLElement& /*element*/ )			{ return true; }
+
+	/// Visit a declaration
+	//virtual bool Visit( const TiXmlDeclaration& /*declaration*/ )	{ return true; }
+	/// Visit a text node
+	virtual bool Visit( const XMLText& /*text*/ )					{ return true; }
+	/// Visit a comment node
+	virtual bool Visit( const XMLComment& /*comment*/ )				{ return true; }
+	/// Visit an unknown node
+	//virtual bool Visit( const TiXmlUnknown& /*unknown*/ )			{ return true; }
+};
+
+
+class XMLUtil
+{
 public:
-	XMLBase() {}
-	virtual ~XMLBase() {}
-
-	static const char* SkipWhiteSpace( const char* p )	{ while( isspace( *p ) ) { ++p; } return p; }
-	static char* SkipWhiteSpace( char* p )				{ while( isspace( *p ) ) { ++p; } return p; }
+	// Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't 
+	// correct, but simple, and usually works.
+	static const char* SkipWhiteSpace( const char* p )	{ while( IsUTF8Continuation(*p) || isspace( *p ) ) { ++p; } return p; }
+	static char* SkipWhiteSpace( char* p )				{ while( IsUTF8Continuation(*p) || isspace( *p ) ) { ++p; } return p; }
 
 	inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
 		int n = 0;
@@ -303,13 +349,8 @@ public:
 		return false;
 	}
 	inline static int IsUTF8Continuation( unsigned char p ) { return p & 0x80; }
-	inline static int IsAlphaNum( unsigned char anyByte )	{ return ( anyByte <= 127 ) ? isalnum( anyByte ) : 1; }
-	inline static int IsAlpha( unsigned char anyByte )		{ return ( anyByte <= 127 ) ? isalpha( anyByte ) : 1; }
-
-	static char* ParseText( char* in, StrPair* pair, const char* endTag, int strFlags );
-	static char* ParseName( char* in, StrPair* pair );
-
-private:
+	inline static int IsAlphaNum( unsigned char anyByte )	{ return ( anyByte < 128 ) ? isalnum( anyByte ) : 1; }
+	inline static int IsAlpha( unsigned char anyByte )		{ return ( anyByte < 128 ) ? isalpha( anyByte ) : 1; }
 };
 
 
@@ -318,25 +359,50 @@ class XMLNode
 	friend class XMLDocument;
 	friend class XMLElement;
 public:
-	//void* operator new( size_t size, MemPool* pool );
-	//void operator delete( void* mem, MemPool* pool );
+	XMLDocument* GetDocument()				{ return document; }
 
-	XMLNode* InsertEndChild( XMLNode* addThis );
-	virtual void Print( XMLStreamer* streamer );
+	virtual XMLElement*		ToElement()		{ return 0; }
+	virtual XMLText*		ToText()		{ return 0; }
+	virtual XMLComment*		ToComment()		{ return 0; }
+	virtual XMLDocument*	ToDocument()	{ return 0; }
 
 	const char* Value() const			{ return value.GetStr(); }
 	void SetValue( const char* val )	{ value.SetInternedStr( val ); }
 
-	virtual XMLElement* ToElement()		{ return 0; }
-	virtual XMLText*	ToText()		{ return 0; }
-	virtual XMLComment* ToComment()		{ return 0; }
+	const XMLNode*  FirstChild() const		{ return firstChild; }
+	XMLNode*		FirstChild()			{ return firstChild; }
+	const XMLElement* FirstChildElement( const char* value=0 ) const;
+	XMLElement* FirstChildElement( const char* value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( value )); }
 
-	XMLNode* FirstChild()	{ return firstChild; }
-	XMLElement* FirstChildElement( const char* value=0 );
+	const XMLNode*	LastChild() const						{ return lastChild; }
+	XMLNode*		LastChild()								{ return const_cast<XMLNode*>(const_cast<const XMLNode*>(this)->LastChild() ); }
 
-	// fixme: guarentee null terminator to avoid internal checks
+	const XMLElement* LastChildElement( const char* value=0 ) const;
+	XMLElement* LastChildElement( const char* value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(value) ); }
+	
+	const XMLNode*	PreviousSibling() const					{ return prev; }
+	XMLNode*	PreviousSibling()							{ return prev; }
+
+	const XMLNode*	PreviousSiblingElement( const char* value=0 ) const ;
+	XMLNode*	PreviousSiblingElement( const char* value=0 ) { return const_cast<XMLNode*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( value ) ); }
+	
+	const XMLNode*	NextSibling() const						{ return next; }
+	XMLNode*	NextSibling()								{ return next; }
+		
+	const XMLNode*	NextSiblingElement( const char* value=0 ) const;
+ 	XMLNode*	NextSiblingElement( const char* value=0 )	{ return const_cast<XMLNode*>(const_cast<const XMLNode*>(this)->NextSiblingElement( value ) ); }
+
+	XMLNode* InsertEndChild( XMLNode* addThis );
+	XMLNode* InsertFirstChild( XMLNode* addThis );
+	XMLNode* InsertAfterChild( XMLNode* afterThis, XMLNode* addThis );
+	
+	void ClearChildren();
+	void DeleteChild( XMLNode* node );
+
+	virtual bool Accept( XMLVisitor* visitor ) const = 0;
+	virtual void Print( XMLStreamer* streamer );
+
 	virtual char* ParseDeep( char* );
-
 	void SetTextParent()		{ isTextParent = true; } 
 	bool IsTextParent() const	{ return isTextParent; }
 	virtual bool IsClosingElement() const { return false; }
@@ -345,8 +411,6 @@ protected:
 	XMLNode( XMLDocument* );
 	virtual ~XMLNode();
 	
-	void ClearChildren();
-
 	XMLDocument*	document;
 	XMLNode*		parent;
 	bool			isTextParent;
@@ -373,6 +437,7 @@ public:
 	const char* Value() { return value.GetStr(); }
 	void SetValue( const char* );
 
+	virtual bool Accept( XMLVisitor* visitor ) const;
 	virtual XMLText*	ToText()		{ return this; }
 
 	char* ParseDeep( char* );
@@ -394,6 +459,7 @@ public:
 	virtual XMLComment*	ToComment()		{ return this; }
 
 	const char* Value() { return value.GetStr(); }
+	virtual bool Accept( XMLVisitor* visitor ) const;
 
 	char* ParseDeep( char* );
 
@@ -405,7 +471,7 @@ private:
 };
 
 
-class XMLAttribute : public XMLBase
+class XMLAttribute
 {
 	friend class XMLElement;
 public:
@@ -434,6 +500,7 @@ public:
 	virtual void Print( XMLStreamer* );
 
 	virtual XMLElement* ToElement() { return this; }
+	virtual bool Accept( XMLVisitor* visitor ) const;
 
 	// internal:
 	virtual bool IsClosingElement() const { return closing; }
@@ -459,11 +526,14 @@ public:
 	XMLDocument(); 
 	~XMLDocument();
 
+	virtual XMLDocument*	ToDocument()	{ return this; }
+
 	int Parse( const char* );
 	int Load( const char* );
 	int Load( FILE* );
 
 	void Print( XMLStreamer* streamer=0 );
+	virtual bool Accept( XMLVisitor* visitor ) const;
 
 	XMLElement* NewElement( const char* name );
 
@@ -500,13 +570,13 @@ private:
 };
 
 
-class XMLStreamer
+class XMLStreamer 
 {
 public:
 	XMLStreamer( FILE* file );
 	~XMLStreamer()	{}
 
-	void OpenElement( const char* name, bool textParent );
+	void OpenElement( const char* name );
 	void PushAttribute( const char* name, const char* value );
 	void CloseElement();
 
@@ -517,24 +587,26 @@ private:
 	void SealElement();
 	void PrintSpace( int depth );
 	void PrintString( const char* );	// prints out, after detecting entities.
-	bool TextOnStack() const { 
+/*	bool TextOnStack() const { 
 		for( int i=0; i<text.Size(); ++i ) { 
 			if ( text[i] == 'T' ) 
 				return true; 
 		} 
 		return false; 
-	}
+	}*/
 
 	FILE* fp;
 	int depth;
 	bool elementJustOpened;
+	int textDepth;
+
 	enum {
 		ENTITY_RANGE = 64
 	};
 	bool entityFlag[ENTITY_RANGE];
 
 	DynArray< const char*, 10 > stack;
-	DynArray< char, 10 > text;
+	//DynArray< char, 10 > text;
 };
 
 

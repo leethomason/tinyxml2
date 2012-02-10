@@ -52,6 +52,7 @@ int main( int argc, const char* argv )
 			printf( "----------------------------------------------\n" );
 		}
 	}
+#if 0
 	{
 		static const char* test = "<element>Text before.</element>";
 		XMLDocument doc;
@@ -67,5 +68,6 @@ int main( int argc, const char* argv )
 		doc->Parse( test );
 		delete doc;
 	}
+#endif
 	return 0;
 }
