@@ -363,12 +363,13 @@ void XMLNode::DeleteChild( XMLNode* node )
 }
 
 
-void XMLNode::Print( XMLStreamer* streamer )
+/*void XMLNode::Print( XMLStreamer* streamer )
 {
 	for( XMLNode* node = firstChild; node; node=node->next ) {
 		node->Print( streamer );
 	}
 }
+*/
 
 
 char* XMLNode::ParseDeep( char* p )
@@ -401,11 +402,13 @@ char* XMLText::ParseDeep( char* p )
 }
 
 
+/*
 void XMLText::Print( XMLStreamer* streamer )
 {
 	const char* v = value.GetStr();
 	streamer->PushText( v );
 }
+*/
 
 
 bool XMLText::Accept( XMLVisitor* visitor ) const
@@ -427,12 +430,14 @@ XMLComment::~XMLComment()
 }
 
 
+/*
 void XMLComment::Print( XMLStreamer* streamer )
 {
 //	XMLNode::Print( fp, depth );
 //	fprintf( fp, "<!--%s-->\n", value.GetStr() );
 	streamer->PushComment( value.GetStr() );
 }
+*/
 
 
 char* XMLComment::ParseDeep( char* p )
@@ -462,13 +467,14 @@ char* XMLAttribute::ParseDeep( char* p )
 }
 
 
+/*
 void XMLAttribute::Print( XMLStreamer* streamer )
 {
 	// fixme: sort out single vs. double quote
 	//fprintf( cfile, "%s=\"%s\"", name.GetStr(), value.GetStr() );
 	streamer->PushAttribute( name.GetStr(), value.GetStr() );
 }
-
+*/
 
 // --------- XMLElement ---------- //
 XMLElement::XMLElement( XMLDocument* doc ) : XMLNode( doc ),
@@ -580,6 +586,7 @@ char* XMLElement::ParseDeep( char* p )
 }
 
 
+/*
 void XMLElement::Print( XMLStreamer* streamer )
 {
 	//if ( !parent || !parent->IsTextParent() ) {
@@ -599,6 +606,7 @@ void XMLElement::Print( XMLStreamer* streamer )
 	}
 	streamer->CloseElement();
 }
+*/
 
 
 bool XMLElement::Accept( XMLVisitor* visitor ) const
@@ -687,9 +695,10 @@ void XMLDocument::Print( XMLStreamer* streamer )
 	XMLStreamer stdStreamer( stdout );
 	if ( !streamer )
 		streamer = &stdStreamer;
-	for( XMLNode* node = firstChild; node; node=node->next ) {
-		node->Print( streamer );
-	}
+	//for( XMLNode* node = firstChild; node; node=node->next ) {
+	//	node->Print( streamer );
+	//}
+	Accept( streamer );
 }
 
 
@@ -871,4 +880,36 @@ void XMLStreamer::PushComment( const char* comment )
 	}
 	PrintSpace( depth );
 	fprintf( fp, "<!--%s-->\n", comment );
+}
+
+
+bool XMLStreamer::VisitEnter( const XMLElement& element, const XMLAttribute* attribute )
+{
+	OpenElement( element.Name() );
+	while ( attribute ) {
+		PushAttribute( attribute->Name(), attribute->Value() );
+		attribute = attribute->Next();
+	}
+	return true;
+}
+
+
+bool XMLStreamer::VisitExit( const XMLElement& element )
+{
+	CloseElement();
+	return true;
+}
+
+
+bool XMLStreamer::Visit( const XMLText& text )
+{
+	PushText( text.Value() );
+	return true;
+}
+
+
+bool XMLStreamer::Visit( const XMLComment& comment )
+{
+	PushComment( comment.Value() );
+	return true;
 }

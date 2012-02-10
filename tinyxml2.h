@@ -231,56 +231,6 @@ private:
 };
 
 
-/*
-class StringStack
-{
-public:
-	StringStack();
-	virtual ~StringStack();
-
-	void Push( const char* str );
-	const char* Pop();
-
-	int NumPositive() const { return nPositive; }
-
-private:
-	DynArray< char, 50 > mem;
-	int nPositive;		// number of strings with len > 0
-};
-*/
-
-/*
-class StringPool
-{
-public:
-	enum { INIT_SIZE=20 };
-
-	StringPool() : size( 0 ) { 
-		const char** mem = pool.PushArr( INIT_SIZE );
-		memset( (void*)mem, 0, sizeof(char)*INIT_SIZE );
-	}
-	~StringPool() {}
-
-	const char* Intern( const char* str );
-
-private:
-	// FNV hash
-	int Hash( const char* s ) {
-		#define FNV_32_PRIME ((int)0x01000193)
-		int hval = 0;
-	    while (*s) {
-			hval *= FNV_32_PRIME;
-			hval ^= (int)*s++;
-		}
-		return hval;
-	}
-
-	int size;
-	DynArray< const char*, INIT_SIZE > pool;		// the hash table
-	StringStack store;								// memory for the interned strings
-};
-*/
-
 
 /**
 	Implements the interface to the "Visitor pattern" (see the Accept() method.)
@@ -359,6 +309,7 @@ class XMLNode
 	friend class XMLDocument;
 	friend class XMLElement;
 public:
+	const XMLDocument* GetDocument() const	{ return document; }
 	XMLDocument* GetDocument()				{ return document; }
 
 	virtual XMLElement*		ToElement()		{ return 0; }
@@ -366,8 +317,19 @@ public:
 	virtual XMLComment*		ToComment()		{ return 0; }
 	virtual XMLDocument*	ToDocument()	{ return 0; }
 
+	virtual const XMLElement*	ToElement() const	{ return 0; }
+	virtual const XMLText*		ToText() const		{ return 0; }
+	virtual const XMLComment*	ToComment() const	{ return 0; }
+	virtual const XMLDocument*	ToDocument() const	{ return 0; }
+
 	const char* Value() const			{ return value.GetStr(); }
 	void SetValue( const char* val )	{ value.SetInternedStr( val ); }
+
+	const XMLNode*	Parent() const			{ return parent; }
+	XMLNode* Parent()						{ return parent; }
+
+	/// Returns true if this node has no children.
+	bool NoChildren() const					{ return !firstChild; }
 
 	const XMLNode*  FirstChild() const		{ return firstChild; }
 	XMLNode*		FirstChild()			{ return firstChild; }
@@ -400,7 +362,7 @@ public:
 	void DeleteChild( XMLNode* node );
 
 	virtual bool Accept( XMLVisitor* visitor ) const = 0;
-	virtual void Print( XMLStreamer* streamer );
+	//virtual void Print( XMLStreamer* streamer );
 
 	virtual char* ParseDeep( char* );
 	void SetTextParent()		{ isTextParent = true; } 
@@ -433,12 +395,11 @@ class XMLText : public XMLNode
 	friend class XMLBase;
 	friend class XMLDocument;
 public:
-	virtual void Print( XMLStreamer* streamer );
-	const char* Value() { return value.GetStr(); }
-	void SetValue( const char* );
+	//virtual void Print( XMLStreamer* streamer );
 
 	virtual bool Accept( XMLVisitor* visitor ) const;
-	virtual XMLText*	ToText()		{ return this; }
+	virtual XMLText*	ToText()			{ return this; }
+	virtual const XMLText*	ToText() const	{ return this; }
 
 	char* ParseDeep( char* );
 
@@ -455,10 +416,9 @@ class XMLComment : public XMLNode
 	friend class XMLBase;
 	friend class XMLDocument;
 public:
-	virtual void Print( XMLStreamer* );
-	virtual XMLComment*	ToComment()		{ return this; }
+	virtual XMLComment*	ToComment()					{ return this; }
+	virtual const XMLComment* ToComment() const		{ return this; }
 
-	const char* Value() { return value.GetStr(); }
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
 	char* ParseDeep( char* );
@@ -475,15 +435,19 @@ class XMLAttribute
 {
 	friend class XMLElement;
 public:
-	virtual void Print( XMLStreamer* streamer );
+	//virtual void Print( XMLStreamer* streamer );
+
+	const char* Name() const { return name.GetStr(); }
+	const char* Value() const { return value.GetStr(); }
+	const XMLAttribute* Next() const { return next; }
 
 private:
 	XMLAttribute( XMLElement* element ) : next( 0 ) {}
 	virtual ~XMLAttribute()	{}
 	char* ParseDeep( char* p );
 
-	StrPair name;
-	StrPair value;
+	mutable StrPair name;
+	mutable StrPair value;
 	XMLAttribute* next;
 	MemPool* memPool;
 };
@@ -497,10 +461,29 @@ public:
 	const char* Name() const		{ return Value(); }
 	void SetName( const char* str )	{ SetValue( str ); }
 
-	virtual void Print( XMLStreamer* );
-
-	virtual XMLElement* ToElement() { return this; }
+	virtual XMLElement* ToElement()				{ return this; }
+	virtual const XMLElement* ToElement() const { return this; }
 	virtual bool Accept( XMLVisitor* visitor ) const;
+
+	const char* Attribute( const char* name ) const;
+
+	int QueryIntAttribute( const char* name, int* value ) const;
+	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const;
+	int QueryBoolAttribute( const char* name, bool* value ) const;
+	int QueryDoubleAttribute( const char* name, double* _value ) const;
+	int QueryFloatAttribute( const char* name, float* _value ) const;
+
+	void SetAttribute( const char* name, const char* value );
+	void SetAttribute( const char* name, int value );
+	void SetAttribute( const char* name, unsigned value );
+	void SetAttribute( const char* name, bool value );
+	void SetAttribute( const char* name, double value );
+
+	void RemoveAttribute( const char* name );
+
+	const XMLAttribute* FirstAttribute() const { return rootAttribute; }
+
+	const char* GetText() const;
 
 	// internal:
 	virtual bool IsClosingElement() const { return closing; }
@@ -515,7 +498,7 @@ private:
 
 	bool closing;
 	XMLAttribute* rootAttribute;
-	XMLAttribute* lastAttribute;
+	XMLAttribute* lastAttribute;	// fixme: remove
 };
 
 
@@ -526,7 +509,8 @@ public:
 	XMLDocument(); 
 	~XMLDocument();
 
-	virtual XMLDocument*	ToDocument()	{ return this; }
+	virtual XMLDocument* ToDocument()				{ return this; }
+	virtual const XMLDocument* ToDocument() const	{ return this; }
 
 	int Parse( const char* );
 	int Load( const char* );
@@ -561,7 +545,6 @@ private:
 	const char* errorStr1;
 	const char* errorStr2;
 	char* charBuffer;
-	//StringStack stringPool;
 
 	MemPoolT< sizeof(XMLElement) >	elementPool;
 	MemPoolT< sizeof(XMLAttribute) > attributePool;
@@ -570,7 +553,7 @@ private:
 };
 
 
-class XMLStreamer 
+class XMLStreamer : public XMLVisitor
 {
 public:
 	XMLStreamer( FILE* file );
@@ -583,17 +566,20 @@ public:
 	void PushText( const char* text );
 	void PushComment( const char* comment );
 
+	virtual bool VisitEnter( const XMLDocument& /*doc*/ )			{ return true; }
+	virtual bool VisitExit( const XMLDocument& /*doc*/ )			{ return true; }
+
+	virtual bool VisitEnter( const XMLElement& element, const XMLAttribute* attribute );
+	virtual bool VisitExit( const XMLElement& element );
+
+	virtual bool Visit( const XMLText& text );
+	virtual bool Visit( const XMLComment& comment );
+
+
 private:
 	void SealElement();
 	void PrintSpace( int depth );
 	void PrintString( const char* );	// prints out, after detecting entities.
-/*	bool TextOnStack() const { 
-		for( int i=0; i<text.Size(); ++i ) { 
-			if ( text[i] == 'T' ) 
-				return true; 
-		} 
-		return false; 
-	}*/
 
 	FILE* fp;
 	int depth;
@@ -606,7 +592,6 @@ private:
 	bool entityFlag[ENTITY_RANGE];
 
 	DynArray< const char*, 10 > stack;
-	//DynArray< char, 10 > text;
 };
 
 
