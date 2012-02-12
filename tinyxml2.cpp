@@ -210,24 +210,45 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 	static const int cdataHeaderLen		= 9;
 	static const int elementHeaderLen	= 1;
 
-	if ( XMLUtil::StringEqual( p, commentHeader, commentHeaderLen ) ) {
+	TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLUnknown ) );		// use same memory pool
+	TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLDeclaration ) );	// use same memory pool
+
+	if ( XMLUtil::StringEqual( p, xmlHeader, xmlHeaderLen ) ) {
+		returnNode = new (commentPool.Alloc()) XMLDeclaration( this );
+		returnNode->memPool = &commentPool;
+		p += xmlHeaderLen;
+	}
+	else if ( XMLUtil::StringEqual( p, commentHeader, commentHeaderLen ) ) {
 		returnNode = new (commentPool.Alloc()) XMLComment( this );
 		returnNode->memPool = &commentPool;
 		p += commentHeaderLen;
+	}
+	else if ( XMLUtil::StringEqual( p, cdataHeader, cdataHeaderLen ) ) {
+		XMLText* text = new (textPool.Alloc()) XMLText( this );
+		returnNode = text;
+		returnNode->memPool = &textPool;
+		p += cdataHeaderLen;
+		text->SetCData( true );
+	}
+	else if ( XMLUtil::StringEqual( p, dtdHeader, dtdHeaderLen ) ) {
+		returnNode = new (commentPool.Alloc()) XMLUnknown( this );
+		returnNode->memPool = &commentPool;
+		p += dtdHeaderLen;
 	}
 	else if ( XMLUtil::StringEqual( p, elementHeader, elementHeaderLen ) ) {
 		returnNode = new (elementPool.Alloc()) XMLElement( this );
 		returnNode->memPool = &elementPool;
 		p += elementHeaderLen;
 	}
-	// fixme: better text detection
 	else if ( (*p != '<') && XMLUtil::IsAlphaNum( *p ) ) {
 		returnNode = new (textPool.Alloc()) XMLText( this );
 		returnNode->memPool = &textPool;
 		p = start;	// Back it up, all the text counts.
 	}
 	else {
-		TIXMLASSERT( 0 );
+		this->SetError( ERROR_IDENTIFYING_TAG, p, 0 );
+		p = 0;
+		returnNode = 0;
 	}
 
 	*node = returnNode;
@@ -393,22 +414,19 @@ char* XMLNode::ParseDeep( char* p )
 // --------- XMLText ---------- //
 char* XMLText::ParseDeep( char* p )
 {
-	p = value.ParseText( p, "<", StrPair::TEXT_ELEMENT );
-	// consumes the end tag.
-	if ( p && *p ) {
-		return p-1;
+	if ( this->CData() ) {
+		p = value.ParseText( p, "]]>", StrPair::NEEDS_NEWLINE_NORMALIZATION );
+		return p;
+	}
+	else {
+		p = value.ParseText( p, "<", StrPair::TEXT_ELEMENT );
+		// consumes the end tag.
+		if ( p && *p ) {
+			return p-1;
+		}
 	}
 	return 0;
 }
-
-
-/*
-void XMLText::Print( XMLStreamer* streamer )
-{
-	const char* v = value.GetStr();
-	streamer->PushText( v );
-}
-*/
 
 
 bool XMLText::Accept( XMLVisitor* visitor ) const
@@ -430,16 +448,6 @@ XMLComment::~XMLComment()
 }
 
 
-/*
-void XMLComment::Print( XMLStreamer* streamer )
-{
-//	XMLNode::Print( fp, depth );
-//	fprintf( fp, "<!--%s-->\n", value.GetStr() );
-	streamer->PushComment( value.GetStr() );
-}
-*/
-
-
 char* XMLComment::ParseDeep( char* p )
 {
 	// Comment parses as text.
@@ -452,6 +460,55 @@ bool XMLComment::Accept( XMLVisitor* visitor ) const
 	return visitor->Visit( *this );
 }
 
+
+// --------- XMLDeclaration ---------- //
+
+XMLDeclaration::XMLDeclaration( XMLDocument* doc ) : XMLNode( doc )
+{
+}
+
+
+XMLDeclaration::~XMLDeclaration()
+{
+	//printf( "~XMLDeclaration\n" );
+}
+
+
+char* XMLDeclaration::ParseDeep( char* p )
+{
+	// Declaration parses as text.
+	return value.ParseText( p, ">", StrPair::NEEDS_NEWLINE_NORMALIZATION );
+}
+
+
+bool XMLDeclaration::Accept( XMLVisitor* visitor ) const
+{
+	return visitor->Visit( *this );
+}
+
+// --------- XMLUnknown ---------- //
+
+XMLUnknown::XMLUnknown( XMLDocument* doc ) : XMLNode( doc )
+{
+}
+
+
+XMLUnknown::~XMLUnknown()
+{
+}
+
+
+char* XMLUnknown::ParseDeep( char* p )
+{
+	// Unknown parses as text.
+	return value.ParseText( p, ">", StrPair::NEEDS_NEWLINE_NORMALIZATION );
+}
+
+
+bool XMLUnknown::Accept( XMLVisitor* visitor ) const
+{
+	return visitor->Visit( *this );
+}
 
 // --------- XMLAttribute ---------- //
 char* XMLAttribute::ParseDeep( char* p )
@@ -862,14 +919,18 @@ void XMLStreamer::SealElement()
 }
 
 
-void XMLStreamer::PushText( const char* text )
+void XMLStreamer::PushText( const char* text, bool cdata )
 {
 	textDepth = depth-1;
 
 	if ( elementJustOpened ) {
 		SealElement();
 	}
+	if ( cdata )
+		fprintf( fp, "<![CDATA[" );
 	PrintString( text );
+	if ( cdata ) 
+		fprintf( fp, "]]>" );
 }
 
 

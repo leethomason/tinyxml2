@@ -1,4 +1,4 @@
-#ifndef TINYXML2_INCLUDED
+#ifndef TINYXML_INCLUDED
 #define TINYXML2_INCLUDED
 
 /*
@@ -50,6 +50,8 @@ class XMLAttribute;
 class XMLComment;
 class XMLNode;
 class XMLText;
+class XMLDeclaration;
+class XMLUnknown;
 
 class XMLStreamer;
 
@@ -267,13 +269,13 @@ public:
 	virtual bool VisitExit( const XMLElement& /*element*/ )			{ return true; }
 
 	/// Visit a declaration
-	//virtual bool Visit( const TiXmlDeclaration& /*declaration*/ )	{ return true; }
+	virtual bool Visit( const XMLDeclaration& /*declaration*/ )		{ return true; }
 	/// Visit a text node
 	virtual bool Visit( const XMLText& /*text*/ )					{ return true; }
 	/// Visit a comment node
 	virtual bool Visit( const XMLComment& /*comment*/ )				{ return true; }
 	/// Visit an unknown node
-	//virtual bool Visit( const TiXmlUnknown& /*unknown*/ )			{ return true; }
+	virtual bool Visit( const XMLUnknown& /*unknown*/ )				{ return true; }
 };
 
 
@@ -316,11 +318,15 @@ public:
 	virtual XMLText*		ToText()		{ return 0; }
 	virtual XMLComment*		ToComment()		{ return 0; }
 	virtual XMLDocument*	ToDocument()	{ return 0; }
+	virtual XMLDeclaration*	ToDeclaration()	{ return 0; }
+	virtual XMLUnknown*		ToUnknown()		{ return 0; }
 
-	virtual const XMLElement*	ToElement() const	{ return 0; }
-	virtual const XMLText*		ToText() const		{ return 0; }
-	virtual const XMLComment*	ToComment() const	{ return 0; }
-	virtual const XMLDocument*	ToDocument() const	{ return 0; }
+	virtual const XMLElement*		ToElement() const		{ return 0; }
+	virtual const XMLText*			ToText() const			{ return 0; }
+	virtual const XMLComment*		ToComment() const		{ return 0; }
+	virtual const XMLDocument*		ToDocument() const		{ return 0; }
+	virtual const XMLDeclaration*	ToDeclaration() const	{ return 0; }
+	virtual const XMLUnknown*		ToUnknown() const		{ return 0; }
 
 	const char* Value() const			{ return value.GetStr(); }
 	void SetValue( const char* val )	{ value.SetInternedStr( val ); }
@@ -395,25 +401,26 @@ class XMLText : public XMLNode
 	friend class XMLBase;
 	friend class XMLDocument;
 public:
-	//virtual void Print( XMLStreamer* streamer );
-
 	virtual bool Accept( XMLVisitor* visitor ) const;
 	virtual XMLText*	ToText()			{ return this; }
 	virtual const XMLText*	ToText() const	{ return this; }
 
+	void SetCData( bool value )				{ isCData = true; }
+	bool CData() const						{ return isCData; }
+
 	char* ParseDeep( char* );
 
 protected:
-	XMLText( XMLDocument* doc )	: XMLNode( doc )	{}
-	virtual ~XMLText()								{}
+	XMLText( XMLDocument* doc )	: XMLNode( doc ), isCData( false )	{}
+	virtual ~XMLText()												{}
 
 private:
+	bool isCData;
 };
 
 
 class XMLComment : public XMLNode
 {
-	friend class XMLBase;
 	friend class XMLDocument;
 public:
 	virtual XMLComment*	ToComment()					{ return this; }
@@ -428,6 +435,40 @@ protected:
 	virtual ~XMLComment();
 
 private:
+};
+
+
+class XMLDeclaration : public XMLNode
+{
+	friend class XMLDocument;
+public:
+	virtual XMLDeclaration*	ToDeclaration()					{ return this; }
+	virtual const XMLDeclaration* ToDeclaration() const		{ return this; }
+
+	virtual bool Accept( XMLVisitor* visitor ) const;
+
+	char* ParseDeep( char* );
+
+protected:
+	XMLDeclaration( XMLDocument* doc );
+	virtual ~XMLDeclaration();
+};
+
+
+class XMLUnknown : public XMLNode
+{
+	friend class XMLDocument;
+public:
+	virtual XMLUnknown*	ToUnknown()					{ return this; }
+	virtual const XMLUnknown* ToUnknown() const		{ return this; }
+
+	virtual bool Accept( XMLVisitor* visitor ) const;
+
+	char* ParseDeep( char* );
+
+protected:
+	XMLUnknown( XMLDocument* doc );
+	virtual ~XMLUnknown();
 };
 
 
@@ -525,7 +566,8 @@ public:
 		NO_ERROR = 0,
 		ERROR_ELEMENT_MISMATCH,
 		ERROR_PARSING_ELEMENT,
-		ERROR_PARSING_ATTRIBUTE
+		ERROR_PARSING_ATTRIBUTE,
+		ERROR_IDENTIFYING_TAG
 	};
 	void SetError( int error, const char* str1, const char* str2 );
 	
@@ -563,7 +605,7 @@ public:
 	void PushAttribute( const char* name, const char* value );
 	void CloseElement();
 
-	void PushText( const char* text );
+	void PushText( const char* text, bool cdata=false );
 	void PushComment( const char* comment );
 
 	virtual bool VisitEnter( const XMLDocument& /*doc*/ )			{ return true; }
