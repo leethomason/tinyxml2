@@ -7,14 +7,7 @@ using namespace tinyxml2;
 
 int main( int argc, const char* argv )
 {
-#if 0
-	{
-		static const char* test = "<!--hello world-->";
-
-		XMLDocument doc;
-		doc.Parse( test );
-		doc.Print( stdout );
-	}
+#if 1
 	{
 		static const char* test = "<!--hello world\n"
 			                      "          line 2\r"
@@ -24,9 +17,10 @@ int main( int argc, const char* argv )
 
 		XMLDocument doc;
 		doc.Parse( test );
-		doc.Print( stdout );
+		doc.Print();
 	}
 #endif
+#if 0
 	{
 		static const char* test[] = {	"<element />",
 									    "<element></element>",
@@ -52,7 +46,8 @@ int main( int argc, const char* argv )
 			printf( "----------------------------------------------\n" );
 		}
 	}
-#if 0
+#endif
+#if 1
 	{
 		static const char* test = "<element>Text before.</element>";
 		XMLDocument doc;

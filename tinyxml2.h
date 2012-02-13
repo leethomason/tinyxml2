@@ -3,16 +3,19 @@
 
 /*
 	TODO
-	- const and non-const versions of API
+	X const and non-const versions of API
 	X memory pool the class construction
-	- attribute accessors
-	- node navigation
+	X attribute accessors
+	X node navigation
 	- handles
-	- visit pattern - change streamer?
-	- make constructors protected
-	- hide copy constructor
-	- hide = operator
+	X visit pattern - change streamer?
+	X make constructors protected
+	X hide copy constructor
+	X hide = operator
 	X UTF8 support: isAlpha, etc.
+	- tests from xml1
+	- perf test: xml1
+	- perf test: xenowar
 */
 
 #include <limits.h>
@@ -156,6 +159,7 @@ private:
 	int size;			// number objects in use
 };
 
+
 class MemPool
 {
 public:
@@ -166,6 +170,7 @@ public:
 	virtual void* Alloc() = 0;
 	virtual void Free( void* ) = 0; 
 };
+
 
 template< int SIZE >
 class MemPoolT : public MemPool
@@ -371,18 +376,17 @@ public:
 	//virtual void Print( XMLStreamer* streamer );
 
 	virtual char* ParseDeep( char* );
-	void SetTextParent()		{ isTextParent = true; } 
-	bool IsTextParent() const	{ return isTextParent; }
 	virtual bool IsClosingElement() const { return false; }
 
 protected:
 	XMLNode( XMLDocument* );
 	virtual ~XMLNode();
+	XMLNode( const XMLNode& );	// not supported
+	void operator=( const XMLNode& );	// not supported
 	
 	XMLDocument*	document;
 	XMLNode*		parent;
-	bool			isTextParent;
-	mutable StrPair			value;
+	mutable StrPair	value;
 
 	XMLNode*		firstChild;
 	XMLNode*		lastChild;
@@ -402,6 +406,7 @@ class XMLText : public XMLNode
 	friend class XMLDocument;
 public:
 	virtual bool Accept( XMLVisitor* visitor ) const;
+
 	virtual XMLText*	ToText()			{ return this; }
 	virtual const XMLText*	ToText() const	{ return this; }
 
@@ -413,6 +418,8 @@ public:
 protected:
 	XMLText( XMLDocument* doc )	: XMLNode( doc ), isCData( false )	{}
 	virtual ~XMLText()												{}
+	XMLText( const XMLText& );	// not supported
+	void operator=( const XMLText& );	// not supported
 
 private:
 	bool isCData;
@@ -433,6 +440,8 @@ public:
 protected:
 	XMLComment( XMLDocument* doc );
 	virtual ~XMLComment();
+	XMLComment( const XMLComment& );	// not supported
+	void operator=( const XMLComment& );	// not supported
 
 private:
 };
@@ -452,6 +461,8 @@ public:
 protected:
 	XMLDeclaration( XMLDocument* doc );
 	virtual ~XMLDeclaration();
+	XMLDeclaration( const XMLDeclaration& );	// not supported
+	void operator=( const XMLDeclaration& );	// not supported
 };
 
 
@@ -469,6 +480,8 @@ public:
 protected:
 	XMLUnknown( XMLDocument* doc );
 	virtual ~XMLUnknown();
+	XMLUnknown( const XMLUnknown& );	// not supported
+	void operator=( const XMLUnknown& );	// not supported
 };
 
 
@@ -476,15 +489,28 @@ class XMLAttribute
 {
 	friend class XMLElement;
 public:
-	//virtual void Print( XMLStreamer* streamer );
-
 	const char* Name() const { return name.GetStr(); }
 	const char* Value() const { return value.GetStr(); }
 	const XMLAttribute* Next() const { return next; }
 
+	int QueryIntAttribute( const char* name, int* value ) const;
+	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const;
+	int QueryBoolAttribute( const char* name, bool* value ) const;
+	int QueryDoubleAttribute( const char* name, double* _value ) const;
+	int QueryFloatAttribute( const char* name, float* _value ) const;
+
+	void SetAttribute( const char* name, const char* value );
+	void SetAttribute( const char* name, int value );
+	void SetAttribute( const char* name, unsigned value );
+	void SetAttribute( const char* name, bool value );
+	void SetAttribute( const char* name, double value );
+
 private:
 	XMLAttribute( XMLElement* element ) : next( 0 ) {}
 	virtual ~XMLAttribute()	{}
+	XMLAttribute( const XMLAttribute& );	// not supported
+	void operator=( const XMLAttribute& );	// not supported
+
 	char* ParseDeep( char* p );
 
 	mutable StrPair name;
@@ -530,11 +556,12 @@ public:
 	virtual bool IsClosingElement() const { return closing; }
 	char* ParseDeep( char* p );
 
-protected:
+private:
 	XMLElement( XMLDocument* doc );
 	virtual ~XMLElement();
+	XMLElement( const XMLElement& );	// not supported
+	void operator=( const XMLElement& );	// not supported
 
-private:
 	char* ParseAttributes( char* p, bool *closedElement );
 
 	bool closing;
@@ -579,8 +606,8 @@ public:
 	char* Identify( char* p, XMLNode** node );
 
 private:
-
-	XMLDocument( const XMLDocument& );	// intentionally not implemented
+	XMLDocument( const XMLDocument& );	// not supported
+	void operator=( const XMLDocument& );	// not supported
 	void InitDocument();
 
 	int errorID;

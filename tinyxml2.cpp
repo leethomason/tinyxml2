@@ -275,7 +275,7 @@ bool XMLDocument::Accept( XMLVisitor* visitor ) const
 XMLNode::XMLNode( XMLDocument* doc ) :
 	document( doc ),
 	parent( 0 ),
-	isTextParent( false ),
+//	isTextParent( false ),
 	firstChild( 0 ), lastChild( 0 ),
 	prev( 0 ), next( 0 )
 {
@@ -342,9 +342,9 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 		addThis->prev = 0;
 		addThis->next = 0;
 	}
-	if ( addThis->ToText() ) {
-		SetTextParent();
-	}
+//	if ( addThis->ToText() ) {
+//		SetTextParent();
+//	}
 	return addThis;
 }
 
