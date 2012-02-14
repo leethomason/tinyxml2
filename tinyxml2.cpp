@@ -648,7 +648,7 @@ XMLDocument::~XMLDocument()
 	ClearChildren();
 	delete [] charBuffer;
 
-#if 1
+#if 0
 	textPool.Trace( "text" );
 	elementPool.Trace( "element" );
 	commentPool.Trace( "comment" );

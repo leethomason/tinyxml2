@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #if defined( WIN32 )
 	#include <crtdbg.h>
@@ -10,6 +11,50 @@
 #endif
 
 using namespace tinyxml2;
+int gPass = 0;
+int gFail = 0;
+
+bool XmlTest (const char* testString, const char* expected, const char* found, bool noEcho )
+{
+	bool pass = !strcmp( expected, found );
+	if ( pass )
+		printf ("[pass]");
+	else
+		printf ("[fail]");
+
+	if ( noEcho )
+		printf (" %s\n", testString);
+	else
+		printf (" %s [%s][%s]\n", testString, expected, found);
+
+	if ( pass )
+		++gPass;
+	else
+		++gFail;
+	return pass;
+}
+
+
+bool XmlTest( const char* testString, int expected, int found, bool noEcho )
+{
+	bool pass = ( expected == found );
+	if ( pass )
+		printf ("[pass]");
+	else
+		printf ("[fail]");
+
+	if ( noEcho )
+		printf (" %s\n", testString);
+	else
+		printf (" %s [%d][%d]\n", testString, expected, found);
+
+	if ( pass )
+		++gPass;
+	else
+		++gFail;
+	return pass;
+}
+
 
 int main( int argc, const char* argv )
 {
@@ -75,11 +120,20 @@ int main( int argc, const char* argv )
 	}
 #endif
 	{
+		// Build:
+		//		<element>
+		//			<!--comment-->
+		//			<sub attrib="1" />
+		//			<sub attrib="2" />
+		//			<sub attrib="3" />
+		//		<element>
+
 		XMLDocument* doc = new XMLDocument();
 		doc->InsertEndChild( doc->NewElement( "element" ) );
 		doc->Print();
 		delete doc;
 	}
+
 	#if defined( WIN32 )
 		_CrtMemCheckpoint( &endMemState );  
 		//_CrtMemDumpStatistics( &endMemState );
@@ -88,5 +142,7 @@ int main( int argc, const char* argv )
 		_CrtMemDifference( &diffMemState, &startMemState, &endMemState );
 		_CrtMemDumpStatistics( &diffMemState );
 	#endif
+
+	printf ("\nPass %d, Fail %d\n", gPass, gFail);
 	return 0;
 }
