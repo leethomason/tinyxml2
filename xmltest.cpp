@@ -3,11 +3,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined( WIN32 )
+	#include <crtdbg.h>
+	_CrtMemState startMemState;
+	_CrtMemState endMemState;
+#endif
+
 using namespace tinyxml2;
 
 int main( int argc, const char* argv )
 {
-#if 1
+	#if defined( WIN32 )
+		_CrtMemCheckpoint( &startMemState );
+	#endif	
+
+#if 0 
 	{
 		static const char* test = "<!--hello world\n"
 			                      "          line 2\r"
@@ -47,7 +57,7 @@ int main( int argc, const char* argv )
 		}
 	}
 #endif
-#if 1
+#if 0
 	{
 		static const char* test = "<element>Text before.</element>";
 		XMLDocument doc;
@@ -64,5 +74,19 @@ int main( int argc, const char* argv )
 		delete doc;
 	}
 #endif
+	{
+		XMLDocument* doc = new XMLDocument();
+		doc->InsertEndChild( doc->NewElement( "element" ) );
+		doc->Print();
+		delete doc;
+	}
+	#if defined( WIN32 )
+		_CrtMemCheckpoint( &endMemState );  
+		//_CrtMemDumpStatistics( &endMemState );
+
+		_CrtMemState diffMemState;
+		_CrtMemDifference( &diffMemState, &startMemState, &endMemState );
+		_CrtMemDumpStatistics( &diffMemState );
+	#endif
 	return 0;
 }

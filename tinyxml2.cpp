@@ -58,7 +58,7 @@ const char* StrPair::GetStr()
 					else {
 						++p;
 					}
-					*q = LF;
+					*q++ = LF;
 				}
 				else if ( (flags & NEEDS_NEWLINE_NORMALIZATION) && *p == LF ) {
 					if ( *(p+1) == CR ) {
@@ -67,7 +67,7 @@ const char* StrPair::GetStr()
 					else {
 						++p;
 					}
-					*q = LF;
+					*q++ = LF;
 				}
 				else if ( (flags & NEEDS_ENTITY_PROCESSING) && *p == '&' ) {
 					int i=0;
@@ -275,11 +275,9 @@ bool XMLDocument::Accept( XMLVisitor* visitor ) const
 XMLNode::XMLNode( XMLDocument* doc ) :
 	document( doc ),
 	parent( 0 ),
-//	isTextParent( false ),
 	firstChild( 0 ), lastChild( 0 ),
 	prev( 0 ), next( 0 )
 {
-
 }
 
 
@@ -342,9 +340,6 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 		addThis->prev = 0;
 		addThis->next = 0;
 	}
-//	if ( addThis->ToText() ) {
-//		SetTextParent();
-//	}
 	return addThis;
 }
 
@@ -382,15 +377,6 @@ void XMLNode::DeleteChild( XMLNode* node )
 	TIXMLASSERT( node->parent == this );
 	TIXMLASSERT( 0 );
 }
-
-
-/*void XMLNode::Print( XMLStreamer* streamer )
-{
-	for( XMLNode* node = firstChild; node; node=node->next ) {
-		node->Print( streamer );
-	}
-}
-*/
 
 
 char* XMLNode::ParseDeep( char* p )
@@ -524,14 +510,6 @@ char* XMLAttribute::ParseDeep( char* p )
 }
 
 
-/*
-void XMLAttribute::Print( XMLStreamer* streamer )
-{
-	// fixme: sort out single vs. double quote
-	//fprintf( cfile, "%s=\"%s\"", name.GetStr(), value.GetStr() );
-	streamer->PushAttribute( name.GetStr(), value.GetStr() );
-}
-*/
 
 // --------- XMLElement ---------- //
 XMLElement::XMLElement( XMLDocument* doc ) : XMLNode( doc ),
@@ -544,8 +522,6 @@ XMLElement::XMLElement( XMLDocument* doc ) : XMLNode( doc ),
 
 XMLElement::~XMLElement()
 {
-	//printf( "~XMLElemen %x\n",this );
-
 	XMLAttribute* attribute = rootAttribute;
 	while( attribute ) {
 		XMLAttribute* next = attribute->next;
@@ -643,29 +619,6 @@ char* XMLElement::ParseDeep( char* p )
 }
 
 
-/*
-void XMLElement::Print( XMLStreamer* streamer )
-{
-	//if ( !parent || !parent->IsTextParent() ) {
-	//	PrintSpace( cfile, depth );
-	//}
-	//fprintf( cfile, "<%s", Name() );
-	streamer->OpenElement( Name() );
-
-	for( XMLAttribute* attrib=rootAttribute; attrib; attrib=attrib->next ) {
-		//fprintf( cfile, " " );
-		attrib->Print( streamer );
-
-	}
-
-	for( XMLNode* node=firstChild; node; node=node->next ) {
-		node->Print( streamer );
-	}
-	streamer->CloseElement();
-}
-*/
-
-
 bool XMLElement::Accept( XMLVisitor* visitor ) const
 {
 	if ( visitor->VisitEnter( *this, rootAttribute ) ) 
@@ -695,12 +648,13 @@ XMLDocument::~XMLDocument()
 	ClearChildren();
 	delete [] charBuffer;
 
-	/*
+#if 1
 	textPool.Trace( "text" );
 	elementPool.Trace( "element" );
 	commentPool.Trace( "comment" );
 	attributePool.Trace( "attribute" );
-	*/
+#endif
+
 	TIXMLASSERT( textPool.CurrentAllocs() == 0 );
 	TIXMLASSERT( elementPool.CurrentAllocs() == 0 );
 	TIXMLASSERT( commentPool.CurrentAllocs() == 0 );
