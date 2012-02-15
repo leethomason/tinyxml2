@@ -101,20 +101,28 @@ public:
 	};
 
 	StrPair() : flags( 0 ), start( 0 ), end( 0 ) {}
+	~StrPair();
+
 	void Set( char* start, char* end, int flags ) {
+		Reset();
 		this->start = start; this->end = end; this->flags = flags | NEEDS_FLUSH;
 	}
 	const char* GetStr();
 	bool Empty() const { return start == end; }
 
-	void SetInternedStr( const char* str ) { this->start = (char*) str; this->end = 0; this->flags = 0; }
+	void SetInternedStr( const char* str ) { Reset(); this->start = (char*) str; }
+	void SetStr( const char* str, int flags=0 );
+
 	char* ParseText( char* in, const char* endTag, int strFlags );
 	char* ParseName( char* in );
 
 
 private:
+	void Reset();
+
 	enum {
-		NEEDS_FLUSH = 0x100
+		NEEDS_FLUSH = 0x100,
+		NEEDS_DELETE = 0x200
 	};
 
 	// After parsing, if *end != 0, it can be set to zero.
@@ -363,7 +371,7 @@ public:
 	virtual const XMLUnknown*		ToUnknown() const		{ return 0; }
 
 	const char* Value() const			{ return value.GetStr(); }
-	void SetValue( const char* val )	{ value.SetInternedStr( val ); }
+	void SetValue( const char* val, bool staticMem=false );
 
 	const XMLNode*	Parent() const			{ return parent; }
 	XMLNode* Parent()						{ return parent; }
@@ -548,16 +556,14 @@ public:
 	int QueryFloatAttribute( float* value ) const;
 
 	void SetAttribute( const char* value );
-	
-	// NOTE: other sets aren't supported...need to deal with memory model?	
-	/*
 	void SetAttribute( int value );
 	void SetAttribute( unsigned value );
 	void SetAttribute( bool value );
 	void SetAttribute( double value );
-	*/
+	void SetAttribute( float value );
 
 private:
+	enum { BUF_SIZE = 200 };
 	XMLAttribute( XMLElement* element ) : next( 0 ) {}
 	virtual ~XMLAttribute()	{}
 	XMLAttribute( const XMLAttribute& );	// not supported
@@ -578,29 +584,30 @@ class XMLElement : public XMLNode
 	friend class XMLDocument;
 public:
 	const char* Name() const		{ return Value(); }
-	void SetName( const char* str )	{ SetValue( str ); }
+	void SetName( const char* str, bool staticMem=false )	{ SetValue( str, staticMem ); }
 
 	virtual XMLElement* ToElement()				{ return this; }
 	virtual const XMLElement* ToElement() const { return this; }
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
-	const char* Attribute( const char* name ) const;
+	const char* Attribute( const char* name ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return 0; return a->Value(); }
 
-	int QueryIntAttribute( const char* name, int* value ) const;
-	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const;
-	int QueryBoolAttribute( const char* name, bool* value ) const;
-	int QueryDoubleAttribute( const char* name, double* _value ) const;
-	int QueryFloatAttribute( const char* name, float* _value ) const;
+	int QueryIntAttribute( const char* name, int* value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryIntAttribute( value ); } 
+	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryUnsignedAttribute( value ); }
+	int QueryBoolAttribute( const char* name, bool* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryBoolAttribute( value ); }
+	int QueryDoubleAttribute( const char* name, double* value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryDoubleAttribute( value ); }
+	int QueryFloatAttribute( const char* name, float* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryFloatAttribute( value ); }
 
-	void SetAttribute( const char* name, const char* value );
-	void SetAttribute( const char* name, int value );
-	void SetAttribute( const char* name, unsigned value );
-	void SetAttribute( const char* name, bool value );
-	void SetAttribute( const char* name, double value );
+	void SetAttribute( const char* name, const char* value )	{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, int value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, unsigned value )		{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, bool value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, double value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
 
 	void RemoveAttribute( const char* name );
 
 	const XMLAttribute* FirstAttribute() const { return rootAttribute; }
+	const XMLAttribute* FindAttribute( const char* name ) const;
 
 	const char* GetText() const;
 
@@ -614,6 +621,8 @@ private:
 	XMLElement( const XMLElement& );	// not supported
 	void operator=( const XMLElement& );	// not supported
 
+	XMLAttribute* FindAttribute( const char* name );
+	XMLAttribute* FindOrCreateAttribute( const char* name );
 	char* ParseAttributes( char* p, bool *closedElement );
 
 	bool closing;

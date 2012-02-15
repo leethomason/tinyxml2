@@ -37,6 +37,85 @@ static const Entity entities[NUM_ENTITIES] =
 };
 
 
+StrPair::~StrPair()
+{
+	Reset();
+}
+
+
+void StrPair::Reset()
+{
+	if ( flags & NEEDS_DELETE ) {
+		delete [] start;
+	}
+	flags = 0;
+	start = 0;
+	end = 0;
+}
+
+
+void StrPair::SetStr( const char* str, int flags )
+{
+	Reset();
+	size_t len = strlen( str );
+	start = new char[ len+1 ];
+	strncpy( start, str, len );
+	end = start + len;
+	this->flags = flags | NEEDS_DELETE;
+}
+
+
+char* StrPair::ParseText( char* p, const char* endTag, int strFlags )
+{
+	TIXMLASSERT( endTag && *endTag );
+
+	char* start = p;	// fixme: hides a member
+	char  endChar = *endTag;
+	int   length = strlen( endTag );	
+
+	// Inner loop of text parsing.
+	while ( *p ) {
+		if ( *p == endChar && strncmp( p, endTag, length ) == 0 ) {
+			Set( start, p, strFlags );
+			return p + length;
+		}
+		++p;
+	}	
+	return p;
+}
+
+
+char* StrPair::ParseName( char* p )
+{
+	char* start = p;
+
+	start = p;
+	if ( !start || !(*start) ) {
+		return 0;
+	}
+
+	if ( !XMLUtil::IsAlpha( *p ) ) {
+		return 0;
+	}
+
+	while( *p && (
+			   XMLUtil::IsAlphaNum( (unsigned char) *p ) 
+			|| *p == '_'
+			|| *p == '-'
+			|| *p == '.'
+			|| *p == ':' ))
+	{
+		++p;
+	}
+
+	if ( p > start ) {
+		Set( start, p, 0 );
+		return p;
+	}
+	return 0;
+}
+
+
 const char* StrPair::GetStr()
 {
 	if ( flags & NEEDS_FLUSH ) {
@@ -96,90 +175,14 @@ const char* StrPair::GetStr()
 			}
 			*q = 0;
 		}
-		flags = 0;
+		flags = (flags & NEEDS_DELETE);
 	}
 	return start;
 }
 
-/*
-const char* StringPool::Intern( const char* str )
-{
-	// Treat the array as a linear, inplace hash table.
-	// Nothing can get deleted, so that's handy.
-	if ( size > pool.Size()*3/4 ) {
-		DynArray< const char*, 20 > store;
-		for( int i=0; i<pool.Size(); ++i ) {
-			if ( pool[i] != 0 ) {
-				store.Push( pool[i] );
-			}
-		}
-		int newSize = pool.Size() * 2;
-		pool.PopArr( pool.Size() );
-
-		const char** mem = pool.PushArr( newSize );
-		memset( (void*)mem, 0, sizeof(char)*newSize );
-
-		while ( !store.Empty() ) {
-			Intern( store.Pop() );
-		}
-	}
-
-}
-*/
 
 
 // --------- XMLUtil ----------- //
-
-char* StrPair::ParseText( char* p, const char* endTag, int strFlags )
-{
-	TIXMLASSERT( endTag && *endTag );
-
-	char* start = p;
-	char  endChar = *endTag;
-	int   length = strlen( endTag );	
-
-	// Inner loop of text parsing.
-	while ( *p ) {
-		if ( *p == endChar && strncmp( p, endTag, length ) == 0 ) {
-			Set( start, p, strFlags );
-			return p + length;
-		}
-		++p;
-	}	
-	return p;
-}
-
-
-char* StrPair::ParseName( char* p )
-{
-	char* start = p;
-
-	start = p;
-	if ( !start || !(*start) ) {
-		return 0;
-	}
-
-	if ( !XMLUtil::IsAlpha( *p ) ) {
-		return 0;
-	}
-
-	while( *p && (
-			   XMLUtil::IsAlphaNum( (unsigned char) *p ) 
-			|| *p == '_'
-			|| *p == '-'
-			|| *p == '.'
-			|| *p == ':' ))
-	{
-		++p;
-	}
-
-	if ( p > start ) {
-		Set( start, p, 0 );
-		return p;
-	}
-	return 0;
-}
-
 
 char* XMLDocument::Identify( char* p, XMLNode** node ) 
 {
@@ -287,6 +290,15 @@ XMLNode::~XMLNode()
 	if ( parent ) {
 		parent->Unlink( this );
 	}
+}
+
+
+void XMLNode::SetValue( const char* str, bool staticMem )
+{
+	if ( staticMem )
+		value.SetInternedStr( str );
+	else
+		value.SetStr( str );
 }
 
 
@@ -606,19 +618,47 @@ int XMLAttribute::QueryFloatAttribute( float* value ) const
 
 void XMLAttribute::SetAttribute( const char* v )
 {
-	value.SetInternedStr( v );
+	value.SetStr( v );
 }
 
 
-/*
 void XMLAttribute::SetAttribute( int v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d" );
-
-	value.SetInternedStr( v );
+	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v );	
+	value.SetStr( buf );
 }
-*/
+
+
+void XMLAttribute::SetAttribute( unsigned v )
+{
+	char buf[BUF_SIZE];
+	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%u", v );	
+	value.SetStr( buf );
+}
+
+
+void XMLAttribute::SetAttribute( bool v )
+{
+	char buf[BUF_SIZE];
+	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v ? 1 : 0 );	
+	value.SetStr( buf );
+}
+
+void XMLAttribute::SetAttribute( double v )
+{
+	char buf[BUF_SIZE];
+	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%f", v );	
+	value.SetStr( buf );
+}
+
+void XMLAttribute::SetAttribute( float v )
+{
+	char buf[BUF_SIZE];
+	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%f", v );	
+	value.SetStr( buf );
+}
+
 
 // --------- XMLElement ---------- //
 XMLElement::XMLElement( XMLDocument* doc ) : XMLNode( doc ),
@@ -637,6 +677,39 @@ XMLElement::~XMLElement()
 		DELETE_ATTRIBUTE( attribute );
 		attribute = next;
 	}
+}
+
+
+XMLAttribute* XMLElement::FindAttribute( const char* name )
+{
+	XMLAttribute* a = 0;
+	for( a=rootAttribute; a; a = a->next ) {
+		if ( XMLUtil::StringEqual( a->Name(), name ) )
+			return a;
+	}
+	return 0;
+}
+
+
+const XMLAttribute* XMLElement::FindAttribute( const char* name ) const
+{
+	XMLAttribute* a = 0;
+	for( a=rootAttribute; a; a = a->next ) {
+		if ( XMLUtil::StringEqual( a->Name(), name ) )
+			return a;
+	}
+	return 0;
+}
+
+
+XMLAttribute* XMLElement::FindOrCreateAttribute( const char* name )
+{
+	XMLAttribute* attrib = FindAttribute( name );
+	if ( !attrib ) {
+		 attrib = new (document->attributePool.Alloc() ) XMLAttribute( this );
+		attrib->memPool = &document->attributePool;
+	}
+	return attrib;
 }
 
 
