@@ -13,7 +13,11 @@
 	X hide copy constructor
 	X hide = operator
 	X UTF8 support: isAlpha, etc.
+	- string buffer for sets. (Grr.)
+	- MS BOM
+	- print to memory buffer
 	- tests from xml1
+	- xml1 tests especially UTF-8
 	- perf test: xml1
 	- perf test: xenowar
 */
@@ -42,6 +46,31 @@
         #endif
 #else
         #define TIXMLASSERT( x )           {}
+#endif
+
+
+// Deprecated library function hell. Compilers want to use the
+// new safe versions. This probably doesn't fully address the problem,
+// but it gets closer. There are too many compilers for me to fully
+// test. If you get compilation troubles, undefine TIXML_SAFE
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
+	// Microsoft visual studio, version 2005 and higher.
+	#define TIXML_SNPRINTF _snprintf_s
+	#define TIXML_SSCANF   sscanf_s
+#elif defined(_MSC_VER) && (_MSC_VER >= 1200 )
+	// Microsoft visual studio, version 6 and higher.
+	//#pragma message( "Using _sn* functions." )
+	#define TIXML_SNPRINTF _snprintf
+	#define TIXML_SSCANF   sscanf
+#elif defined(__GNUC__) && (__GNUC__ >= 3 )
+	// GCC version 3 and higher.s
+	//#warning( "Using sn* functions." )
+	#define TIXML_SNPRINTF snprintf
+	#define TIXML_SSCANF   sscanf
+#else
+	#define TIXML_SNPRINTF snprintf
+	#define TIXML_SSCANF   sscanf
 #endif
 
 
@@ -365,8 +394,20 @@ public:
 	const XMLNode*	NextSiblingElement( const char* value=0 ) const;
  	XMLNode*	NextSiblingElement( const char* value=0 )	{ return const_cast<XMLNode*>(const_cast<const XMLNode*>(this)->NextSiblingElement( value ) ); }
 
+	/**
+
+		Tests: Programmatic DOM
+	*/
 	XMLNode* InsertEndChild( XMLNode* addThis );
+	/**
+
+		Tests: Programmatic DOM
+	*/
 	XMLNode* InsertFirstChild( XMLNode* addThis );
+	/**
+
+		Tests: Programmatic DOM
+	*/
 	XMLNode* InsertAfterChild( XMLNode* afterThis, XMLNode* addThis );
 	
 	void ClearChildren();
@@ -485,6 +526,13 @@ protected:
 };
 
 
+enum {
+	ATTRIBUTE_SUCCESS,
+	NO_ATTRIBUTE,
+	WRONG_ATTRIBUTE_TYPE
+};
+
+
 class XMLAttribute
 {
 	friend class XMLElement;
@@ -493,17 +541,21 @@ public:
 	const char* Value() const { return value.GetStr(); }
 	const XMLAttribute* Next() const { return next; }
 
-	int QueryIntAttribute( const char* name, int* value ) const;
-	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const;
-	int QueryBoolAttribute( const char* name, bool* value ) const;
-	int QueryDoubleAttribute( const char* name, double* _value ) const;
-	int QueryFloatAttribute( const char* name, float* _value ) const;
+	int QueryIntAttribute( int* value ) const;
+	int QueryUnsignedAttribute( unsigned int* value ) const;
+	int QueryBoolAttribute( bool* value ) const;
+	int QueryDoubleAttribute( double* value ) const;
+	int QueryFloatAttribute( float* value ) const;
 
-	void SetAttribute( const char* name, const char* value );
-	void SetAttribute( const char* name, int value );
-	void SetAttribute( const char* name, unsigned value );
-	void SetAttribute( const char* name, bool value );
-	void SetAttribute( const char* name, double value );
+	void SetAttribute( const char* value );
+	
+	// NOTE: other sets aren't supported...need to deal with memory model?	
+	/*
+	void SetAttribute( int value );
+	void SetAttribute( unsigned value );
+	void SetAttribute( bool value );
+	void SetAttribute( double value );
+	*/
 
 private:
 	XMLAttribute( XMLElement* element ) : next( 0 ) {}
@@ -587,7 +639,18 @@ public:
 	void Print( XMLStreamer* streamer=0 );
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
+	/**
+		Testing: Programmatic DOM
+	*/
 	XMLElement* NewElement( const char* name );
+	/**
+		Testing: Programmatic DOM
+	*/
+	XMLComment* NewComment( const char* comment );
+	/**
+		Testing: Programmatic DOM
+	*/
+	XMLText* NewText( const char* text );
 
 	enum {
 		NO_ERROR = 0,

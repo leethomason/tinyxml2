@@ -344,6 +344,51 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 }
 
 
+XMLNode* XMLNode::InsertFirstChild( XMLNode* addThis )
+{
+	if ( firstChild ) {
+		TIXMLASSERT( lastChild );
+		TIXMLASSERT( firstChild->prev == 0 );
+
+		firstChild->prev = addThis;
+		addThis->next = firstChild;
+		firstChild = addThis;
+
+		addThis->parent = this;
+		addThis->prev = 0;
+	}
+	else {
+		TIXMLASSERT( lastChild == 0 );
+		firstChild = lastChild = addThis;
+
+		addThis->parent = this;
+		addThis->prev = 0;
+		addThis->next = 0;
+	}
+	return addThis;
+}
+
+
+XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
+{
+	TIXMLASSERT( afterThis->parent == this );
+	if ( afterThis->parent != this )
+		return 0;
+
+	if ( afterThis->next == 0 ) {
+		// The last node or the only node.
+		return InsertEndChild( addThis );
+	}
+	addThis->prev = afterThis;
+	addThis->next = afterThis->next;
+	afterThis->next->prev = addThis;
+	afterThis->next = addThis;
+	return addThis;
+}
+
+
+
+
 const XMLElement* XMLNode::FirstChildElement( const char* value ) const
 {
 	for( XMLNode* node=firstChild; node; node=node->next ) {
@@ -510,6 +555,70 @@ char* XMLAttribute::ParseDeep( char* p )
 }
 
 
+int XMLAttribute::QueryIntAttribute( int* value ) const
+{
+	if ( TIXML_SSCANF( Value(), "%d", value ) == 1 )
+		return ATTRIBUTE_SUCCESS;
+	return WRONG_ATTRIBUTE_TYPE;
+}
+
+
+int XMLAttribute::QueryUnsignedAttribute( unsigned int* value ) const
+{
+	if ( TIXML_SSCANF( Value(), "%u", value ) == 1 )
+		return ATTRIBUTE_SUCCESS;
+	return WRONG_ATTRIBUTE_TYPE;
+}
+
+
+int XMLAttribute::QueryBoolAttribute( bool* value ) const
+{
+	int ival = -1;
+	QueryIntAttribute( &ival );
+
+	if ( ival > 0 || XMLUtil::StringEqual( Value(), "true" ) ) {
+		*value = true;
+		return ATTRIBUTE_SUCCESS;
+	}
+	else if ( ival == 0 || XMLUtil::StringEqual( Value(), "false" ) ) {
+		*value = false;
+		return ATTRIBUTE_SUCCESS;
+	}
+	return WRONG_ATTRIBUTE_TYPE;
+}
+
+
+int XMLAttribute::QueryDoubleAttribute( double* value ) const
+{
+	if ( TIXML_SSCANF( Value(), "%lf", value ) == 1 )
+		return ATTRIBUTE_SUCCESS;
+	return WRONG_ATTRIBUTE_TYPE;
+}
+
+
+int XMLAttribute::QueryFloatAttribute( float* value ) const
+{
+	if ( TIXML_SSCANF( Value(), "%f", value ) == 1 )
+		return ATTRIBUTE_SUCCESS;
+	return WRONG_ATTRIBUTE_TYPE;
+}
+
+
+void XMLAttribute::SetAttribute( const char* v )
+{
+	value.SetInternedStr( v );
+}
+
+
+/*
+void XMLAttribute::SetAttribute( int v )
+{
+	char buf[BUF_SIZE];
+	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d" );
+
+	value.SetInternedStr( v );
+}
+*/
 
 // --------- XMLElement ---------- //
 XMLElement::XMLElement( XMLDocument* doc ) : XMLNode( doc ),
@@ -681,6 +790,25 @@ XMLElement* XMLDocument::NewElement( const char* name )
 	ele->SetName( name );
 	return ele;
 }
+
+
+XMLComment* XMLDocument::NewComment( const char* str )
+{
+	XMLComment* comment = new (commentPool.Alloc()) XMLComment( this );
+	comment->memPool = &commentPool;
+	comment->SetValue( str );
+	return comment;
+}
+
+
+XMLText* XMLDocument::NewText( const char* str )
+{
+	XMLText* Text = new (textPool.Alloc()) XMLText( this );
+	Text->memPool = &textPool;
+	Text->SetValue( str );
+	return Text;
+}
+
 
 
 int XMLDocument::Parse( const char* p )

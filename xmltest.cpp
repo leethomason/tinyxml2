@@ -120,16 +120,27 @@ int main( int argc, const char* argv )
 	}
 #endif
 	{
+		// Test: Programmatic DOM
 		// Build:
 		//		<element>
 		//			<!--comment-->
 		//			<sub attrib="1" />
 		//			<sub attrib="2" />
-		//			<sub attrib="3" />
+		//			<sub attrib="3" >With Text!</sub>
 		//		<element>
 
 		XMLDocument* doc = new XMLDocument();
-		doc->InsertEndChild( doc->NewElement( "element" ) );
+		XMLNode* element = doc->InsertEndChild( doc->NewElement( "element" ) );
+
+		XMLElement* sub[3] = { doc->NewElement( "sub" ), doc->NewElement( "sub" ), doc->NewElement( "sub" ) };
+		for( int i=0; i<3; ++i ) {
+			sub[i]->SetAttribute( "attrib", i );
+		}
+		element->InsertEndChild( sub[2] );
+		XMLNode* comment = element->InsertFirstChild( doc->NewComment( "comment" ) );
+		element->InsertAfterChild( comment, sub[0] );
+		element->InsertAfterChild( sub[0], sub[1] );
+		sub[2]->InsertFirstChild( doc->NewText( "With Text!" ));
 		doc->Print();
 		delete doc;
 	}
