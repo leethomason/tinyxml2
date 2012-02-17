@@ -564,10 +564,12 @@ public:
 
 private:
 	enum { BUF_SIZE = 200 };
+
 	XMLAttribute( XMLElement* element ) : next( 0 ) {}
 	virtual ~XMLAttribute()	{}
 	XMLAttribute( const XMLAttribute& );	// not supported
 	void operator=( const XMLAttribute& );	// not supported
+	void SetName( const char* name );
 
 	char* ParseDeep( char* p );
 
@@ -591,6 +593,12 @@ public:
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
 	const char* Attribute( const char* name ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return 0; return a->Value(); }
+
+	int		 IntAttribute( const char* name ) const		{ int i=0;		QueryIntAttribute( name, &i );		return i; }
+	unsigned UnsignedAttribute( const char* name ) const{ unsigned i=0; QueryUnsignedAttribute( name, &i ); return i; }
+	bool	 BoolAttribute( const char* name ) const	{ bool b=false; QueryBoolAttribute( name, &b );		return b; }
+	double 	 DoubleAttribute( const char* name ) const	{ double d=0;	QueryDoubleAttribute( name, &d );		return d; }
+	float	 FloatAttribute( const char* name ) const	{ float f=0;	QueryFloatAttribute( name, &f );		return f; }
 
 	int QueryIntAttribute( const char* name, int* value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryIntAttribute( value ); } 
 	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryUnsignedAttribute( value ); }
@@ -623,11 +631,11 @@ private:
 
 	XMLAttribute* FindAttribute( const char* name );
 	XMLAttribute* FindOrCreateAttribute( const char* name );
+	void LinkAttribute( XMLAttribute* attrib );
 	char* ParseAttributes( char* p, bool *closedElement );
 
 	bool closing;
 	XMLAttribute* rootAttribute;
-	XMLAttribute* lastAttribute;	// fixme: remove
 };
 
 

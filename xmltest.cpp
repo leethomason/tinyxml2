@@ -14,7 +14,7 @@ using namespace tinyxml2;
 int gPass = 0;
 int gFail = 0;
 
-bool XmlTest (const char* testString, const char* expected, const char* found, bool noEcho )
+bool XMLTest (const char* testString, const char* expected, const char* found, bool echo=true )
 {
 	bool pass = !strcmp( expected, found );
 	if ( pass )
@@ -22,7 +22,7 @@ bool XmlTest (const char* testString, const char* expected, const char* found, b
 	else
 		printf ("[fail]");
 
-	if ( noEcho )
+	if ( !echo )
 		printf (" %s\n", testString);
 	else
 		printf (" %s [%s][%s]\n", testString, expected, found);
@@ -35,7 +35,7 @@ bool XmlTest (const char* testString, const char* expected, const char* found, b
 }
 
 
-bool XmlTest( const char* testString, int expected, int found, bool noEcho )
+bool XMLTest( const char* testString, int expected, int found, bool echo=true )
 {
 	bool pass = ( expected == found );
 	if ( pass )
@@ -43,7 +43,7 @@ bool XmlTest( const char* testString, int expected, int found, bool noEcho )
 	else
 		printf ("[fail]");
 
-	if ( noEcho )
+	if ( !echo )
 		printf (" %s\n", testString);
 	else
 		printf (" %s [%d][%d]\n", testString, expected, found);
@@ -126,7 +126,7 @@ int main( int argc, const char* argv )
 		//			<!--comment-->
 		//			<sub attrib="1" />
 		//			<sub attrib="2" />
-		//			<sub attrib="3" >With Text!</sub>
+		//			<sub attrib="3" >& Text!</sub>
 		//		<element>
 
 		XMLDocument* doc = new XMLDocument();
@@ -140,8 +140,13 @@ int main( int argc, const char* argv )
 		XMLNode* comment = element->InsertFirstChild( doc->NewComment( "comment" ) );
 		element->InsertAfterChild( comment, sub[0] );
 		element->InsertAfterChild( sub[0], sub[1] );
-		sub[2]->InsertFirstChild( doc->NewText( "With Text!" ));
+		sub[2]->InsertFirstChild( doc->NewText( "& Text!" ));
 		doc->Print();
+		XMLTest( "Programmatic DOM", "comment", doc->FirstChildElement( "element" )->FirstChild()->Value() );
+		XMLTest( "Programmatic DOM", "0", doc->FirstChildElement( "element" )->FirstChildElement()->Attribute( "attrib" ) );
+		XMLTest( "Programmatic DOM", 2, doc->FirstChildElement()->LastChildElement( "sub" )->IntAttribute( "attrib" ) );
+		XMLTest( "Programmatic DOM", "& Text!", 
+				 doc->FirstChildElement()->LastChildElement( "sub" )->FirstChild()->ToText()->Value() );
 		delete doc;
 	}
 

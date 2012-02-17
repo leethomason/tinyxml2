@@ -59,7 +59,7 @@ void StrPair::SetStr( const char* str, int flags )
 	Reset();
 	size_t len = strlen( str );
 	start = new char[ len+1 ];
-	strncpy( start, str, len );
+	memcpy( start, str, len+1 );
 	end = start + len;
 	this->flags = flags | NEEDS_DELETE;
 }
@@ -341,17 +341,16 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 		addThis->prev = lastChild;
 		lastChild = addThis;
 
-		addThis->parent = this;
 		addThis->next = 0;
 	}
 	else {
 		TIXMLASSERT( firstChild == 0 );
 		firstChild = lastChild = addThis;
 
-		addThis->parent = this;
 		addThis->prev = 0;
 		addThis->next = 0;
 	}
+	addThis->parent = this;
 	return addThis;
 }
 
@@ -366,17 +365,16 @@ XMLNode* XMLNode::InsertFirstChild( XMLNode* addThis )
 		addThis->next = firstChild;
 		firstChild = addThis;
 
-		addThis->parent = this;
 		addThis->prev = 0;
 	}
 	else {
 		TIXMLASSERT( lastChild == 0 );
 		firstChild = lastChild = addThis;
 
-		addThis->parent = this;
 		addThis->prev = 0;
 		addThis->next = 0;
 	}
+	addThis->parent = this;
 	return addThis;
 }
 
@@ -395,6 +393,7 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
 	addThis->next = afterThis->next;
 	afterThis->next->prev = addThis;
 	afterThis->next = addThis;
+	addThis->parent = this;
 	return addThis;
 }
 
@@ -567,6 +566,12 @@ char* XMLAttribute::ParseDeep( char* p )
 }
 
 
+void XMLAttribute::SetName( const char* n )
+{
+	name.SetStr( n );
+}
+
+
 int XMLAttribute::QueryIntAttribute( int* value ) const
 {
 	if ( TIXML_SSCANF( Value(), "%d", value ) == 1 )
@@ -663,19 +668,18 @@ void XMLAttribute::SetAttribute( float v )
 // --------- XMLElement ---------- //
 XMLElement::XMLElement( XMLDocument* doc ) : XMLNode( doc ),
 	closing( false ),
-	rootAttribute( 0 ),
-	lastAttribute( 0 )
+	rootAttribute( 0 )
+	//lastAttribute( 0 )
 {
 }
 
 
 XMLElement::~XMLElement()
 {
-	XMLAttribute* attribute = rootAttribute;
-	while( attribute ) {
-		XMLAttribute* next = attribute->next;
-		DELETE_ATTRIBUTE( attribute );
-		attribute = next;
+	while( rootAttribute ) {
+		XMLAttribute* next = rootAttribute->next;
+		DELETE_ATTRIBUTE( rootAttribute );
+		rootAttribute = next;
 	}
 }
 
@@ -706,10 +710,26 @@ XMLAttribute* XMLElement::FindOrCreateAttribute( const char* name )
 {
 	XMLAttribute* attrib = FindAttribute( name );
 	if ( !attrib ) {
-		 attrib = new (document->attributePool.Alloc() ) XMLAttribute( this );
+		attrib = new (document->attributePool.Alloc() ) XMLAttribute( this );
 		attrib->memPool = &document->attributePool;
+		LinkAttribute( attrib );
+		attrib->SetName( name );
 	}
 	return attrib;
+}
+
+
+void XMLElement::LinkAttribute( XMLAttribute* attrib )
+{
+	if ( rootAttribute ) {
+		XMLAttribute* end = rootAttribute;
+		while ( end->next )
+			end = end->next;
+		end->next = attrib;
+	}
+	else {
+		rootAttribute = attrib;
+	}
 }
 
 
@@ -737,14 +757,7 @@ char* XMLElement::ParseAttributes( char* p, bool* closedElement )
 				document->SetError( XMLDocument::ERROR_PARSING_ATTRIBUTE, start, p );
 				return 0;
 			}
-			if ( rootAttribute ) {
-				TIXMLASSERT( lastAttribute );
-				lastAttribute->next = attrib;
-				lastAttribute = attrib;
-			}
-			else {
-				rootAttribute = lastAttribute = attrib;
-			}
+			LinkAttribute( attrib );
 		}
 		// end of the tag
 		else if ( *p == '/' && *(p+1) == '>' ) {
@@ -876,10 +889,10 @@ XMLComment* XMLDocument::NewComment( const char* str )
 
 XMLText* XMLDocument::NewText( const char* str )
 {
-	XMLText* Text = new (textPool.Alloc()) XMLText( this );
-	Text->memPool = &textPool;
-	Text->SetValue( str );
-	return Text;
+	XMLText* text = new (textPool.Alloc()) XMLText( this );
+	text->memPool = &textPool;
+	text->SetValue( str );
+	return text;
 }
 
 
@@ -921,44 +934,6 @@ void XMLDocument::SetError( int error, const char* str1, const char* str2 )
 	errorStr1 = str1;
 	errorStr2 = str2;
 }
-
-
-/*
-StringStack::StringStack()
-{
-	nPositive = 0;
-	mem.Push( 0 );	// start with null. makes later code simpler.
-}
-
-
-StringStack::~StringStack()
-{
-}
-
-
-void StringStack::Push( const char* str ) {
-	int needed = strlen( str ) + 1;
-	char* p = mem.PushArr( needed );
-	strcpy( p, str );
-	if ( needed > 1 ) 
-		nPositive++;
-}
-
-
-const char* StringStack::Pop() {
-	TIXMLASSERT( mem.Size() > 1 );
-	const char* p = mem.Mem() + mem.Size() - 2;	// end of final string.
-	if ( *p ) {
-		nPositive--;
-	}
-	while( *p ) {					// stack starts with a null, don't need to check for 'mem'
-		TIXMLASSERT( p > mem.Mem() );
-		--p;
-	}
-	mem.PopArr( strlen(p)+1 );
-	return p+1;
-}
-*/
 
 
 XMLStreamer::XMLStreamer( FILE* file ) : fp( file ), depth( 0 ), elementJustOpened( false ), textDepth( -1 )
@@ -1094,8 +1069,11 @@ void XMLStreamer::PushComment( const char* comment )
 	if ( elementJustOpened ) {
 		SealElement();
 	}
-	PrintSpace( depth );
-	fprintf( fp, "<!--%s-->\n", comment );
+	if ( textDepth < 0 && depth > 0) {
+		fprintf( fp, "\n" );
+		PrintSpace( depth );
+	}
+	fprintf( fp, "<!--%s-->", comment );
 }
 
 
