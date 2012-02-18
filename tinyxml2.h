@@ -13,13 +13,16 @@
 	X hide copy constructor
 	X hide = operator
 	X UTF8 support: isAlpha, etc.
-	- string buffer for sets. (Grr.)
+	X string buffer for sets. (Grr.)
 	- MS BOM
 	- print to memory buffer
 	- tests from xml1
 	- xml1 tests especially UTF-8
 	- perf test: xml1
 	- perf test: xenowar
+	- test: load(char*)
+	- test: load(FILE*)
+
 */
 
 #include <limits.h>
@@ -64,7 +67,7 @@
 	#define TIXML_SNPRINTF _snprintf
 	#define TIXML_SSCANF   sscanf
 #elif defined(__GNUC__) && (__GNUC__ >= 3 )
-	// GCC version 3 and higher.s
+	// GCC version 3 and higher
 	//#warning( "Using sn* functions." )
 	#define TIXML_SNPRINTF snprintf
 	#define TIXML_SSCANF   sscanf
@@ -87,6 +90,12 @@ class XMLUnknown;
 
 class XMLStreamer;
 
+/*
+	A class that wraps strings. Normally stores the start and end
+	pointers into the XML file itself, and will apply normalization
+	and entity transalion if actually read. Can also store (and memory
+	manage) a traditional char[]
+*/
 class StrPair
 {
 public:
@@ -132,6 +141,11 @@ private:
 };
 
 
+/*
+	A dynamic array of Plain Old Data. Doesn't support constructors, etc.
+	Has a small initial memory pool, so that low or no usage will not
+	cause a call to new/delete
+*/
 template <class T, int INIT>
 class DynArray
 {
@@ -170,12 +184,13 @@ public:
 		size -= count;
 	}
 
-	bool Empty() const { return size == 0; }
-	T& operator[](int i) { TIXMLASSERT( i>= 0 && i < size ); return mem[i]; }
-	const T& operator[](int i) const { TIXMLASSERT( i>= 0 && i < size ); return mem[i]; }
-	int Size() const { return size; }
-	const T* Mem() const { return mem; }
-	T* Mem() { return mem; }
+	bool Empty() const					{ return size == 0; }
+	T& operator[](int i)				{ TIXMLASSERT( i>= 0 && i < size ); return mem[i]; }
+	const T& operator[](int i) const	{ TIXMLASSERT( i>= 0 && i < size ); return mem[i]; }
+	int Size() const					{ return size; }
+	int Capacity() const				{ return allocated; }
+	const T* Mem() const				{ return mem; }
+	T* Mem()							{ return mem; }
 
 
 private:
@@ -197,6 +212,10 @@ private:
 };
 
 
+/*
+	Parent virtual class a a pool for fast allocation
+	and deallocation of objects.
+*/
 class MemPool
 {
 public:
@@ -209,6 +228,9 @@ public:
 };
 
 
+/*
+	Template child class to create pools of the correct type.
+*/
 template< int SIZE >
 class MemPoolT : public MemPool
 {
@@ -321,13 +343,16 @@ public:
 };
 
 
+/*
+	Utility functionality.
+*/
 class XMLUtil
 {
 public:
 	// Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't 
 	// correct, but simple, and usually works.
-	static const char* SkipWhiteSpace( const char* p )	{ while( IsUTF8Continuation(*p) || isspace( *p ) ) { ++p; } return p; }
-	static char* SkipWhiteSpace( char* p )				{ while( IsUTF8Continuation(*p) || isspace( *p ) ) { ++p; } return p; }
+	static const char* SkipWhiteSpace( const char* p )	{ while( !IsUTF8Continuation(*p) && isspace( *p ) ) { ++p; } return p; }
+	static char* SkipWhiteSpace( char* p )				{ while( !IsUTF8Continuation(*p) && isspace( *p ) ) { ++p; } return p; }
 
 	inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
 		int n = 0;
@@ -418,11 +443,17 @@ public:
 	*/
 	XMLNode* InsertAfterChild( XMLNode* afterThis, XMLNode* addThis );
 	
+	/**
+		Tests: All (used by destructor)
+	*/
 	void ClearChildren();
+
+	/**
+		Tests: Progammatic DOM
+	*/
 	void DeleteChild( XMLNode* node );
 
 	virtual bool Accept( XMLVisitor* visitor ) const = 0;
-	//virtual void Print( XMLStreamer* streamer );
 
 	virtual char* ParseDeep( char* );
 	virtual bool IsClosingElement() const { return false; }
@@ -549,6 +580,12 @@ public:
 	const char* Value() const { return value.GetStr(); }
 	const XMLAttribute* Next() const { return next; }
 
+	int		 IntAttribute( const char* name ) const		{ int i=0;		QueryIntAttribute( &i );		return i; }
+	unsigned UnsignedAttribute( const char* name ) const{ unsigned i=0; QueryUnsignedAttribute( &i );	return i; }
+	bool	 BoolAttribute( const char* name ) const	{ bool b=false; QueryBoolAttribute( &b );		return b; }
+	double 	 DoubleAttribute( const char* name ) const	{ double d=0;	QueryDoubleAttribute( &d );		return d; }
+	float	 FloatAttribute( const char* name ) const	{ float f=0;	QueryFloatAttribute( &f );		return f; }
+
 	int QueryIntAttribute( int* value ) const;
 	int QueryUnsignedAttribute( unsigned int* value ) const;
 	int QueryBoolAttribute( bool* value ) const;
@@ -612,7 +649,10 @@ public:
 	void SetAttribute( const char* name, bool value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
 	void SetAttribute( const char* name, double value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
 
-	void RemoveAttribute( const char* name );
+	/**
+		Tests: Programmatic DOM
+	*/
+	void DeleteAttribute( const char* name );
 
 	const XMLAttribute* FirstAttribute() const { return rootAttribute; }
 	const XMLAttribute* FindAttribute( const char* name ) const;
@@ -657,17 +697,22 @@ public:
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
 	/**
-		Testing: Programmatic DOM
+		Tests: Programmatic DOM
 	*/
 	XMLElement* NewElement( const char* name );
 	/**
-		Testing: Programmatic DOM
+		Tests: Programmatic DOM
 	*/
 	XMLComment* NewComment( const char* comment );
 	/**
-		Testing: Programmatic DOM
+		Tests: Programmatic DOM
 	*/
 	XMLText* NewText( const char* text );
+
+	/**
+		Tests: Programmatic DOM
+	*/
+	void DeleteNode( XMLNode* node )	{ node->parent->DeleteChild( node ); }
 
 	enum {
 		NO_ERROR = 0,
@@ -705,7 +750,7 @@ private:
 class XMLStreamer : public XMLVisitor
 {
 public:
-	XMLStreamer( FILE* file );
+	XMLStreamer( FILE* file=0 );
 	~XMLStreamer()	{}
 
 	void OpenElement( const char* name );
@@ -724,11 +769,13 @@ public:
 	virtual bool Visit( const XMLText& text );
 	virtual bool Visit( const XMLComment& comment );
 
+	const char* CStr() const { return buffer.Mem(); }
 
 private:
 	void SealElement();
 	void PrintSpace( int depth );
 	void PrintString( const char* );	// prints out, after detecting entities.
+	void Print( const char* format, ... );
 
 	FILE* fp;
 	int depth;
@@ -741,6 +788,7 @@ private:
 	bool entityFlag[ENTITY_RANGE];
 
 	DynArray< const char*, 10 > stack;
+	DynArray< char, 20 > buffer, accumulator;
 };
 
 

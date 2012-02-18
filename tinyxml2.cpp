@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <new.h>
+#include <stdarg.h>
 
 //#pragma warning ( disable : 4291 )
 
@@ -332,6 +333,13 @@ void XMLNode::Unlink( XMLNode* child )
 }
 
 
+void XMLNode::DeleteChild( XMLNode* node )
+{
+	TIXMLASSERT( node->parent == this );
+	DELETE_NODE( node );
+}
+
+
 XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 {
 	if ( lastChild ) {
@@ -425,13 +433,6 @@ const XMLElement* XMLNode::LastChildElement( const char* value ) const
 		}
 	}
 	return 0;
-}
-
-
-void XMLNode::DeleteChild( XMLNode* node )
-{
-	TIXMLASSERT( node->parent == this );
-	TIXMLASSERT( 0 );
 }
 
 
@@ -733,6 +734,25 @@ void XMLElement::LinkAttribute( XMLAttribute* attrib )
 }
 
 
+void XMLElement::DeleteAttribute( const char* name )
+{
+	XMLAttribute* prev = 0;
+	for( XMLAttribute* a=rootAttribute; a; a=a->next ) {
+		if ( XMLUtil::StringEqual( name, a->Name() ) ) {
+			if ( prev ) {
+				prev->next = a->next;
+			}
+			else {
+				rootAttribute = a->next;
+			}
+			DELETE_ATTRIBUTE( a );
+			break;
+		}
+		prev = a;
+	}
+}
+
+
 char* XMLElement::ParseAttributes( char* p, bool* closedElement )
 {
 	const char* start = p;
@@ -947,13 +967,45 @@ XMLStreamer::XMLStreamer( FILE* file ) : fp( file ), depth( 0 ), elementJustOpen
 			entityFlag[ entities[i].value ] = true;
 		}
 	}
+	buffer.Push( 0 );
+}
+
+
+void XMLStreamer::Print( const char* format, ... )
+{
+    va_list     va;
+    va_start( va, format );
+
+	if ( fp ) {
+		vfprintf( fp, format, va );
+	}
+	else {
+		// This seems brutally complex. Haven't figured out a better
+		// way on windows.
+		#ifdef _MSC_VER
+			int len = -1;
+			while ( len < 0 ) {
+				len = vsnprintf_s( accumulator.Mem(), accumulator.Capacity(), accumulator.Capacity()-1, format, va );
+				if ( len < 0 ) {
+					accumulator.PushArr( 1000 );
+				}
+			}
+			char* p = buffer.PushArr( len ) - 1;
+			memcpy( p, accumulator.Mem(), len+1 );
+		#else
+			int len = vsnprintf( 0, 0, format, va );
+			char* p = buffer.PushArr( len ) - 1;
+			vsprintf_s( p, len+1, format, va );
+		#endif
+	}
+    va_end( va );
 }
 
 
 void XMLStreamer::PrintSpace( int depth )
 {
 	for( int i=0; i<depth; ++i ) {
-		fprintf( fp, "    " );
+		Print( "    " );
 	}
 }
 
@@ -970,12 +1022,12 @@ void XMLStreamer::PrintString( const char* p )
 			// entity, and keep looking.
 			if ( entityFlag[*q] ) {
 				while ( p < q ) {
-					fputc( *p, fp );
+					Print( "%c", *p );
 					++p;
 				}
 				for( int i=0; i<NUM_ENTITIES; ++i ) {
 					if ( entities[i].value == *q ) {
-						fprintf( fp, "&%s;", entities[i].pattern );
+						Print( "&%s;", entities[i].pattern );
 						break;
 					}
 				}
@@ -987,9 +1039,10 @@ void XMLStreamer::PrintString( const char* p )
 	// Flush the remaining string. This will be the entire
 	// string if an entity wasn't found.
 	if ( q-p > 0 ) {
-		fprintf( fp, "%s", p );
+		Print( "%s", p );
 	}
 }
+
 
 void XMLStreamer::OpenElement( const char* name )
 {
@@ -999,11 +1052,11 @@ void XMLStreamer::OpenElement( const char* name )
 	stack.Push( name );
 
 	if ( textDepth < 0 && depth > 0) {
-		fprintf( fp, "\n" );
+		Print( "\n" );
 		PrintSpace( depth );
 	}
 
-	fprintf( fp, "<%s", name );
+	Print( "<%s", name );
 	elementJustOpened = true;
 	++depth;
 }
@@ -1012,9 +1065,9 @@ void XMLStreamer::OpenElement( const char* name )
 void XMLStreamer::PushAttribute( const char* name, const char* value )
 {
 	TIXMLASSERT( elementJustOpened );
-	fprintf( fp, " %s=\"", name );
+	Print( " %s=\"", name );
 	PrintString( value );
-	fprintf( fp, "\"" );
+	Print( "\"" );
 }
 
 
@@ -1024,20 +1077,20 @@ void XMLStreamer::CloseElement()
 	const char* name = stack.Pop();
 
 	if ( elementJustOpened ) {
-		fprintf( fp, "/>" );
+		Print( "/>" );
 	}
 	else {
 		if ( textDepth < 0 ) {
-			fprintf( fp, "\n" );
+			Print( "\n" );
 			PrintSpace( depth );
 		}
-		fprintf( fp, "</%s>", name );
+		Print( "</%s>", name );
 	}
 
 	if ( textDepth == depth )
 		textDepth = -1;
 	if ( depth == 0 )
-		fprintf( fp, "\n" );
+		Print( "\n" );
 	elementJustOpened = false;
 }
 
@@ -1045,7 +1098,7 @@ void XMLStreamer::CloseElement()
 void XMLStreamer::SealElement()
 {
 	elementJustOpened = false;
-	fprintf( fp, ">" );
+	Print( ">" );
 }
 
 
@@ -1057,10 +1110,10 @@ void XMLStreamer::PushText( const char* text, bool cdata )
 		SealElement();
 	}
 	if ( cdata )
-		fprintf( fp, "<![CDATA[" );
+		Print( "<![CDATA[" );
 	PrintString( text );
 	if ( cdata ) 
-		fprintf( fp, "]]>" );
+		Print( "]]>" );
 }
 
 
@@ -1070,10 +1123,10 @@ void XMLStreamer::PushComment( const char* comment )
 		SealElement();
 	}
 	if ( textDepth < 0 && depth > 0) {
-		fprintf( fp, "\n" );
+		Print( "\n" );
 		PrintSpace( depth );
 	}
-	fprintf( fp, "<!--%s-->", comment );
+	Print( "<!--%s-->", comment );
 }
 
 

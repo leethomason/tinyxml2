@@ -147,6 +147,26 @@ int main( int argc, const char* argv )
 		XMLTest( "Programmatic DOM", 2, doc->FirstChildElement()->LastChildElement( "sub" )->IntAttribute( "attrib" ) );
 		XMLTest( "Programmatic DOM", "& Text!", 
 				 doc->FirstChildElement()->LastChildElement( "sub" )->FirstChild()->ToText()->Value() );
+
+		// And now deletion:
+		element->DeleteChild( sub[2] );
+		doc->DeleteNode( comment );
+
+		element->FirstChildElement()->SetAttribute( "attrib", true );
+		element->LastChildElement()->DeleteAttribute( "attrib" );
+
+		XMLTest( "Programmatic DOM", true, doc->FirstChildElement()->FirstChildElement()->BoolAttribute( "attrib" ) );
+		int value = 10;
+		int result = doc->FirstChildElement()->LastChildElement()->QueryIntAttribute( "attrib", &value );
+		XMLTest( "Programmatic DOM", result, NO_ATTRIBUTE );
+		XMLTest( "Programmatic DOM", value, 10 );
+
+		doc->Print();
+
+		XMLStreamer streamer;
+		doc->Print( &streamer );
+		printf( "%s", streamer.CStr() );
+
 		delete doc;
 	}
 
