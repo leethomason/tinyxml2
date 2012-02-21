@@ -15,14 +15,15 @@
 	X UTF8 support: isAlpha, etc.
 	X string buffer for sets. (Grr.)
 	- MS BOM
-	- print to memory buffer
+	X print to memory buffer
 	- tests from xml1
 	- xml1 tests especially UTF-8
 	- perf test: xml1
 	- perf test: xenowar
 	- test: load(char*)
 	- test: load(FILE*)
-
+	- rename declaration
+	- rename streamer
 */
 
 #include <limits.h>
@@ -689,9 +690,10 @@ public:
 	virtual XMLDocument* ToDocument()				{ return this; }
 	virtual const XMLDocument* ToDocument() const	{ return this; }
 
-	int Parse( const char* );
-	int Load( const char* );
+	int Parse( const char* xml );
+	int Load( const char* filename );
 	int Load( FILE* );
+	void Save( const char* filename );
 
 	void Print( XMLStreamer* streamer=0 );
 	virtual bool Accept( XMLVisitor* visitor ) const;
@@ -716,10 +718,17 @@ public:
 
 	enum {
 		NO_ERROR = 0,
+		ERROR_FILE_NOT_FOUND,
 		ERROR_ELEMENT_MISMATCH,
 		ERROR_PARSING_ELEMENT,
 		ERROR_PARSING_ATTRIBUTE,
-		ERROR_IDENTIFYING_TAG
+		ERROR_IDENTIFYING_TAG,
+		ERROR_PARSING_TEXT,
+		ERROR_PARSING_CDATA,
+		ERROR_PARSING_COMMENT,
+		ERROR_PARSING_DECLARATION,
+		ERROR_PARSING_UNKNOWN
+
 	};
 	void SetError( int error, const char* str1, const char* str2 );
 	
@@ -727,6 +736,7 @@ public:
 	int GetErrorID() const { return errorID; }
 	const char* GetErrorStr1() const { return errorStr1; }
 	const char* GetErrorStr2() const { return errorStr2; }
+	void PrintError() const;
 
 	char* Identify( char* p, XMLNode** node );
 
@@ -759,6 +769,8 @@ public:
 
 	void PushText( const char* text, bool cdata=false );
 	void PushComment( const char* comment );
+	void PushDeclaration( const char* value );
+	void PushUnknown( const char* value );
 
 	virtual bool VisitEnter( const XMLDocument& /*doc*/ )			{ return true; }
 	virtual bool VisitExit( const XMLDocument& /*doc*/ )			{ return true; }
@@ -768,24 +780,28 @@ public:
 
 	virtual bool Visit( const XMLText& text );
 	virtual bool Visit( const XMLComment& comment );
+	virtual bool Visit( const XMLDeclaration& declaration );
+	virtual bool Visit( const XMLUnknown& unknown );
 
 	const char* CStr() const { return buffer.Mem(); }
 
 private:
 	void SealElement();
 	void PrintSpace( int depth );
-	void PrintString( const char* );	// prints out, after detecting entities.
+	void PrintString( const char*, bool restrictedEntitySet );	// prints out, after detecting entities.
 	void Print( const char* format, ... );
 
+	bool elementJustOpened;
+	bool firstElement;
 	FILE* fp;
 	int depth;
-	bool elementJustOpened;
 	int textDepth;
 
 	enum {
 		ENTITY_RANGE = 64
 	};
 	bool entityFlag[ENTITY_RANGE];
+	bool restrictedEntityFlag[ENTITY_RANGE];
 
 	DynArray< const char*, 10 > stack;
 	DynArray< char, 20 > buffer, accumulator;

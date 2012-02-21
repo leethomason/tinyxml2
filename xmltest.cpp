@@ -14,6 +14,36 @@ using namespace tinyxml2;
 int gPass = 0;
 int gFail = 0;
 
+//#define DREAM_ONLY
+
+/*
+int gNew = 0;
+int gNewTotal = 0;
+
+void* operator new( size_t size ) 
+{
+	++gNew;
+	return malloc( size );
+}
+
+void* operator new[]( size_t size ) 
+{
+	++gNew;
+	return malloc( size );
+}
+
+void operator delete[]( void* mem ) 
+{
+	free( mem );
+}
+
+void operator delete( void* mem ) 
+{
+	free( mem );
+}
+*/
+
+
 bool XMLTest (const char* testString, const char* expected, const char* found, bool echo=true )
 {
 	bool pass = !strcmp( expected, found );
@@ -61,7 +91,7 @@ int main( int argc, const char* argv )
 	#if defined( WIN32 )
 		_CrtMemCheckpoint( &startMemState );
 	#endif	
-
+#ifndef DREAM_ONLY
 #if 0 
 	{
 		static const char* test = "<!--hello world\n"
@@ -169,6 +199,40 @@ int main( int argc, const char* argv )
 
 		delete doc;
 	}
+#endif
+	{
+		// Test: Dream
+		// XML1 : 1,187,569 bytes	in 31,209 allocations
+		// XML2 :   469,073	bytes	in    323 allocations
+		//int newStart = gNew;
+		XMLDocument doc;
+		doc.Load( "dream.xml" );
+
+		doc.Save( "dreamout.xml" );
+		doc.PrintError();
+
+		XMLTest( "Dream", "xml version=\"1.0\"",
+			              doc.FirstChild()->ToDeclaration()->Value() );
+		XMLTest( "Dream", true, doc.FirstChild()->NextSibling()->ToUnknown() ? true : false );
+		XMLTest( "Dream", "DOCTYPE PLAY SYSTEM \"play.dtd\"",
+						  doc.FirstChild()->NextSibling()->ToUnknown()->Value() );
+		XMLTest( "Dream", "And Robin shall restore amends.",
+			              doc.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
+		XMLTest( "Dream", "And Robin shall restore amends.",
+			              doc.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
+
+		XMLDocument doc2;
+		doc2.Load( "dreamout.xml" );
+		XMLTest( "Dream-out", "xml version=\"1.0\"",
+			              doc2.FirstChild()->ToDeclaration()->Value() );
+		XMLTest( "Dream-out", true, doc2.FirstChild()->NextSibling()->ToUnknown() ? true : false );
+		XMLTest( "Dream-out", "DOCTYPE PLAY SYSTEM \"play.dtd\"",
+						  doc2.FirstChild()->NextSibling()->ToUnknown()->Value() );
+		XMLTest( "Dream-out", "And Robin shall restore amends.",
+			              doc2.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
+
+		//gNewTotal = gNew - newStart;
+	}
 
 	#if defined( WIN32 )
 		_CrtMemCheckpoint( &endMemState );  
@@ -177,6 +241,7 @@ int main( int argc, const char* argv )
 		_CrtMemState diffMemState;
 		_CrtMemDifference( &diffMemState, &startMemState, &endMemState );
 		_CrtMemDumpStatistics( &diffMemState );
+		//printf( "new total=%d\n", gNewTotal );
 	#endif
 
 	printf ("\nPass %d, Fail %d\n", gPass, gFail);

@@ -82,7 +82,7 @@ char* StrPair::ParseText( char* p, const char* endTag, int strFlags )
 		}
 		++p;
 	}	
-	return p;
+	return 0;
 }
 
 
@@ -198,17 +198,17 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 	// What is this thing? 
 	// - Elements start with a letter or underscore, but xml is reserved.
 	// - Comments: <!--
-	// - Decleration: <?xml
+	// - Decleration: <?
 	// - Everthing else is unknown to tinyxml.
 	//
 
-	static const char* xmlHeader		= { "<?xml" };
+	static const char* xmlHeader		= { "<?" };
 	static const char* commentHeader	= { "<!--" };
 	static const char* dtdHeader		= { "<!" };
 	static const char* cdataHeader		= { "<![CDATA[" };
 	static const char* elementHeader	= { "<" };	// and a header for everything else; check last.
 
-	static const int xmlHeaderLen		= 5;
+	static const int xmlHeaderLen		= 2;
 	static const int commentHeaderLen	= 4;
 	static const int dtdHeaderLen		= 2;
 	static const int cdataHeaderLen		= 9;
@@ -244,15 +244,10 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 		returnNode->memPool = &elementPool;
 		p += elementHeaderLen;
 	}
-	else if ( (*p != '<') && XMLUtil::IsAlphaNum( *p ) ) {
+	else {
 		returnNode = new (textPool.Alloc()) XMLText( this );
 		returnNode->memPool = &textPool;
 		p = start;	// Back it up, all the text counts.
-	}
-	else {
-		this->SetError( ERROR_IDENTIFYING_TAG, p, 0 );
-		p = 0;
-		returnNode = 0;
 	}
 
 	*node = returnNode;
@@ -457,13 +452,19 @@ char* XMLNode::ParseDeep( char* p )
 // --------- XMLText ---------- //
 char* XMLText::ParseDeep( char* p )
 {
+	const char* start = p;
 	if ( this->CData() ) {
 		p = value.ParseText( p, "]]>", StrPair::NEEDS_NEWLINE_NORMALIZATION );
+		if ( !p ) {
+			document->SetError( XMLDocument::ERROR_PARSING_CDATA, start, 0 );
+		}
 		return p;
 	}
 	else {
 		p = value.ParseText( p, "<", StrPair::TEXT_ELEMENT );
-		// consumes the end tag.
+		if ( !p ) {
+			document->SetError( XMLDocument::ERROR_PARSING_TEXT, start, 0 );
+		}
 		if ( p && *p ) {
 			return p-1;
 		}
@@ -494,7 +495,12 @@ XMLComment::~XMLComment()
 char* XMLComment::ParseDeep( char* p )
 {
 	// Comment parses as text.
-	return value.ParseText( p, "-->", StrPair::COMMENT );
+	const char* start = p;
+	p = value.ParseText( p, "-->", StrPair::COMMENT );
+	if ( p == 0 ) {
+		document->SetError( XMLDocument::ERROR_PARSING_COMMENT, start, 0 );
+	}
+	return p;
 }
 
 
@@ -520,7 +526,12 @@ XMLDeclaration::~XMLDeclaration()
 char* XMLDeclaration::ParseDeep( char* p )
 {
 	// Declaration parses as text.
-	return value.ParseText( p, ">", StrPair::NEEDS_NEWLINE_NORMALIZATION );
+	const char* start = p;
+	p = value.ParseText( p, "?>", StrPair::NEEDS_NEWLINE_NORMALIZATION );
+	if ( p == 0 ) {
+		document->SetError( XMLDocument::ERROR_PARSING_DECLARATION, start, 0 );
+	}
+	return p;
 }
 
 
@@ -544,7 +555,13 @@ XMLUnknown::~XMLUnknown()
 char* XMLUnknown::ParseDeep( char* p )
 {
 	// Unknown parses as text.
-	return value.ParseText( p, ">", StrPair::NEEDS_NEWLINE_NORMALIZATION );
+	const char* start = p;
+
+	p = value.ParseText( p, ">", StrPair::NEEDS_NEWLINE_NORMALIZATION );
+	if ( !p ) {
+		document->SetError( XMLDocument::ERROR_PARSING_UNKNOWN, start, 0 );
+	}
+	return p;
 }
 
 
@@ -705,6 +722,16 @@ const XMLAttribute* XMLElement::FindAttribute( const char* name ) const
 	}
 	return 0;
 }
+
+
+const char* XMLElement::GetText() const
+{
+	if ( FirstChild() && FirstChild()->ToText() ) {
+		return FirstChild()->ToText()->Value();
+	}
+	return 0;
+}
+
 
 
 XMLAttribute* XMLElement::FindOrCreateAttribute( const char* name )
@@ -916,6 +943,48 @@ XMLText* XMLDocument::NewText( const char* str )
 }
 
 
+int XMLDocument::Load( const char* filename )
+{
+	ClearChildren();
+	InitDocument();
+
+	FILE* fp = fopen( filename, "rb" );
+	if ( !fp ) {
+		SetError( ERROR_FILE_NOT_FOUND, filename, 0 );
+		return errorID;
+	}
+	Load( fp );
+	fclose( fp );
+	return errorID;
+}
+
+
+int XMLDocument::Load( FILE* fp ) 
+{
+	ClearChildren();
+	InitDocument();
+
+	fseek( fp, 0, SEEK_END );
+	unsigned size = ftell( fp );
+	fseek( fp, 0, SEEK_SET );
+
+	charBuffer = new char[size+1];
+	fread( charBuffer, size, 1, fp );
+	charBuffer[size] = 0;
+
+	ParseDeep( charBuffer );
+	return errorID;
+}
+
+
+void XMLDocument::Save( const char* filename )
+{
+	FILE* fp = fopen( filename, "w" );
+	XMLStreamer stream( fp );
+	Print( &stream );
+	fclose( fp );
+}
+
 
 int XMLDocument::Parse( const char* p )
 {
@@ -928,9 +997,8 @@ int XMLDocument::Parse( const char* p )
 	size_t len = strlen( p );
 	charBuffer = new char[ len+1 ];
 	memcpy( charBuffer, p, len+1 );
-	XMLNode* node = 0;
-	
-	char* q = ParseDeep( charBuffer );
+
+	ParseDeep( charBuffer );
 	return errorID;
 }
 
@@ -950,16 +1018,42 @@ void XMLDocument::Print( XMLStreamer* streamer )
 void XMLDocument::SetError( int error, const char* str1, const char* str2 )
 {
 	errorID = error;
-	printf( "ERROR: id=%d '%s' '%s'\n", error, str1, str2 );	// fixme: remove
 	errorStr1 = str1;
 	errorStr2 = str2;
 }
 
 
-XMLStreamer::XMLStreamer( FILE* file ) : fp( file ), depth( 0 ), elementJustOpened( false ), textDepth( -1 )
+void XMLDocument::PrintError() const 
+{
+	if ( errorID ) {
+		char buf1[20] = { 0 };
+		char buf2[20] = { 0 };
+		
+		if ( errorStr1 ) {
+			strncpy( buf1, errorStr1, 20 );
+			buf1[19] = 0;
+		}
+		if ( errorStr2 ) {
+			strncpy( buf2, errorStr2, 20 );
+			buf2[19] = 0;
+		}
+
+		printf( "XMLDocument error id=%d str1=%s str2=%s\n",
+			    errorID, buf1, buf2 );
+	}
+}
+
+
+XMLStreamer::XMLStreamer( FILE* file ) : 
+	elementJustOpened( false ), 
+	firstElement( true ),
+	fp( file ), 
+	depth( 0 ), 
+	textDepth( -1 )
 {
 	for( int i=0; i<ENTITY_RANGE; ++i ) {
 		entityFlag[i] = false;
+		restrictedEntityFlag[i] = false;
 	}
 	for( int i=0; i<NUM_ENTITIES; ++i ) {
 		TIXMLASSERT( entities[i].value < ENTITY_RANGE );
@@ -967,6 +1061,8 @@ XMLStreamer::XMLStreamer( FILE* file ) : fp( file ), depth( 0 ), elementJustOpen
 			entityFlag[ entities[i].value ] = true;
 		}
 	}
+	restrictedEntityFlag['&'] = true;
+	restrictedEntityFlag['<'] = true;
 	buffer.Push( 0 );
 }
 
@@ -984,10 +1080,12 @@ void XMLStreamer::Print( const char* format, ... )
 		// way on windows.
 		#ifdef _MSC_VER
 			int len = -1;
+			int expand = 1000;
 			while ( len < 0 ) {
 				len = vsnprintf_s( accumulator.Mem(), accumulator.Capacity(), accumulator.Capacity()-1, format, va );
 				if ( len < 0 ) {
-					accumulator.PushArr( 1000 );
+					accumulator.PushArr( expand );
+					expand *= 3/2;
 				}
 			}
 			char* p = buffer.PushArr( len ) - 1;
@@ -1010,17 +1108,18 @@ void XMLStreamer::PrintSpace( int depth )
 }
 
 
-void XMLStreamer::PrintString( const char* p )
+void XMLStreamer::PrintString( const char* p, bool restricted )
 {
 	// Look for runs of bytes between entities to print.
 	const char* q = p;
+	const bool* flag = restricted ? restrictedEntityFlag : entityFlag;
 
 	while ( *q ) {
 		if ( *q < ENTITY_RANGE ) {
 			// Check for entities. If one is found, flush
 			// the stream up until the entity, write the 
 			// entity, and keep looking.
-			if ( entityFlag[*q] ) {
+			if ( flag[*q] ) {
 				while ( p < q ) {
 					Print( "%c", *p );
 					++p;
@@ -1051,13 +1150,14 @@ void XMLStreamer::OpenElement( const char* name )
 	}
 	stack.Push( name );
 
-	if ( textDepth < 0 && depth > 0) {
+	if ( textDepth < 0 && !firstElement ) {
 		Print( "\n" );
 		PrintSpace( depth );
 	}
 
 	Print( "<%s", name );
 	elementJustOpened = true;
+	firstElement = false;
 	++depth;
 }
 
@@ -1066,7 +1166,7 @@ void XMLStreamer::PushAttribute( const char* name, const char* value )
 {
 	TIXMLASSERT( elementJustOpened );
 	Print( " %s=\"", name );
-	PrintString( value );
+	PrintString( value, false );
 	Print( "\"" );
 }
 
@@ -1109,11 +1209,14 @@ void XMLStreamer::PushText( const char* text, bool cdata )
 	if ( elementJustOpened ) {
 		SealElement();
 	}
-	if ( cdata )
+	if ( cdata ) {
 		Print( "<![CDATA[" );
-	PrintString( text );
-	if ( cdata ) 
+		Print( "%s", text );
 		Print( "]]>" );
+	}
+	else {
+		PrintString( text, true );
+	}
 }
 
 
@@ -1122,11 +1225,40 @@ void XMLStreamer::PushComment( const char* comment )
 	if ( elementJustOpened ) {
 		SealElement();
 	}
-	if ( textDepth < 0 && depth > 0) {
+	if ( textDepth < 0 && !firstElement ) {
 		Print( "\n" );
 		PrintSpace( depth );
 	}
+	firstElement = false;
 	Print( "<!--%s-->", comment );
+}
+
+
+void XMLStreamer::PushDeclaration( const char* value )
+{
+	if ( elementJustOpened ) {
+		SealElement();
+	}
+	if ( textDepth < 0 && !firstElement) {
+		Print( "\n" );
+		PrintSpace( depth );
+	}
+	firstElement = false;
+	Print( "<?%s?>", value );
+}
+
+
+void XMLStreamer::PushUnknown( const char* value )
+{
+	if ( elementJustOpened ) {
+		SealElement();
+	}
+	if ( textDepth < 0 && !firstElement ) {
+		Print( "\n" );
+		PrintSpace( depth );
+	}
+	firstElement = false;
+	Print( "<!%s>", value );
 }
 
 
@@ -1160,3 +1292,18 @@ bool XMLStreamer::Visit( const XMLComment& comment )
 	PushComment( comment.Value() );
 	return true;
 }
+
+bool XMLStreamer::Visit( const XMLDeclaration& declaration )
+{
+	PushDeclaration( declaration.Value() );
+	return true;
+}
+
+
+bool XMLStreamer::Visit( const XMLUnknown& unknown )
+{
+	PushUnknown( unknown.Value() );
+	return true;
+}
+
+
