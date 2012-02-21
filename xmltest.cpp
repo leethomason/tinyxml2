@@ -86,6 +86,18 @@ bool XMLTest( const char* testString, int expected, int found, bool echo=true )
 }
 
 
+void NullLineEndings( char* p )
+{
+	while( p && *p ) {
+		if ( *p == '\n' || *p == '\r' ) {
+			*p = 0;
+			return;
+		}
+		++p;
+	}
+}
+
+
 int main( int argc, const char* argv )
 {
 	#if defined( WIN32 )
@@ -150,6 +162,7 @@ int main( int argc, const char* argv )
 	}
 #endif
 	{
+#if 0
 		// Test: Programmatic DOM
 		// Build:
 		//		<element>
@@ -198,17 +211,19 @@ int main( int argc, const char* argv )
 		printf( "%s", streamer.CStr() );
 
 		delete doc;
+#endif
 	}
 #endif
 	{
+#if 0 
 		// Test: Dream
 		// XML1 : 1,187,569 bytes	in 31,209 allocations
 		// XML2 :   469,073	bytes	in    323 allocations
 		//int newStart = gNew;
 		XMLDocument doc;
-		doc.Load( "dream.xml" );
+		doc.LoadFile( "dream.xml" );
 
-		doc.Save( "dreamout.xml" );
+		doc.SaveFile( "dreamout.xml" );
 		doc.PrintError();
 
 		XMLTest( "Dream", "xml version=\"1.0\"",
@@ -222,7 +237,7 @@ int main( int argc, const char* argv )
 			              doc.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
 
 		XMLDocument doc2;
-		doc2.Load( "dreamout.xml" );
+		doc2.LoadFile( "dreamout.xml" );
 		XMLTest( "Dream-out", "xml version=\"1.0\"",
 			              doc2.FirstChild()->ToDeclaration()->Value() );
 		XMLTest( "Dream-out", true, doc2.FirstChild()->NextSibling()->ToUnknown() ? true : false );
@@ -231,10 +246,132 @@ int main( int argc, const char* argv )
 		XMLTest( "Dream-out", "And Robin shall restore amends.",
 			              doc2.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
 
+#endif
 		//gNewTotal = gNew - newStart;
 	}
 
-	#if defined( WIN32 )
+#if 0
+	{
+		const char* error =	"<?xml version=\"1.0\" standalone=\"no\" ?>\n"
+							"<passages count=\"006\" formatversion=\"20020620\">\n"
+							"    <wrong error>\n"
+							"</passages>";
+
+		XMLDocument doc;
+		doc.Parse( error );
+		XMLTest( "Bad XML", doc.ErrorID(), ERROR_PARSING_ATTRIBUTE );
+	}
+
+	{
+		const char* str = "<doc attr0='1' attr1='2.0' attr2='foo' />";
+
+		XMLDocument doc;
+		doc.Parse( str );
+
+		XMLElement* ele = doc.FirstChildElement();
+
+		int iVal, result;
+		double dVal;
+
+		result = ele->QueryDoubleAttribute( "attr0", &dVal );
+		XMLTest( "Query attribute: int as double", result, XML_NO_ERROR );
+		XMLTest( "Query attribute: int as double", (int)dVal, 1 );
+		result = ele->QueryDoubleAttribute( "attr1", &dVal );
+		XMLTest( "Query attribute: double as double", (int)dVal, 2 );
+		result = ele->QueryIntAttribute( "attr1", &iVal );
+		XMLTest( "Query attribute: double as int", result, XML_NO_ERROR );
+		XMLTest( "Query attribute: double as int", iVal, 2 );
+		result = ele->QueryIntAttribute( "attr2", &iVal );
+		XMLTest( "Query attribute: not a number", result, WRONG_ATTRIBUTE_TYPE );
+		result = ele->QueryIntAttribute( "bar", &iVal );
+		XMLTest( "Query attribute: does not exist", result, NO_ATTRIBUTE );
+	}
+
+	{
+		const char* str = "<doc/>";
+
+		XMLDocument doc;
+		doc.Parse( str );
+
+		XMLElement* ele = doc.FirstChildElement();
+
+		int iVal;
+		double dVal;
+
+		ele->SetAttribute( "str", "strValue" );
+		ele->SetAttribute( "int", 1 );
+		ele->SetAttribute( "double", -1.0 );
+
+		const char* cStr = ele->Attribute( "str" );
+		ele->QueryIntAttribute( "int", &iVal );
+		ele->QueryDoubleAttribute( "double", &dVal );
+
+		XMLTest( "Attribute round trip. c-string.", "strValue", cStr );
+		XMLTest( "Attribute round trip. int.", 1, iVal );
+		XMLTest( "Attribute round trip. double.", -1, (int)dVal );
+	}
+
+#endif
+	{
+		XMLDocument doc;
+		doc.LoadFile( "utf8test.xml" );
+
+		// Get the attribute "value" from the "Russian" element and check it.
+		XMLElement* element = doc.FirstChildElement( "document" )->FirstChildElement( "Russian" );
+		const unsigned char correctValue[] = {	0xd1U, 0x86U, 0xd0U, 0xb5U, 0xd0U, 0xbdU, 0xd0U, 0xbdU, 
+												0xd0U, 0xbeU, 0xd1U, 0x81U, 0xd1U, 0x82U, 0xd1U, 0x8cU, 0 };
+
+		XMLTest( "UTF-8: Russian value.", (const char*)correctValue, element->Attribute( "value" ) );
+
+		const unsigned char russianElementName[] = {	0xd0U, 0xa0U, 0xd1U, 0x83U,
+														0xd1U, 0x81U, 0xd1U, 0x81U,
+														0xd0U, 0xbaU, 0xd0U, 0xb8U,
+														0xd0U, 0xb9U, 0 };
+		const char russianText[] = "<\xD0\xB8\xD0\xBC\xD0\xB5\xD0\xB5\xD1\x82>";
+
+		XMLText* text = doc.FirstChildElement( "document" )->FirstChildElement( (const char*) russianElementName )->FirstChild()->ToText();
+		XMLTest( "UTF-8: Browsing russian element name.",
+				 russianText,
+				 text->Value() );
+
+		// Now try for a round trip.
+		doc.SaveFile( "utf8testout.xml" );
+
+		// Check the round trip.
+		char savedBuf[256];
+		char verifyBuf[256];
+		int okay = 0;
+
+		FILE* saved  = fopen( "utf8testout.xml", "r" );
+		FILE* verify = fopen( "utf8testverify.xml", "r" );
+
+		if ( saved && verify )
+		{
+			okay = 1;
+			while ( fgets( verifyBuf, 256, verify ) )
+			{
+				fgets( savedBuf, 256, saved );
+				NullLineEndings( verifyBuf );
+				NullLineEndings( savedBuf );
+
+				if ( strcmp( verifyBuf, savedBuf ) )
+				{
+					printf( "verify:%s<\n", verifyBuf );
+					printf( "saved :%s<\n", savedBuf );
+					okay = 0;
+					break;
+				}
+			}
+		}
+		if ( saved )
+			fclose( saved );
+		if ( verify )
+			fclose( verify );
+		XMLTest( "UTF-8: Verified multi-language round trip.", 1, okay );
+	}
+
+
+#if defined( WIN32 )
 		_CrtMemCheckpoint( &endMemState );  
 		//_CrtMemDumpStatistics( &endMemState );
 

@@ -371,6 +371,12 @@ public:
 	inline static int IsUTF8Continuation( unsigned char p ) { return p & 0x80; }
 	inline static int IsAlphaNum( unsigned char anyByte )	{ return ( anyByte < 128 ) ? isalnum( anyByte ) : 1; }
 	inline static int IsAlpha( unsigned char anyByte )		{ return ( anyByte < 128 ) ? isalpha( anyByte ) : 1; }
+
+	static const char* ReadBOM( const char* p, bool* hasBOM );
+	// p is the starting location,
+	// the UTF-8 value of the entity will be placed in value, and length filled in.
+	static const char* GetCharacterRef( const char* p, char* value, int* length );
+	static void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
 };
 
 
@@ -567,9 +573,21 @@ protected:
 
 
 enum {
-	ATTRIBUTE_SUCCESS,
+	XML_NO_ERROR = 0,
+
 	NO_ATTRIBUTE,
-	WRONG_ATTRIBUTE_TYPE
+	WRONG_ATTRIBUTE_TYPE,
+
+	ERROR_FILE_NOT_FOUND,
+	ERROR_ELEMENT_MISMATCH,
+	ERROR_PARSING_ELEMENT,
+	ERROR_PARSING_ATTRIBUTE,
+	ERROR_IDENTIFYING_TAG,
+	ERROR_PARSING_TEXT,
+	ERROR_PARSING_CDATA,
+	ERROR_PARSING_COMMENT,
+	ERROR_PARSING_DECLARATION,
+	ERROR_PARSING_UNKNOWN
 };
 
 
@@ -691,9 +709,11 @@ public:
 	virtual const XMLDocument* ToDocument() const	{ return this; }
 
 	int Parse( const char* xml );
-	int Load( const char* filename );
-	int Load( FILE* );
-	void Save( const char* filename );
+	int LoadFile( const char* filename );
+	int LoadFile( FILE* );
+	void SaveFile( const char* filename );
+
+	bool HasBOM() const { return writeBOM; }
 
 	void Print( XMLStreamer* streamer=0 );
 	virtual bool Accept( XMLVisitor* visitor ) const;
@@ -716,24 +736,10 @@ public:
 	*/
 	void DeleteNode( XMLNode* node )	{ node->parent->DeleteChild( node ); }
 
-	enum {
-		NO_ERROR = 0,
-		ERROR_FILE_NOT_FOUND,
-		ERROR_ELEMENT_MISMATCH,
-		ERROR_PARSING_ELEMENT,
-		ERROR_PARSING_ATTRIBUTE,
-		ERROR_IDENTIFYING_TAG,
-		ERROR_PARSING_TEXT,
-		ERROR_PARSING_CDATA,
-		ERROR_PARSING_COMMENT,
-		ERROR_PARSING_DECLARATION,
-		ERROR_PARSING_UNKNOWN
-
-	};
 	void SetError( int error, const char* str1, const char* str2 );
 	
-	bool Error() const { return errorID != NO_ERROR; }
-	int GetErrorID() const { return errorID; }
+	bool Error() const { return errorID != XML_NO_ERROR; }
+	int  ErrorID() const { return errorID; }
 	const char* GetErrorStr1() const { return errorStr1; }
 	const char* GetErrorStr2() const { return errorStr2; }
 	void PrintError() const;
@@ -745,6 +751,7 @@ private:
 	void operator=( const XMLDocument& );	// not supported
 	void InitDocument();
 
+	bool writeBOM;
 	int errorID;
 	const char* errorStr1;
 	const char* errorStr2;
@@ -763,6 +770,7 @@ public:
 	XMLStreamer( FILE* file=0 );
 	~XMLStreamer()	{}
 
+	void PushHeader( bool writeBOM, bool writeDeclaration );
 	void OpenElement( const char* name );
 	void PushAttribute( const char* name, const char* value );
 	void CloseElement();
@@ -772,7 +780,7 @@ public:
 	void PushDeclaration( const char* value );
 	void PushUnknown( const char* value );
 
-	virtual bool VisitEnter( const XMLDocument& /*doc*/ )			{ return true; }
+	virtual bool VisitEnter( const XMLDocument& /*doc*/ );
 	virtual bool VisitExit( const XMLDocument& /*doc*/ )			{ return true; }
 
 	virtual bool VisitEnter( const XMLElement& element, const XMLAttribute* attribute );
