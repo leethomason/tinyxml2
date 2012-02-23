@@ -587,7 +587,9 @@ enum {
 	ERROR_PARSING_CDATA,
 	ERROR_PARSING_COMMENT,
 	ERROR_PARSING_DECLARATION,
-	ERROR_PARSING_UNKNOWN
+	ERROR_PARSING_UNKNOWN,
+	ERROR_EMPTY_DOCUMENT,
+	ERROR_MISMATCHED_ELEMENT
 };
 
 
@@ -714,6 +716,8 @@ public:
 	void SaveFile( const char* filename );
 
 	bool HasBOM() const { return writeBOM; }
+	XMLElement* RootElement()				{ return FirstChildElement(); }
+	const XMLElement* RootElement() const	{ return FirstChildElement(); }
 
 	void Print( XMLStreamer* streamer=0 );
 	virtual bool Accept( XMLVisitor* visitor ) const;

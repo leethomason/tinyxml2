@@ -592,8 +592,11 @@ char* XMLNode::ParseDeep( char* p )
 		p = document->Identify( p, &node );
 		if ( p && node ) {
 			p = node->ParseDeep( p );
-			// FIXME: is it the correct closing element?
+
 			if ( node->IsClosingElement() ) {
+				if ( !XMLUtil::StringEqual( Value(), node->Value() )) {
+					document->SetError( ERROR_MISMATCHED_ELEMENT, Value(), 0 );
+				}
 				DELETE_NODE( node );
 				return p;
 			}
@@ -953,7 +956,7 @@ char* XMLElement::ParseAttributes( char* p, bool* closedElement )
 			attrib->memPool = &document->attributePool;
 
 			p = attrib->ParseDeep( p );
-			if ( !p ) {
+			if ( !p || Attribute( attrib->Name() ) ) {
 				DELETE_ATTRIBUTE( attrib );
 				document->SetError( ERROR_PARSING_ATTRIBUTE, start, p );
 				return 0;
@@ -1134,7 +1137,8 @@ int XMLDocument::LoadFile( FILE* fp )
 	p = XMLUtil::SkipWhiteSpace( p );
 	p = XMLUtil::ReadBOM( p, &writeBOM );
 	if ( !p || !*p ) {
-		return 0;	// correctly parse an empty string?
+		SetError( ERROR_EMPTY_DOCUMENT, 0, 0 );
+		return errorID;
 	}
 
 	ParseDeep( charBuffer + (p-charBuffer) );
@@ -1157,12 +1161,14 @@ int XMLDocument::Parse( const char* p )
 	InitDocument();
 
 	if ( !p || !*p ) {
-		return true;	// correctly parse an empty string?
+		SetError( ERROR_EMPTY_DOCUMENT, 0, 0 );
+		return errorID;
 	}
 	p = XMLUtil::SkipWhiteSpace( p );
 	p = XMLUtil::ReadBOM( p, &writeBOM );
 	if ( !p || !*p ) {
-		return true;	// correctly parse an empty string?
+		SetError( ERROR_EMPTY_DOCUMENT, 0, 0 );
+		return errorID;
 	}
 
 	size_t len = strlen( p );
@@ -1180,9 +1186,6 @@ void XMLDocument::Print( XMLStreamer* streamer )
 	XMLStreamer stdStreamer( stdout );
 	if ( !streamer )
 		streamer = &stdStreamer;
-	//for( XMLNode* node = firstChild; node; node=node->next ) {
-	//	node->Print( streamer );
-	//}
 	Accept( streamer );
 }
 
@@ -1477,7 +1480,7 @@ bool XMLStreamer::VisitExit( const XMLElement& element )
 
 bool XMLStreamer::Visit( const XMLText& text )
 {
-	PushText( text.Value() );
+	PushText( text.Value(), text.CData() );
 	return true;
 }
 

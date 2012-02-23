@@ -103,21 +103,7 @@ int main( int argc, const char* argv )
 	#if defined( WIN32 )
 		_CrtMemCheckpoint( &startMemState );
 	#endif	
-#ifndef DREAM_ONLY
-#if 0 
-	{
-		static const char* test = "<!--hello world\n"
-			                      "          line 2\r"
-			                      "          line 3\r\n"
-			                      "          line 4\n\r"
-			                      "          line 5\r-->";
 
-		XMLDocument doc;
-		doc.Parse( test );
-		doc.Print();
-	}
-#endif
-#if 0
 	{
 		static const char* test[] = {	"<element />",
 									    "<element></element>",
@@ -143,8 +129,19 @@ int main( int argc, const char* argv )
 			printf( "----------------------------------------------\n" );
 		}
 	}
-#endif
-#if 0
+
+	{
+		static const char* test = "<!--hello world\n"
+			                      "          line 2\r"
+			                      "          line 3\r\n"
+			                      "          line 4\n\r"
+			                      "          line 5\r-->";
+
+		XMLDocument doc;
+		doc.Parse( test );
+		doc.Print();
+	}
+
 	{
 		static const char* test = "<element>Text before.</element>";
 		XMLDocument doc;
@@ -160,9 +157,7 @@ int main( int argc, const char* argv )
 		doc->Parse( test );
 		delete doc;
 	}
-#endif
 	{
-#if 0
 		// Test: Programmatic DOM
 		// Build:
 		//		<element>
@@ -211,11 +206,8 @@ int main( int argc, const char* argv )
 		printf( "%s", streamer.CStr() );
 
 		delete doc;
-#endif
 	}
-#endif
 	{
-#if 0 
 		// Test: Dream
 		// XML1 : 1,187,569 bytes	in 31,209 allocations
 		// XML2 :   469,073	bytes	in    323 allocations
@@ -246,11 +238,8 @@ int main( int argc, const char* argv )
 		XMLTest( "Dream-out", "And Robin shall restore amends.",
 			              doc2.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
 
-#endif
 		//gNewTotal = gNew - newStart;
 	}
-
-#if 0
 	{
 		const char* error =	"<?xml version=\"1.0\" standalone=\"no\" ?>\n"
 							"<passages count=\"006\" formatversion=\"20020620\">\n"
@@ -311,7 +300,6 @@ int main( int argc, const char* argv )
 		XMLTest( "Attribute round trip. double.", -1, (int)dVal );
 	}
 
-#endif
 	{
 		XMLDocument doc;
 		doc.LoadFile( "utf8test.xml" );
@@ -370,8 +358,284 @@ int main( int argc, const char* argv )
 		XMLTest( "UTF-8: Verified multi-language round trip.", 1, okay );
 	}
 
+	// --------GetText()-----------
+	{
+		const char* str = "<foo>This is  text</foo>";
+		XMLDocument doc;
+		doc.Parse( str );
+		const XMLElement* element = doc.RootElement();
 
-#if defined( WIN32 )
+		XMLTest( "GetText() normal use.", "This is  text", element->GetText() );
+
+		str = "<foo><b>This is text</b></foo>";
+		doc.Parse( str );
+		element = doc.RootElement();
+
+		XMLTest( "GetText() contained element.", element->GetText() == 0, true );
+	}
+
+
+	// ---------- CDATA ---------------
+	{
+		const char* str =	"<xmlElement>"
+								"<![CDATA["
+									"I am > the rules!\n"
+									"...since I make symbolic puns"
+								"]]>"
+							"</xmlElement>";
+		XMLDocument doc;
+		doc.Parse( str );
+		doc.Print();
+
+		XMLTest( "CDATA parse.", doc.FirstChildElement()->FirstChild()->Value(), 
+								 "I am > the rules!\n...since I make symbolic puns",
+								 false );
+	}
+
+	// ----------- CDATA -------------
+	{
+		const char* str =	"<xmlElement>"
+								"<![CDATA["
+									"<b>I am > the rules!</b>\n"
+									"...since I make symbolic puns"
+								"]]>"
+							"</xmlElement>";
+		XMLDocument doc;
+		doc.Parse( str );
+		doc.Print();
+
+		XMLTest( "CDATA parse. [ tixml1:1480107 ]", doc.FirstChildElement()->FirstChild()->Value(), 
+								 "<b>I am > the rules!</b>\n...since I make symbolic puns",
+								 false );
+	}
+
+	// InsertAfterChild causes crash.
+	{
+		// InsertBeforeChild and InsertAfterChild causes crash.
+		XMLDocument doc;
+		XMLElement* parent = doc.NewElement( "Parent" );
+		doc.InsertFirstChild( parent );
+
+		XMLElement* childText0 = doc.NewElement( "childText0" );
+		XMLElement* childText1 = doc.NewElement( "childText1" );
+
+		XMLNode* childNode0 = parent->InsertEndChild( childText0 );
+		XMLNode* childNode1 = parent->InsertAfterChild( childNode0, childText1 );
+
+		XMLTest( "Test InsertAfterChild on empty node. ", ( childNode1 == parent->LastChild() ), true );
+	}
+
+	{
+		// Entities not being written correctly.
+		// From Lynn Allen
+
+		const char* passages =
+			"<?xml version=\"1.0\" standalone=\"no\" ?>"
+			"<passages count=\"006\" formatversion=\"20020620\">"
+				"<psg context=\"Line 5 has &quot;quotation marks&quot; and &apos;apostrophe marks&apos;."
+				" It also has &lt;, &gt;, and &amp;, as well as a fake copyright &#xA9;.\"> </psg>"
+			"</passages>";
+
+		XMLDocument doc;
+		doc.Parse( passages );
+		XMLElement* psg = doc.RootElement()->FirstChildElement();
+		const char* context = psg->Attribute( "context" );
+		const char* expected = "Line 5 has \"quotation marks\" and 'apostrophe marks'. It also has <, >, and &, as well as a fake copyright \xC2\xA9.";
+
+		XMLTest( "Entity transformation: read. ", expected, context, true );
+
+		FILE* textfile = fopen( "textfile.txt", "w" );
+		if ( textfile )
+		{
+			XMLStreamer streamer( textfile );
+			psg->Accept( &streamer );
+			fclose( textfile );
+		}
+		textfile = fopen( "textfile.txt", "r" );
+		TIXMLASSERT( textfile );
+		if ( textfile )
+		{
+			char buf[ 1024 ];
+			fgets( buf, 1024, textfile );
+			XMLTest( "Entity transformation: write. ",
+					 "<psg context=\"Line 5 has &quot;quotation marks&quot; and &apos;apostrophe marks&apos;."
+					 " It also has &lt;, &gt;, and &amp;, as well as a fake copyright \xC2\xA9.\"/>\n",
+					 buf, false );
+		}
+		fclose( textfile );
+	}
+
+	{
+        const char* test = "<?xml version='1.0'?><a.elem xmi.version='2.0'/>";
+
+		XMLDocument doc;
+        doc.Parse( test );
+        XMLTest( "dot in names", doc.Error(), 0);
+        XMLTest( "dot in names", doc.FirstChildElement()->Name(), "a.elem" );
+        XMLTest( "dot in names", doc.FirstChildElement()->Attribute( "xmi.version" ), "2.0" );
+	}
+
+	{
+        const char* test = "<element><Name>1.1 Start easy ignore fin thickness&#xA;</Name></element>";
+
+        XMLDocument doc;
+		doc.Parse( test );
+
+		XMLText* text = doc.FirstChildElement()->FirstChildElement()->FirstChild()->ToText();
+		XMLTest( "Entity with one digit.",
+				 text->Value(), "1.1 Start easy ignore fin thickness\n",
+				 false );
+    }
+
+	{
+		// DOCTYPE not preserved (950171)
+		// 
+		const char* doctype =
+			"<?xml version=\"1.0\" ?>"
+			"<!DOCTYPE PLAY SYSTEM 'play.dtd'>"
+			"<!ELEMENT title (#PCDATA)>"
+			"<!ELEMENT books (title,authors)>"
+			"<element />";
+
+		XMLDocument doc;
+		doc.Parse( doctype );
+		doc.SaveFile( "test7.xml" );
+		doc.DeleteChild( doc.RootElement() );
+		doc.LoadFile( "test7.xml" );
+		doc.Print();
+		
+		const XMLUnknown* decl = doc.FirstChild()->NextSibling()->ToUnknown();
+		XMLTest( "Correct value of unknown.", "DOCTYPE PLAY SYSTEM 'play.dtd'", decl->Value() );
+
+	}
+
+	{
+		// Comments do not stream out correctly.
+		const char* doctype = 
+			"<!-- Somewhat<evil> -->";
+		XMLDocument doc;
+		doc.Parse( doctype );
+
+		XMLComment* comment = doc.FirstChild()->ToComment();
+
+		XMLTest( "Comment formatting.", " Somewhat<evil> ", comment->Value() );
+	}
+	{
+		// Double attributes
+		const char* doctype = "<element attr='red' attr='blue' />";
+
+		XMLDocument doc;
+		doc.Parse( doctype );
+		
+		XMLTest( "Parsing repeated attributes.", ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );	// is an  error to tinyxml (didn't use to be, but caused issues)
+	}
+
+	{
+		// Embedded null in stream.
+		const char* doctype = "<element att\0r='red' attr='blue' />";
+
+		XMLDocument doc;
+		doc.Parse( doctype );
+		XMLTest( "Embedded null throws error.", true, doc.Error() );
+	}
+
+	{
+		// Empty documents should return TIXML_ERROR_PARSING_EMPTY, bug 1070717
+		const char* str = "    ";
+		XMLDocument doc;
+		doc.Parse( str );
+		XMLTest( "Empty document error", ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
+	}
+
+	{
+		// Low entities
+		XMLDocument doc;
+		doc.Parse( "<test>&#x0e;</test>" );
+		const char result[] = { 0x0e, 0 };
+		XMLTest( "Low entities.", doc.FirstChildElement()->GetText(), result );
+		doc.Print();
+	}
+
+	{
+		// Attribute values with trailing quotes not handled correctly
+		XMLDocument doc;
+		doc.Parse( "<foo attribute=bar\" />" );
+		XMLTest( "Throw error with bad end quotes.", doc.Error(), true );
+	}
+
+	{
+		// [ 1663758 ] Failure to report error on bad XML
+		XMLDocument xml;
+		xml.Parse("<x>");
+		XMLTest("Missing end tag at end of input", xml.Error(), true);
+		xml.Parse("<x> ");
+		XMLTest("Missing end tag with trailing whitespace", xml.Error(), true);
+		xml.Parse("<x></y>");
+		XMLTest("Mismatched tags", xml.ErrorID(), ERROR_MISMATCHED_ELEMENT);
+	} 
+
+
+	{
+		// [ 1475201 ] TinyXML parses entities in comments
+		XMLDocument xml;
+		xml.Parse("<!-- declarations for <head> & <body> -->"
+				  "<!-- far &amp; away -->" );
+
+		XMLNode* e0 = xml.FirstChild();
+		XMLNode* e1 = e0->NextSibling();
+		XMLComment* c0 = e0->ToComment();
+		XMLComment* c1 = e1->ToComment();
+
+		XMLTest( "Comments ignore entities.", " declarations for <head> & <body> ", c0->Value(), true );
+		XMLTest( "Comments ignore entities.", " far &amp; away ", c1->Value(), true );
+	}
+
+	{
+		XMLDocument xml;
+		xml.Parse( "<Parent>"
+						"<child1 att=''/>"
+						"<!-- With this comment, child2 will not be parsed! -->"
+						"<child2 att=''/>"
+					"</Parent>" );
+		int count = 0;
+
+		for( XMLNode* ele = xml.FirstChildElement( "Parent" )->FirstChild();
+			 ele;
+			 ele = ele->NextSibling() )
+		{
+			++count;
+		}
+
+		XMLTest( "Comments iterate correctly.", 3, count );
+	}
+
+	{
+		// trying to repro ]1874301]. If it doesn't go into an infinite loop, all is well.
+		unsigned char buf[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?><feed><![CDATA[Test XMLblablablalblbl";
+		buf[60] = 239;
+		buf[61] = 0;
+
+		XMLDocument doc;
+		doc.Parse( (const char*)buf);
+	} 
+
+
+	{
+		// bug 1827248 Error while parsing a little bit malformed file
+		// Actually not malformed - should work.
+		XMLDocument xml;
+		xml.Parse( "<attributelist> </attributelist >" );
+		XMLTest( "Handle end tag whitespace", false, xml.Error() );
+	}
+
+	{
+		// This one must not result in an infinite loop
+		XMLDocument xml;
+		xml.Parse( "<infinite>loop" );
+		XMLTest( "Infinite loop test.", true, true );
+	}
+
+	#if defined( WIN32 )
 		_CrtMemCheckpoint( &endMemState );  
 		//_CrtMemDumpStatistics( &endMemState );
 
