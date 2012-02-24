@@ -358,7 +358,7 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 	p = XMLUtil::SkipWhiteSpace( p );
 	if( !p || !*p )
 	{
-		return 0;
+		return p;
 	}
 
 	// What is this thing? 
@@ -409,11 +409,6 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 		returnNode = new (elementPool.Alloc()) XMLElement( this );
 		returnNode->memPool = &elementPool;
 		p += elementHeaderLen;
-
-		p = XMLUtil::SkipWhiteSpace( p );
-		if ( p && *p == '/' ) {
-			((XMLElement*)returnNode)->closingType = XMLElement::CLOSING;
-		}
 	}
 	else {
 		returnNode = new (textPool.Alloc()) XMLText( this );
@@ -602,7 +597,7 @@ const XMLElement* XMLNode::LastChildElement( const char* value ) const
 }
 
 
-char* XMLNode::ParseDeep( char* p )
+char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
 {
 	// This is a recursive method, but thinking about it "at the current level"
 	// it is a pretty simple flat list:
@@ -617,69 +612,67 @@ char* XMLNode::ParseDeep( char* p )
 	// Where the closing element (/foo) *must* be the next thing after the opening
 	// element, and the names must match. BUT the tricky bit is that the closing
 	// element will be read by the child.
+	// 
+	// 'endTag' is the end tag for this node, it is returned by a call to a child.
+	// 'parentEnd' is the end tag for the parent, which is filled in and returned.
 
 	while( p && *p ) {
 		XMLNode* node = 0;
-		char* mark = p;
 
 		p = document->Identify( p, &node );
-		if ( p == 0 ) {
+		if ( p == 0 || node == 0 ) {
 			break;
 		}
 
-		// We read the end tag. Back up and return.
-		if ( node && node->ToElement() && node->ToElement()->ClosingType() == XMLElement::CLOSING ) {
+		StrPair endTag;
+		p = node->ParseDeep( p, &endTag );
+		if ( !p ) {
 			DELETE_NODE( node );
-			return mark;
+			node = 0;
+			break;
 		}
 
-		if ( node ) {
-			p = node->ParseDeep( p );
-			if ( !p ) {
-				DELETE_NODE( node );
-				node = 0;
-				break;
+		// We read the end tag. Return it to the parent.
+		if ( node->ToElement() && node->ToElement()->ClosingType() == XMLElement::CLOSING ) {
+			if ( parentEnd ) {
+				*parentEnd = ((XMLElement*)node)->value;
 			}
-	
-			XMLElement* ele = node->ToElement();
-			if ( ele && ele->ClosingType() == XMLElement::OPEN ) {
-				XMLNode* closingNode = 0;
-				p = document->Identify( p, &closingNode );
-				XMLElement* closingEle = closingNode ? closingNode->ToElement() : 0;
+			DELETE_NODE( node );
+			return p;
+		}
 
-				if ( closingEle == 0 ) {
+		// Handle an end tag returned to this level.
+		// And handle a bunch of annoying errors.
+		XMLElement* ele = node->ToElement();
+		if ( ele ) {
+			if ( endTag.Empty() && ele->ClosingType() == XMLElement::OPEN ) {
+				document->SetError( ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
+				p = 0;
+			}
+			else if ( !endTag.Empty() && ele->ClosingType() != XMLElement::OPEN ) {
+				document->SetError( ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
+				p = 0;
+			}
+			else if ( !endTag.Empty() ) {
+				if ( !XMLUtil::StringEqual( endTag.GetStr(), node->Value() )) { 
 					document->SetError( ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
 					p = 0;
 				}
-				else if ( closingEle->ClosingType() != XMLElement::CLOSING ) {
-					document->SetError( ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
-					p = 0;
-				}
-				else 
-				{
-					p = closingEle->ParseDeep( p );
-					if ( !XMLUtil::StringEqual( closingEle->Value(), node->Value() )) { 
-						document->SetError( ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
-						p = 0;
-					}
-				}
-				// Else everything is fine, but we need to throw away the node.
-				DELETE_NODE( closingNode );
-				if ( p == 0 ) {
-					DELETE_NODE( node );
-					node = 0;
-				}
 			}
-			if ( node ) {
-				this->InsertEndChild( node );
-			}
+		}
+		if ( p == 0 ) {
+			DELETE_NODE( node );
+			node = 0;
+		}
+		if ( node ) {
+			this->InsertEndChild( node );
 		}
 	}
 	return 0;
 }
 
 // --------- XMLText ---------- //
-char* XMLText::ParseDeep( char* p )
+char* XMLText::ParseDeep( char* p, StrPair* )
 {
 	const char* start = p;
 	if ( this->CData() ) {
@@ -721,7 +714,7 @@ XMLComment::~XMLComment()
 }
 
 
-char* XMLComment::ParseDeep( char* p )
+char* XMLComment::ParseDeep( char* p, StrPair* )
 {
 	// Comment parses as text.
 	const char* start = p;
@@ -752,7 +745,7 @@ XMLDeclaration::~XMLDeclaration()
 }
 
 
-char* XMLDeclaration::ParseDeep( char* p )
+char* XMLDeclaration::ParseDeep( char* p, StrPair* )
 {
 	// Declaration parses as text.
 	const char* start = p;
@@ -781,7 +774,7 @@ XMLUnknown::~XMLUnknown()
 }
 
 
-char* XMLUnknown::ParseDeep( char* p )
+char* XMLUnknown::ParseDeep( char* p, StrPair* )
 {
 	// Unknown parses as text.
 	const char* start = p;
@@ -1056,7 +1049,7 @@ char* XMLElement::ParseAttributes( char* p )
 //	<ele></ele>
 //	<ele>foo<b>bar</b></ele>
 //
-char* XMLElement::ParseDeep( char* p )
+char* XMLElement::ParseDeep( char* p, StrPair* strPair )
 {
 	// Read the element name.
 	p = XMLUtil::SkipWhiteSpace( p );
@@ -1079,7 +1072,8 @@ char* XMLElement::ParseDeep( char* p )
 	if ( !p || !*p || closingType ) 
 		return p;
 
-	p = XMLNode::ParseDeep( p );
+	p = XMLNode::ParseDeep( p, strPair );
+	// FIXME: proces end tage here??
 	return p;
 }
 
@@ -1207,7 +1201,7 @@ int XMLDocument::LoadFile( FILE* fp )
 		return errorID;
 	}
 
-	ParseDeep( charBuffer + (p-charBuffer) );
+	ParseDeep( charBuffer + (p-charBuffer), 0 );
 	return errorID;
 }
 
@@ -1242,7 +1236,7 @@ int XMLDocument::Parse( const char* p )
 	memcpy( charBuffer, p, len+1 );
 
 	
-	ParseDeep( charBuffer );
+	ParseDeep( charBuffer, 0 );
 	return errorID;
 }
 

@@ -462,7 +462,7 @@ public:
 
 	virtual bool Accept( XMLVisitor* visitor ) const = 0;
 
-	virtual char* ParseDeep( char* );
+	virtual char* ParseDeep( char*, StrPair* );
 
 protected:
 	XMLNode( XMLDocument* );
@@ -499,7 +499,7 @@ public:
 	void SetCData( bool value )				{ isCData = true; }
 	bool CData() const						{ return isCData; }
 
-	char* ParseDeep( char* );
+	char* ParseDeep( char*, StrPair* endTag );
 
 protected:
 	XMLText( XMLDocument* doc )	: XMLNode( doc ), isCData( false )	{}
@@ -521,7 +521,7 @@ public:
 
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
-	char* ParseDeep( char* );
+	char* ParseDeep( char*, StrPair* endTag );
 
 protected:
 	XMLComment( XMLDocument* doc );
@@ -542,7 +542,7 @@ public:
 
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
-	char* ParseDeep( char* );
+	char* ParseDeep( char*, StrPair* endTag );
 
 protected:
 	XMLDeclaration( XMLDocument* doc );
@@ -561,7 +561,7 @@ public:
 
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
-	char* ParseDeep( char* );
+	char* ParseDeep( char*, StrPair* endTag );
 
 protected:
 	XMLUnknown( XMLDocument* doc );
@@ -686,7 +686,7 @@ public:
 		CLOSING		// </foo>
 	};
 	int ClosingType() const { return closingType; }
-	char* ParseDeep( char* p );
+	char* ParseDeep( char* p, StrPair* endTag );
 
 private:
 	XMLElement( XMLDocument* doc );
