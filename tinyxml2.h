@@ -463,7 +463,6 @@ public:
 	virtual bool Accept( XMLVisitor* visitor ) const = 0;
 
 	virtual char* ParseDeep( char* );
-	virtual bool IsClosingElement() const { return false; }
 
 protected:
 	XMLNode( XMLDocument* );
@@ -681,7 +680,12 @@ public:
 	const char* GetText() const;
 
 	// internal:
-	virtual bool IsClosingElement() const { return closing; }
+	enum {
+		OPEN,		// <foo>
+		CLOSED,		// <foo/>
+		CLOSING		// </foo>
+	};
+	int ClosingType() const { return closingType; }
 	char* ParseDeep( char* p );
 
 private:
@@ -693,9 +697,9 @@ private:
 	XMLAttribute* FindAttribute( const char* name );
 	XMLAttribute* FindOrCreateAttribute( const char* name );
 	void LinkAttribute( XMLAttribute* attrib );
-	char* ParseAttributes( char* p, bool *closedElement );
+	char* ParseAttributes( char* p );
 
-	bool closing;
+	int closingType;
 	XMLAttribute* rootAttribute;
 };
 

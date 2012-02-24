@@ -129,7 +129,7 @@ int main( int argc, const char* argv )
 			printf( "----------------------------------------------\n" );
 		}
 	}
-
+#if 1
 	{
 		static const char* test = "<!--hello world\n"
 			                      "          line 2\r"
@@ -597,6 +597,8 @@ int main( int argc, const char* argv )
 						"<!-- With this comment, child2 will not be parsed! -->"
 						"<child2 att=''/>"
 					"</Parent>" );
+		xml.Print();
+
 		int count = 0;
 
 		for( XMLNode* ele = xml.FirstChildElement( "Parent" )->FirstChild();
@@ -634,7 +636,7 @@ int main( int argc, const char* argv )
 		xml.Parse( "<infinite>loop" );
 		XMLTest( "Infinite loop test.", true, true );
 	}
-
+#endif
 	#if defined( WIN32 )
 		_CrtMemCheckpoint( &endMemState );  
 		//_CrtMemDumpStatistics( &endMemState );

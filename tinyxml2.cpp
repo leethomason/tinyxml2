@@ -27,8 +27,20 @@ static const unsigned char TIXML_UTF_LEAD_1 = 0xbbU;
 static const unsigned char TIXML_UTF_LEAD_2 = 0xbfU;
 
 
-#define DELETE_NODE( node ) { MemPool* pool = node->memPool; node->~XMLNode(); pool->Free( node ); }
-#define DELETE_ATTRIBUTE( attrib ) { MemPool* pool = attrib->memPool; attrib->~XMLAttribute(); pool->Free( attrib ); }
+#define DELETE_NODE( node )	{			\
+	if ( node ) {						\
+		MemPool* pool = node->memPool;	\
+		node->~XMLNode();				\
+		pool->Free( node );				\
+	}									\
+}
+#define DELETE_ATTRIBUTE( attrib ) {		\
+	if ( attrib ) {							\
+		MemPool* pool = attrib->memPool;	\
+		attrib->~XMLAttribute();			\
+		pool->Free( attrib );				\
+	}										\
+}
 
 struct Entity {
 	const char* pattern;
@@ -397,6 +409,11 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 		returnNode = new (elementPool.Alloc()) XMLElement( this );
 		returnNode->memPool = &elementPool;
 		p += elementHeaderLen;
+
+		p = XMLUtil::SkipWhiteSpace( p );
+		if ( p && *p == '/' ) {
+			((XMLElement*)returnNode)->closingType = XMLElement::CLOSING;
+		}
 	}
 	else {
 		returnNode = new (textPool.Alloc()) XMLText( this );
@@ -587,20 +604,75 @@ const XMLElement* XMLNode::LastChildElement( const char* value ) const
 
 char* XMLNode::ParseDeep( char* p )
 {
+	// This is a recursive method, but thinking about it "at the current level"
+	// it is a pretty simple flat list:
+	//		<foo/>
+	//		<!-- comment -->
+	//
+	// With a special case:
+	//		<foo>
+	//		</foo>
+	//		<!-- comment -->
+	//		
+	// Where the closing element (/foo) *must* be the next thing after the opening
+	// element, and the names must match. BUT the tricky bit is that the closing
+	// element will be read by the child.
+
 	while( p && *p ) {
 		XMLNode* node = 0;
-		p = document->Identify( p, &node );
-		if ( p && node ) {
-			p = node->ParseDeep( p );
+		char* mark = p;
 
-			if ( node->IsClosingElement() ) {
-				if ( !XMLUtil::StringEqual( Value(), node->Value() )) {
-					document->SetError( ERROR_MISMATCHED_ELEMENT, Value(), 0 );
-				}
+		p = document->Identify( p, &node );
+		if ( p == 0 ) {
+			break;
+		}
+
+		// We read the end tag. Back up and return.
+		if ( node && node->ToElement() && node->ToElement()->ClosingType() == XMLElement::CLOSING ) {
+			DELETE_NODE( node );
+			return mark;
+		}
+
+		if ( node ) {
+			p = node->ParseDeep( p );
+			if ( !p ) {
 				DELETE_NODE( node );
-				return p;
+				node = 0;
+				break;
 			}
-			this->InsertEndChild( node );
+	
+			XMLElement* ele = node->ToElement();
+			if ( ele && ele->ClosingType() == XMLElement::OPEN ) {
+				XMLNode* closingNode = 0;
+				p = document->Identify( p, &closingNode );
+				XMLElement* closingEle = closingNode ? closingNode->ToElement() : 0;
+
+				if ( closingEle == 0 ) {
+					document->SetError( ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
+					p = 0;
+				}
+				else if ( closingEle->ClosingType() != XMLElement::CLOSING ) {
+					document->SetError( ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
+					p = 0;
+				}
+				else 
+				{
+					p = closingEle->ParseDeep( p );
+					if ( !XMLUtil::StringEqual( closingEle->Value(), node->Value() )) { 
+						document->SetError( ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
+						p = 0;
+					}
+				}
+				// Else everything is fine, but we need to throw away the node.
+				DELETE_NODE( closingNode );
+				if ( p == 0 ) {
+					DELETE_NODE( node );
+					node = 0;
+				}
+			}
+			if ( node ) {
+				this->InsertEndChild( node );
+			}
 		}
 	}
 	return 0;
@@ -736,7 +808,7 @@ char* XMLAttribute::ParseDeep( char* p )
 	char endTag[2] = { *p, 0 };
 	++p;
 	p = value.ParseText( p, endTag, StrPair::ATTRIBUTE_VALUE );
-	if ( value.Empty() ) return 0;
+	//if ( value.Empty() ) return 0;
 	return p;
 }
 
@@ -842,9 +914,8 @@ void XMLAttribute::SetAttribute( float v )
 
 // --------- XMLElement ---------- //
 XMLElement::XMLElement( XMLDocument* doc ) : XMLNode( doc ),
-	closing( false ),
+	closingType( 0 ),
 	rootAttribute( 0 )
-	//lastAttribute( 0 )
 {
 }
 
@@ -937,10 +1008,9 @@ void XMLElement::DeleteAttribute( const char* name )
 }
 
 
-char* XMLElement::ParseAttributes( char* p, bool* closedElement )
+char* XMLElement::ParseAttributes( char* p )
 {
 	const char* start = p;
-	*closedElement = false;
 
 	// Read the attributes.
 	while( p ) {
@@ -965,11 +1035,7 @@ char* XMLElement::ParseAttributes( char* p, bool* closedElement )
 		}
 		// end of the tag
 		else if ( *p == '/' && *(p+1) == '>' ) {
-			if ( closing ) {
-				document->SetError( ERROR_PARSING_ELEMENT, start, p );
-				return 0;
-			}
-			*closedElement = true;
+			closingType = CLOSED;
 			return p+2;	// done; sealed element.
 		}
 		// end of the tag
@@ -1001,7 +1067,7 @@ char* XMLElement::ParseDeep( char* p )
 	// parsed just like a regular element then deleted from
 	// the DOM.
 	if ( *p == '/' ) {
-		closing = true;
+		closingType = CLOSING;
 		++p;
 	}
 
@@ -1009,8 +1075,8 @@ char* XMLElement::ParseDeep( char* p )
 	if ( value.Empty() ) return 0;
 
 	bool elementClosed=false;
-	p = ParseAttributes( p, &elementClosed );
-	if ( !p || !*p || elementClosed || closing ) 
+	p = ParseAttributes( p );
+	if ( !p || !*p || closingType ) 
 		return p;
 
 	p = XMLNode::ParseDeep( p );
