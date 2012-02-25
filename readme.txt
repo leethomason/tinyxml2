@@ -1,5 +1,3 @@
-/** @mainpage
-
 <h1> TinyXML-2 </h1>
 
 TinyXML is a simple, small, efficient, C++ XML parser that can be 
@@ -511,4 +509,4 @@ Please post questions, comments, file bugs, or contact us at:
 www.sourceforge.net/projects/tinyxml
 
 Lee Thomason, Yves Berquin, Andrew Ellerton
-*/
+
