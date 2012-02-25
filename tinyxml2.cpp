@@ -448,7 +448,7 @@ XMLNode::XMLNode( XMLDocument* doc ) :
 
 XMLNode::~XMLNode()
 {
-	ClearChildren();
+	DeleteChildren();
 	if ( parent ) {
 		parent->Unlink( this );
 	}
@@ -464,7 +464,7 @@ void XMLNode::SetValue( const char* str, bool staticMem )
 }
 
 
-void XMLNode::ClearChildren()
+void XMLNode::DeleteChildren()
 {
 	while( firstChild ) {
 		XMLNode* node = firstChild;
@@ -1106,7 +1106,7 @@ XMLDocument::XMLDocument() :
 
 XMLDocument::~XMLDocument()
 {
-	ClearChildren();
+	DeleteChildren();
 	delete [] charBuffer;
 
 #if 0
@@ -1164,7 +1164,7 @@ XMLText* XMLDocument::NewText( const char* str )
 
 int XMLDocument::LoadFile( const char* filename )
 {
-	ClearChildren();
+	DeleteChildren();
 	InitDocument();
 
 	FILE* fp = fopen( filename, "rb" );
@@ -1180,7 +1180,7 @@ int XMLDocument::LoadFile( const char* filename )
 
 int XMLDocument::LoadFile( FILE* fp ) 
 {
-	ClearChildren();
+	DeleteChildren();
 	InitDocument();
 
 	fseek( fp, 0, SEEK_END );
@@ -1211,7 +1211,7 @@ int XMLDocument::LoadFile( FILE* fp )
 void XMLDocument::SaveFile( const char* filename )
 {
 	FILE* fp = fopen( filename, "w" );
-	XMLStreamer stream( fp );
+	XMLPrinter stream( fp );
 	Print( &stream );
 	fclose( fp );
 }
@@ -1219,7 +1219,7 @@ void XMLDocument::SaveFile( const char* filename )
 
 int XMLDocument::Parse( const char* p )
 {
-	ClearChildren();
+	DeleteChildren();
 	InitDocument();
 
 	if ( !p || !*p ) {
@@ -1243,9 +1243,9 @@ int XMLDocument::Parse( const char* p )
 }
 
 
-void XMLDocument::Print( XMLStreamer* streamer ) 
+void XMLDocument::Print( XMLPrinter* streamer ) 
 {
-	XMLStreamer stdStreamer( stdout );
+	XMLPrinter stdStreamer( stdout );
 	if ( !streamer )
 		streamer = &stdStreamer;
 	Accept( streamer );
@@ -1281,7 +1281,7 @@ void XMLDocument::PrintError() const
 }
 
 
-XMLStreamer::XMLStreamer( FILE* file ) : 
+XMLPrinter::XMLPrinter( FILE* file ) : 
 	elementJustOpened( false ), 
 	firstElement( true ),
 	fp( file ), 
@@ -1305,7 +1305,7 @@ XMLStreamer::XMLStreamer( FILE* file ) :
 }
 
 
-void XMLStreamer::Print( const char* format, ... )
+void XMLPrinter::Print( const char* format, ... )
 {
     va_list     va;
     va_start( va, format );
@@ -1338,7 +1338,7 @@ void XMLStreamer::Print( const char* format, ... )
 }
 
 
-void XMLStreamer::PrintSpace( int depth )
+void XMLPrinter::PrintSpace( int depth )
 {
 	for( int i=0; i<depth; ++i ) {
 		Print( "    " );
@@ -1346,7 +1346,7 @@ void XMLStreamer::PrintSpace( int depth )
 }
 
 
-void XMLStreamer::PrintString( const char* p, bool restricted )
+void XMLPrinter::PrintString( const char* p, bool restricted )
 {
 	// Look for runs of bytes between entities to print.
 	const char* q = p;
@@ -1382,7 +1382,7 @@ void XMLStreamer::PrintString( const char* p, bool restricted )
 }
 
 
-void XMLStreamer::PushHeader( bool writeBOM, bool writeDec )
+void XMLPrinter::PushHeader( bool writeBOM, bool writeDec )
 {
 	static const unsigned char bom[] = { TIXML_UTF_LEAD_0, TIXML_UTF_LEAD_1, TIXML_UTF_LEAD_2, 0 };
 	if ( writeBOM ) {
@@ -1394,7 +1394,7 @@ void XMLStreamer::PushHeader( bool writeBOM, bool writeDec )
 }
 
 
-void XMLStreamer::OpenElement( const char* name )
+void XMLPrinter::OpenElement( const char* name )
 {
 	if ( elementJustOpened ) {
 		SealElement();
@@ -1413,7 +1413,7 @@ void XMLStreamer::OpenElement( const char* name )
 }
 
 
-void XMLStreamer::PushAttribute( const char* name, const char* value )
+void XMLPrinter::PushAttribute( const char* name, const char* value )
 {
 	TIXMLASSERT( elementJustOpened );
 	Print( " %s=\"", name );
@@ -1422,7 +1422,7 @@ void XMLStreamer::PushAttribute( const char* name, const char* value )
 }
 
 
-void XMLStreamer::CloseElement()
+void XMLPrinter::CloseElement()
 {
 	--depth;
 	const char* name = stack.Pop();
@@ -1446,14 +1446,14 @@ void XMLStreamer::CloseElement()
 }
 
 
-void XMLStreamer::SealElement()
+void XMLPrinter::SealElement()
 {
 	elementJustOpened = false;
 	Print( ">" );
 }
 
 
-void XMLStreamer::PushText( const char* text, bool cdata )
+void XMLPrinter::PushText( const char* text, bool cdata )
 {
 	textDepth = depth-1;
 
@@ -1471,7 +1471,7 @@ void XMLStreamer::PushText( const char* text, bool cdata )
 }
 
 
-void XMLStreamer::PushComment( const char* comment )
+void XMLPrinter::PushComment( const char* comment )
 {
 	if ( elementJustOpened ) {
 		SealElement();
@@ -1485,7 +1485,7 @@ void XMLStreamer::PushComment( const char* comment )
 }
 
 
-void XMLStreamer::PushDeclaration( const char* value )
+void XMLPrinter::PushDeclaration( const char* value )
 {
 	if ( elementJustOpened ) {
 		SealElement();
@@ -1499,7 +1499,7 @@ void XMLStreamer::PushDeclaration( const char* value )
 }
 
 
-void XMLStreamer::PushUnknown( const char* value )
+void XMLPrinter::PushUnknown( const char* value )
 {
 	if ( elementJustOpened ) {
 		SealElement();
@@ -1513,7 +1513,7 @@ void XMLStreamer::PushUnknown( const char* value )
 }
 
 
-bool XMLStreamer::VisitEnter( const XMLDocument& doc )
+bool XMLPrinter::VisitEnter( const XMLDocument& doc )
 {
 	if ( doc.HasBOM() ) {
 		PushHeader( true, false );
@@ -1522,7 +1522,7 @@ bool XMLStreamer::VisitEnter( const XMLDocument& doc )
 }
 
 
-bool XMLStreamer::VisitEnter( const XMLElement& element, const XMLAttribute* attribute )
+bool XMLPrinter::VisitEnter( const XMLElement& element, const XMLAttribute* attribute )
 {
 	OpenElement( element.Name() );
 	while ( attribute ) {
@@ -1533,34 +1533,34 @@ bool XMLStreamer::VisitEnter( const XMLElement& element, const XMLAttribute* att
 }
 
 
-bool XMLStreamer::VisitExit( const XMLElement& element )
+bool XMLPrinter::VisitExit( const XMLElement& element )
 {
 	CloseElement();
 	return true;
 }
 
 
-bool XMLStreamer::Visit( const XMLText& text )
+bool XMLPrinter::Visit( const XMLText& text )
 {
 	PushText( text.Value(), text.CData() );
 	return true;
 }
 
 
-bool XMLStreamer::Visit( const XMLComment& comment )
+bool XMLPrinter::Visit( const XMLComment& comment )
 {
 	PushComment( comment.Value() );
 	return true;
 }
 
-bool XMLStreamer::Visit( const XMLDeclaration& declaration )
+bool XMLPrinter::Visit( const XMLDeclaration& declaration )
 {
 	PushDeclaration( declaration.Value() );
 	return true;
 }
 
 
-bool XMLStreamer::Visit( const XMLUnknown& unknown )
+bool XMLPrinter::Visit( const XMLUnknown& unknown )
 {
 	PushUnknown( unknown.Value() );
 	return true;

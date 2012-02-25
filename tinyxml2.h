@@ -1,35 +1,15 @@
 #ifndef TINYXML_INCLUDED
 #define TINYXML2_INCLUDED
 
-/*
-	TODO
-	X const and non-const versions of API
-	X memory pool the class construction
-	X attribute accessors
-	X node navigation
-	- handles
-	X visit pattern - change streamer?
-	X make constructors protected
-	X hide copy constructor
-	X hide = operator
-	X UTF8 support: isAlpha, etc.
-	X string buffer for sets. (Grr.)
-	- MS BOM
-	X print to memory buffer
-	- tests from xml1
-	- xml1 tests especially UTF-8
-	- perf test: xml1
-	- perf test: xenowar
-	- test: load(char*)
-	- test: load(FILE*)
-	- rename declaration
-	- rename streamer
-*/
 
 #include <limits.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <memory.h>
+
+/* TODO: create main page description.
+   TODO: add 'lastAttribute' for faster parsing.
+*/
 
 #if defined( _DEBUG ) || defined( DEBUG ) || defined (__DEBUG__)
 	#ifndef DEBUG
@@ -89,12 +69,12 @@ class XMLText;
 class XMLDeclaration;
 class XMLUnknown;
 
-class XMLStreamer;
+class XMLPrinter;
 
 /*
 	A class that wraps strings. Normally stores the start and end
 	pointers into the XML file itself, and will apply normalization
-	and entity transalion if actually read. Can also store (and memory
+	and entity translation if actually read. Can also store (and memory
 	manage) a traditional char[]
 */
 class StrPair
@@ -380,20 +360,48 @@ public:
 };
 
 
+/** XMLNode is a base class for every object that is in the
+	XML Document Object Model (DOM), except XMLAttributes.
+	Nodes have siblings, a parent, and children which can
+	be navigated. A node is always in a XMLDocument.
+	The type of a TiXmlNode can be queried, and it can 
+	be cast to its more defined type.
+
+	An XMLDocument allocates memory for all its Nodes.
+	When the XMLDocument gets deleted, all its Nodes
+	will also be deleted.
+
+	@verbatim
+	A Document can contain:	Element	(container or leaf)
+							Comment (leaf)
+							Unknown (leaf)
+							Declaration( leaf )
+
+	An Element can contain:	Element (container or leaf)
+							Text	(leaf)
+							Attributes (not on tree)
+							Comment (leaf)
+							Unknown (leaf)
+
+	@endverbatim
+*/
 class XMLNode
 {
 	friend class XMLDocument;
 	friend class XMLElement;
 public:
+
+	/// Get the XMLDocument that owns this XMLNode.
 	const XMLDocument* GetDocument() const	{ return document; }
+	/// Get the XMLDocument that owns this XMLNode.
 	XMLDocument* GetDocument()				{ return document; }
 
-	virtual XMLElement*		ToElement()		{ return 0; }
-	virtual XMLText*		ToText()		{ return 0; }
-	virtual XMLComment*		ToComment()		{ return 0; }
-	virtual XMLDocument*	ToDocument()	{ return 0; }
-	virtual XMLDeclaration*	ToDeclaration()	{ return 0; }
-	virtual XMLUnknown*		ToUnknown()		{ return 0; }
+	virtual XMLElement*		ToElement()		{ return 0; }	///< Safely cast to an Element, or null.
+	virtual XMLText*		ToText()		{ return 0; }	///< Safely cast to Text, or null.
+	virtual XMLComment*		ToComment()		{ return 0; }	///< Safely cast to a Comment, or null.
+	virtual XMLDocument*	ToDocument()	{ return 0; }	///< Safely cast to a Document, or null.
+	virtual XMLDeclaration*	ToDeclaration()	{ return 0; }	///< Safely cast to a Declaration, or null.
+	virtual XMLUnknown*		ToUnknown()		{ return 0; }	///< Safely cast to an Unknown, or null.
 
 	virtual const XMLElement*		ToElement() const		{ return 0; }
 	virtual const XMLText*			ToText() const			{ return 0; }
@@ -402,66 +410,111 @@ public:
 	virtual const XMLDeclaration*	ToDeclaration() const	{ return 0; }
 	virtual const XMLUnknown*		ToUnknown() const		{ return 0; }
 
+	/** The meaning of 'value' changes for the specific type.
+		@verbatim
+		Document:	empy
+		Element:	name of the element
+		Comment:	the comment text
+		Unknown:	the tag contents
+		Text:		the text string
+		@endverbatim
+	*/
 	const char* Value() const			{ return value.GetStr(); }
+	/** Set the Value of an XML node.
+		@sa Value()
+	*/
 	void SetValue( const char* val, bool staticMem=false );
 
+	/// Get the parent of this node on the DOM.
 	const XMLNode*	Parent() const			{ return parent; }
 	XMLNode* Parent()						{ return parent; }
 
 	/// Returns true if this node has no children.
 	bool NoChildren() const					{ return !firstChild; }
 
+	/// Get the first child node, or null if none exists.
 	const XMLNode*  FirstChild() const		{ return firstChild; }
 	XMLNode*		FirstChild()			{ return firstChild; }
+	/** Get the first child element, or optionally the first child
+	    element with the specified name.
+	*/
 	const XMLElement* FirstChildElement( const char* value=0 ) const;
 	XMLElement* FirstChildElement( const char* value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( value )); }
 
+	/// Get the last child node, or null if none exists.
 	const XMLNode*	LastChild() const						{ return lastChild; }
 	XMLNode*		LastChild()								{ return const_cast<XMLNode*>(const_cast<const XMLNode*>(this)->LastChild() ); }
 
+	/** Get the last child element or optionally the last child
+	    element with the specified name.
+	*/
 	const XMLElement* LastChildElement( const char* value=0 ) const;
 	XMLElement* LastChildElement( const char* value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(value) ); }
 	
+	/// Get the previous (left) sibling node of this node.
 	const XMLNode*	PreviousSibling() const					{ return prev; }
 	XMLNode*	PreviousSibling()							{ return prev; }
 
+	/// Get the previous (left) sibling element of this node, with an opitionally supplied name.
 	const XMLNode*	PreviousSiblingElement( const char* value=0 ) const ;
 	XMLNode*	PreviousSiblingElement( const char* value=0 ) { return const_cast<XMLNode*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( value ) ); }
 	
+	/// Get the next (right) sibling node of this node.
 	const XMLNode*	NextSibling() const						{ return next; }
 	XMLNode*	NextSibling()								{ return next; }
 		
+	/// Get the next (right) sibling element of this node, with an opitionally supplied name.
 	const XMLNode*	NextSiblingElement( const char* value=0 ) const;
  	XMLNode*	NextSiblingElement( const char* value=0 )	{ return const_cast<XMLNode*>(const_cast<const XMLNode*>(this)->NextSiblingElement( value ) ); }
 
 	/**
-
-		Tests: Programmatic DOM
+		Add a child node as the last (right) child.
 	*/
 	XMLNode* InsertEndChild( XMLNode* addThis );
 	/**
-
-		Tests: Programmatic DOM
+		Add a child node as the first (left) child.
 	*/
 	XMLNode* InsertFirstChild( XMLNode* addThis );
 	/**
-
-		Tests: Programmatic DOM
+		Add a node after the specified child node.
 	*/
 	XMLNode* InsertAfterChild( XMLNode* afterThis, XMLNode* addThis );
 	
 	/**
-		Tests: All (used by destructor)
+		Delete all the children of this node.
 	*/
-	void ClearChildren();
+	void DeleteChildren();
 
 	/**
-		Tests: Progammatic DOM
+		Delete a child of this node.
 	*/
 	void DeleteChild( XMLNode* node );
 
+	/** Accept a hierchical visit the nodes in the TinyXML DOM. Every node in the 
+		XML tree will be conditionally visited and the host will be called back
+		via the TiXmlVisitor interface.
+
+		This is essentially a SAX interface for TinyXML. (Note however it doesn't re-parse
+		the XML for the callbacks, so the performance of TinyXML is unchanged by using this
+		interface versus any other.)
+
+		The interface has been based on ideas from:
+
+		- http://www.saxproject.org/
+		- http://c2.com/cgi/wiki?HierarchicalVisitorPattern 
+
+		Which are both good references for "visiting".
+
+		An example of using Accept():
+		@verbatim
+		TiXmlPrinter printer;
+		tinyxmlDoc.Accept( &printer );
+		const char* xmlcstr = printer.CStr();
+		@endverbatim
+	*/
 	virtual bool Accept( XMLVisitor* visitor ) const = 0;
 
+	// internal
 	virtual char* ParseDeep( char*, StrPair* );
 
 protected:
@@ -486,6 +539,18 @@ private:
 };
 
 
+/** XML text.
+
+	Note that a text node can have child element nodes, for example:
+	@verbatim
+	<root>This is <b>bold</b></root>
+	@endverbatim
+
+	A text node can have 2 ways to output the next. "normal" output 
+	and CDATA. It will default to the mode it was parsed from the XML file and
+	you generally want to leave it alone, but you can change the output mode with 
+	SetCDATA() and query it with CDATA().
+*/
 class XMLText : public XMLNode
 {
 	friend class XMLBase;
@@ -496,7 +561,9 @@ public:
 	virtual XMLText*	ToText()			{ return this; }
 	virtual const XMLText*	ToText() const	{ return this; }
 
-	void SetCData( bool value )				{ isCData = true; }
+	/// Declare whether this should be CDATA or standard text.
+	void SetCData( bool isCData )			{ this->isCData = isCData; }
+	/// Returns true if this is a CDATA text element.
 	bool CData() const						{ return isCData; }
 
 	char* ParseDeep( char*, StrPair* endTag );
@@ -512,6 +579,7 @@ private:
 };
 
 
+/** An XML Comment. */
 class XMLComment : public XMLNode
 {
 	friend class XMLDocument;
@@ -533,6 +601,17 @@ private:
 };
 
 
+/** In correct XML the declaration is the first entry in the file.
+	@verbatim
+		<?xml version="1.0" standalone="yes"?>
+	@endverbatim
+
+	TinyXML2 will happily read or write files without a declaration,
+	however.
+
+	The text of the declaration isn't interpreted. It is parsed
+	and written as a string.
+*/
 class XMLDeclaration : public XMLNode
 {
 	friend class XMLDocument;
@@ -552,6 +631,13 @@ protected:
 };
 
 
+/** Any tag that tinyXml doesn't recognize is saved as an
+	unknown. It is a tag of text, but should not be modified.
+	It will be written back to the XML, unchanged, when the file
+	is saved.
+
+	DTD tags get thrown into TiXmlUnknowns.
+*/
 class XMLUnknown : public XMLNode
 {
 	friend class XMLDocument;
@@ -593,31 +679,59 @@ enum {
 };
 
 
+/** An attribute is a name-value pair. Elements have an arbitrary
+	number of attributes, each with a unique name.
+
+	@note The attributes are not XMLNodes. You may only query the
+	Next() attribute in a list.
+*/
 class XMLAttribute
 {
 	friend class XMLElement;
 public:
-	const char* Name() const { return name.GetStr(); }
-	const char* Value() const { return value.GetStr(); }
-	const XMLAttribute* Next() const { return next; }
+	const char* Name() const { return name.GetStr(); }			///< The name of the attribute.
+	const char* Value() const { return value.GetStr(); }		///< The value of the attribute.
+	const XMLAttribute* Next() const { return next; }			///< The next attribute in the list.
 
+	/** IntAttribute interprets the attribute as an integer, and returns the value.
+	    If the value isn't an integer, 0 will be returned. There is no error checking;
+		use QueryIntAttribute() if you need error checking.
+	*/
 	int		 IntAttribute( const char* name ) const		{ int i=0;		QueryIntAttribute( &i );		return i; }
+	/// Query as an unsigned integer. See IntAttribute()
 	unsigned UnsignedAttribute( const char* name ) const{ unsigned i=0; QueryUnsignedAttribute( &i );	return i; }
+	/// Query as a boolean. See IntAttribute()
 	bool	 BoolAttribute( const char* name ) const	{ bool b=false; QueryBoolAttribute( &b );		return b; }
+	/// Query as a double. See IntAttribute()
 	double 	 DoubleAttribute( const char* name ) const	{ double d=0;	QueryDoubleAttribute( &d );		return d; }
+	/// Query as a float. See IntAttribute()
 	float	 FloatAttribute( const char* name ) const	{ float f=0;	QueryFloatAttribute( &f );		return f; }
 
+	/** QueryIntAttribute interprets the attribute as an integer, and returns the value
+		in the provided paremeter. The function will return XML_NO_ERROR on success,
+		and WRONG_ATTRIBUTE_TYPE if the conversion is not successful.
+	*/
 	int QueryIntAttribute( int* value ) const;
+	/// See QueryIntAttribute
 	int QueryUnsignedAttribute( unsigned int* value ) const;
+	/// See QueryIntAttribute
 	int QueryBoolAttribute( bool* value ) const;
+	/// See QueryIntAttribute
 	int QueryDoubleAttribute( double* value ) const;
+	/// See QueryIntAttribute
 	int QueryFloatAttribute( float* value ) const;
 
+	/// Set the attribute to a string value.
 	void SetAttribute( const char* value );
+	/// Set the attribute to value.
 	void SetAttribute( int value );
+	/// Set the attribute to value.
 	void SetAttribute( unsigned value );
+	/// Set the attribute to value.
 	void SetAttribute( bool value );
+	/// Set the attribute to value.
 	void SetAttribute( double value );
+	/// Set the attribute to value.
 	void SetAttribute( float value );
 
 private:
@@ -638,46 +752,116 @@ private:
 };
 
 
+/** The element is a container class. It has a value, the element name,
+	and can contain other elements, text, comments, and unknowns.
+	Elements also contain an arbitrary number of attributes.
+*/
 class XMLElement : public XMLNode
 {
 	friend class XMLBase;
 	friend class XMLDocument;
 public:
+	/// Get the name of an element (which is the Value() of the node.)
 	const char* Name() const		{ return Value(); }
+	/// Set the name of the element.
 	void SetName( const char* str, bool staticMem=false )	{ SetValue( str, staticMem ); }
 
 	virtual XMLElement* ToElement()				{ return this; }
 	virtual const XMLElement* ToElement() const { return this; }
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
+	/** Given an attribute name, Attribute() returns the value
+		for the attribute of that name, or null if none exists.
+	*/
 	const char* Attribute( const char* name ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return 0; return a->Value(); }
 
+	/** Given an attribute name, IntAttribute() returns the value
+		of the attribute interpreted as an integer. 0 will be
+		returned if there is an error. For a method with error 
+		checking, see QueryIntAttribute()
+	*/
 	int		 IntAttribute( const char* name ) const		{ int i=0;		QueryIntAttribute( name, &i );		return i; }
+	/// See IntAttribute()
 	unsigned UnsignedAttribute( const char* name ) const{ unsigned i=0; QueryUnsignedAttribute( name, &i ); return i; }
+	/// See IntAttribute()
 	bool	 BoolAttribute( const char* name ) const	{ bool b=false; QueryBoolAttribute( name, &b );		return b; }
+	/// See IntAttribute()
 	double 	 DoubleAttribute( const char* name ) const	{ double d=0;	QueryDoubleAttribute( name, &d );		return d; }
+	/// See IntAttribute()
 	float	 FloatAttribute( const char* name ) const	{ float f=0;	QueryFloatAttribute( name, &f );		return f; }
 
+	/** Given an attribute name, QueryIntAttribute() returns 
+		XML_NO_ERROR, WRONG_ATTRIBUTE_TYPE if the conversion
+		can't be performed, or NO_ATTRIBUTE if the attribute
+		doesn't exist. If successful, the result of the conversion
+		will be written to 'value'. If not successful, nothing will
+		be written to 'value'. This allows you to provide default
+		value:
+
+		@verbatim
+		int value = 10;
+		QueryIntAttribute( "foo", &value );		// if "foo" isn't found, value will still be 10
+		@endverbatim
+	*/
 	int QueryIntAttribute( const char* name, int* value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryIntAttribute( value ); } 
+	/// See QueryIntAttribute()
 	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryUnsignedAttribute( value ); }
+	/// See QueryIntAttribute()
 	int QueryBoolAttribute( const char* name, bool* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryBoolAttribute( value ); }
+	/// See QueryIntAttribute()
 	int QueryDoubleAttribute( const char* name, double* value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryDoubleAttribute( value ); }
+	/// See QueryIntAttribute()
 	int QueryFloatAttribute( const char* name, float* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryFloatAttribute( value ); }
 
+	/// Sets the named attribute to value.
 	void SetAttribute( const char* name, const char* value )	{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	/// Sets the named attribute to value.
 	void SetAttribute( const char* name, int value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	/// Sets the named attribute to value.
 	void SetAttribute( const char* name, unsigned value )		{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	/// Sets the named attribute to value.
 	void SetAttribute( const char* name, bool value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	/// Sets the named attribute to value.
 	void SetAttribute( const char* name, double value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
 
 	/**
-		Tests: Programmatic DOM
+		Delete an attribute.
 	*/
 	void DeleteAttribute( const char* name );
 
+	/// Return the first attribute in the list.
 	const XMLAttribute* FirstAttribute() const { return rootAttribute; }
+	/// Query a specific attribute in the list.
 	const XMLAttribute* FindAttribute( const char* name ) const;
 
+	/** Convenience function for easy access to the text inside an element. Although easy
+		and concise, GetText() is limited compared to getting the TiXmlText child
+		and accessing it directly.
+	
+		If the first child of 'this' is a TiXmlText, the GetText()
+		returns the character string of the Text node, else null is returned.
+
+		This is a convenient method for getting the text of simple contained text:
+		@verbatim
+		<foo>This is text</foo>
+		const char* str = fooElement->GetText();
+		@endverbatim
+
+		'str' will be a pointer to "This is text". 
+		
+		Note that this function can be misleading. If the element foo was created from
+		this XML:
+		@verbatim
+		<foo><b>This is text</b></foo> 
+		@endverbatim
+
+		then the value of str would be null. The first child node isn't a text node, it is
+		another element. From this XML:
+		@verbatim
+		<foo>This is <b>text</b></foo> 
+		@endverbatim
+		GetText() will return "This is ".
+	*/
 	const char* GetText() const;
 
 	// internal:
@@ -705,54 +889,111 @@ private:
 };
 
 
+/** A document binds together all the functionality. 
+	It can be saved, loaded, and printed to the screen.
+	All Nodes are connected and allocated to a Document.
+	If the Document is deleted, all its Nodes are also deleted.
+*/
 class XMLDocument : public XMLNode
 {
 	friend class XMLElement;
 public:
+	/// constructor
 	XMLDocument(); 
 	~XMLDocument();
 
 	virtual XMLDocument* ToDocument()				{ return this; }
 	virtual const XMLDocument* ToDocument() const	{ return this; }
 
+	/**
+		Parse an XML file from a character string.
+		Returns XML_NO_ERROR (0) on success, or
+		an errorID.
+	*/
 	int Parse( const char* xml );
+	/**
+		Load an XML file from disk.
+		Returns XML_NO_ERROR (0) on success, or
+		an errorID.
+	*/
 	int LoadFile( const char* filename );
+	/**
+		Load an XML file from disk. You are responsible
+		for providing and closing the FILE*.
+
+		Returns XML_NO_ERROR (0) on success, or
+		an errorID.
+	*/
 	int LoadFile( FILE* );
+	/**
+		Save the XML file to disk.
+	*/
 	void SaveFile( const char* filename );
 
 	bool HasBOM() const { return writeBOM; }
+
+	/** Return the root element of DOM. Equivalent to FirstChildElement().
+	    To get the first node, use FirstChild().
+	*/
 	XMLElement* RootElement()				{ return FirstChildElement(); }
 	const XMLElement* RootElement() const	{ return FirstChildElement(); }
 
-	void Print( XMLStreamer* streamer=0 );
+	/** Print the Document. If the Printer is not provided, it will
+	    print to stdout. If you provide Printer, this can print to a file:
+		@verbatim
+		XMLPrinter printer( fp );
+		doc.Print( &printer );
+		@endverbatim
+
+		Or you can use a printer to print to memory:
+		@verbatim
+		XMLPrinter printer;
+		doc->Print( &printer );
+		SomeFunctior( printer.CStr() );
+		@endverbatim
+	*/
+	void Print( XMLPrinter* streamer=0 );
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
 	/**
-		Tests: Programmatic DOM
+		Create a new Element associated with
+		this Document. The memory for the Element
+		is managed by the Document.
 	*/
 	XMLElement* NewElement( const char* name );
 	/**
-		Tests: Programmatic DOM
+		Create a new Comment associated with
+		this Document. The memory for the Comment
+		is managed by the Document.
 	*/
 	XMLComment* NewComment( const char* comment );
 	/**
-		Tests: Programmatic DOM
+		Create a new Text associated with
+		this Document. The memory for the Text
+		is managed by the Document.
 	*/
 	XMLText* NewText( const char* text );
 
 	/**
-		Tests: Programmatic DOM
+		Delete a node associated with this documented.
+		It will be unlinked from the DOM.
 	*/
 	void DeleteNode( XMLNode* node )	{ node->parent->DeleteChild( node ); }
 
 	void SetError( int error, const char* str1, const char* str2 );
 	
+	/// Return true if there was an error parsing the document.
 	bool Error() const { return errorID != XML_NO_ERROR; }
+	/// Return the errorID.
 	int  ErrorID() const { return errorID; }
+	/// Return a possibly helpful diagnostic location or string.
 	const char* GetErrorStr1() const { return errorStr1; }
+	/// Return possibly helpful secondary diagnostic location or string.
 	const char* GetErrorStr2() const { return errorStr2; }
+	/// If there is an error, print it to stdout
 	void PrintError() const;
 
+	// internal
 	char* Identify( char* p, XMLNode** node );
 
 private:
@@ -773,19 +1014,75 @@ private:
 };
 
 
-class XMLStreamer : public XMLVisitor
+
+/**
+	Printing functionality. The XMLPrinter gives you more
+	options than the XMLDocument::Print() method.
+
+	It can:
+	-# Print to memory.
+	-# Print to a file you provide
+	-# Print XML without a XMLDocument.
+
+	Print to Memory
+
+	@verbatim
+	XMLPrinter printer;
+	doc->Print( &printer );
+	SomeFunctior( printer.CStr() );
+	@endverbatim
+
+	Print to a File
+	
+	You provide the file pointer.
+	@verbatim
+	XMLPrinter printer( fp );
+	doc.Print( &printer );
+	@endverbatim
+
+	Print without a XMLDocument
+
+	When loading, an XML parser is very useful. However, sometimes
+	when saving, it just gets in the way. The code is often set up
+	for streaming, and constructing the DOM is just overhead.
+
+	The Printer supports the streaming case. The following code
+	prints out a trivially simple XML file without ever creating
+	an XML document.
+
+	@verbatim
+	XMLPrinter printer( fp );
+	printer.OpenElement( "foo" );
+	printer.PushAttribute( "foo", "bar" );
+	printer.CloseElement();
+	@endverbatim
+*/
+class XMLPrinter : public XMLVisitor
 {
 public:
-	XMLStreamer( FILE* file=0 );
-	~XMLStreamer()	{}
+	/** Construct the printer. If the FILE* is specified,
+		this will print to the FILE. Else it will print
+		to memory, and the result is available in CStr()
+	*/
+	XMLPrinter( FILE* file=0 );
+	~XMLPrinter()	{}
 
+	/** If streaming, write the BOM and declaration. */
 	void PushHeader( bool writeBOM, bool writeDeclaration );
+	/** If streaming, start writing an element.
+	    The element must be closed with CloseElement()
+	*/
 	void OpenElement( const char* name );
+	/// If streaming, add an attribute to an open element.
 	void PushAttribute( const char* name, const char* value );
+	/// If streaming, close the Element.
 	void CloseElement();
 
+	/// Add a text node.
 	void PushText( const char* text, bool cdata=false );
+	/// Add a comment
 	void PushComment( const char* comment );
+
 	void PushDeclaration( const char* value );
 	void PushUnknown( const char* value );
 
@@ -800,6 +1097,10 @@ public:
 	virtual bool Visit( const XMLDeclaration& declaration );
 	virtual bool Visit( const XMLUnknown& unknown );
 
+	/**
+		If in print to memory mode, return a pointer to
+		the XML file in memory.
+	*/
 	const char* CStr() const { return buffer.Mem(); }
 
 private:

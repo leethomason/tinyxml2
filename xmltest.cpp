@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined( WIN32 )
+#if defined( _MSC_VER )
 	#include <crtdbg.h>
 	_CrtMemState startMemState;
 	_CrtMemState endMemState;
@@ -13,35 +13,6 @@
 using namespace tinyxml2;
 int gPass = 0;
 int gFail = 0;
-
-//#define DREAM_ONLY
-
-/*
-int gNew = 0;
-int gNewTotal = 0;
-
-void* operator new( size_t size ) 
-{
-	++gNew;
-	return malloc( size );
-}
-
-void* operator new[]( size_t size ) 
-{
-	++gNew;
-	return malloc( size );
-}
-
-void operator delete[]( void* mem ) 
-{
-	free( mem );
-}
-
-void operator delete( void* mem ) 
-{
-	free( mem );
-}
-*/
 
 
 bool XMLTest (const char* testString, const char* expected, const char* found, bool echo=true )
@@ -100,7 +71,7 @@ void NullLineEndings( char* p )
 
 int main( int argc, const char* argv )
 {
-	#if defined( WIN32 )
+	#if defined( _MSC_VER )
 		_CrtMemCheckpoint( &startMemState );
 	#endif	
 
@@ -201,7 +172,7 @@ int main( int argc, const char* argv )
 
 		doc->Print();
 
-		XMLStreamer streamer;
+		XMLPrinter streamer;
 		doc->Print( &streamer );
 		printf( "%s", streamer.CStr() );
 
@@ -447,7 +418,7 @@ int main( int argc, const char* argv )
 		FILE* textfile = fopen( "textfile.txt", "w" );
 		if ( textfile )
 		{
-			XMLStreamer streamer( textfile );
+			XMLPrinter streamer( textfile );
 			psg->Accept( &streamer );
 			fclose( textfile );
 		}
@@ -637,7 +608,8 @@ int main( int argc, const char* argv )
 		XMLTest( "Infinite loop test.", true, true );
 	}
 #endif
-	#if defined( WIN32 )
+
+	#if defined( _MSC_VER )
 		_CrtMemCheckpoint( &endMemState );  
 		//_CrtMemDumpStatistics( &endMemState );
 
