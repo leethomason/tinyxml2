@@ -629,6 +629,9 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
 		if ( !p ) {
 			DELETE_NODE( node );
 			node = 0;
+			if ( !document->Error() ) {
+				document->SetError( ERROR_PARSING, 0, 0 );
+			}
 			break;
 		}
 
@@ -1073,7 +1076,6 @@ char* XMLElement::ParseDeep( char* p, StrPair* strPair )
 		return p;
 
 	p = XMLNode::ParseDeep( p, strPair );
-	// FIXME: proces end tage here??
 	return p;
 }
 
