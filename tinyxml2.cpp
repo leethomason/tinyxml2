@@ -27,10 +27,9 @@ distribution.
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <new.h>
+#include <new>
 #include <stdarg.h>
 
-//#pragma warning ( disable : 4291 )
 
 using namespace tinyxml2;
 
@@ -403,8 +402,11 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 	static const int cdataHeaderLen		= 9;
 	static const int elementHeaderLen	= 1;
 
+#pragma warning ( push )
+#pragma warning ( disable : 4127 )
 	TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLUnknown ) );		// use same memory pool
 	TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLDeclaration ) );	// use same memory pool
+#pragma warning (pop)
 
 	if ( XMLUtil::StringEqual( p, xmlHeader, xmlHeaderLen ) ) {
 		returnNode = new (commentPool.Alloc()) XMLDeclaration( this );
@@ -985,7 +987,7 @@ XMLAttribute* XMLElement::FindOrCreateAttribute( const char* name )
 {
 	XMLAttribute* attrib = FindAttribute( name );
 	if ( !attrib ) {
-		attrib = new (document->attributePool.Alloc() ) XMLAttribute( this );
+		attrib = new (document->attributePool.Alloc() ) XMLAttribute();
 		attrib->memPool = &document->attributePool;
 		LinkAttribute( attrib );
 		attrib->SetName( name );
@@ -1041,7 +1043,7 @@ char* XMLElement::ParseAttributes( char* p )
 
 		// attribute.
 		if ( XMLUtil::IsAlpha( *p ) ) {
-			XMLAttribute* attrib = new (document->attributePool.Alloc() ) XMLAttribute( this );
+			XMLAttribute* attrib = new (document->attributePool.Alloc() ) XMLAttribute();
 			attrib->memPool = &document->attributePool;
 
 			p = attrib->ParseDeep( p );
@@ -1080,7 +1082,6 @@ char* XMLElement::ParseDeep( char* p, StrPair* strPair )
 	// Read the element name.
 	p = XMLUtil::SkipWhiteSpace( p );
 	if ( !p ) return 0;
-	const char* start = p;
 
 	// The closing element is the </element> form. It is
 	// parsed just like a regular element then deleted from
@@ -1093,7 +1094,6 @@ char* XMLElement::ParseDeep( char* p, StrPair* strPair )
 	p = value.ParseName( p );
 	if ( value.Empty() ) return 0;
 
-	bool elementClosed=false;
 	p = ParseAttributes( p );
 	if ( !p || !*p || closingType ) 
 		return p;
@@ -1318,12 +1318,12 @@ XMLPrinter::XMLPrinter( FILE* file ) :
 	for( int i=0; i<NUM_ENTITIES; ++i ) {
 		TIXMLASSERT( entities[i].value < ENTITY_RANGE );
 		if ( entities[i].value < ENTITY_RANGE ) {
-			entityFlag[ entities[i].value ] = true;
+			entityFlag[ (int)entities[i].value ] = true;
 		}
 	}
-	restrictedEntityFlag['&'] = true;
-	restrictedEntityFlag['<'] = true;
-	restrictedEntityFlag['>'] = true;	// not required, but consistency is nice
+	restrictedEntityFlag[(int)'&'] = true;
+	restrictedEntityFlag[(int)'<'] = true;
+	restrictedEntityFlag[(int)'>'] = true;	// not required, but consistency is nice
 	buffer.Push( 0 );
 }
 
@@ -1354,7 +1354,7 @@ void XMLPrinter::Print( const char* format, ... )
 		#else
 			int len = vsnprintf( 0, 0, format, va );
 			char* p = buffer.PushArr( len ) - 1;
-			vsprintf_s( p, len+1, format, va );
+			vsnprintf( p, len+1, format, va );
 		#endif
 	}
     va_end( va );
@@ -1556,7 +1556,7 @@ bool XMLPrinter::VisitEnter( const XMLElement& element, const XMLAttribute* attr
 }
 
 
-bool XMLPrinter::VisitExit( const XMLElement& element )
+bool XMLPrinter::VisitExit( const XMLElement& )
 {
 	CloseElement();
 	return true;

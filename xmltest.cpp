@@ -69,7 +69,7 @@ void NullLineEndings( char* p )
 }
 
 
-int main( int argc, const char* argv )
+int main( int /*argc*/, const char* /*argv*/ )
 {
 	#if defined( _MSC_VER )
 		_CrtMemCheckpoint( &startMemState );

@@ -33,6 +33,9 @@ distribution.
 /* TODO: create main page description.
    TODO: add 'lastAttribute' for faster parsing.
 */
+/*
+	gcc: g++ -Wall tinyxml2.cpp xmltest.cpp -o gccxmltest.exe
+*/
 
 #if defined( _DEBUG ) || defined( DEBUG ) || defined (__DEBUG__)
 	#ifndef DEBUG
@@ -720,15 +723,15 @@ public:
 	    If the value isn't an integer, 0 will be returned. There is no error checking;
 		use QueryIntAttribute() if you need error checking.
 	*/
-	int		 IntAttribute( const char* name ) const		{ int i=0;		QueryIntAttribute( &i );		return i; }
+	int		 IntAttribute() const				{ int i=0;		QueryIntAttribute( &i );		return i; }
 	/// Query as an unsigned integer. See IntAttribute()
-	unsigned UnsignedAttribute( const char* name ) const{ unsigned i=0; QueryUnsignedAttribute( &i );	return i; }
+	unsigned UnsignedAttribute() const			{ unsigned i=0; QueryUnsignedAttribute( &i );	return i; }
 	/// Query as a boolean. See IntAttribute()
-	bool	 BoolAttribute( const char* name ) const	{ bool b=false; QueryBoolAttribute( &b );		return b; }
+	bool	 BoolAttribute() const				{ bool b=false; QueryBoolAttribute( &b );		return b; }
 	/// Query as a double. See IntAttribute()
-	double 	 DoubleAttribute( const char* name ) const	{ double d=0;	QueryDoubleAttribute( &d );		return d; }
+	double 	 DoubleAttribute() const			{ double d=0;	QueryDoubleAttribute( &d );		return d; }
 	/// Query as a float. See IntAttribute()
-	float	 FloatAttribute( const char* name ) const	{ float f=0;	QueryFloatAttribute( &f );		return f; }
+	float	 FloatAttribute() const				{ float f=0;	QueryFloatAttribute( &f );		return f; }
 
 	/** QueryIntAttribute interprets the attribute as an integer, and returns the value
 		in the provided paremeter. The function will return XML_NO_ERROR on success,
@@ -760,7 +763,7 @@ public:
 private:
 	enum { BUF_SIZE = 200 };
 
-	XMLAttribute( XMLElement* element ) : next( 0 ) {}
+	XMLAttribute() : next( 0 ) {}
 	virtual ~XMLAttribute()	{}
 	XMLAttribute( const XMLAttribute& );	// not supported
 	void operator=( const XMLAttribute& );	// not supported
