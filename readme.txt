@@ -1,4 +1,4 @@
-/** @mainpage
+/* @mainpage
 
 <h1> TinyXML-2 </h1>
 
