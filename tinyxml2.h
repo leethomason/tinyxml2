@@ -972,7 +972,7 @@ public:
 		@verbatim
 		XMLPrinter printer;
 		doc->Print( &printer );
-		SomeFunctior( printer.CStr() );
+		// printer.CStr() has a const char* to the XML
 		@endverbatim
 	*/
 	void Print( XMLPrinter* streamer=0 );
