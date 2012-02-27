@@ -1190,7 +1190,10 @@ int XMLDocument::LoadFile( const char* filename )
 	DeleteChildren();
 	InitDocument();
 
+#pragma warning ( push )
+#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 	FILE* fp = fopen( filename, "rb" );
+#pragma warning ( pop )
 	if ( !fp ) {
 		SetError( ERROR_FILE_NOT_FOUND, filename, 0 );
 		return errorID;
@@ -1233,7 +1236,10 @@ int XMLDocument::LoadFile( FILE* fp )
 
 void XMLDocument::SaveFile( const char* filename )
 {
+#pragma warning ( push )
+#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 	FILE* fp = fopen( filename, "w" );
+#pragma warning ( pop )
 	XMLPrinter stream( fp );
 	Print( &stream );
 	fclose( fp );
@@ -1286,16 +1292,17 @@ void XMLDocument::SetError( int error, const char* str1, const char* str2 )
 void XMLDocument::PrintError() const 
 {
 	if ( errorID ) {
-		char buf1[20] = { 0 };
-		char buf2[20] = { 0 };
+		static const int LEN = 20;
+		char buf1[LEN] = { 0 };
+		char buf2[LEN] = { 0 };
 		
 		if ( errorStr1 ) {
-			strncpy( buf1, errorStr1, 20 );
-			buf1[19] = 0;
+			TIXML_SNPRINTF( buf1, LEN, "%s", errorStr1 );
+			buf1[LEN-1] = 0;
 		}
 		if ( errorStr2 ) {
-			strncpy( buf2, errorStr2, 20 );
-			buf2[19] = 0;
+			TIXML_SNPRINTF( buf2, LEN, "%s", errorStr2 );
+			buf2[LEN-1] = 0;
 		}
 
 		printf( "XMLDocument error id=%d str1=%s str2=%s\n",

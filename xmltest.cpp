@@ -301,8 +301,12 @@ int main( int /*argc*/, const char* /*argv*/ )
 		char verifyBuf[256];
 		int okay = 0;
 
+
+#pragma warning ( push )
+#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 		FILE* saved  = fopen( "utf8testout.xml", "r" );
 		FILE* verify = fopen( "utf8testverify.xml", "r" );
+#pragma warning ( pop )
 
 		if ( saved && verify )
 		{
@@ -415,14 +419,20 @@ int main( int /*argc*/, const char* /*argv*/ )
 
 		XMLTest( "Entity transformation: read. ", expected, context, true );
 
+#pragma warning ( push )
+#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 		FILE* textfile = fopen( "textfile.txt", "w" );
+#pragma warning ( pop )
 		if ( textfile )
 		{
 			XMLPrinter streamer( textfile );
 			psg->Accept( &streamer );
 			fclose( textfile );
 		}
+#pragma warning ( push )
+#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 		textfile = fopen( "textfile.txt", "r" );
+#pragma warning ( pop )
 		TIXMLASSERT( textfile );
 		if ( textfile )
 		{
