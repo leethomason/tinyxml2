@@ -96,6 +96,45 @@ be created by calling the appropriate XMLDocument::NewElement, NewText, etc.
 method. Although you have pointers to these objects, they are still owned
 by the Document. When the Document is deleted, so are all the nodes it contains.
 
+<h3> White Space </h3>
+
+Microsoft has an excellent article on white space: http://msdn.microsoft.com/en-us/library/ms256097.aspx
+
+TinyXML-2 preserves white space in a (hopefully) sane way that is almost complient with the spec.
+(TinyXML-1 used a completely outdated model.)
+
+As a first step, all newlines / carriage-returns / line-feeds are normalized to a
+line-feed character, as required by the XML spec.
+
+White space in text is preserved. For example:
+@verbatim
+	<element> Hello,  World</element>
+@endverbatim
+
+The leading space before the "Hello" and the double space after the comma are preserved.
+Line-feeds are preserved, as in this example:
+
+@verbatim
+	<element> Hello again,  
+	          World</element>
+@endverbatim
+
+However, white space between elements is *not* preserved. Although not strictly compliant,
+tracking and reporting inta-element space is awkward, and not normally valuable. TinyXML-2 
+sees these as the same XML:
+
+@verbatim
+<document>
+<data>1</data>
+<data>2</data>
+<data>3</data>
+</document>
+@endverbatim
+
+@verbatim
+<document><data>1</data><data>2</data><data>3</data></document>
+@endverbatim
+
 <h3> Entities </h3>
 TinyXML-2 recognizes the pre-defined "character entities", meaning special
 characters. Namely:
