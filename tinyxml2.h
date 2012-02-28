@@ -498,6 +498,8 @@ public:
 		Add a child node as the last (right) child.
 	*/
 	XMLNode* InsertEndChild( XMLNode* addThis );
+
+	XMLNode* LinkEndChild( XMLNode* addThis )	{ return InsertEndChild( addThis ); }
 	/**
 		Add a child node as the first (left) child.
 	*/
