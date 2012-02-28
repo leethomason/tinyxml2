@@ -302,11 +302,15 @@ int main( int /*argc*/, const char* /*argv*/ )
 		int okay = 0;
 
 
+#if defined(_MSC_VER)
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
+#endif
 		FILE* saved  = fopen( "utf8testout.xml", "r" );
 		FILE* verify = fopen( "utf8testverify.xml", "r" );
+#if defined(_MSC_VER)
 #pragma warning ( pop )
+#endif
 
 		if ( saved && verify )
 		{
@@ -419,20 +423,28 @@ int main( int /*argc*/, const char* /*argv*/ )
 
 		XMLTest( "Entity transformation: read. ", expected, context, true );
 
+#if defined(_MSC_VER)
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
+#endif
 		FILE* textfile = fopen( "textfile.txt", "w" );
+#if defined(_MSC_VER)
 #pragma warning ( pop )
+#endif
 		if ( textfile )
 		{
 			XMLPrinter streamer( textfile );
 			psg->Accept( &streamer );
 			fclose( textfile );
 		}
+#if defined(_MSC_VER)
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
+#endif
 		textfile = fopen( "textfile.txt", "r" );
+#if defined(_MSC_VER)
 #pragma warning ( pop )
+#endif
 		TIXMLASSERT( textfile );
 		if ( textfile )
 		{
@@ -618,6 +630,28 @@ int main( int /*argc*/, const char* /*argv*/ )
 		XMLTest( "Infinite loop test.", true, true );
 	}
 #endif
+	{
+		const char* pub = "<?xml version='1.0'?> <element><sub/></element> <!--comment--> <!DOCTYPE>";
+		XMLDocument doc;
+		doc.Parse( pub );
+
+		XMLDocument clone;
+		for( const XMLNode* node=doc.FirstChild(); node; node=node->NextSibling() ) {
+			XMLNode* copy = node->ShallowClone( &clone );
+			clone.InsertEndChild( copy );
+		}
+
+		clone.Print();
+
+		int count=0;
+		const XMLNode* a=clone.FirstChild();
+		const XMLNode* b=doc.FirstChild();
+		for( ; a && b; a=a->NextSibling(), b=b->NextSibling() ) {
+			++count;
+			XMLTest( "Clone and Equal", true, a->ShallowEqual( b ));
+		}
+		XMLTest( "Clone and Equal", 4, count );
+	}
 
 	#if defined( _MSC_VER )
 		_CrtMemCheckpoint( &endMemState );  

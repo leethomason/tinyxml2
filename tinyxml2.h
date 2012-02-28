@@ -21,7 +21,7 @@ must not be misrepresented as being the original software.
 distribution.
 */
 
-#ifndef TINYXML_INCLUDED
+#ifndef TINYXML2_INCLUDED
 #define TINYXML2_INCLUDED
 
 
@@ -30,8 +30,9 @@ distribution.
 #include <stdio.h>
 #include <memory.h>
 
-/* TODO: create main page description.
+/* 
    TODO: add 'lastAttribute' for faster parsing.
+   TODO: intern strings instead of allocation.
 */
 /*
 	gcc: g++ -Wall tinyxml2.cpp xmltest.cpp -o gccxmltest.exe
@@ -482,16 +483,16 @@ public:
 	XMLNode*	PreviousSibling()							{ return prev; }
 
 	/// Get the previous (left) sibling element of this node, with an opitionally supplied name.
-	const XMLNode*	PreviousSiblingElement( const char* value=0 ) const ;
-	XMLNode*	PreviousSiblingElement( const char* value=0 ) { return const_cast<XMLNode*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( value ) ); }
+	const XMLElement*	PreviousSiblingElement( const char* value=0 ) const ;
+	XMLElement*	PreviousSiblingElement( const char* value=0 ) { return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( value ) ); }
 	
 	/// Get the next (right) sibling node of this node.
 	const XMLNode*	NextSibling() const						{ return next; }
 	XMLNode*	NextSibling()								{ return next; }
 		
 	/// Get the next (right) sibling element of this node, with an opitionally supplied name.
-	const XMLNode*	NextSiblingElement( const char* value=0 ) const;
- 	XMLNode*	NextSiblingElement( const char* value=0 )	{ return const_cast<XMLNode*>(const_cast<const XMLNode*>(this)->NextSiblingElement( value ) ); }
+	const XMLElement*	NextSiblingElement( const char* value=0 ) const;
+ 	XMLElement*	NextSiblingElement( const char* value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement( value ) ); }
 
 	/**
 		Add a child node as the last (right) child.
@@ -515,6 +516,25 @@ public:
 		Delete a child of this node.
 	*/
 	void DeleteChild( XMLNode* node );
+
+	/**
+		Make a copy of this node, but not its children.
+		You may pass in a Document pointer that will be
+		the owner of the new Node. If the 'document' is 
+		null, then the node returned will be allocated
+		from the current Document. (this->GetDocument())
+
+		Note: if called on a XMLDocument, this will return null.
+	*/
+	virtual XMLNode* ShallowClone( XMLDocument* document ) const = 0;
+
+	/**
+		Test if 2 nodes are the same, but don't test children.
+		The 2 nodes do not need to be in the same Document.
+
+		Note: if called on a XMLDocument, this will return false.
+	*/
+	virtual bool ShallowEqual( const XMLNode* compare ) const = 0;
 
 	/** Accept a hierchical visit the nodes in the TinyXML DOM. Every node in the 
 		XML tree will be conditionally visited and the host will be called back
@@ -593,6 +613,9 @@ public:
 	bool CData() const						{ return isCData; }
 
 	char* ParseDeep( char*, StrPair* endTag );
+	virtual XMLNode* ShallowClone( XMLDocument* document ) const;
+	virtual bool ShallowEqual( const XMLNode* compare ) const;
+
 
 protected:
 	XMLText( XMLDocument* doc )	: XMLNode( doc ), isCData( false )	{}
@@ -616,6 +639,8 @@ public:
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
 	char* ParseDeep( char*, StrPair* endTag );
+	virtual XMLNode* ShallowClone( XMLDocument* document ) const;
+	virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
 	XMLComment( XMLDocument* doc );
@@ -648,6 +673,8 @@ public:
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
 	char* ParseDeep( char*, StrPair* endTag );
+	virtual XMLNode* ShallowClone( XMLDocument* document ) const;
+	virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
 	XMLDeclaration( XMLDocument* doc );
@@ -674,6 +701,8 @@ public:
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
 	char* ParseDeep( char*, StrPair* endTag );
+	virtual XMLNode* ShallowClone( XMLDocument* document ) const;
+	virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
 	XMLUnknown( XMLDocument* doc );
@@ -685,6 +714,7 @@ protected:
 
 enum {
 	XML_NO_ERROR = 0,
+	XML_SUCCESS = 0,
 
 	NO_ATTRIBUTE,
 	WRONG_ATTRIBUTE_TYPE,
@@ -723,29 +753,29 @@ public:
 	    If the value isn't an integer, 0 will be returned. There is no error checking;
 		use QueryIntAttribute() if you need error checking.
 	*/
-	int		 IntAttribute() const				{ int i=0;		QueryIntAttribute( &i );		return i; }
+	int		 IntValue() const				{ int i=0;		QueryIntValue( &i );		return i; }
 	/// Query as an unsigned integer. See IntAttribute()
-	unsigned UnsignedAttribute() const			{ unsigned i=0; QueryUnsignedAttribute( &i );	return i; }
+	unsigned UnsignedValue() const			{ unsigned i=0; QueryUnsignedValue( &i );	return i; }
 	/// Query as a boolean. See IntAttribute()
-	bool	 BoolAttribute() const				{ bool b=false; QueryBoolAttribute( &b );		return b; }
+	bool	 BoolValue() const				{ bool b=false; QueryBoolValue( &b );		return b; }
 	/// Query as a double. See IntAttribute()
-	double 	 DoubleAttribute() const			{ double d=0;	QueryDoubleAttribute( &d );		return d; }
+	double 	 DoubleValue() const			{ double d=0;	QueryDoubleValue( &d );		return d; }
 	/// Query as a float. See IntAttribute()
-	float	 FloatAttribute() const				{ float f=0;	QueryFloatAttribute( &f );		return f; }
+	float	 FloatValue() const				{ float f=0;	QueryFloatValue( &f );		return f; }
 
 	/** QueryIntAttribute interprets the attribute as an integer, and returns the value
 		in the provided paremeter. The function will return XML_NO_ERROR on success,
 		and WRONG_ATTRIBUTE_TYPE if the conversion is not successful.
 	*/
-	int QueryIntAttribute( int* value ) const;
+	int QueryIntValue( int* value ) const;
 	/// See QueryIntAttribute
-	int QueryUnsignedAttribute( unsigned int* value ) const;
+	int QueryUnsignedValue( unsigned int* value ) const;
 	/// See QueryIntAttribute
-	int QueryBoolAttribute( bool* value ) const;
+	int QueryBoolValue( bool* value ) const;
 	/// See QueryIntAttribute
-	int QueryDoubleAttribute( double* value ) const;
+	int QueryDoubleValue( double* value ) const;
 	/// See QueryIntAttribute
-	int QueryFloatAttribute( float* value ) const;
+	int QueryFloatValue( float* value ) const;
 
 	/// Set the attribute to a string value.
 	void SetAttribute( const char* value );
@@ -829,15 +859,15 @@ public:
 		QueryIntAttribute( "foo", &value );		// if "foo" isn't found, value will still be 10
 		@endverbatim
 	*/
-	int QueryIntAttribute( const char* name, int* value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryIntAttribute( value ); } 
+	int QueryIntAttribute( const char* name, int* value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryIntValue( value ); } 
 	/// See QueryIntAttribute()
-	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryUnsignedAttribute( value ); }
+	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryUnsignedValue( value ); }
 	/// See QueryIntAttribute()
-	int QueryBoolAttribute( const char* name, bool* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryBoolAttribute( value ); }
+	int QueryBoolAttribute( const char* name, bool* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryBoolValue( value ); }
 	/// See QueryIntAttribute()
-	int QueryDoubleAttribute( const char* name, double* value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryDoubleAttribute( value ); }
+	int QueryDoubleAttribute( const char* name, double* value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryDoubleValue( value ); }
 	/// See QueryIntAttribute()
-	int QueryFloatAttribute( const char* name, float* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryFloatAttribute( value ); }
+	int QueryFloatAttribute( const char* name, float* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryFloatValue( value ); }
 
 	/// Sets the named attribute to value.
 	void SetAttribute( const char* name, const char* value )	{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
@@ -898,6 +928,8 @@ public:
 	};
 	int ClosingType() const { return closingType; }
 	char* ParseDeep( char* p, StrPair* endTag );
+	virtual XMLNode* ShallowClone( XMLDocument* document ) const;
+	virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 private:
 	XMLElement( XMLDocument* doc );
@@ -999,6 +1031,18 @@ public:
 		is managed by the Document.
 	*/
 	XMLText* NewText( const char* text );
+	/**
+		Create a new Declaration associated with
+		this Document. The memory for the object
+		is managed by the Document.
+	*/
+	XMLDeclaration* NewDeclaration( const char* text );
+	/**
+		Create a new Unknown associated with
+		this Document. The memory for the object
+		is managed by the Document.
+	*/
+	XMLUnknown* NewUnknown( const char* text );
 
 	/**
 		Delete a node associated with this documented.
@@ -1021,6 +1065,9 @@ public:
 
 	// internal
 	char* Identify( char* p, XMLNode** node );
+
+	virtual XMLNode* ShallowClone( XMLDocument* document ) const	{ return 0; }
+	virtual bool ShallowEqual( const XMLNode* compare ) const	{ return false; }
 
 private:
 	XMLDocument( const XMLDocument& );	// not supported
@@ -1101,6 +1148,10 @@ public:
 	void OpenElement( const char* name );
 	/// If streaming, add an attribute to an open element.
 	void PushAttribute( const char* name, const char* value );
+	void PushAttribute( const char* name, int value );
+	void PushAttribute( const char* name, unsigned value );
+	void PushAttribute( const char* name, bool value );
+	void PushAttribute( const char* name, double value );
 	/// If streaming, close the Element.
 	void CloseElement();
 
@@ -1142,7 +1193,8 @@ private:
 	int textDepth;
 
 	enum {
-		ENTITY_RANGE = 64
+		ENTITY_RANGE = 64,
+		BUF_SIZE = 200
 	};
 	bool entityFlag[ENTITY_RANGE];
 	bool restrictedEntityFlag[ENTITY_RANGE];

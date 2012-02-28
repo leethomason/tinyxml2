@@ -402,12 +402,15 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 	static const int cdataHeaderLen		= 9;
 	static const int elementHeaderLen	= 1;
 
+#if defined(_MSC_VER)
 #pragma warning ( push )
 #pragma warning ( disable : 4127 )
+#endif
 	TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLUnknown ) );		// use same memory pool
 	TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLDeclaration ) );	// use same memory pool
+#if defined(_MSC_VER)
 #pragma warning (pop)
-
+#endif
 	if ( XMLUtil::StringEqual( p, xmlHeader, xmlHeaderLen ) ) {
 		returnNode = new (commentPool.Alloc()) XMLDeclaration( this );
 		returnNode->memPool = &commentPool;
@@ -622,6 +625,32 @@ const XMLElement* XMLNode::LastChildElement( const char* value ) const
 }
 
 
+const XMLElement* XMLNode::NextSiblingElement( const char* value ) const
+{
+	for( XMLNode* element=this->next; element; element = element->next ) {
+		if (    element->ToElement() 
+			 && (!value || XMLUtil::StringEqual( value, element->Value() ))) 
+		{
+			return element->ToElement();
+		}
+	}
+	return 0;
+}
+
+
+const XMLElement* XMLNode::PreviousSiblingElement( const char* value ) const
+{
+	for( XMLNode* element=this->prev; element; element = element->prev ) {
+		if (    element->ToElement()
+			 && (!value || XMLUtil::StringEqual( value, element->Value() ))) 
+		{
+			return element->ToElement();
+		}
+	}
+	return 0;
+}
+
+
 char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
 {
 	// This is a recursive method, but thinking about it "at the current level"
@@ -723,6 +752,23 @@ char* XMLText::ParseDeep( char* p, StrPair* )
 }
 
 
+XMLNode* XMLText::ShallowClone( XMLDocument* doc ) const
+{
+	if ( !doc ) {
+		doc = document;
+	}
+	XMLText* text = doc->NewText( Value() );	// fixme: this will always allocate memory. Intern?
+	text->SetCData( this->CData() );
+	return text;
+}
+
+
+bool XMLText::ShallowEqual( const XMLNode* compare ) const
+{
+	return ( compare->ToText() && XMLUtil::StringEqual( compare->ToText()->Value(), Value() ));
+}
+
+
 bool XMLText::Accept( XMLVisitor* visitor ) const
 {
 	return visitor->Visit( *this );
@@ -751,6 +797,22 @@ char* XMLComment::ParseDeep( char* p, StrPair* )
 		document->SetError( ERROR_PARSING_COMMENT, start, 0 );
 	}
 	return p;
+}
+
+
+XMLNode* XMLComment::ShallowClone( XMLDocument* doc ) const
+{
+	if ( !doc ) {
+		doc = document;
+	}
+	XMLComment* comment = doc->NewComment( Value() );	// fixme: this will always allocate memory. Intern?
+	return comment;
+}
+
+
+bool XMLComment::ShallowEqual( const XMLNode* compare ) const
+{
+	return ( compare->ToComment() && XMLUtil::StringEqual( compare->ToComment()->Value(), Value() ));
 }
 
 
@@ -785,6 +847,23 @@ char* XMLDeclaration::ParseDeep( char* p, StrPair* )
 }
 
 
+XMLNode* XMLDeclaration::ShallowClone( XMLDocument* doc ) const
+{
+	if ( !doc ) {
+		doc = document;
+	}
+	XMLDeclaration* dec = doc->NewDeclaration( Value() );	// fixme: this will always allocate memory. Intern?
+	return dec;
+}
+
+
+bool XMLDeclaration::ShallowEqual( const XMLNode* compare ) const
+{
+	return ( compare->ToDeclaration() && XMLUtil::StringEqual( compare->ToDeclaration()->Value(), Value() ));
+}
+
+
+
 bool XMLDeclaration::Accept( XMLVisitor* visitor ) const
 {
 	return visitor->Visit( *this );
@@ -815,6 +894,22 @@ char* XMLUnknown::ParseDeep( char* p, StrPair* )
 }
 
 
+XMLNode* XMLUnknown::ShallowClone( XMLDocument* doc ) const
+{
+	if ( !doc ) {
+		doc = document;
+	}
+	XMLUnknown* text = doc->NewUnknown( Value() );	// fixme: this will always allocate memory. Intern?
+	return text;
+}
+
+
+bool XMLUnknown::ShallowEqual( const XMLNode* compare ) const
+{
+	return ( compare->ToUnknown() && XMLUtil::StringEqual( compare->ToUnknown()->Value(), Value() ));
+}
+
+
 bool XMLUnknown::Accept( XMLVisitor* visitor ) const
 {
 	return visitor->Visit( *this );
@@ -840,7 +935,7 @@ void XMLAttribute::SetName( const char* n )
 }
 
 
-int XMLAttribute::QueryIntAttribute( int* value ) const
+int XMLAttribute::QueryIntValue( int* value ) const
 {
 	if ( TIXML_SSCANF( Value(), "%d", value ) == 1 )
 		return XML_NO_ERROR;
@@ -848,7 +943,7 @@ int XMLAttribute::QueryIntAttribute( int* value ) const
 }
 
 
-int XMLAttribute::QueryUnsignedAttribute( unsigned int* value ) const
+int XMLAttribute::QueryUnsignedValue( unsigned int* value ) const
 {
 	if ( TIXML_SSCANF( Value(), "%u", value ) == 1 )
 		return XML_NO_ERROR;
@@ -856,10 +951,10 @@ int XMLAttribute::QueryUnsignedAttribute( unsigned int* value ) const
 }
 
 
-int XMLAttribute::QueryBoolAttribute( bool* value ) const
+int XMLAttribute::QueryBoolValue( bool* value ) const
 {
 	int ival = -1;
-	QueryIntAttribute( &ival );
+	QueryIntValue( &ival );
 
 	if ( ival > 0 || XMLUtil::StringEqual( Value(), "true" ) ) {
 		*value = true;
@@ -873,7 +968,7 @@ int XMLAttribute::QueryBoolAttribute( bool* value ) const
 }
 
 
-int XMLAttribute::QueryDoubleAttribute( double* value ) const
+int XMLAttribute::QueryDoubleValue( double* value ) const
 {
 	if ( TIXML_SSCANF( Value(), "%lf", value ) == 1 )
 		return XML_NO_ERROR;
@@ -881,7 +976,7 @@ int XMLAttribute::QueryDoubleAttribute( double* value ) const
 }
 
 
-int XMLAttribute::QueryFloatAttribute( float* value ) const
+int XMLAttribute::QueryFloatValue( float* value ) const
 {
 	if ( TIXML_SSCANF( Value(), "%f", value ) == 1 )
 		return XML_NO_ERROR;
@@ -1103,6 +1198,43 @@ char* XMLElement::ParseDeep( char* p, StrPair* strPair )
 }
 
 
+
+XMLNode* XMLElement::ShallowClone( XMLDocument* doc ) const
+{
+	if ( !doc ) {
+		doc = document;
+	}
+	XMLElement* element = doc->NewElement( Value() );					// fixme: this will always allocate memory. Intern?
+	for( const XMLAttribute* a=FirstAttribute(); a; a=a->Next() ) {
+		element->SetAttribute( a->Name(), a->Value() );					// fixme: this will always allocate memory. Intern?
+	}
+	return element;
+}
+
+
+bool XMLElement::ShallowEqual( const XMLNode* compare ) const
+{
+	const XMLElement* other = compare->ToElement();
+	if ( other && XMLUtil::StringEqual( other->Value(), Value() )) {
+
+		const XMLAttribute* a=FirstAttribute();
+		const XMLAttribute* b=other->FirstAttribute();
+
+		while ( a && b ) {
+			if ( !XMLUtil::StringEqual( a->Value(), b->Value() ) ) {
+				return false;
+			}
+		}	
+		if ( a || b ) {
+			// different count
+			return false;
+		}
+		return true;
+	}
+	return false;
+}
+
+
 bool XMLElement::Accept( XMLVisitor* visitor ) const
 {
 	if ( visitor->VisitEnter( *this, rootAttribute ) ) 
@@ -1114,8 +1246,8 @@ bool XMLElement::Accept( XMLVisitor* visitor ) const
 		}
 	}
 	return visitor->VisitExit( *this );
-
 }
+
 
 // --------- XMLDocument ----------- //
 XMLDocument::XMLDocument() :
@@ -1185,15 +1317,37 @@ XMLText* XMLDocument::NewText( const char* str )
 }
 
 
+XMLDeclaration* XMLDocument::NewDeclaration( const char* str )
+{
+	XMLDeclaration* dec = new (commentPool.Alloc()) XMLDeclaration( this );
+	dec->memPool = &commentPool;
+	dec->SetValue( str );
+	return dec;
+}
+
+
+XMLUnknown* XMLDocument::NewUnknown( const char* str )
+{
+	XMLUnknown* unk = new (commentPool.Alloc()) XMLUnknown( this );
+	unk->memPool = &commentPool;
+	unk->SetValue( str );
+	return unk;
+}
+
+
 int XMLDocument::LoadFile( const char* filename )
 {
 	DeleteChildren();
 	InitDocument();
 
+#if defined(_MSC_VER)
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
+#endif
 	FILE* fp = fopen( filename, "rb" );
+#if defined(_MSC_VER)
 #pragma warning ( pop )
+#endif
 	if ( !fp ) {
 		SetError( ERROR_FILE_NOT_FOUND, filename, 0 );
 		return errorID;
@@ -1236,10 +1390,14 @@ int XMLDocument::LoadFile( FILE* fp )
 
 void XMLDocument::SaveFile( const char* filename )
 {
+#if defined(_MSC_VER)
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
+#endif
 	FILE* fp = fopen( filename, "w" );
+#if defined(_MSC_VER)
 #pragma warning ( pop )
+#endif
 	XMLPrinter stream( fp );
 	Print( &stream );
 	fclose( fp );
@@ -1449,6 +1607,38 @@ void XMLPrinter::PushAttribute( const char* name, const char* value )
 	Print( " %s=\"", name );
 	PrintString( value, false );
 	Print( "\"" );
+}
+
+
+void XMLPrinter::PushAttribute( const char* name, int v )
+{
+	char buf[BUF_SIZE];
+	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v );	
+	PushAttribute( name, buf );
+}
+
+
+void XMLPrinter::PushAttribute( const char* name, unsigned v )
+{
+	char buf[BUF_SIZE];
+	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%u", v );	
+	PushAttribute( name, buf );
+}
+
+
+void XMLPrinter::PushAttribute( const char* name, bool v )
+{
+	char buf[BUF_SIZE];
+	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v ? 1 : 0 );	
+	PushAttribute( name, buf );
+}
+
+
+void XMLPrinter::PushAttribute( const char* name, double v )
+{
+	char buf[BUF_SIZE];
+	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%f", v );	
+	PushAttribute( name, buf );
 }
 
 
