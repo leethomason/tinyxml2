@@ -1066,8 +1066,8 @@ public:
 	// internal
 	char* Identify( char* p, XMLNode** node );
 
-	virtual XMLNode* ShallowClone( XMLDocument* document ) const	{ return 0; }
-	virtual bool ShallowEqual( const XMLNode* compare ) const	{ return false; }
+	virtual XMLNode* ShallowClone( XMLDocument* ) const	{ return 0; }
+	virtual bool ShallowEqual( const XMLNode* ) const	{ return false; }
 
 private:
 	XMLDocument( const XMLDocument& );	// not supported

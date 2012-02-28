@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined( _MSC_VER )
+#if defined( _MSC_VER ) && defined( DEBUG )
 	#include <crtdbg.h>
 	_CrtMemState startMemState;
 	_CrtMemState endMemState;
@@ -71,7 +71,7 @@ void NullLineEndings( char* p )
 
 int main( int /*argc*/, const char* /*argv*/ )
 {
-	#if defined( _MSC_VER )
+	#if defined( _MSC_VER ) && defined( DEBUG )
 		_CrtMemCheckpoint( &startMemState );
 	#endif	
 
@@ -521,6 +521,7 @@ int main( int /*argc*/, const char* /*argv*/ )
 		doc.Parse( doctype );
 		
 		XMLTest( "Parsing repeated attributes.", ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );	// is an  error to tinyxml (didn't use to be, but caused issues)
+		doc.PrintError();
 	}
 
 	{
@@ -653,7 +654,7 @@ int main( int /*argc*/, const char* /*argv*/ )
 		XMLTest( "Clone and Equal", 4, count );
 	}
 
-	#if defined( _MSC_VER )
+	#if defined( _MSC_VER ) && defined( DEBUG )
 		_CrtMemCheckpoint( &endMemState );  
 		//_CrtMemDumpStatistics( &endMemState );
 
