@@ -71,7 +71,7 @@ Both parsers:
 Advantages of TinyXML-2
 <ol>
 	<li>The focus of all future dev.</li>	
-	<li>Many fewer memory allocation (about 1/100th), uses less memory (about 40% of TinyXML-1), and faster.</li>
+	<li>Many fewer memory allocation (1/10th to 1/100th), uses less memory (about 40% of TinyXML-1), and faster.</li>
 	<li>No STL requirement.</li>
 	<li>More modern C++, including a proper namespace.</li>
 	<li>Proper and useful handling of whitespace</li>
@@ -107,52 +107,41 @@ As a first step, all newlines / carriage-returns / line-feeds are normalized to 
 line-feed character, as required by the XML spec.
 
 White space in text is preserved. For example:
-@verbatim
+
 	<element> Hello,  World</element>
-@endverbatim
 
 The leading space before the "Hello" and the double space after the comma are preserved.
 Line-feeds are preserved, as in this example:
 
-@verbatim
 	<element> Hello again,  
 	          World</element>
-@endverbatim
 
 However, white space between elements is *not* preserved. Although not strictly compliant,
 tracking and reporting inta-element space is awkward, and not normally valuable. TinyXML-2 
 sees these as the same XML:
 
-@verbatim
-<document>
-<data>1</data>
-<data>2</data>
-<data>3</data>
-</document>
-@endverbatim
+	<document>
+	<data>1</data>
+	<data>2</data>
+	<data>3</data>
+	</document>
 
-@verbatim
-<document><data>1</data><data>2</data><data>3</data></document>
-@endverbatim
+	<document><data>1</data><data>2</data><data>3</data></document>
 
 <h3> Entities </h3>
 TinyXML-2 recognizes the pre-defined "character entities", meaning special
 characters. Namely:
 
-@verbatim
 	&amp;	&
 	&lt;	<
 	&gt;	>
 	&quot;	"
 	&apos;	'
-@endverbatim
 
 These are recognized when the XML document is read, and translated to there
 UTF-8 equivalents. For instance, text with the XML of:
 
-@verbatim
 	Far &amp; Away
-@endverbatim
 
 will have the Value() of "Far & Away" when queried from the XMLText object,
 and will be written back to the XML stream/file as an ampersand. 
@@ -167,42 +156,37 @@ regular code point. The output is correct, but the entity syntax isn't preserved
 
 <h4> Print to file </h4>
 You can directly use the convenience function:
-@verbatim
+
 	XMLDocument doc;
 	...
 	doc.Save( "foo.xml" );
-@endverbatim
 
 Or the XMLPrinter class:
-@verbatim
+
 	XMLPrinter printer( fp );
 	doc.Print( &printer );
-@endverbatim
 
 <h4> Print to memory </h4>
 Printing to memory is supported by the XMLPrinter.
-@verbatim
+
 	XMLPrinter printer;
 	doc->Print( &printer );
 	// printer.CStr() has a const char* to the XML
-@endverbatim
 
 <h4> Print without an XMLDocument </h4>
 
-	When loading, an XML parser is very useful. However, sometimes
-	when saving, it just gets in the way. The code is often set up
-	for streaming, and constructing the DOM is just overhead.
+When loading, an XML parser is very useful. However, sometimes
+when saving, it just gets in the way. The code is often set up
+for streaming, and constructing the DOM is just overhead.
 
-	The Printer supports the streaming case. The following code
-	prints out a trivially simple XML file without ever creating
-	an XML document.
+The Printer supports the streaming case. The following code
+prints out a trivially simple XML file without ever creating
+an XML document.
 
-@verbatim
 	XMLPrinter printer( fp );
 	printer.OpenElement( "foo" );
 	printer.PushAttribute( "foo", "bar" );
 	printer.CloseElement();
-@endverbatim
 
 <h2> Using and Installing </h2>
 
