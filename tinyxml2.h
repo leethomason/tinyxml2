@@ -115,8 +115,10 @@ public:
 		NEEDS_NEWLINE_NORMALIZATION		= 0x02,
 
 		TEXT_ELEMENT		= NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
+		TEXT_ELEMENT_LEAVE_ENTITIES		= NEEDS_NEWLINE_NORMALIZATION,
 		ATTRIBUTE_NAME		= 0,
 		ATTRIBUTE_VALUE		= NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
+		ATTRIBUTE_VALUE_LEAVE_ENTITIES		= NEEDS_NEWLINE_NORMALIZATION,
 		COMMENT				= NEEDS_NEWLINE_NORMALIZATION,
 	};
 
@@ -804,7 +806,7 @@ private:
 	void operator=( const XMLAttribute& );	// not supported
 	void SetName( const char* name );
 
-	char* ParseDeep( char* p );
+	char* ParseDeep( char* p, bool processEntities );
 
 	mutable StrPair name;
 	mutable StrPair value;
@@ -962,7 +964,7 @@ class XMLDocument : public XMLNode
 	friend class XMLElement;
 public:
 	/// constructor
-	XMLDocument(); 
+	XMLDocument( bool processEntities = true ); 
 	~XMLDocument();
 
 	virtual XMLDocument* ToDocument()				{ return this; }
@@ -993,6 +995,11 @@ public:
 	*/
 	void SaveFile( const char* filename );
 
+	bool ProcessEntities() const						{ return processEntities; }
+
+	/**
+		Returns true if this document has a leading Byte Order Mark of UTF8.
+	*/
 	bool HasBOM() const { return writeBOM; }
 
 	/** Return the root element of DOM. Equivalent to FirstChildElement().
@@ -1071,8 +1078,8 @@ public:
 	// internal
 	char* Identify( char* p, XMLNode** node );
 
-	virtual XMLNode* ShallowClone( XMLDocument* document ) const	{ return 0; }
-	virtual bool ShallowEqual( const XMLNode* compare ) const	{ return false; }
+	virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const	{ return 0; }
+	virtual bool ShallowEqual( const XMLNode* /*compare*/ ) const	{ return false; }
 
 private:
 	XMLDocument( const XMLDocument& );	// not supported
@@ -1080,6 +1087,7 @@ private:
 	void InitDocument();
 
 	bool writeBOM;
+	bool processEntities;
 	int errorID;
 	const char* errorStr1;
 	const char* errorStr2;
@@ -1196,6 +1204,7 @@ private:
 	FILE* fp;
 	int depth;
 	int textDepth;
+	bool processEntities;
 
 	enum {
 		ENTITY_RANGE = 64,

@@ -55,7 +55,7 @@ complete XML needs, TinyXML-2 is not the parser for you.
 Which should you use? TinyXML-2 uses a similar API to TinyXML-1 and the same
 rich test cases. But the implementation of the parser is completely re-written
 to make it more appropriate for use in a game. It uses less memory, is faster,
-and user far few memory allocations.
+and uses far few memory allocations.
 
 TinyXML-2 has no requirement for STL, but has also dropped all STL support. All
 strings are query and set as 'const char*'. This allows the use of internal 

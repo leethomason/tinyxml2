@@ -3,9 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #if defined( _MSC_VER )
 	#include <crtdbg.h>
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
 	_CrtMemState startMemState;
 	_CrtMemState endMemState;
 #endif
@@ -211,6 +214,8 @@ int main( int /*argc*/, const char* /*argv*/ )
 
 		//gNewTotal = gNew - newStart;
 	}
+
+
 	{
 		const char* error =	"<?xml version=\"1.0\" standalone=\"no\" ?>\n"
 							"<passages count=\"006\" formatversion=\"20020620\">\n"
@@ -459,6 +464,24 @@ int main( int /*argc*/, const char* /*argv*/ )
 	}
 
 	{
+		// Suppress entities.
+		const char* passages =
+			"<?xml version=\"1.0\" standalone=\"no\" ?>"
+			"<passages count=\"006\" formatversion=\"20020620\">"
+				"<psg context=\"Line 5 has &quot;quotation marks&quot; and &apos;apostrophe marks&apos;.\">Crazy &ttk;</psg>"
+			"</passages>";
+		
+		XMLDocument doc( false );
+		doc.Parse( passages );
+
+		XMLTest( "No entity parsing.", doc.FirstChildElement()->FirstChildElement()->Attribute( "context" ), 
+				 "Line 5 has &quot;quotation marks&quot; and &apos;apostrophe marks&apos;." );
+		XMLTest( "No entity parsing.", doc.FirstChildElement()->FirstChildElement()->FirstChild()->Value(),
+				 "Crazy &ttk;" );
+		doc.Print();
+	}
+
+	{
         const char* test = "<?xml version='1.0'?><a.elem xmi.version='2.0'/>";
 
 		XMLDocument doc;
@@ -651,6 +674,62 @@ int main( int /*argc*/, const char* /*argv*/ )
 			XMLTest( "Clone and Equal", true, a->ShallowEqual( b ));
 		}
 		XMLTest( "Clone and Equal", 4, count );
+	}
+
+	// ----------- Performance tracking --------------
+	{
+#if defined( _MSC_VER )
+		__int64 start, end, freq;
+		QueryPerformanceFrequency( (LARGE_INTEGER*) &freq );
+#endif
+
+#if defined(_MSC_VER)
+#pragma warning ( push )
+#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
+#endif
+		FILE* fp  = fopen( "dream.xml", "r" );
+#if defined(_MSC_VER)
+#pragma warning ( pop )
+#endif
+		fseek( fp, 0, SEEK_END );
+		long size = ftell( fp );
+		fseek( fp, 0, SEEK_SET );
+
+		char* mem = new char[size+1];
+		fread( mem, size, 1, fp );
+		fclose( fp );
+		mem[size] = 0;
+
+#if defined( _MSC_VER )
+		QueryPerformanceCounter( (LARGE_INTEGER*) &start );
+#else
+		clock_t cstart = clock();
+#endif
+		static const int COUNT = 10;
+		for( int i=0; i<COUNT; ++i ) {
+			XMLDocument doc;
+			doc.Parse( mem );
+		}
+#if defined( _MSC_VER )
+		QueryPerformanceCounter( (LARGE_INTEGER*) &end );
+#else
+		clock_t cend = clock();
+#endif
+
+		delete [] mem;
+
+		static const char* note = 
+#ifdef DEBUG
+			"DEBUG";
+#else
+			"Release";
+#endif
+
+#if defined( _MSC_VER )
+		printf( "\nParsing %s of dream.xml: %.3f milli-seconds\n", note, 1000.0 * (double)(end-start) / ( (double)freq * (double)COUNT) );
+#else
+		printf( "\nParsing %s of dream.xml: %.3f milli-seconds\n", note, (double)(cend - cstart)/(double)COUNT );
+#endif
 	}
 
 	#if defined( _MSC_VER )
