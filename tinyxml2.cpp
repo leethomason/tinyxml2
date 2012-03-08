@@ -312,7 +312,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 	if ( *(p+1) == '#' && *(p+2) )
 	{
 		unsigned long ucs = 0;
-		ptrdiff_t delta = 0;
+		int delta = 0;
 		unsigned mult = 1;
 
 		if ( *(p+2) == 'x' )
@@ -325,7 +325,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 
 			if ( !q || !*q ) return 0;
 
-			delta = q-p;
+			delta = (q-p);
 			--q;
 
 			while ( *q != 'x' )
@@ -740,7 +740,7 @@ char* XMLText::ParseDeep( char* p, StrPair* )
 		return p;
 	}
 	else {
-		p = value.ParseText( p, "<", StrPair::TEXT_ELEMENT );
+		p = value.ParseText( p, "<", document->ProcessEntities() ? StrPair::TEXT_ELEMENT : StrPair::TEXT_ELEMENT_LEAVE_ENTITIES );
 		if ( !p ) {
 			document->SetError( ERROR_PARSING_TEXT, start, 0 );
 		}
@@ -916,14 +916,14 @@ bool XMLUnknown::Accept( XMLVisitor* visitor ) const
 }
 
 // --------- XMLAttribute ---------- //
-char* XMLAttribute::ParseDeep( char* p )
+char* XMLAttribute::ParseDeep( char* p, bool processEntities )
 {
 	p = name.ParseText( p, "=", StrPair::ATTRIBUTE_NAME );
 	if ( !p || !*p ) return 0;
 
 	char endTag[2] = { *p, 0 };
 	++p;
-	p = value.ParseText( p, endTag, StrPair::ATTRIBUTE_VALUE );
+	p = value.ParseText( p, endTag, processEntities ? StrPair::ATTRIBUTE_VALUE : StrPair::ATTRIBUTE_VALUE_LEAVE_ENTITIES );
 	//if ( value.Empty() ) return 0;
 	return p;
 }
@@ -1141,7 +1141,7 @@ char* XMLElement::ParseAttributes( char* p )
 			XMLAttribute* attrib = new (document->attributePool.Alloc() ) XMLAttribute();
 			attrib->memPool = &document->attributePool;
 
-			p = attrib->ParseDeep( p );
+			p = attrib->ParseDeep( p, document->ProcessEntities() );
 			if ( !p || Attribute( attrib->Name() ) ) {
 				DELETE_ATTRIBUTE( attrib );
 				document->SetError( ERROR_PARSING_ATTRIBUTE, start, p );
@@ -1250,9 +1250,13 @@ bool XMLElement::Accept( XMLVisitor* visitor ) const
 
 
 // --------- XMLDocument ----------- //
-XMLDocument::XMLDocument() :
+XMLDocument::XMLDocument( bool _processEntities ) :
 	XMLNode( 0 ),
 	writeBOM( false ),
+	processEntities( _processEntities ),
+	errorID( 0 ),
+	errorStr1( 0 ),
+	errorStr2( 0 ),
 	charBuffer( 0 )
 {
 	document = this;	// avoid warning about 'this' in initializer list
@@ -1474,7 +1478,8 @@ XMLPrinter::XMLPrinter( FILE* file ) :
 	firstElement( true ),
 	fp( file ), 
 	depth( 0 ), 
-	textDepth( -1 )
+	textDepth( -1 ),
+	processEntities( true )
 {
 	for( int i=0; i<ENTITY_RANGE; ++i ) {
 		entityFlag[i] = false;
@@ -1540,31 +1545,33 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
 	const char* q = p;
 	const bool* flag = restricted ? restrictedEntityFlag : entityFlag;
 
-	while ( *q ) {
-		// Remember, char is sometimes signed. (How many times has that bitten me?)
-		if ( *q > 0 && *q < ENTITY_RANGE ) {
-			// Check for entities. If one is found, flush
-			// the stream up until the entity, write the 
-			// entity, and keep looking.
-			if ( flag[*q] ) {
-				while ( p < q ) {
-					Print( "%c", *p );
+	if ( processEntities ) {
+		while ( *q ) {
+			// Remember, char is sometimes signed. (How many times has that bitten me?)
+			if ( *q > 0 && *q < ENTITY_RANGE ) {
+				// Check for entities. If one is found, flush
+				// the stream up until the entity, write the 
+				// entity, and keep looking.
+				if ( flag[*q] ) {
+					while ( p < q ) {
+						Print( "%c", *p );
+						++p;
+					}
+					for( int i=0; i<NUM_ENTITIES; ++i ) {
+						if ( entities[i].value == *q ) {
+							Print( "&%s;", entities[i].pattern );
+							break;
+						}
+					}
 					++p;
 				}
-				for( int i=0; i<NUM_ENTITIES; ++i ) {
-					if ( entities[i].value == *q ) {
-						Print( "&%s;", entities[i].pattern );
-						break;
-					}
-				}
-				++p;
 			}
+			++q;
 		}
-		++q;
 	}
 	// Flush the remaining string. This will be the entire
 	// string if an entity wasn't found.
-	if ( q-p > 0 ) {
+	if ( !processEntities || (q-p > 0) ) {
 		Print( "%s", p );
 	}
 }
@@ -1735,6 +1742,7 @@ void XMLPrinter::PushUnknown( const char* value )
 
 bool XMLPrinter::VisitEnter( const XMLDocument& doc )
 {
+	processEntities = doc.ProcessEntities();
 	if ( doc.HasBOM() ) {
 		PushHeader( true, false );
 	}
@@ -1785,5 +1793,3 @@ bool XMLPrinter::Visit( const XMLUnknown& unknown )
 	PushUnknown( unknown.Value() );
 	return true;
 }
-
-
