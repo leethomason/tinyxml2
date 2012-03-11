@@ -28,7 +28,6 @@ distribution.
 #include <limits.h>
 #include <ctype.h>
 #include <stdio.h>
-#include <memory.h>
 
 /* 
    TODO: add 'lastAttribute' for faster parsing.
