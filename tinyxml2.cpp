@@ -1523,6 +1523,9 @@ void XMLPrinter::Print( const char* format, ... )
 			memcpy( p, accumulator.Mem(), len+1 );
 		#else
 			int len = vsnprintf( 0, 0, format, va );
+			// Close out and re-start the va-args
+			va_end( va );
+			va_start( va, format );		
 			char* p = buffer.PushArr( len ) - 1;
 			vsnprintf( p, len+1, format, va );
 		#endif
