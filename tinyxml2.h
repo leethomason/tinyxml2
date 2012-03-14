@@ -28,6 +28,7 @@ distribution.
 #include <limits.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <memory.h>		// Needed by mac.
 
 /* 
    TODO: add 'lastAttribute' for faster parsing.
