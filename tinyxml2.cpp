@@ -23,13 +23,10 @@ distribution.
 
 #include "tinyxml2.h"
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
 #include <new>
-#include <stdarg.h>
-
 
 using namespace tinyxml2;
 
@@ -684,7 +681,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
 			DELETE_NODE( node );
 			node = 0;
 			if ( !document->Error() ) {
-				document->SetError( ERROR_PARSING, 0, 0 );
+				document->SetError( XML_ERROR_PARSING, 0, 0 );
 			}
 			break;
 		}
@@ -703,16 +700,16 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
 		XMLElement* ele = node->ToElement();
 		if ( ele ) {
 			if ( endTag.Empty() && ele->ClosingType() == XMLElement::OPEN ) {
-				document->SetError( ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
+				document->SetError( XML_ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
 				p = 0;
 			}
 			else if ( !endTag.Empty() && ele->ClosingType() != XMLElement::OPEN ) {
-				document->SetError( ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
+				document->SetError( XML_ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
 				p = 0;
 			}
 			else if ( !endTag.Empty() ) {
 				if ( !XMLUtil::StringEqual( endTag.GetStr(), node->Value() )) { 
-					document->SetError( ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
+					document->SetError( XML_ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
 					p = 0;
 				}
 			}
@@ -735,14 +732,14 @@ char* XMLText::ParseDeep( char* p, StrPair* )
 	if ( this->CData() ) {
 		p = value.ParseText( p, "]]>", StrPair::NEEDS_NEWLINE_NORMALIZATION );
 		if ( !p ) {
-			document->SetError( ERROR_PARSING_CDATA, start, 0 );
+			document->SetError( XML_ERROR_PARSING_CDATA, start, 0 );
 		}
 		return p;
 	}
 	else {
 		p = value.ParseText( p, "<", document->ProcessEntities() ? StrPair::TEXT_ELEMENT : StrPair::TEXT_ELEMENT_LEAVE_ENTITIES );
 		if ( !p ) {
-			document->SetError( ERROR_PARSING_TEXT, start, 0 );
+			document->SetError( XML_ERROR_PARSING_TEXT, start, 0 );
 		}
 		if ( p && *p ) {
 			return p-1;
@@ -794,7 +791,7 @@ char* XMLComment::ParseDeep( char* p, StrPair* )
 	const char* start = p;
 	p = value.ParseText( p, "-->", StrPair::COMMENT );
 	if ( p == 0 ) {
-		document->SetError( ERROR_PARSING_COMMENT, start, 0 );
+		document->SetError( XML_ERROR_PARSING_COMMENT, start, 0 );
 	}
 	return p;
 }
@@ -841,7 +838,7 @@ char* XMLDeclaration::ParseDeep( char* p, StrPair* )
 	const char* start = p;
 	p = value.ParseText( p, "?>", StrPair::NEEDS_NEWLINE_NORMALIZATION );
 	if ( p == 0 ) {
-		document->SetError( ERROR_PARSING_DECLARATION, start, 0 );
+		document->SetError( XML_ERROR_PARSING_DECLARATION, start, 0 );
 	}
 	return p;
 }
@@ -888,7 +885,7 @@ char* XMLUnknown::ParseDeep( char* p, StrPair* )
 
 	p = value.ParseText( p, ">", StrPair::NEEDS_NEWLINE_NORMALIZATION );
 	if ( !p ) {
-		document->SetError( ERROR_PARSING_UNKNOWN, start, 0 );
+		document->SetError( XML_ERROR_PARSING_UNKNOWN, start, 0 );
 	}
 	return p;
 }
@@ -939,7 +936,7 @@ int XMLAttribute::QueryIntValue( int* value ) const
 {
 	if ( TIXML_SSCANF( Value(), "%d", value ) == 1 )
 		return XML_NO_ERROR;
-	return WRONG_ATTRIBUTE_TYPE;
+	return XML_WRONG_ATTRIBUTE_TYPE;
 }
 
 
@@ -947,7 +944,7 @@ int XMLAttribute::QueryUnsignedValue( unsigned int* value ) const
 {
 	if ( TIXML_SSCANF( Value(), "%u", value ) == 1 )
 		return XML_NO_ERROR;
-	return WRONG_ATTRIBUTE_TYPE;
+	return XML_WRONG_ATTRIBUTE_TYPE;
 }
 
 
@@ -964,7 +961,7 @@ int XMLAttribute::QueryBoolValue( bool* value ) const
 		*value = false;
 		return XML_NO_ERROR;
 	}
-	return WRONG_ATTRIBUTE_TYPE;
+	return XML_WRONG_ATTRIBUTE_TYPE;
 }
 
 
@@ -972,7 +969,7 @@ int XMLAttribute::QueryDoubleValue( double* value ) const
 {
 	if ( TIXML_SSCANF( Value(), "%lf", value ) == 1 )
 		return XML_NO_ERROR;
-	return WRONG_ATTRIBUTE_TYPE;
+	return XML_WRONG_ATTRIBUTE_TYPE;
 }
 
 
@@ -980,7 +977,7 @@ int XMLAttribute::QueryFloatValue( float* value ) const
 {
 	if ( TIXML_SSCANF( Value(), "%f", value ) == 1 )
 		return XML_NO_ERROR;
-	return WRONG_ATTRIBUTE_TYPE;
+	return XML_WRONG_ATTRIBUTE_TYPE;
 }
 
 
@@ -1132,7 +1129,7 @@ char* XMLElement::ParseAttributes( char* p )
 	while( p ) {
 		p = XMLUtil::SkipWhiteSpace( p );
 		if ( !p || !(*p) ) {
-			document->SetError( ERROR_PARSING_ELEMENT, start, Name() );
+			document->SetError( XML_ERROR_PARSING_ELEMENT, start, Name() );
 			return 0;
 		}
 
@@ -1144,7 +1141,7 @@ char* XMLElement::ParseAttributes( char* p )
 			p = attrib->ParseDeep( p, document->ProcessEntities() );
 			if ( !p || Attribute( attrib->Name() ) ) {
 				DELETE_ATTRIBUTE( attrib );
-				document->SetError( ERROR_PARSING_ATTRIBUTE, start, p );
+				document->SetError( XML_ERROR_PARSING_ATTRIBUTE, start, p );
 				return 0;
 			}
 			LinkAttribute( attrib );
@@ -1160,7 +1157,7 @@ char* XMLElement::ParseAttributes( char* p )
 			break;
 		}
 		else {
-			document->SetError( ERROR_PARSING_ELEMENT, start, p );
+			document->SetError( XML_ERROR_PARSING_ELEMENT, start, p );
 			return 0;
 		}
 	}
@@ -1353,7 +1350,7 @@ int XMLDocument::LoadFile( const char* filename )
 #pragma warning ( pop )
 #endif
 	if ( !fp ) {
-		SetError( ERROR_FILE_NOT_FOUND, filename, 0 );
+		SetError( XML_ERROR_FILE_NOT_FOUND, filename, 0 );
 		return errorID;
 	}
 	LoadFile( fp );
@@ -1383,7 +1380,7 @@ int XMLDocument::LoadFile( FILE* fp )
 	p = XMLUtil::SkipWhiteSpace( p );
 	p = XMLUtil::ReadBOM( p, &writeBOM );
 	if ( !p || !*p ) {
-		SetError( ERROR_EMPTY_DOCUMENT, 0, 0 );
+		SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
 		return errorID;
 	}
 
@@ -1414,13 +1411,13 @@ int XMLDocument::Parse( const char* p )
 	InitDocument();
 
 	if ( !p || !*p ) {
-		SetError( ERROR_EMPTY_DOCUMENT, 0, 0 );
+		SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
 		return errorID;
 	}
 	p = XMLUtil::SkipWhiteSpace( p );
 	p = XMLUtil::ReadBOM( p, &writeBOM );
 	if ( !p || !*p ) {
-		SetError( ERROR_EMPTY_DOCUMENT, 0, 0 );
+		SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
 		return errorID;
 	}
 
