@@ -24,12 +24,19 @@ distribution.
 #ifndef TINYXML2_INCLUDED
 #define TINYXML2_INCLUDED
 
-#include <cctype>
-#include <climits>
-#include <cstdio>
-#include <cstring>
-#if __APPLE__
-#  include <memory.h>
+#if 1
+	#include <cctype>
+	#include <climits>
+	#include <cstdio>
+	#include <cstring>
+#else
+	// Not completely sure all the interesting systems
+	// can handle the new headers; can switch this if
+	// there is an include problem.
+	#include <limits.h>
+	#include <ctype.h>
+	#include <stdio.h>
+	#include <memory.h>		// Needed by mac.
 #endif
 
 /* 
@@ -127,9 +134,9 @@ public:
 	StrPair() : flags( 0 ), start( 0 ), end( 0 ) {}
 	~StrPair();
 
-	void Set( char* start_, char* end_, int flags_ ) {
+	void Set( char* _start, char* _end, int _flags ) {
 		Reset();
-		this->start = start_; this->end = end_; this->flags = flags_ | NEEDS_FLUSH;
+		this->start = _start; this->end = _end; this->flags = _flags | NEEDS_FLUSH;
 	}
 	const char* GetStr();
 	bool Empty() const { return start == end; }
@@ -473,7 +480,7 @@ public:
 	    element with the specified name.
 	*/
 	const XMLElement* FirstChildElement( const char* value=0 ) const;
-	XMLElement* FirstChildElement( const char* value_=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( value_ )); }
+	XMLElement* FirstChildElement( const char* _value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( _value )); }
 
 	/// Get the last child node, or null if none exists.
 	const XMLNode*	LastChild() const						{ return lastChild; }
@@ -483,7 +490,7 @@ public:
 	    element with the specified name.
 	*/
 	const XMLElement* LastChildElement( const char* value=0 ) const;
-	XMLElement* LastChildElement( const char* value_=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(value_) ); }
+	XMLElement* LastChildElement( const char* _value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(_value) ); }
 	
 	/// Get the previous (left) sibling node of this node.
 	const XMLNode*	PreviousSibling() const					{ return prev; }
@@ -491,7 +498,7 @@ public:
 
 	/// Get the previous (left) sibling element of this node, with an opitionally supplied name.
 	const XMLElement*	PreviousSiblingElement( const char* value=0 ) const ;
-	XMLElement*	PreviousSiblingElement( const char* value_=0 ) { return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( value_ ) ); }
+	XMLElement*	PreviousSiblingElement( const char* _value=0 ) { return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( _value ) ); }
 	
 	/// Get the next (right) sibling node of this node.
 	const XMLNode*	NextSibling() const						{ return next; }
@@ -499,7 +506,7 @@ public:
 		
 	/// Get the next (right) sibling element of this node, with an opitionally supplied name.
 	const XMLElement*	NextSiblingElement( const char* value=0 ) const;
- 	XMLElement*	NextSiblingElement( const char* value_=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement( value_ ) ); }
+ 	XMLElement*	NextSiblingElement( const char* _value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement( _value ) ); }
 
 	/**
 		Add a child node as the last (right) child.
@@ -617,7 +624,7 @@ public:
 	virtual const XMLText*	ToText() const	{ return this; }
 
 	/// Declare whether this should be CDATA or standard text.
-	void SetCData( bool isCData_ )			{ this->isCData = isCData_; }
+	void SetCData( bool _isCData )			{ this->isCData = _isCData; }
 	/// Returns true if this is a CDATA text element.
 	bool CData() const						{ return isCData; }
 
