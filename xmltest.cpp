@@ -78,6 +78,32 @@ int main( int /*argc*/, const char* /*argv*/ )
 		_CrtMemCheckpoint( &startMemState );
 	#endif	
 
+	/* ------ Example 1: Load and parse an XML file. ---- */	
+	{
+		XMLDocument doc;
+		doc.LoadFile( "dream.xml" );
+	}
+	
+	/* ------ Example 2: Lookup information. ---- */	
+	{
+		XMLDocument doc;
+		doc.LoadFile( "dream.xml" );
+
+		// Structure of the XML file:
+		// - Element "PLAY"			the root Element
+		// - - Element "TITLE"		child of the root PLAY Element
+		// - - - Text				child of the TITLE Element
+		
+		// Navigate to the title, using the convenience function, with a dangerous lack of error checking.
+		const char* title = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->GetText();
+		printf( "Name of play (1): %s\n", title );
+		
+		// Text is just another Node to TinyXML-2. The more general way to get to the XMLText:
+		XMLText* textNode = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->FirstChild()->ToText();
+		title = textNode->Value();
+		printf( "Name of play (2): %s\n", title );
+	}
+
 	{
 		static const char* test[] = {	"<element />",
 									    "<element></element>",

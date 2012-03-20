@@ -83,7 +83,7 @@ Advantages of TinyXML-1
 	<li>Support for some C++ STL conventions: streams and strings</li>
 	<li>Very mature and well debugged code base.</li>
 </ol>
-
+	
 <h2> Features </h2>
 
 <h3> Memory Model </h3>
@@ -187,6 +187,40 @@ an XML document.
 	printer.OpenElement( "foo" );
 	printer.PushAttribute( "foo", "bar" );
 	printer.CloseElement();
+
+<h2> Examples </h2>
+
+<h4> Load and parse an XML file. </h4>
+@verbatim
+	/* ------ Example 1: Load and parse an XML file. ---- */	
+	{
+		XMLDocument doc;
+		doc.LoadFile( "dream.xml" );
+	}
+@endverbatim
+
+<h4> Lookup information. </h4>
+@verbatim
+	/* ------ Example 2: Lookup information. ---- */	
+	{
+		XMLDocument doc;
+		doc.LoadFile( "dream.xml" );
+
+		// Structure of the XML file:
+		// - Element "PLAY"			the root Element, which is the FirstChildElement of the Document
+		// - - Element "TITLE"		child of the root PLAY Element
+		// - - - Text				child of the TITLE Element
+		
+		// Navigate to the title, using the convenience function, with a dangerous lack of error checking.
+		const char* title = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->GetText();
+		printf( "Name of play (1): %s\n", title );
+		
+		// Text is just another Node to TinyXML-2. The more general way to get to the XMLText:
+		XMLText* textNode = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->FirstChild()->ToText();
+		title = textNode->Value();
+		printf( "Name of play (2): %s\n", title );
+	}
+@endverbatim
 
 <h2> Using and Installing </h2>
 
