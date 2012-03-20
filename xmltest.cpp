@@ -1,9 +1,8 @@
 #include "tinyxml2.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 
 #if defined( _MSC_VER )
 	#include <crtdbg.h>
@@ -72,7 +71,7 @@ void NullLineEndings( char* p )
 }
 
 
-int main( int /*argc*/, const char* /*argv*/ )
+int main( int /*argc*/, const char ** /*argv*/ )
 {
 	#if defined( _MSC_VER ) && defined( DEBUG )
 		_CrtMemCheckpoint( &startMemState );
@@ -170,7 +169,7 @@ int main( int /*argc*/, const char* /*argv*/ )
 		XMLTest( "Programmatic DOM", true, doc->FirstChildElement()->FirstChildElement()->BoolAttribute( "attrib" ) );
 		int value = 10;
 		int result = doc->FirstChildElement()->LastChildElement()->QueryIntAttribute( "attrib", &value );
-		XMLTest( "Programmatic DOM", result, NO_ATTRIBUTE );
+		XMLTest( "Programmatic DOM", result, XML_NO_ATTRIBUTE );
 		XMLTest( "Programmatic DOM", value, 10 );
 
 		doc->Print();
@@ -224,7 +223,7 @@ int main( int /*argc*/, const char* /*argv*/ )
 
 		XMLDocument doc;
 		doc.Parse( error );
-		XMLTest( "Bad XML", doc.ErrorID(), ERROR_PARSING_ATTRIBUTE );
+		XMLTest( "Bad XML", doc.ErrorID(), XML_ERROR_PARSING_ATTRIBUTE );
 	}
 
 	{
@@ -247,9 +246,9 @@ int main( int /*argc*/, const char* /*argv*/ )
 		XMLTest( "Query attribute: double as int", result, XML_NO_ERROR );
 		XMLTest( "Query attribute: double as int", iVal, 2 );
 		result = ele->QueryIntAttribute( "attr2", &iVal );
-		XMLTest( "Query attribute: not a number", result, WRONG_ATTRIBUTE_TYPE );
+		XMLTest( "Query attribute: not a number", result, XML_WRONG_ATTRIBUTE_TYPE );
 		result = ele->QueryIntAttribute( "bar", &iVal );
-		XMLTest( "Query attribute: does not exist", result, NO_ATTRIBUTE );
+		XMLTest( "Query attribute: does not exist", result, XML_NO_ATTRIBUTE );
 	}
 
 	{
@@ -543,7 +542,7 @@ int main( int /*argc*/, const char* /*argv*/ )
 		XMLDocument doc;
 		doc.Parse( doctype );
 		
-		XMLTest( "Parsing repeated attributes.", ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );	// is an  error to tinyxml (didn't use to be, but caused issues)
+		XMLTest( "Parsing repeated attributes.", XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );	// is an  error to tinyxml (didn't use to be, but caused issues)
 		doc.PrintError();
 	}
 
@@ -557,11 +556,11 @@ int main( int /*argc*/, const char* /*argv*/ )
 	}
 
 	{
-		// Empty documents should return TIXML_ERROR_PARSING_EMPTY, bug 1070717
+		// Empty documents should return TIXML_XML_ERROR_PARSING_EMPTY, bug 1070717
 		const char* str = "    ";
 		XMLDocument doc;
 		doc.Parse( str );
-		XMLTest( "Empty document error", ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
+		XMLTest( "Empty document error", XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
 	}
 
 	{
@@ -588,7 +587,7 @@ int main( int /*argc*/, const char* /*argv*/ )
 		xml.Parse("<x> ");
 		XMLTest("Missing end tag with trailing whitespace", xml.Error(), true);
 		xml.Parse("<x></y>");
-		XMLTest("Mismatched tags", xml.ErrorID(), ERROR_MISMATCHED_ELEMENT);
+		XMLTest("Mismatched tags", xml.ErrorID(), XML_ERROR_MISMATCHED_ELEMENT);
 	} 
 
 
