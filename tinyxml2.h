@@ -24,11 +24,13 @@ distribution.
 #ifndef TINYXML2_INCLUDED
 #define TINYXML2_INCLUDED
 
-
-#include <limits.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <memory.h>		// Needed by mac.
+#include <cctype>
+#include <climits>
+#include <cstdio>
+#include <cstring>
+#if __APPLE__
+#  include <memory.h>
+#endif
 
 /* 
    TODO: add 'lastAttribute' for faster parsing.
@@ -36,7 +38,6 @@ distribution.
 */
 /*
 	gcc: g++ -Wall tinyxml2.cpp xmltest.cpp -o gccxmltest.exe
-
 */
 
 #if defined( _DEBUG ) || defined( DEBUG ) || defined (__DEBUG__)
@@ -724,22 +725,22 @@ enum {
 	XML_NO_ERROR = 0,
 	XML_SUCCESS = 0,
 
-	NO_ATTRIBUTE,
-	WRONG_ATTRIBUTE_TYPE,
+	XML_NO_ATTRIBUTE,
+	XML_WRONG_ATTRIBUTE_TYPE,
 
-	ERROR_FILE_NOT_FOUND,
-	ERROR_ELEMENT_MISMATCH,
-	ERROR_PARSING_ELEMENT,
-	ERROR_PARSING_ATTRIBUTE,
-	ERROR_IDENTIFYING_TAG,
-	ERROR_PARSING_TEXT,
-	ERROR_PARSING_CDATA,
-	ERROR_PARSING_COMMENT,
-	ERROR_PARSING_DECLARATION,
-	ERROR_PARSING_UNKNOWN,
-	ERROR_EMPTY_DOCUMENT,
-	ERROR_MISMATCHED_ELEMENT,
-	ERROR_PARSING
+	XML_ERROR_FILE_NOT_FOUND,
+	XML_ERROR_ELEMENT_MISMATCH,
+	XML_ERROR_PARSING_ELEMENT,
+	XML_ERROR_PARSING_ATTRIBUTE,
+	XML_ERROR_IDENTIFYING_TAG,
+	XML_ERROR_PARSING_TEXT,
+	XML_ERROR_PARSING_CDATA,
+	XML_ERROR_PARSING_COMMENT,
+	XML_ERROR_PARSING_DECLARATION,
+	XML_ERROR_PARSING_UNKNOWN,
+	XML_ERROR_EMPTY_DOCUMENT,
+	XML_ERROR_MISMATCHED_ELEMENT,
+	XML_ERROR_PARSING
 };
 
 
@@ -773,7 +774,7 @@ public:
 
 	/** QueryIntAttribute interprets the attribute as an integer, and returns the value
 		in the provided paremeter. The function will return XML_NO_ERROR on success,
-		and WRONG_ATTRIBUTE_TYPE if the conversion is not successful.
+		and XML_WRONG_ATTRIBUTE_TYPE if the conversion is not successful.
 	*/
 	int QueryIntValue( int* value ) const;
 	/// See QueryIntAttribute
@@ -855,8 +856,8 @@ public:
 	float	 FloatAttribute( const char* name ) const	{ float f=0;	QueryFloatAttribute( name, &f );		return f; }
 
 	/** Given an attribute name, QueryIntAttribute() returns 
-		XML_NO_ERROR, WRONG_ATTRIBUTE_TYPE if the conversion
-		can't be performed, or NO_ATTRIBUTE if the attribute
+		XML_NO_ERROR, XML_WRONG_ATTRIBUTE_TYPE if the conversion
+		can't be performed, or XML_NO_ATTRIBUTE if the attribute
 		doesn't exist. If successful, the result of the conversion
 		will be written to 'value'. If not successful, nothing will
 		be written to 'value'. This allows you to provide default
@@ -867,15 +868,15 @@ public:
 		QueryIntAttribute( "foo", &value );		// if "foo" isn't found, value will still be 10
 		@endverbatim
 	*/
-	int QueryIntAttribute( const char* name, int* value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryIntValue( value ); } 
+	int QueryIntAttribute( const char* name, int* value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryIntValue( value ); } 
 	/// See QueryIntAttribute()
-	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryUnsignedValue( value ); }
+	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryUnsignedValue( value ); }
 	/// See QueryIntAttribute()
-	int QueryBoolAttribute( const char* name, bool* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryBoolValue( value ); }
+	int QueryBoolAttribute( const char* name, bool* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryBoolValue( value ); }
 	/// See QueryIntAttribute()
-	int QueryDoubleAttribute( const char* name, double* value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryDoubleValue( value ); }
+	int QueryDoubleAttribute( const char* name, double* value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryDoubleValue( value ); }
 	/// See QueryIntAttribute()
-	int QueryFloatAttribute( const char* name, float* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return NO_ATTRIBUTE; return a->QueryFloatValue( value ); }
+	int QueryFloatAttribute( const char* name, float* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryFloatValue( value ); }
 
 	/// Sets the named attribute to value.
 	void SetAttribute( const char* name, const char* value )	{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
