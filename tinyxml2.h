@@ -120,15 +120,15 @@ public:
 		ATTRIBUTE_NAME		= 0,
 		ATTRIBUTE_VALUE		= NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
 		ATTRIBUTE_VALUE_LEAVE_ENTITIES		= NEEDS_NEWLINE_NORMALIZATION,
-		COMMENT				= NEEDS_NEWLINE_NORMALIZATION,
+		COMMENT				= NEEDS_NEWLINE_NORMALIZATION
 	};
 
 	StrPair() : flags( 0 ), start( 0 ), end( 0 ) {}
 	~StrPair();
 
-	void Set( char* start, char* end, int flags ) {
+	void Set( char* start_, char* end_, int flags_ ) {
 		Reset();
-		this->start = start; this->end = end; this->flags = flags | NEEDS_FLUSH;
+		this->start = start_; this->end = end_; this->flags = flags_ | NEEDS_FLUSH;
 	}
 	const char* GetStr();
 	bool Empty() const { return start == end; }
@@ -381,7 +381,7 @@ public:
 		}
 		return false;
 	}
-	inline static int IsUTF8Continuation( unsigned char p ) { return p & 0x80; }
+	inline static int IsUTF8Continuation( const char p ) { return p & 0x80; }
 	inline static int IsAlphaNum( unsigned char anyByte )	{ return ( anyByte < 128 ) ? isalnum( anyByte ) : 1; }
 	inline static int IsAlpha( unsigned char anyByte )		{ return ( anyByte < 128 ) ? isalpha( anyByte ) : 1; }
 
@@ -472,7 +472,7 @@ public:
 	    element with the specified name.
 	*/
 	const XMLElement* FirstChildElement( const char* value=0 ) const;
-	XMLElement* FirstChildElement( const char* value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( value )); }
+	XMLElement* FirstChildElement( const char* value_=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( value_ )); }
 
 	/// Get the last child node, or null if none exists.
 	const XMLNode*	LastChild() const						{ return lastChild; }
@@ -482,7 +482,7 @@ public:
 	    element with the specified name.
 	*/
 	const XMLElement* LastChildElement( const char* value=0 ) const;
-	XMLElement* LastChildElement( const char* value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(value) ); }
+	XMLElement* LastChildElement( const char* value_=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(value_) ); }
 	
 	/// Get the previous (left) sibling node of this node.
 	const XMLNode*	PreviousSibling() const					{ return prev; }
@@ -490,7 +490,7 @@ public:
 
 	/// Get the previous (left) sibling element of this node, with an opitionally supplied name.
 	const XMLElement*	PreviousSiblingElement( const char* value=0 ) const ;
-	XMLElement*	PreviousSiblingElement( const char* value=0 ) { return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( value ) ); }
+	XMLElement*	PreviousSiblingElement( const char* value_=0 ) { return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( value_ ) ); }
 	
 	/// Get the next (right) sibling node of this node.
 	const XMLNode*	NextSibling() const						{ return next; }
@@ -498,7 +498,7 @@ public:
 		
 	/// Get the next (right) sibling element of this node, with an opitionally supplied name.
 	const XMLElement*	NextSiblingElement( const char* value=0 ) const;
- 	XMLElement*	NextSiblingElement( const char* value=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement( value ) ); }
+ 	XMLElement*	NextSiblingElement( const char* value_=0 )	{ return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement( value_ ) ); }
 
 	/**
 		Add a child node as the last (right) child.
@@ -616,7 +616,7 @@ public:
 	virtual const XMLText*	ToText() const	{ return this; }
 
 	/// Declare whether this should be CDATA or standard text.
-	void SetCData( bool isCData )			{ this->isCData = isCData; }
+	void SetCData( bool isCData_ )			{ this->isCData = isCData_; }
 	/// Returns true if this is a CDATA text element.
 	bool CData() const						{ return isCData; }
 
@@ -1219,7 +1219,7 @@ private:
 };
 
 
-};	// tinyxml2
+}	// tinyxml2
 
 
 
