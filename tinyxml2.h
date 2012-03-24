@@ -56,7 +56,7 @@ distribution.
 
 #if defined(DEBUG)
         #if defined(_MSC_VER)
-                #define TIXMLASSERT( x )           if ( !(x)) { _asm { int 3 } } //if ( !(x)) WinDebugBreak()
+                #define TIXMLASSERT( x )           if ( !(x)) { __debugbreak(); } //if ( !(x)) WinDebugBreak()
         #elif defined (ANDROID_NDK)
                 #include <android/log.h>
                 #define TIXMLASSERT( x )           if ( !(x)) { __android_log_assert( "assert", "grinliz", "ASSERT in '%s' at %d.", __FILE__, __LINE__ ); }
