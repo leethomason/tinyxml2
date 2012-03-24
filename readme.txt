@@ -100,8 +100,8 @@ by the Document. When the Document is deleted, so are all the nodes it contains.
 
 Microsoft has an excellent article on white space: http://msdn.microsoft.com/en-us/library/ms256097.aspx
 
-TinyXML-2 preserves white space in a (hopefully) sane way that is almost complient with the spec.
-(TinyXML-1 used a completely outdated model.)
+TinyXML-2 preserves white space in a (hopefully) sane way that is almost complient with the
+spec.(TinyXML-1 used a completely outdated model.)
 
 As a first step, all newlines / carriage-returns / line-feeds are normalized to a
 line-feed character, as required by the XML spec.
@@ -110,15 +110,15 @@ White space in text is preserved. For example:
 
 	<element> Hello,  World</element>
 
-The leading space before the "Hello" and the double space after the comma are preserved.
-Line-feeds are preserved, as in this example:
+The leading space before the "Hello" and the double space after the comma are 
+preserved. Line-feeds are preserved, as in this example:
 
 	<element> Hello again,  
 	          World</element>
 
-However, white space between elements is *not* preserved. Although not strictly compliant,
-tracking and reporting inta-element space is awkward, and not normally valuable. TinyXML-2 
-sees these as the same XML:
+However, white space between elements is *not* preserved. Although not strictly 
+compliant, tracking and reporting inter-element space is awkward, and not normally
+valuable. TinyXML-2 sees these as the same XML:
 
 	<document>
 	<data>1</data>
@@ -207,15 +207,18 @@ an XML document.
 		doc.LoadFile( "dream.xml" );
 
 		// Structure of the XML file:
-		// - Element "PLAY"			the root Element, which is the FirstChildElement of the Document
-		// - - Element "TITLE"		child of the root PLAY Element
-		// - - - Text				child of the TITLE Element
+		// - Element "PLAY"      the root Element, which is the 
+		//                       FirstChildElement of the Document
+		// - - Element "TITLE"   child of the root PLAY Element
+		// - - - Text            child of the TITLE Element
 		
-		// Navigate to the title, using the convenience function, with a dangerous lack of error checking.
+		// Navigate to the title, using the convenience function,
+		// with a dangerous lack of error checking.
 		const char* title = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->GetText();
 		printf( "Name of play (1): %s\n", title );
 		
-		// Text is just another Node to TinyXML-2. The more general way to get to the XMLText:
+		// Text is just another Node to TinyXML-2. The more
+		// general way to get to the XMLText:
 		XMLText* textNode = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->FirstChild()->ToText();
 		title = textNode->Value();
 		printf( "Name of play (2): %s\n", title );
