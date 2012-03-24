@@ -844,11 +844,16 @@ public:
 	virtual bool Accept( XMLVisitor* visitor ) const;
 
 	/** Given an attribute name, Attribute() returns the value
-		for the attribute of that name, or null if none exists.
-		
-		'value' is normally null. However, if specified, the attribute
-		will only be returned if the 'name' and 'value' match. This
-		allow you to write code:
+		for the attribute of that name, or null if none 
+		exists. For example:
+
+		@verbatim
+		const char* value = ele->Attribute( "foo" );
+		@endverbatim
+
+		The 'value' parameter is normally null. However, if specified, 
+		the attribute will only be returned if the 'name' and 'value' 
+		match. This allow you to write code:
 
 		@verbatim
 		if ( ele->Attribute( "foo", "bar" ) ) callFooIsBar();
