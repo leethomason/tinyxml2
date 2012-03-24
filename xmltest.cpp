@@ -77,6 +77,29 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		_CrtMemCheckpoint( &startMemState );
 	#endif	
 
+	#if defined(_MSC_VER)
+	#pragma warning ( push )
+	#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
+	#endif
+
+	FILE* fp = fopen( "dream.xml", "r" );
+	if ( !fp ) {
+		printf( "Error opening test file 'dream.xml'.\n"
+				"Is your working directory the same as where \n"
+				"the xmltest.cpp and dream.xml file are?\n\n"
+	#if defined( _MSC_VER )
+				"In windows Visual Studio you may need to set\n"
+				"Properties->Debugging->Working Directory to '..'\n"
+	#endif
+			  );
+		exit( 1 );
+	}
+	fclose( fp );
+
+	#if defined(_MSC_VER)
+	#pragma warning ( pop )
+	#endif
+
 	/* ------ Example 1: Load and parse an XML file. ---- */	
 	{
 		XMLDocument doc;

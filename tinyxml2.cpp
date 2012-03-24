@@ -1408,9 +1408,14 @@ void XMLDocument::SaveFile( const char* filename )
 #if defined(_MSC_VER)
 #pragma warning ( pop )
 #endif
-	XMLPrinter stream( fp );
-	Print( &stream );
-	fclose( fp );
+	if ( fp ) {
+		XMLPrinter stream( fp );
+		Print( &stream );
+		fclose( fp );
+	}
+	else {
+		SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
+	}
 }
 
 
