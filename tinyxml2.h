@@ -845,8 +845,23 @@ public:
 
 	/** Given an attribute name, Attribute() returns the value
 		for the attribute of that name, or null if none exists.
+		
+		'value' is normally null. However, if specified, the attribute
+		will only be returned if the 'name' and 'value' match. This
+		allow you to write code:
+
+		@verbatim
+		if ( ele->Attribute( "foo", "bar" ) ) callFooIsBar();
+		@endverbatim
+
+		rather than:
+		@verbatim
+		if ( ele->Attribute( "foo" ) ) {
+			if ( strcmp( ele->Attribute( "foo" ), "bar" ) == 0 ) callFooIsBar();
+		}
+		@endverbatim
 	*/
-	const char* Attribute( const char* name ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return 0; return a->Value(); }
+	const char* Attribute( const char* name, const char* value=0 ) const;
 
 	/** Given an attribute name, IntAttribute() returns the value
 		of the attribute interpreted as an integer. 0 will be

@@ -319,6 +319,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		ele->QueryIntAttribute( "int", &iVal );
 		ele->QueryDoubleAttribute( "double", &dVal );
 
+		XMLTest( "Attribute match test", ele->Attribute( "str", "strValue" ), "strValue" );
 		XMLTest( "Attribute round trip. c-string.", "strValue", cStr );
 		XMLTest( "Attribute round trip. int.", 1, iVal );
 		XMLTest( "Attribute round trip. double.", -1, (int)dVal );
