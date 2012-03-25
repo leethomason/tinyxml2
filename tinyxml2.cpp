@@ -139,7 +139,6 @@ char* StrPair::ParseName( char* p )
 {
 	char* start = p;
 
-	start = p;
 	if ( !start || !(*start) ) {
 		return 0;
 	}

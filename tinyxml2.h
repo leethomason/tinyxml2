@@ -141,7 +141,7 @@ public:
 	const char* GetStr();
 	bool Empty() const { return start == end; }
 
-	void SetInternedStr( const char* str ) { Reset(); this->start = (char*) str; }
+	void SetInternedStr( const char* str ) { Reset(); this->start = const_cast<char*>(str); }
 	void SetStr( const char* str, int flags=0 );
 
 	char* ParseText( char* in, const char* endTag, int strFlags );
@@ -896,26 +896,26 @@ public:
 		QueryIntAttribute( "foo", &value );		// if "foo" isn't found, value will still be 10
 		@endverbatim
 	*/
-	int QueryIntAttribute( const char* name, int* value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryIntValue( value ); } 
+	int QueryIntAttribute( const char* name, int* _value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryIntValue( _value ); } 
 	/// See QueryIntAttribute()
-	int QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryUnsignedValue( value ); }
+	int QueryUnsignedAttribute( const char* name, unsigned int* _value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryUnsignedValue( _value ); }
 	/// See QueryIntAttribute()
-	int QueryBoolAttribute( const char* name, bool* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryBoolValue( value ); }
+	int QueryBoolAttribute( const char* name, bool* _value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryBoolValue( _value ); }
 	/// See QueryIntAttribute()
-	int QueryDoubleAttribute( const char* name, double* value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryDoubleValue( value ); }
+	int QueryDoubleAttribute( const char* name, double* _value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryDoubleValue( _value ); }
 	/// See QueryIntAttribute()
-	int QueryFloatAttribute( const char* name, float* value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryFloatValue( value ); }
+	int QueryFloatAttribute( const char* name, float* _value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryFloatValue( _value ); }
 
 	/// Sets the named attribute to value.
-	void SetAttribute( const char* name, const char* value )	{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, const char* _value )	{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
 	/// Sets the named attribute to value.
-	void SetAttribute( const char* name, int value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, int _value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
 	/// Sets the named attribute to value.
-	void SetAttribute( const char* name, unsigned value )		{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, unsigned _value )		{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
 	/// Sets the named attribute to value.
-	void SetAttribute( const char* name, bool value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, bool _value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
 	/// Sets the named attribute to value.
-	void SetAttribute( const char* name, double value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( value ); }
+	void SetAttribute( const char* name, double _value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
 
 	/**
 		Delete an attribute.
