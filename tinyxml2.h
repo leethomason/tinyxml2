@@ -405,7 +405,7 @@ public:
 	XML Document Object Model (DOM), except XMLAttributes.
 	Nodes have siblings, a parent, and children which can
 	be navigated. A node is always in a XMLDocument.
-	The type of a TiXmlNode can be queried, and it can 
+	The type of a XMLNode can be queried, and it can 
 	be cast to its more defined type.
 
 	An XMLDocument allocates memory for all its Nodes.
