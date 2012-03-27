@@ -1,0 +1,219 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		037AE8A4151E692700E0F29F /* tinyxml2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 037AE8A1151E692700E0F29F /* tinyxml2.cpp */; };
+		037AE8A5151E692700E0F29F /* xmltest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 037AE8A3151E692700E0F29F /* xmltest.cpp */; };
+		037AE9BE151E694400E0F29F /* dream.xml in CopyFiles */ = {isa = PBXBuildFile; fileRef = 037AE062151CCC6D00E0F29F /* dream.xml */; };
+		037AE9BF151E694400E0F29F /* utf8test.xml in CopyFiles */ = {isa = PBXBuildFile; fileRef = 037AE065151CCC6D00E0F29F /* utf8test.xml */; };
+		037AE9C0151E694400E0F29F /* utf8testverify.xml in CopyFiles */ = {isa = PBXBuildFile; fileRef = 037AE066151CCC6D00E0F29F /* utf8testverify.xml */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		037AE9CF151E697800E0F29F /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				037AE9BE151E694400E0F29F /* dream.xml in CopyFiles */,
+				037AE9BF151E694400E0F29F /* utf8test.xml in CopyFiles */,
+				037AE9C0151E694400E0F29F /* utf8testverify.xml in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		037AE062151CCC6D00E0F29F /* dream.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = dream.xml; sourceTree = "<group>"; };
+		037AE065151CCC6D00E0F29F /* utf8test.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = utf8test.xml; sourceTree = "<group>"; };
+		037AE066151CCC6D00E0F29F /* utf8testverify.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = utf8testverify.xml; sourceTree = "<group>"; };
+		037AE86D151E685F00E0F29F /* tinyxml2 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = tinyxml2; sourceTree = BUILT_PRODUCTS_DIR; };
+		037AE8A1151E692700E0F29F /* tinyxml2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml2.cpp; path = ../tinyxml2.cpp; sourceTree = "<group>"; };
+		037AE8A2151E692700E0F29F /* tinyxml2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tinyxml2.h; path = ../tinyxml2.h; sourceTree = "<group>"; };
+		037AE8A3151E692700E0F29F /* xmltest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xmltest.cpp; path = ../xmltest.cpp; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		037AE86B151E685F00E0F29F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		037AE056151CCC5200E0F29F = {
+			isa = PBXGroup;
+			children = (
+				037AE06A151CCC7C00E0F29F /* resources */,
+				037AE069151CCC7000E0F29F /* src */,
+				037AE06F151CCCB900E0F29F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		037AE069151CCC7000E0F29F /* src */ = {
+			isa = PBXGroup;
+			children = (
+				037AE8A1151E692700E0F29F /* tinyxml2.cpp */,
+				037AE8A2151E692700E0F29F /* tinyxml2.h */,
+				037AE8A3151E692700E0F29F /* xmltest.cpp */,
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
+		037AE06A151CCC7C00E0F29F /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				037AE062151CCC6D00E0F29F /* dream.xml */,
+				037AE065151CCC6D00E0F29F /* utf8test.xml */,
+				037AE066151CCC6D00E0F29F /* utf8testverify.xml */,
+			);
+			name = resources;
+			path = ..;
+			sourceTree = "<group>";
+		};
+		037AE06F151CCCB900E0F29F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				037AE86D151E685F00E0F29F /* tinyxml2 */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		037AE86C151E685F00E0F29F /* tinyxml2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 037AE873151E687E00E0F29F /* Build configuration list for PBXNativeTarget "tinyxml2" */;
+			buildPhases = (
+				037AE86A151E685F00E0F29F /* Sources */,
+				037AE86B151E685F00E0F29F /* Frameworks */,
+				037AE9CF151E697800E0F29F /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = tinyxml2;
+			productName = tinyxml2;
+			productReference = 037AE86D151E685F00E0F29F /* tinyxml2 */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		037AE058151CCC5200E0F29F /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 037AE05B151CCC5200E0F29F /* Build configuration list for PBXProject "tinyxml2" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 037AE056151CCC5200E0F29F;
+			productRefGroup = 037AE06F151CCCB900E0F29F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				037AE86C151E685F00E0F29F /* tinyxml2 */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		037AE86A151E685F00E0F29F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				037AE8A4151E692700E0F29F /* tinyxml2.cpp in Sources */,
+				037AE8A5151E692700E0F29F /* xmltest.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		037AE059151CCC5200E0F29F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)/Debug";
+				COPY_PHASE_STRIP = NO;
+				SYMROOT = build;
+			};
+			name = Debug;
+		};
+		037AE05A151CCC5200E0F29F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+			};
+			name = Release;
+		};
+		037AE86F151E686000E0F29F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = tinyxml2;
+			};
+			name = Debug;
+		};
+		037AE870151E686000E0F29F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = tinyxml2;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		037AE05B151CCC5200E0F29F /* Build configuration list for PBXProject "tinyxml2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				037AE059151CCC5200E0F29F /* Debug */,
+				037AE05A151CCC5200E0F29F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		037AE873151E687E00E0F29F /* Build configuration list for PBXNativeTarget "tinyxml2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				037AE86F151E686000E0F29F /* Debug */,
+				037AE870151E686000E0F29F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 037AE058151CCC5200E0F29F /* Project object */;
+}
