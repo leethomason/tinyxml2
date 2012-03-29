@@ -1187,10 +1187,10 @@ class XMLHandle
 {
 public:
 	/// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
-	//XMLHandle( XMLNode* _node )								{ node = _node; }
-	XMLHandle( const XMLNode* _node )						{ node = const_cast<XMLNode*>(_node); }
-	//XMLHandle( XMLNode& _node )								{ node = &_node; }
-	XMLHandle( const XMLNode& _node )						{ node = const_cast<XMLNode*>(&_node); }
+	XMLHandle( XMLNode* _node )								{ node = _node; }
+	//XMLHandle( const XMLNode* _node )						{ node = const_cast<XMLNode*>(_node); }
+	XMLHandle( XMLNode& _node )								{ node = &_node; }
+	//XMLHandle( const XMLNode& _node )						{ node = const_cast<XMLNode*>(&_node); }
 	XMLHandle( const XMLHandle& ref )						{ node = ref.node; }
 
 	XMLHandle operator=( XMLHandle ref )					{ node = ref.node; return *this; }
@@ -1204,14 +1204,14 @@ public:
 	XMLHandle LastChild()									{ return XMLHandle( node ? node->LastChild() : 0 ); }
 	const XMLHandle LastChild()	const						{ return XMLHandle( node ? node->LastChild() : 0 ); }
 
-	XMLHandle LastChildElement( const char* _value=0 )				{ return XMLHandle( node ? node->LastChildElement() : 0 ); }
-	const XMLHandle LastChildElement( const char* _value=0 ) const	{ return XMLHandle( node ? node->LastChildElement() : 0 ); }
+	XMLHandle LastChildElement( const char* _value=0 )				{ return XMLHandle( node ? node->LastChildElement( _value ) : 0 ); }
+	const XMLHandle LastChildElement( const char* _value=0 ) const	{ return XMLHandle( node ? node->LastChildElement( _value ) : 0 ); }
 	
 	XMLHandle PreviousSibling()								{ return XMLHandle( node ? node->PreviousSibling() : 0 ); }
 	const XMLHandle PreviousSibling() const					{ return XMLHandle( node ? node->PreviousSibling() : 0 ); }
 
-	XMLHandle PreviousSiblingElement( const char* _value=0 )				{ return XMLHandle( node ? node->PreviousSiblingElement() : 0 ); }
-	const XMLHandle PreviousSiblingElement( const char* _value=0 ) const	{ return XMLHandle( node ? node->PreviousSiblingElement() : 0 ); }
+	XMLHandle PreviousSiblingElement( const char* _value=0 )				{ return XMLHandle( node ? node->PreviousSiblingElement( _value ) : 0 ); }
+	const XMLHandle PreviousSiblingElement( const char* _value=0 ) const	{ return XMLHandle( node ? node->PreviousSiblingElement( _value ) : 0 ); }
 	
 	XMLHandle NextSibling()									{ return XMLHandle( node ? node->NextSibling() : 0 ); }
 	const XMLHandle NextSibling() const						{ return XMLHandle( node ? node->NextSibling() : 0 ); }

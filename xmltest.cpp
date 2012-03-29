@@ -726,6 +726,22 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLTest( "Clone and Equal", 4, count );
 	}
 
+	// -------- Handles ------------
+	{
+		static const char* xml = "<element attrib='bar'><sub>Text</sub></element>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		const XMLDocument& docC = doc;
+
+		XMLElement* ele = XMLHandle( doc ).FirstChildElement( "element" ).FirstChild().ToElement();
+		XMLTest( "Handle, success, mutable", ele->Value(), "sub" );
+
+		ele = XMLHandle( docC ).FirstChildElement( "element" ).FirstChild().ToElement();
+		XMLTest( "Handle, success, mutable", ele->Value(), "sub" );
+
+	}
+	
+
 	// ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )
