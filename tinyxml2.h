@@ -1130,6 +1130,111 @@ private:
 };
 
 
+/**
+	A XMLHandle is a class that wraps a node pointer with null checks; this is
+	an incredibly useful thing. Note that XMLHandle is not part of the TinyXml
+	DOM structure. It is a separate utility class.
+
+	Take an example:
+	@verbatim
+	<Document>
+		<Element attributeA = "valueA">
+			<Child attributeB = "value1" />
+			<Child attributeB = "value2" />
+		</Element>
+	<Document>
+	@endverbatim
+
+	Assuming you want the value of "attributeB" in the 2nd "Child" element, it's very 
+	easy to write a *lot* of code that looks like:
+
+	@verbatim
+	TiXmlElement* root = document.FirstChildElement( "Document" );
+	if ( root )
+	{
+		TiXmlElement* element = root->FirstChildElement( "Element" );
+		if ( element )
+		{
+			TiXmlElement* child = element->FirstChildElement( "Child" );
+			if ( child )
+			{
+				TiXmlElement* child2 = child->NextSiblingElement( "Child" );
+				if ( child2 )
+				{
+					// Finally do something useful.
+	@endverbatim
+
+	And that doesn't even cover "else" cases. TiXmlHandle addresses the verbosity
+	of such code. A TiXmlHandle checks for null	pointers so it is perfectly safe 
+	and correct to use:
+
+	@verbatim
+	TiXmlHandle docHandle( &document );
+	TiXmlElement* child2 = docHandle.FirstChild( "Document" ).FirstChild( "Element" ).Child( "Child", 1 ).ToElement();
+	if ( child2 )
+	{
+		// do something useful
+	@endverbatim
+
+	Which is MUCH more concise and useful.
+
+	It is also safe to copy handles - internally they are nothing more than node pointers.
+	@verbatim
+	TiXmlHandle handleCopy = handle;
+	@endverbatim
+*/
+class XMLHandle
+{
+public:
+	/// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
+	//XMLHandle( XMLNode* _node )								{ node = _node; }
+	XMLHandle( const XMLNode* _node )						{ node = const_cast<XMLNode*>(_node); }
+	//XMLHandle( XMLNode& _node )								{ node = &_node; }
+	XMLHandle( const XMLNode& _node )						{ node = const_cast<XMLNode*>(&_node); }
+	XMLHandle( const XMLHandle& ref )						{ node = ref.node; }
+
+	XMLHandle operator=( XMLHandle ref )					{ node = ref.node; return *this; }
+
+	XMLHandle FirstChild() 									{ return XMLHandle( node ? node->FirstChild() : static_cast<XMLNode*>(0) ); }
+	const XMLHandle FirstChild() const						{ return XMLHandle( node ? node->FirstChild() : 0 ); }
+		
+	XMLHandle FirstChildElement( const char* value=0 )				{ return XMLHandle( node ? node->FirstChildElement( value ) : 0 ); }
+	const XMLHandle FirstChildElement( const char* value=0 ) const	{ return XMLHandle( node ? node->FirstChildElement( value ) : 0 ); }
+
+	XMLHandle LastChild()									{ return XMLHandle( node ? node->LastChild() : 0 ); }
+	const XMLHandle LastChild()	const						{ return XMLHandle( node ? node->LastChild() : 0 ); }
+
+	XMLHandle LastChildElement( const char* _value=0 )				{ return XMLHandle( node ? node->LastChildElement() : 0 ); }
+	const XMLHandle LastChildElement( const char* _value=0 ) const	{ return XMLHandle( node ? node->LastChildElement() : 0 ); }
+	
+	XMLHandle PreviousSibling()								{ return XMLHandle( node ? node->PreviousSibling() : 0 ); }
+	const XMLHandle PreviousSibling() const					{ return XMLHandle( node ? node->PreviousSibling() : 0 ); }
+
+	XMLHandle PreviousSiblingElement( const char* _value=0 )				{ return XMLHandle( node ? node->PreviousSiblingElement() : 0 ); }
+	const XMLHandle PreviousSiblingElement( const char* _value=0 ) const	{ return XMLHandle( node ? node->PreviousSiblingElement() : 0 ); }
+	
+	XMLHandle NextSibling()									{ return XMLHandle( node ? node->NextSibling() : 0 ); }
+	const XMLHandle NextSibling() const						{ return XMLHandle( node ? node->NextSibling() : 0 ); }
+		
+	XMLHandle NextSiblingElement( const char* _value=0 )				{ return XMLHandle( node ? node->NextSiblingElement( _value ) : 0 ); }
+	const XMLHandle NextSiblingElement( const char* _value=0 ) const	{ return XMLHandle( node ? node->NextSiblingElement( _value ) : 0 ); }
+
+
+	XMLNode* ToNode() 							{ return node; } 
+	const XMLNode* ToNode() const				{ return node; } 
+	XMLElement* ToElement() 					{ return ( ( node && node->ToElement() ) ? node->ToElement() : 0 ); }
+	const XMLElement* ToElement() const			{ return ( ( node && node->ToElement() ) ? node->ToElement() : 0 ); }
+	XMLText* ToText() 							{ return ( ( node && node->ToText() ) ? node->ToText() : 0 ); }
+	const XMLText* ToText() const				{ return ( ( node && node->ToText() ) ? node->ToText() : 0 ); }
+	XMLUnknown* ToUnknown() 					{ return ( ( node && node->ToUnknown() ) ? node->ToUnknown() : 0 ); }
+	const XMLUnknown* ToUnknown() const			{ return ( ( node && node->ToUnknown() ) ? node->ToUnknown() : 0 ); }
+	XMLDeclaration* ToDeclaration() 			{ return ( ( node && node->ToDeclaration() ) ? node->ToDeclaration() : 0 ); }
+	const XMLDeclaration* ToDeclaration() const	{ return ( ( node && node->ToDeclaration() ) ? node->ToDeclaration() : 0 ); }
+
+private:
+	XMLNode* node;
+};
+
 
 /**
 	Printing functionality. The XMLPrinter gives you more
