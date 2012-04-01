@@ -1576,7 +1576,7 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
 				// Check for entities. If one is found, flush
 				// the stream up until the entity, write the 
 				// entity, and keep looking.
-				if ( flag[*q] ) {
+				if ( flag[(unsigned)(*q)] ) {
 					while ( p < q ) {
 						Print( "%c", *p );
 						++p;
