@@ -7,7 +7,7 @@ using namespace tinyxml2;
 int main(void)
 {
 	XMLDocument doc;
-	doc.LoadFile( "input_example_01.xml" );
+	doc.LoadFile( "../dream.xml" );
 	const char* title = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->GetText();
 		printf( "Name of play (1): %s\n", title );
 
