@@ -1183,45 +1183,46 @@ private:
 	TiXmlHandle handleCopy = handle;
 	@endverbatim
 */
-class XMLHandle
+template< class T >
+class XMLHandleT
 {
 public:
 	/// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
-	XMLHandle( XMLNode* _node )								{ node = _node; }
+	XMLHandleT<T>( T* _node )									{ node = _node; }
 	//XMLHandle( const XMLNode* _node )						{ node = const_cast<XMLNode*>(_node); }
-	XMLHandle( XMLNode& _node )								{ node = &_node; }
+	XMLHandleT<T>( T& _node )								{ node = &_node; }
 	//XMLHandle( const XMLNode& _node )						{ node = const_cast<XMLNode*>(&_node); }
-	XMLHandle( const XMLHandle& ref )						{ node = ref.node; }
+	XMLHandleT<T>( const XMLHandleT<T>& ref )						{ node = ref.node; }
 
-	XMLHandle operator=( XMLHandle ref )					{ node = ref.node; return *this; }
+	XMLHandleT<T> operator=( XMLHandleT<T> ref )					{ node = ref.node; return *this; }
 
-	XMLHandle FirstChild() 									{ return XMLHandle( node ? node->FirstChild() : static_cast<XMLNode*>(0) ); }
-	const XMLHandle FirstChild() const						{ return XMLHandle( node ? node->FirstChild() : 0 ); }
+	XMLHandleT<T> FirstChild() 									{ return XMLHandleT<T>( node ? node->FirstChild() : 0 ); }
+	const XMLHandleT<T> FirstChild() const						{ return XMLHandleT<T>( node ? node->FirstChild() : 0 ); }
 		
-	XMLHandle FirstChildElement( const char* value=0 )				{ return XMLHandle( node ? node->FirstChildElement( value ) : 0 ); }
-	const XMLHandle FirstChildElement( const char* value=0 ) const	{ return XMLHandle( node ? node->FirstChildElement( value ) : 0 ); }
+	XMLHandleT<T> FirstChildElement( const char* value=0 )				{ return XMLHandleT<T>( node ? node->FirstChildElement( value ) : 0 ); }
+	const XMLHandleT<T> FirstChildElement( const char* value=0 ) const	{ return XMLHandleT<T>( node ? node->FirstChildElement( value ) : 0 ); }
 
-	XMLHandle LastChild()									{ return XMLHandle( node ? node->LastChild() : 0 ); }
-	const XMLHandle LastChild()	const						{ return XMLHandle( node ? node->LastChild() : 0 ); }
+	XMLHandleT<T> LastChild()									{ return XMLHandleT<T>( node ? node->LastChild() : 0 ); }
+	const XMLHandleT<T> LastChild()	const						{ return XMLHandleT<T>( node ? node->LastChild() : 0 ); }
 
-	XMLHandle LastChildElement( const char* _value=0 )				{ return XMLHandle( node ? node->LastChildElement( _value ) : 0 ); }
-	const XMLHandle LastChildElement( const char* _value=0 ) const	{ return XMLHandle( node ? node->LastChildElement( _value ) : 0 ); }
+	XMLHandleT<T> LastChildElement( const char* _value=0 )				{ return XMLHandleT<T>( node ? node->LastChildElement( _value ) : 0 ); }
+	const XMLHandleT<T> LastChildElement( const char* _value=0 ) const	{ return XMLHandleT<T>( node ? node->LastChildElement( _value ) : 0 ); }
 	
-	XMLHandle PreviousSibling()								{ return XMLHandle( node ? node->PreviousSibling() : 0 ); }
-	const XMLHandle PreviousSibling() const					{ return XMLHandle( node ? node->PreviousSibling() : 0 ); }
+	XMLHandleT<T> PreviousSibling()								{ return XMLHandleT<T>( node ? node->PreviousSibling() : 0 ); }
+	const XMLHandleT<T> PreviousSibling() const					{ return XMLHandleT<T>( node ? node->PreviousSibling() : 0 ); }
 
-	XMLHandle PreviousSiblingElement( const char* _value=0 )				{ return XMLHandle( node ? node->PreviousSiblingElement( _value ) : 0 ); }
-	const XMLHandle PreviousSiblingElement( const char* _value=0 ) const	{ return XMLHandle( node ? node->PreviousSiblingElement( _value ) : 0 ); }
+	XMLHandleT<T> PreviousSiblingElement( const char* _value=0 )				{ return XMLHandleT<T>( node ? node->PreviousSiblingElement( _value ) : 0 ); }
+	const XMLHandleT<T> PreviousSiblingElement( const char* _value=0 ) const	{ return XMLHandleT<T>( node ? node->PreviousSiblingElement( _value ) : 0 ); }
 	
-	XMLHandle NextSibling()									{ return XMLHandle( node ? node->NextSibling() : 0 ); }
-	const XMLHandle NextSibling() const						{ return XMLHandle( node ? node->NextSibling() : 0 ); }
+	XMLHandleT<T> NextSibling()									{ return XMLHandleT<T>( node ? node->NextSibling() : 0 ); }
+	const XMLHandleT<T> NextSibling() const						{ return XMLHandleT<T>( node ? node->NextSibling() : 0 ); }
 		
-	XMLHandle NextSiblingElement( const char* _value=0 )				{ return XMLHandle( node ? node->NextSiblingElement( _value ) : 0 ); }
-	const XMLHandle NextSiblingElement( const char* _value=0 ) const	{ return XMLHandle( node ? node->NextSiblingElement( _value ) : 0 ); }
+	XMLHandleT<T> NextSiblingElement( const char* _value=0 )				{ return XMLHandleT<T>( node ? node->NextSiblingElement( _value ) : 0 ); }
+	const XMLHandleT<T> NextSiblingElement( const char* _value=0 ) const	{ return XMLHandleT<T>( node ? node->NextSiblingElement( _value ) : 0 ); }
 
 
-	XMLNode* ToNode() 							{ return node; } 
-	const XMLNode* ToNode() const				{ return node; } 
+	T* ToNode() 								{ return node; } 
+	const T* ToNode() const						{ return node; } 
 	XMLElement* ToElement() 					{ return ( ( node && node->ToElement() ) ? node->ToElement() : 0 ); }
 	const XMLElement* ToElement() const			{ return ( ( node && node->ToElement() ) ? node->ToElement() : 0 ); }
 	XMLText* ToText() 							{ return ( ( node && node->ToText() ) ? node->ToText() : 0 ); }
@@ -1232,8 +1233,11 @@ public:
 	const XMLDeclaration* ToDeclaration() const	{ return ( ( node && node->ToDeclaration() ) ? node->ToDeclaration() : 0 ); }
 
 private:
-	XMLNode* node;
+	T* node;
 };
+
+typedef XMLHandleT< XMLNode > XMLHandle;
+typedef XMLHandleT< const XMLNode > XMLConstHandle;
 
 
 /**

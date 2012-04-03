@@ -736,9 +736,8 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLElement* ele = XMLHandle( doc ).FirstChildElement( "element" ).FirstChild().ToElement();
 		XMLTest( "Handle, success, mutable", ele->Value(), "sub" );
 
-//		ele = XMLHandle( docC ).FirstChildElement( "element" ).FirstChild().ToElement();
-//		XMLTest( "Handle, success, mutable", ele->Value(), "sub" );
-
+		const XMLElement* eleC = XMLConstHandle( docC ).FirstChildElement( "element" ).FirstChild().ToElement();
+		XMLTest( "Handle, success, mutable", eleC->Value(), "sub" );
 	}
 	
 
