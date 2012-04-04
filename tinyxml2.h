@@ -96,7 +96,7 @@ distribution.
 
 static const int TIXML2_MAJOR_VERSION = 0;
 static const int TIXML2_MINOR_VERSION = 9;
-static const int TIXML2_PATCH_VERSION = 2;
+static const int TIXML2_PATCH_VERSION = 3;
 
 namespace tinyxml2
 {
