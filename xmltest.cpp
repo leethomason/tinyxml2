@@ -71,6 +71,51 @@ void NullLineEndings( char* p )
 }
 
 
+// Comments in the header. (Don't know how to get Doxygen to read comments in this file.)
+int example_1()
+{
+	XMLDocument doc;
+	doc.LoadFile( "dream.xml" );
+
+	return doc.ErrorID();
+}
+
+
+// Comments in the header. (Don't know how to get Doxygen to read comments in this file.)
+int example_2()
+{
+	static const char* xml = "<element/>";
+	XMLDocument doc;
+	doc.Parse( xml );
+
+	return doc.ErrorID();
+}
+
+
+int example_3()
+{
+	static const char* xml = 
+		"<?xml version=\"1.0\"?>"
+		"<!DOCTYPE PLAY SYSTEM \"play.dtd\">"
+		"<PLAY>"
+		"<TITLE>A Midsummer Night's Dream</TITLE>"
+		"</PLAY>";
+
+	XMLDocument doc;
+	doc.Parse( xml );
+
+	XMLElement* titleElement = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" );
+	const char* title = titleElement->GetText();
+	printf( "Name of play (1): %s\n", title );
+		
+	XMLText* textNode = titleElement->FirstChild()->ToText();
+	title = textNode->Value();
+	printf( "Name of play (2): %s\n", title );
+
+	return doc.ErrorID();
+}
+
+
 int main( int /*argc*/, const char ** /*argv*/ )
 {
 	#if defined( _MSC_VER ) && defined( DEBUG )
@@ -100,31 +145,11 @@ int main( int /*argc*/, const char ** /*argv*/ )
 	#pragma warning ( pop )
 	#endif
 
-	/* ------ Example 1: Load and parse an XML file. ---- */	
-	{
-		XMLDocument doc;
-		doc.LoadFile( "dream.xml" );
-	}
-	
-	/* ------ Example 2: Lookup information. ---- */	
-	{
-		XMLDocument doc;
-		doc.LoadFile( "dream.xml" );
+	XMLTest( "Example-1", 0, example_1() );
+	XMLTest( "Example-2", 0, example_2() );
+	XMLTest( "Example-3", 0, example_3() );
 
-		// Structure of the XML file:
-		// - Element "PLAY"			the root Element
-		// - - Element "TITLE"		child of the root PLAY Element
-		// - - - Text				child of the TITLE Element
-		
-		// Navigate to the title, using the convenience function, with a dangerous lack of error checking.
-		const char* title = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->GetText();
-		printf( "Name of play (1): %s\n", title );
-		
-		// Text is just another Node to TinyXML-2. The more general way to get to the XMLText:
-		XMLText* textNode = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->FirstChild()->ToText();
-		title = textNode->Value();
-		printf( "Name of play (2): %s\n", title );
-	}
+	/* ------ Example 2: Lookup information. ---- */	
 
 	{
 		static const char* test[] = {	"<element />",
