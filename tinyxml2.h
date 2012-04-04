@@ -1169,8 +1169,8 @@ private:
 	and correct to use:
 
 	@verbatim
-	TiXmlHandle docHandle( &document );
-	TiXmlElement* child2 = docHandle.FirstChild( "Document" ).FirstChild( "Element" ).Child( "Child", 1 ).ToElement();
+	XMLHandle docHandle( &document );
+	XMLElement* child2 = docHandle.FirstChild( "Document" ).FirstChild( "Element" ).FirstChild().NextSibling().ToElement();
 	if ( child2 )
 	{
 		// do something useful
