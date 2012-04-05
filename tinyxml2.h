@@ -1133,7 +1133,7 @@ private:
 
 /**
 	A XMLHandle is a class that wraps a node pointer with null checks; this is
-	an incredibly useful thing. Note that XMLHandle is not part of the TinyXml
+	an incredibly useful thing. Note that XMLHandle is not part of the TinyXML
 	DOM structure. It is a separate utility class.
 
 	Take an example:
@@ -1150,23 +1150,23 @@ private:
 	easy to write a *lot* of code that looks like:
 
 	@verbatim
-	TiXmlElement* root = document.FirstChildElement( "Document" );
+	XMLElement* root = document.FirstChildElement( "Document" );
 	if ( root )
 	{
-		TiXmlElement* element = root->FirstChildElement( "Element" );
+		XMLElement* element = root->FirstChildElement( "Element" );
 		if ( element )
 		{
-			TiXmlElement* child = element->FirstChildElement( "Child" );
+			XMLElement* child = element->FirstChildElement( "Child" );
 			if ( child )
 			{
-				TiXmlElement* child2 = child->NextSiblingElement( "Child" );
+				XMLElement* child2 = child->NextSiblingElement( "Child" );
 				if ( child2 )
 				{
 					// Finally do something useful.
 	@endverbatim
 
-	And that doesn't even cover "else" cases. TiXmlHandle addresses the verbosity
-	of such code. A TiXmlHandle checks for null	pointers so it is perfectly safe 
+	And that doesn't even cover "else" cases. XMLHandle addresses the verbosity
+	of such code. A XMLHandle checks for null pointers so it is perfectly safe 
 	and correct to use:
 
 	@verbatim
@@ -1181,33 +1181,49 @@ private:
 
 	It is also safe to copy handles - internally they are nothing more than node pointers.
 	@verbatim
-	TiXmlHandle handleCopy = handle;
+	XMLHandle handleCopy = handle;
 	@endverbatim
+
+	See also XMLConstHandle, which is the same as XMLHandle, but operates on const objects.
 */
 class XMLHandle
 {
 public:
 	/// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
 	XMLHandle( XMLNode* _node )												{ node = _node; }
+	/// Create a handle from a node.
 	XMLHandle( XMLNode& _node )												{ node = &_node; }
+	/// Copy constructor
 	XMLHandle( const XMLHandle& ref )										{ node = ref.node; }
-
+	/// Assignment
 	XMLHandle operator=( const XMLHandle& ref )								{ node = ref.node; return *this; }
 
+	/// Get the first child of this handle.
 	XMLHandle FirstChild() 													{ return XMLHandle( node ? node->FirstChild() : 0 ); }
+	/// Get the first child element of this handle.
 	XMLHandle FirstChildElement( const char* value=0 )						{ return XMLHandle( node ? node->FirstChildElement( value ) : 0 ); }
+	/// Get the last child of this handle.
 	XMLHandle LastChild()													{ return XMLHandle( node ? node->LastChild() : 0 ); }
+	/// Get the last child element of this handle.
 	XMLHandle LastChildElement( const char* _value=0 )						{ return XMLHandle( node ? node->LastChildElement( _value ) : 0 ); }
+	/// Get the previous sibling of this handle.
 	XMLHandle PreviousSibling()												{ return XMLHandle( node ? node->PreviousSibling() : 0 ); }
+	/// Get the previous sibling element of this handle.
 	XMLHandle PreviousSiblingElement( const char* _value=0 )				{ return XMLHandle( node ? node->PreviousSiblingElement( _value ) : 0 ); }
+	/// Get the next sibling of this handle.
 	XMLHandle NextSibling()													{ return XMLHandle( node ? node->NextSibling() : 0 ); }		
+	/// Get the next sibling element of this handle.
 	XMLHandle NextSiblingElement( const char* _value=0 )					{ return XMLHandle( node ? node->NextSiblingElement( _value ) : 0 ); }
 
-
+	/// Safe cast to XMLNode. This can return null.
 	XMLNode* ToNode()							{ return node; } 
+	/// Safe cast to XMLElement. This can return null.
 	XMLElement* ToElement() 					{ return ( ( node && node->ToElement() ) ? node->ToElement() : 0 ); }
+	/// Safe cast to XMLText. This can return null.
 	XMLText* ToText() 							{ return ( ( node && node->ToText() ) ? node->ToText() : 0 ); }
+	/// Safe cast to XMLUnknown. This can return null.
 	XMLUnknown* ToUnknown() 					{ return ( ( node && node->ToUnknown() ) ? node->ToUnknown() : 0 ); }
+	/// Safe cast to XMLDeclaration. This can return null.
 	XMLDeclaration* ToDeclaration() 			{ return ( ( node && node->ToDeclaration() ) ? node->ToDeclaration() : 0 ); }
 
 private:
@@ -1216,7 +1232,8 @@ private:
 
 
 /**
-	A variant of the XMLHandle class for working with const XMLNodes and Documents.
+	A variant of the XMLHandle class for working with const XMLNodes and Documents. It is the
+	same in all regards, except for the 'const' qualifiers. See XMLHandle for API.
 */
 class XMLConstHandle
 {

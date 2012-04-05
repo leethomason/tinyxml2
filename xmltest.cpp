@@ -756,15 +756,28 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		static const char* xml = "<element attrib='bar'><sub>Text</sub></element>";
 		XMLDocument doc;
 		doc.Parse( xml );
-		const XMLDocument& docC = doc;
 
 		XMLElement* ele = XMLHandle( doc ).FirstChildElement( "element" ).FirstChild().ToElement();
 		XMLTest( "Handle, success, mutable", ele->Value(), "sub" );
 
-		const XMLElement* eleC = XMLConstHandle( docC ).FirstChildElement( "element" ).FirstChild().ToElement();
-		XMLTest( "Handle, success, mutable", eleC->Value(), "sub" );
-
+		XMLHandle docH( doc );
+		ele = docH.FirstChildElement( "none" ).FirstChildElement( "element" ).ToElement();
+		XMLTest( "Handle, dne, mutable", 0, (int)ele );
 	}
+	
+	{
+		static const char* xml = "<element attrib='bar'><sub>Text</sub></element>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLConstHandle docH( doc );
+
+		const XMLElement* ele = docH.FirstChildElement( "element" ).FirstChild().ToElement();
+		XMLTest( "Handle, success, const", ele->Value(), "sub" );
+
+		ele = docH.FirstChildElement( "none" ).FirstChildElement( "element" ).ToElement();
+		XMLTest( "Handle, dne, const", 0, (int)ele );
+	}
+
 	
 
 	// ----------- Performance tracking --------------
