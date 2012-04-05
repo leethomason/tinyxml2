@@ -1,3 +1,10 @@
+/** \file xmltest.cpp Various unit tests and examples of use
+ *  \brief hello
+ *  world
+ */
+
+#include "tinyxml2.h"
+
 #include "tinyxml2.h"
 
 #include <cstdlib>
@@ -71,7 +78,11 @@ void NullLineEndings( char* p )
 }
 
 
-// Comments in the header. (Don't know how to get Doxygen to read comments in this file.)
+/** Basic XML file loading.
+ *  The basic syntax to load an XML file from
+ *	disk and check for an error. (ErrorID()
+ *	will return 0 for no error.)
+*/ 
 int example_1()
 {
 	XMLDocument doc;
