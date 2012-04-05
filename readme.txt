@@ -243,8 +243,9 @@ And additionally a test file:
 	<li>xmltest.cpp</li>
 </ol>
 
-Simply compile and run. There is a visual studio 2010 project included.
-
+Simply compile and run. There is a visual studio 2010 project included, a simple Makefile, 
+an XCode project, and a cmake CMakeLists.txt included to help you. The top of tinyxml.h
+even has a simple g++ command line if you are are *nix and don't want to use a build system.
 
 <h2> Documentation </h2>
 
