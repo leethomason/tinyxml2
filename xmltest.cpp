@@ -78,6 +78,14 @@ void NullLineEndings( char* p )
 }
 
 
+
+/**
+ * \defgroup examples examples of tinyxml2 usage
+ * Put the long description here.
+ *
+ */
+/*@{*/
+
 /** Basic XML file loading.
  *  The basic syntax to load an XML file from
  *	disk and check for an error. (ErrorID()
@@ -125,6 +133,9 @@ int example_3()
 
 	return doc.ErrorID();
 }
+
+/*@}*/
+
 
 
 int main( int /*argc*/, const char ** /*argv*/ )
