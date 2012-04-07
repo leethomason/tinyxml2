@@ -88,13 +88,10 @@ distribution.
 		return result;
 	}
 	#define TIXML_SSCANF   sscanf_s
-#elif defined(__GNUC__) && (__GNUC__ >= 3 )
+#else
 	// GCC version 3 and higher
 	//#warning( "Using sn* functions." )
 	#define TIXML_SNPRINTF snprintf
-	#define TIXML_SSCANF   sscanf
-#else
-	#define TIXML_SNPRINTF snprintf( buf, size, x ) snprintf( buf, size, x )
 	#define TIXML_SSCANF   sscanf
 #endif
 
