@@ -24,7 +24,6 @@ distribution.
 #include "tinyxml2.h"
 
 #if 1
-	#include <cstdarg>
 	#include <cstdio>
 	#include <cstdlib>
 	#include <new>
@@ -998,7 +997,7 @@ void XMLAttribute::SetAttribute( const char* v )
 void XMLAttribute::SetAttribute( int v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v );	
 	value.SetStr( buf );
 }
 
@@ -1534,10 +1533,10 @@ void XMLPrinter::Print( const char* format, ... )
 			int len = -1;
 			int expand = 1000;
 			while ( len < 0 ) {
-				len = vsnprintf_s( accumulator.Mem(), accumulator.Capacity(), accumulator.Capacity()-1, format, va );
+				len = vsnprintf_s( accumulator.Mem(), accumulator.Capacity(), _TRUNCATE, format, va );
 				if ( len < 0 ) {
-					accumulator.PushArr( expand );
 					expand *= 3/2;
+					accumulator.PushArr( expand );
 				}
 			}
 			char* p = buffer.PushArr( len ) - 1;

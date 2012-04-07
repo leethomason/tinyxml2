@@ -29,6 +29,7 @@ distribution.
 	#include <climits>
 	#include <cstdio>
 	#include <cstring>
+	#include <cstdarg>
 #else
 	// Not completely sure all the interesting systems
 	// can handle the new headers; can switch this if
@@ -70,27 +71,30 @@ distribution.
 #endif
 
 
-// Deprecated library function hell. Compilers want to use the
-// new safe versions. This probably doesn't fully address the problem,
-// but it gets closer. There are too many compilers for me to fully
-// test. If you get compilation troubles, undefine TIXML_SAFE
-
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
 	// Microsoft visual studio, version 2005 and higher.
-	#define TIXML_SNPRINTF _snprintf_s
+	/*int _snprintf_s(
+	   char *buffer,
+	   size_t sizeOfBuffer,
+	   size_t count,	
+	   const char *format [,
+		  argument] ... 
+	);*/
+	inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... ) {
+	    va_list va;
+		va_start( va, format );
+		int result = vsnprintf_s( buffer, size, _TRUNCATE, format, va );
+	    va_end( va );
+		return result;
+	}
 	#define TIXML_SSCANF   sscanf_s
-#elif defined(_MSC_VER) && (_MSC_VER >= 1200 )
-	// Microsoft visual studio, version 6 and higher.
-	//#pragma message( "Using _sn* functions." )
-	#define TIXML_SNPRINTF _snprintf
-	#define TIXML_SSCANF   sscanf
 #elif defined(__GNUC__) && (__GNUC__ >= 3 )
 	// GCC version 3 and higher
 	//#warning( "Using sn* functions." )
 	#define TIXML_SNPRINTF snprintf
 	#define TIXML_SSCANF   sscanf
 #else
-	#define TIXML_SNPRINTF snprintf
+	#define TIXML_SNPRINTF snprintf( buf, size, x ) snprintf( buf, size, x )
 	#define TIXML_SSCANF   sscanf
 #endif
 
