@@ -751,6 +751,16 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLTest( "Clone and Equal", 4, count );
 	}
 
+	{
+		// This shouldn't crash.
+		XMLDocument doc;
+		if(XML_NO_ERROR != doc.LoadFile( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ))
+		{
+			doc.PrintError();
+		}
+		XMLTest( "Error in snprinf handling.", true, doc.Error() );
+	}
+
 	// ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )

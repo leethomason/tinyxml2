@@ -1005,7 +1005,7 @@ void XMLAttribute::SetAttribute( int v )
 void XMLAttribute::SetAttribute( unsigned v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%u", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%u", v );	
 	value.SetStr( buf );
 }
 
@@ -1013,21 +1013,21 @@ void XMLAttribute::SetAttribute( unsigned v )
 void XMLAttribute::SetAttribute( bool v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v ? 1 : 0 );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v ? 1 : 0 );	
 	value.SetStr( buf );
 }
 
 void XMLAttribute::SetAttribute( double v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%f", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
 	value.SetStr( buf );
 }
 
 void XMLAttribute::SetAttribute( float v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%f", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
 	value.SetStr( buf );
 }
 
@@ -1480,11 +1480,9 @@ void XMLDocument::PrintError() const
 		
 		if ( errorStr1 ) {
 			TIXML_SNPRINTF( buf1, LEN, "%s", errorStr1 );
-			buf1[LEN-1] = 0;
 		}
 		if ( errorStr2 ) {
 			TIXML_SNPRINTF( buf2, LEN, "%s", errorStr2 );
-			buf2[LEN-1] = 0;
 		}
 
 		printf( "XMLDocument error id=%d str1=%s str2=%s\n",
@@ -1643,7 +1641,7 @@ void XMLPrinter::PushAttribute( const char* name, const char* value )
 void XMLPrinter::PushAttribute( const char* name, int v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v );	
 	PushAttribute( name, buf );
 }
 
@@ -1651,7 +1649,7 @@ void XMLPrinter::PushAttribute( const char* name, int v )
 void XMLPrinter::PushAttribute( const char* name, unsigned v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%u", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%u", v );	
 	PushAttribute( name, buf );
 }
 
@@ -1659,7 +1657,7 @@ void XMLPrinter::PushAttribute( const char* name, unsigned v )
 void XMLPrinter::PushAttribute( const char* name, bool v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v ? 1 : 0 );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v ? 1 : 0 );	
 	PushAttribute( name, buf );
 }
 
@@ -1667,7 +1665,7 @@ void XMLPrinter::PushAttribute( const char* name, bool v )
 void XMLPrinter::PushAttribute( const char* name, double v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%f", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
 	PushAttribute( name, buf );
 }
 
