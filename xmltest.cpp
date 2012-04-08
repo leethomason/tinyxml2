@@ -761,6 +761,34 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLTest( "Error in snprinf handling.", true, doc.Error() );
 	}
 
+	// -------- Handles ------------
+	{
+		static const char* xml = "<element attrib='bar'><sub>Text</sub></element>";
+		XMLDocument doc;
+		doc.Parse( xml );
+
+		XMLElement* ele = XMLHandle( doc ).FirstChildElement( "element" ).FirstChild().ToElement();
+		XMLTest( "Handle, success, mutable", ele->Value(), "sub" );
+
+		XMLHandle docH( doc );
+		ele = docH.FirstChildElement( "none" ).FirstChildElement( "element" ).ToElement();
+		XMLTest( "Handle, dne, mutable", 0, (int)ele );
+	}
+	
+	{
+		static const char* xml = "<element attrib='bar'><sub>Text</sub></element>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLConstHandle docH( doc );
+
+		const XMLElement* ele = docH.FirstChildElement( "element" ).FirstChild().ToElement();
+		XMLTest( "Handle, success, const", ele->Value(), "sub" );
+
+		ele = docH.FirstChildElement( "none" ).FirstChildElement( "element" ).ToElement();
+		XMLTest( "Handle, dne, const", 0, (int)ele );
+	}
+
+	
 	// ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )

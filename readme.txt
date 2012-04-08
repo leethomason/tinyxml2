@@ -11,8 +11,7 @@ github.com/leethomason/tinyxml2
 The online HTML version of these docs:
 http://grinninglizard.com/tinyxml2docs/index.html
 
-Where examples are in the "related pages" tab:
-http://grinninglizard.com/tinyxml2docs/pages.html
+Examples are in the "related pages" tab of the HTML docs.
 
 <h2> What it does. </h2>
 	
