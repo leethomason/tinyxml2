@@ -1024,8 +1024,18 @@ public:
 	int LoadFile( FILE* );
 	/**
 		Save the XML file to disk.
+		Returns XML_NO_ERROR (0) on success, or
+		an errorID.
 	*/
-	void SaveFile( const char* filename );
+	int SaveFile( const char* filename );
+	/**
+		Save the XML file to disk.  You are responsible
+		for providing and closing the FILE*.
+
+		Returns XML_NO_ERROR (0) on success, or
+		an errorID.
+	*/
+	int SaveFile( FILE* );
 
 	bool ProcessEntities() const						{ return processEntities; }
 
