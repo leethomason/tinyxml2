@@ -1008,26 +1008,30 @@ public:
 		an errorID.
 	*/
 	int Parse( const char* xml );
+	
 	/**
 		Load an XML file from disk.
 		Returns XML_NO_ERROR (0) on success, or
 		an errorID.
-	*/
+	*/	
 	int LoadFile( const char* filename );
+	
 	/**
 		Load an XML file from disk. You are responsible
 		for providing and closing the FILE*.
 
 		Returns XML_NO_ERROR (0) on success, or
 		an errorID.
-	*/
+	*/	
 	int LoadFile( FILE* );
+	
 	/**
 		Save the XML file to disk.
 		Returns XML_NO_ERROR (0) on success, or
 		an errorID.
 	*/
 	int SaveFile( const char* filename );
+
 	/**
 		Save the XML file to disk.  You are responsible
 		for providing and closing the FILE*.
