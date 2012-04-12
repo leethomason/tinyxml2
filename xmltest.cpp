@@ -772,7 +772,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 
 		XMLHandle docH( doc );
 		ele = docH.FirstChildElement( "none" ).FirstChildElement( "element" ).ToElement();
-		XMLTest( "Handle, dne, mutable", 0, (int)ele );
+		XMLTest( "Handle, dne, mutable", false, ele != 0 );
 	}
 	
 	{
@@ -785,7 +785,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLTest( "Handle, success, const", ele->Value(), "sub" );
 
 		ele = docH.FirstChildElement( "none" ).FirstChildElement( "element" ).ToElement();
-		XMLTest( "Handle, dne, const", 0, (int)ele );
+		XMLTest( "Handle, dne, const", false, ele != 0 );
 	}
 
 	
