@@ -24,25 +24,13 @@ distribution.
 #ifndef TINYXML2_INCLUDED
 #define TINYXML2_INCLUDED
 
-#if 1
-	#include <cctype>
-	#include <climits>
-	#include <cstdio>
-	#include <cstring>
-	#include <cstdarg>
-#else
-	// Not completely sure all the interesting systems
-	// can handle the new headers; can switch this if
-	// there is an include problem.
-	#include <limits.h>
-	#include <ctype.h>
-	#include <stdio.h>
-	#include <memory.h>		// Needed by mac.
-#endif
-
+#include <cctype>
+#include <climits>
+#include <cstdio>
+#include <cstring>
+#include <cstdarg>
 
 /* 
-   TODO: add 'lastAttribute' for faster parsing.
    TODO: intern strings instead of allocation.
 */
 /*
@@ -978,10 +966,13 @@ private:
 
 	XMLAttribute* FindAttribute( const char* name );
 	XMLAttribute* FindOrCreateAttribute( const char* name );
-	void LinkAttribute( XMLAttribute* attrib );
+	//void LinkAttribute( XMLAttribute* attrib );
 	char* ParseAttributes( char* p );
 
 	int closingType;
+	// The attribute list is ordered; there is no 'lastAttribute'
+	// because the list needs to be scanned for dupes before adding
+	// a new attribute.
 	XMLAttribute* rootAttribute;
 };
 
