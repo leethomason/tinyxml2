@@ -760,6 +760,32 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		}
 		XMLTest( "Error in snprinf handling.", true, doc.Error() );
 	}
+	
+	{
+		// Attribute ordering.
+		static const char* xml = "<element attrib1=\"1\" attrib2=\"2\" attrib3=\"3\" />";
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLElement* ele = doc.FirstChildElement();
+		
+		const XMLAttribute* a = ele->FirstAttribute();
+		XMLTest( "Attribute order", "1", a->Value() );
+		a = a->Next();
+		XMLTest( "Attribute order", "2", a->Value() );
+		a = a->Next();
+		XMLTest( "Attribute order", "3", a->Value() );
+		XMLTest( "Attribute order", "attrib3", a->Name() );
+		
+		ele->DeleteAttribute( "attrib2" );
+		a = ele->FirstAttribute();
+		XMLTest( "Attribute order", "1", a->Value() );
+		a = a->Next();
+		XMLTest( "Attribute order", "3", a->Value() );
+		
+		ele->DeleteAttribute( "attrib1" );
+		ele->DeleteAttribute( "attrib3" );
+		XMLTest( "Attribute order (empty)", false, ele->FirstAttribute() ? true : false );
+	}
 
 	// -------- Handles ------------
 	{

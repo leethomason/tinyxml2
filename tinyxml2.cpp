@@ -1092,31 +1092,30 @@ const char* XMLElement::GetText() const
 }
 
 
-
 XMLAttribute* XMLElement::FindOrCreateAttribute( const char* name )
 {
-	XMLAttribute* attrib = FindAttribute( name );
+	XMLAttribute* last = 0;
+	XMLAttribute* attrib = 0;
+	for( attrib = rootAttribute;
+		 attrib;
+		 last = attrib, attrib = attrib->next )
+	{		 
+		if ( XMLUtil::StringEqual( attrib->Name(), name ) ) {
+			break;
+		}
+	}
 	if ( !attrib ) {
 		attrib = new (document->attributePool.Alloc() ) XMLAttribute();
 		attrib->memPool = &document->attributePool;
-		LinkAttribute( attrib );
+		if ( last ) {
+			last->next = attrib;
+		}
+		else {
+			rootAttribute = attrib;
+		}
 		attrib->SetName( name );
 	}
 	return attrib;
-}
-
-
-void XMLElement::LinkAttribute( XMLAttribute* attrib )
-{
-	if ( rootAttribute ) {
-		XMLAttribute* end = rootAttribute;
-		while ( end->next )
-			end = end->next;
-		end->next = attrib;
-	}
-	else {
-		rootAttribute = attrib;
-	}
 }
 
 
@@ -1142,6 +1141,7 @@ void XMLElement::DeleteAttribute( const char* name )
 char* XMLElement::ParseAttributes( char* p )
 {
 	const char* start = p;
+	XMLAttribute* prevAttribute = 0;
 
 	// Read the attributes.
 	while( p ) {
@@ -1162,7 +1162,19 @@ char* XMLElement::ParseAttributes( char* p )
 				document->SetError( XML_ERROR_PARSING_ATTRIBUTE, start, p );
 				return 0;
 			}
-			LinkAttribute( attrib );
+			// There is a minor bug here: if the attribute in the source xml
+			// document is duplicated, it will not be detected and the
+			// attribute will be doubly added. However, tracking the 'prevAttribute'
+			// avoids re-scanning the attribute list. Preferring performance for
+			// now, may reconsider in the future.
+			if ( prevAttribute ) { 
+				prevAttribute->next = attrib;
+				prevAttribute = attrib;
+			}
+			else {
+				rootAttribute = attrib;
+				prevAttribute = rootAttribute;
+			}	
 		}
 		// end of the tag
 		else if ( *p == '/' && *(p+1) == '>' ) {
