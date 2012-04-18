@@ -751,6 +751,44 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLTest( "Clone and Equal", 4, count );
 	}
 
+	{
+		// This shouldn't crash.
+		XMLDocument doc;
+		if(XML_NO_ERROR != doc.LoadFile( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ))
+		{
+			doc.PrintError();
+		}
+		XMLTest( "Error in snprinf handling.", true, doc.Error() );
+	}
+
+	// -------- Handles ------------
+	{
+		static const char* xml = "<element attrib='bar'><sub>Text</sub></element>";
+		XMLDocument doc;
+		doc.Parse( xml );
+
+		XMLElement* ele = XMLHandle( doc ).FirstChildElement( "element" ).FirstChild().ToElement();
+		XMLTest( "Handle, success, mutable", ele->Value(), "sub" );
+
+		XMLHandle docH( doc );
+		ele = docH.FirstChildElement( "none" ).FirstChildElement( "element" ).ToElement();
+		XMLTest( "Handle, dne, mutable", false, ele != 0 );
+	}
+	
+	{
+		static const char* xml = "<element attrib='bar'><sub>Text</sub></element>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLConstHandle docH( doc );
+
+		const XMLElement* ele = docH.FirstChildElement( "element" ).FirstChild().ToElement();
+		XMLTest( "Handle, success, const", ele->Value(), "sub" );
+
+		ele = docH.FirstChildElement( "none" ).FirstChildElement( "element" ).ToElement();
+		XMLTest( "Handle, dne, const", false, ele != 0 );
+	}
+
+	
 	// ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )

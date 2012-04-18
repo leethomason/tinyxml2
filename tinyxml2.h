@@ -29,6 +29,7 @@ distribution.
 	#include <climits>
 	#include <cstdio>
 	#include <cstring>
+	#include <cstdarg>
 #else
 	// Not completely sure all the interesting systems
 	// can handle the new headers; can switch this if
@@ -70,33 +71,33 @@ distribution.
 #endif
 
 
-// Deprecated library function hell. Compilers want to use the
-// new safe versions. This probably doesn't fully address the problem,
-// but it gets closer. There are too many compilers for me to fully
-// test. If you get compilation troubles, undefine TIXML_SAFE
-
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
 	// Microsoft visual studio, version 2005 and higher.
-	#define TIXML_SNPRINTF _snprintf_s
+	/*int _snprintf_s(
+	   char *buffer,
+	   size_t sizeOfBuffer,
+	   size_t count,	
+	   const char *format [,
+		  argument] ... 
+	);*/
+	inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... ) {
+	    va_list va;
+		va_start( va, format );
+		int result = vsnprintf_s( buffer, size, _TRUNCATE, format, va );
+	    va_end( va );
+		return result;
+	}
 	#define TIXML_SSCANF   sscanf_s
-#elif defined(_MSC_VER) && (_MSC_VER >= 1200 )
-	// Microsoft visual studio, version 6 and higher.
-	//#pragma message( "Using _sn* functions." )
-	#define TIXML_SNPRINTF _snprintf
-	#define TIXML_SSCANF   sscanf
-#elif defined(__GNUC__) && (__GNUC__ >= 3 )
+#else
 	// GCC version 3 and higher
 	//#warning( "Using sn* functions." )
-	#define TIXML_SNPRINTF snprintf
-	#define TIXML_SSCANF   sscanf
-#else
 	#define TIXML_SNPRINTF snprintf
 	#define TIXML_SSCANF   sscanf
 #endif
 
 static const int TIXML2_MAJOR_VERSION = 0;
 static const int TIXML2_MINOR_VERSION = 9;
-static const int TIXML2_PATCH_VERSION = 3;
+static const int TIXML2_PATCH_VERSION = 4;
 
 namespace tinyxml2
 {
@@ -1007,24 +1008,38 @@ public:
 		an errorID.
 	*/
 	int Parse( const char* xml );
+	
 	/**
 		Load an XML file from disk.
 		Returns XML_NO_ERROR (0) on success, or
 		an errorID.
-	*/
+	*/	
 	int LoadFile( const char* filename );
+	
 	/**
 		Load an XML file from disk. You are responsible
 		for providing and closing the FILE*.
 
 		Returns XML_NO_ERROR (0) on success, or
 		an errorID.
-	*/
+	*/	
 	int LoadFile( FILE* );
+	
 	/**
 		Save the XML file to disk.
+		Returns XML_NO_ERROR (0) on success, or
+		an errorID.
 	*/
-	void SaveFile( const char* filename );
+	int SaveFile( const char* filename );
+
+	/**
+		Save the XML file to disk.  You are responsible
+		for providing and closing the FILE*.
+
+		Returns XML_NO_ERROR (0) on success, or
+		an errorID.
+	*/
+	int SaveFile( FILE* );
 
 	bool ProcessEntities() const						{ return processEntities; }
 
@@ -1130,6 +1145,139 @@ private:
 	MemPoolT< sizeof(XMLComment) >	commentPool;
 };
 
+
+/**
+	A XMLHandle is a class that wraps a node pointer with null checks; this is
+	an incredibly useful thing. Note that XMLHandle is not part of the TinyXML
+	DOM structure. It is a separate utility class.
+
+	Take an example:
+	@verbatim
+	<Document>
+		<Element attributeA = "valueA">
+			<Child attributeB = "value1" />
+			<Child attributeB = "value2" />
+		</Element>
+	<Document>
+	@endverbatim
+
+	Assuming you want the value of "attributeB" in the 2nd "Child" element, it's very 
+	easy to write a *lot* of code that looks like:
+
+	@verbatim
+	XMLElement* root = document.FirstChildElement( "Document" );
+	if ( root )
+	{
+		XMLElement* element = root->FirstChildElement( "Element" );
+		if ( element )
+		{
+			XMLElement* child = element->FirstChildElement( "Child" );
+			if ( child )
+			{
+				XMLElement* child2 = child->NextSiblingElement( "Child" );
+				if ( child2 )
+				{
+					// Finally do something useful.
+	@endverbatim
+
+	And that doesn't even cover "else" cases. XMLHandle addresses the verbosity
+	of such code. A XMLHandle checks for null pointers so it is perfectly safe 
+	and correct to use:
+
+	@verbatim
+	XMLHandle docHandle( &document );
+	XMLElement* child2 = docHandle.FirstChild( "Document" ).FirstChild( "Element" ).FirstChild().NextSibling().ToElement();
+	if ( child2 )
+	{
+		// do something useful
+	@endverbatim
+
+	Which is MUCH more concise and useful.
+
+	It is also safe to copy handles - internally they are nothing more than node pointers.
+	@verbatim
+	XMLHandle handleCopy = handle;
+	@endverbatim
+
+	See also XMLConstHandle, which is the same as XMLHandle, but operates on const objects.
+*/
+class XMLHandle
+{
+public:
+	/// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
+	XMLHandle( XMLNode* _node )												{ node = _node; }
+	/// Create a handle from a node.
+	XMLHandle( XMLNode& _node )												{ node = &_node; }
+	/// Copy constructor
+	XMLHandle( const XMLHandle& ref )										{ node = ref.node; }
+	/// Assignment
+	XMLHandle operator=( const XMLHandle& ref )								{ node = ref.node; return *this; }
+
+	/// Get the first child of this handle.
+	XMLHandle FirstChild() 													{ return XMLHandle( node ? node->FirstChild() : 0 ); }
+	/// Get the first child element of this handle.
+	XMLHandle FirstChildElement( const char* value=0 )						{ return XMLHandle( node ? node->FirstChildElement( value ) : 0 ); }
+	/// Get the last child of this handle.
+	XMLHandle LastChild()													{ return XMLHandle( node ? node->LastChild() : 0 ); }
+	/// Get the last child element of this handle.
+	XMLHandle LastChildElement( const char* _value=0 )						{ return XMLHandle( node ? node->LastChildElement( _value ) : 0 ); }
+	/// Get the previous sibling of this handle.
+	XMLHandle PreviousSibling()												{ return XMLHandle( node ? node->PreviousSibling() : 0 ); }
+	/// Get the previous sibling element of this handle.
+	XMLHandle PreviousSiblingElement( const char* _value=0 )				{ return XMLHandle( node ? node->PreviousSiblingElement( _value ) : 0 ); }
+	/// Get the next sibling of this handle.
+	XMLHandle NextSibling()													{ return XMLHandle( node ? node->NextSibling() : 0 ); }		
+	/// Get the next sibling element of this handle.
+	XMLHandle NextSiblingElement( const char* _value=0 )					{ return XMLHandle( node ? node->NextSiblingElement( _value ) : 0 ); }
+
+	/// Safe cast to XMLNode. This can return null.
+	XMLNode* ToNode()							{ return node; } 
+	/// Safe cast to XMLElement. This can return null.
+	XMLElement* ToElement() 					{ return ( ( node && node->ToElement() ) ? node->ToElement() : 0 ); }
+	/// Safe cast to XMLText. This can return null.
+	XMLText* ToText() 							{ return ( ( node && node->ToText() ) ? node->ToText() : 0 ); }
+	/// Safe cast to XMLUnknown. This can return null.
+	XMLUnknown* ToUnknown() 					{ return ( ( node && node->ToUnknown() ) ? node->ToUnknown() : 0 ); }
+	/// Safe cast to XMLDeclaration. This can return null.
+	XMLDeclaration* ToDeclaration() 			{ return ( ( node && node->ToDeclaration() ) ? node->ToDeclaration() : 0 ); }
+
+private:
+	XMLNode* node;
+};
+
+
+/**
+	A variant of the XMLHandle class for working with const XMLNodes and Documents. It is the
+	same in all regards, except for the 'const' qualifiers. See XMLHandle for API.
+*/
+class XMLConstHandle
+{
+public:
+	XMLConstHandle( const XMLNode* _node )											{ node = _node; }
+	XMLConstHandle( const XMLNode& _node )											{ node = &_node; }
+	XMLConstHandle( const XMLConstHandle& ref )										{ node = ref.node; }
+
+	XMLConstHandle operator=( const XMLConstHandle& ref )							{ node = ref.node; return *this; }
+
+	const XMLConstHandle FirstChild() const											{ return XMLConstHandle( node ? node->FirstChild() : 0 ); }
+	const XMLConstHandle FirstChildElement( const char* value=0 ) const				{ return XMLConstHandle( node ? node->FirstChildElement( value ) : 0 ); }
+	const XMLConstHandle LastChild()	const										{ return XMLConstHandle( node ? node->LastChild() : 0 ); }
+	const XMLConstHandle LastChildElement( const char* _value=0 ) const				{ return XMLConstHandle( node ? node->LastChildElement( _value ) : 0 ); }
+	const XMLConstHandle PreviousSibling() const									{ return XMLConstHandle( node ? node->PreviousSibling() : 0 ); }
+	const XMLConstHandle PreviousSiblingElement( const char* _value=0 ) const		{ return XMLConstHandle( node ? node->PreviousSiblingElement( _value ) : 0 ); }
+	const XMLConstHandle NextSibling() const										{ return XMLConstHandle( node ? node->NextSibling() : 0 ); }
+	const XMLConstHandle NextSiblingElement( const char* _value=0 ) const			{ return XMLConstHandle( node ? node->NextSiblingElement( _value ) : 0 ); }
+
+
+	const XMLNode* ToNode() const				{ return node; } 
+	const XMLElement* ToElement() const			{ return ( ( node && node->ToElement() ) ? node->ToElement() : 0 ); }
+	const XMLText* ToText() const				{ return ( ( node && node->ToText() ) ? node->ToText() : 0 ); }
+	const XMLUnknown* ToUnknown() const			{ return ( ( node && node->ToUnknown() ) ? node->ToUnknown() : 0 ); }
+	const XMLDeclaration* ToDeclaration() const	{ return ( ( node && node->ToDeclaration() ) ? node->ToDeclaration() : 0 ); }
+
+private:
+	const XMLNode* node;
+};
 
 
 /**
@@ -1251,97 +1399,5 @@ private:
 
 }	// tinyxml2
 
-
-// What follows is the docs for the examples.
-// I'd like the docs to be just before the
-// actual examples in xmltest.cpp, but I 
-// can't seem to get doxygen to do that. It
-// would be a wonderful patch if anyone figures
-// it out.
-
-/** @page Example-1 Load an XML File
- *  @dontinclude ./xmltest.cpp
- *  Basic XML file loading.
- *  The basic syntax to load an XML file from
- *	disk and check for an error. (ErrorID()
- *	will return 0 for no error.)
- *	@skip example_1()
- *  @until }
- */
-
-
-/** @page Example-2 Parse an XML from char buffer
- *  @dontinclude ./xmltest.cpp
- *  Basic XML string parsing.
- *  The basic syntax to parse an XML for
- *  a char* and check for an error. (ErrorID()
- *	will return 0 for no error.)
- *	@skip example_2()
- *  @until }
- */
-
-/** @page Example-3 Get information out of XML
-	@dontinclude ./xmltest.cpp
-	In this example, we navigate a simple XML
-	file, and read some interesting text. Note
-	that this is examlpe doesn't use error
-	checking; working code should check for null
-	pointers when walking an XML tree, or use
-	XMLHandle.
-	
-	(The XML is an excerpt from "dream.xml"). 
-
-	@skip example_3
-	@until </PLAY>";
-
-	The structure of the XML file is:
-
-	<ul>
-		<li>(declaration)</li>
-		<li>(dtd stuff)</li>
-		<li>Element "PLAY"</li>
-		<ul>
-			<li>Element "TITLE"</li>
-			<ul>
-			    <li>Text "A Midsummer Night's Dream"</li>
-			</ul>
-		</ul>
-	</ul>
-
-	For this example, we want to print out the 
-	title of the play. The text of the title (what
-	we want) is child of the "TITLE" element which
-	is a child of the "PLAY" element.
-
-	We want to skip the declaration and dtd, so the
-	method FirstChildElement() is a good choice. The
-	FirstChildElement() of the Document is the "PLAY"
-	Element, the FirstChildElement() of the "PLAY" Element
-	is the "TITLE" Element.
-
-	@until ( "TITLE" );
-
-	We can then use the convenience function GetText()
-	to get the title of the play.
-
-	@until title );
-
-	Text is just another Node in the XML DOM. And in
-	fact you should be a little cautious with it, as
-	text nodes can contain elements. 
-	
-	@verbatim
-	Consider: A Midsummer Night's <b>Dream</b>
-	@endverbatim
-
-	It is more correct to actually query the Text Node
-	if in doubt:
-
-	@until title );
-
-	Noting that here we use FirstChild() since we are
-	looking for XMLText, not an element, and ToText()
-	is a cast from a Node to a XMLText. 
-*/
 
 #endif // TINYXML2_INCLUDED

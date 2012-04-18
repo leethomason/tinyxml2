@@ -24,7 +24,6 @@ distribution.
 #include "tinyxml2.h"
 
 #if 1
-	#include <cstdarg>
 	#include <cstdio>
 	#include <cstdlib>
 	#include <new>
@@ -998,7 +997,7 @@ void XMLAttribute::SetAttribute( const char* v )
 void XMLAttribute::SetAttribute( int v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v );	
 	value.SetStr( buf );
 }
 
@@ -1006,7 +1005,7 @@ void XMLAttribute::SetAttribute( int v )
 void XMLAttribute::SetAttribute( unsigned v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%u", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%u", v );	
 	value.SetStr( buf );
 }
 
@@ -1014,21 +1013,21 @@ void XMLAttribute::SetAttribute( unsigned v )
 void XMLAttribute::SetAttribute( bool v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v ? 1 : 0 );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v ? 1 : 0 );	
 	value.SetStr( buf );
 }
 
 void XMLAttribute::SetAttribute( double v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%f", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
 	value.SetStr( buf );
 }
 
 void XMLAttribute::SetAttribute( float v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%f", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
 	value.SetStr( buf );
 }
 
@@ -1408,7 +1407,7 @@ int XMLDocument::LoadFile( FILE* fp )
 }
 
 
-void XMLDocument::SaveFile( const char* filename )
+int XMLDocument::SaveFile( const char* filename )
 {
 #if defined(_MSC_VER)
 #pragma warning ( push )
@@ -1418,14 +1417,21 @@ void XMLDocument::SaveFile( const char* filename )
 #if defined(_MSC_VER)
 #pragma warning ( pop )
 #endif
-	if ( fp ) {
-		XMLPrinter stream( fp );
-		Print( &stream );
-		fclose( fp );
-	}
-	else {
+	if ( !fp ) {
 		SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
+		return errorID;
 	}
+	SaveFile(fp);
+	fclose( fp );
+	return errorID;
+}
+
+
+int XMLDocument::SaveFile( FILE* fp )
+{
+	XMLPrinter stream( fp );
+	Print( &stream );
+	return errorID;
 }
 
 
@@ -1481,11 +1487,9 @@ void XMLDocument::PrintError() const
 		
 		if ( errorStr1 ) {
 			TIXML_SNPRINTF( buf1, LEN, "%s", errorStr1 );
-			buf1[LEN-1] = 0;
 		}
 		if ( errorStr2 ) {
 			TIXML_SNPRINTF( buf2, LEN, "%s", errorStr2 );
-			buf2[LEN-1] = 0;
 		}
 
 		printf( "XMLDocument error id=%d str1=%s str2=%s\n",
@@ -1534,10 +1538,10 @@ void XMLPrinter::Print( const char* format, ... )
 			int len = -1;
 			int expand = 1000;
 			while ( len < 0 ) {
-				len = vsnprintf_s( accumulator.Mem(), accumulator.Capacity(), accumulator.Capacity()-1, format, va );
+				len = vsnprintf_s( accumulator.Mem(), accumulator.Capacity(), _TRUNCATE, format, va );
 				if ( len < 0 ) {
-					accumulator.PushArr( expand );
 					expand *= 3/2;
+					accumulator.PushArr( expand );
 				}
 			}
 			char* p = buffer.PushArr( len ) - 1;
@@ -1644,7 +1648,7 @@ void XMLPrinter::PushAttribute( const char* name, const char* value )
 void XMLPrinter::PushAttribute( const char* name, int v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v );	
 	PushAttribute( name, buf );
 }
 
@@ -1652,7 +1656,7 @@ void XMLPrinter::PushAttribute( const char* name, int v )
 void XMLPrinter::PushAttribute( const char* name, unsigned v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%u", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%u", v );	
 	PushAttribute( name, buf );
 }
 
@@ -1660,7 +1664,7 @@ void XMLPrinter::PushAttribute( const char* name, unsigned v )
 void XMLPrinter::PushAttribute( const char* name, bool v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%d", v ? 1 : 0 );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v ? 1 : 0 );	
 	PushAttribute( name, buf );
 }
 
@@ -1668,7 +1672,7 @@ void XMLPrinter::PushAttribute( const char* name, bool v )
 void XMLPrinter::PushAttribute( const char* name, double v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE-1, "%f", v );	
+	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
 	PushAttribute( name, buf );
 }
 
