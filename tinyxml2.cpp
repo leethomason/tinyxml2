@@ -1169,12 +1169,11 @@ char* XMLElement::ParseAttributes( char* p )
 			// now, may reconsider in the future.
 			if ( prevAttribute ) { 
 				prevAttribute->next = attrib;
-				prevAttribute = attrib;
 			}
 			else {
 				rootAttribute = attrib;
-				prevAttribute = rootAttribute;
 			}	
+			prevAttribute = attrib;
 		}
 		// end of the tag
 		else if ( *p == '/' && *(p+1) == '>' ) {
