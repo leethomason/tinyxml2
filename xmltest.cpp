@@ -813,6 +813,18 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		ele = docH.FirstChildElement( "none" ).FirstChildElement( "element" ).ToElement();
 		XMLTest( "Handle, dne, const", false, ele != 0 );
 	}
+	{
+		// Default Declaration & BOM
+		XMLDocument doc;
+		doc.InsertEndChild( doc.NewDeclaration() );
+		doc.SetBOM( true );
+		
+		XMLPrinter printer;
+		doc.Print( &printer );
+
+		static const char* result  = "\xef\xbb\xbf<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+		XMLTest( "BOM and default declaration", printer.CStr(), result, false );
+	}
 
 	
 	// ----------- Performance tracking --------------

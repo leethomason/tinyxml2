@@ -85,7 +85,7 @@ distribution.
 
 static const int TIXML2_MAJOR_VERSION = 1;
 static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 0;
+static const int TIXML2_PATCH_VERSION = 1;
 
 namespace tinyxml2
 {
@@ -1038,6 +1038,9 @@ public:
 		Returns true if this document has a leading Byte Order Mark of UTF8.
 	*/
 	bool HasBOM() const { return writeBOM; }
+	/** Sets whether to write the BOM when writing the file.
+	*/
+	void SetBOM( bool useBOM ) { writeBOM = useBOM; }
 
 	/** Return the root element of DOM. Equivalent to FirstChildElement().
 	    To get the first node, use FirstChild().
@@ -1084,8 +1087,14 @@ public:
 		Create a new Declaration associated with
 		this Document. The memory for the object
 		is managed by the Document.
+
+		If the 'text' param is null, the standard
+		declaration is used.:
+		@verbatim
+			<?xml version="1.0" encoding="UTF-8"?>
+		@endverbatim
 	*/
-	XMLDeclaration* NewDeclaration( const char* text );
+	XMLDeclaration* NewDeclaration( const char* text=0 );
 	/**
 		Create a new Unknown associated with
 		this Document. The memory for the object

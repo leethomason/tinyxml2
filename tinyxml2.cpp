@@ -1351,7 +1351,7 @@ XMLDeclaration* XMLDocument::NewDeclaration( const char* str )
 {
 	XMLDeclaration* dec = new (commentPool.Alloc()) XMLDeclaration( this );
 	dec->memPool = &commentPool;
-	dec->SetValue( str );
+	dec->SetValue( str ? str : "xml version=\"1.0\" encoding=\"UTF-8\"" );
 	return dec;
 }
 
