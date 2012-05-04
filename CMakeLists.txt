@@ -38,11 +38,27 @@ endif(MSVC)
 
 ################################
 # Add targets
-
-add_library(tinyxml2 STATIC tinyxml2.cpp tinyxml2.h)
+SET(BUILD_STATIC_LIBS ON CACHE BOOL "Set to ON to build static libraries")
+IF(BUILD_STATIC_LIBS)
+	add_library(tinyxml2static STATIC tinyxml2.cpp tinyxml2.h)
+	set_target_properties(tinyxml2static PROPERTIES OUTPUT_NAME tinyxml2)
+ENDIF(BUILD_STATIC_LIBS)
+add_library(tinyxml2 SHARED tinyxml2.cpp tinyxml2.h)
 
 add_executable(test xmltest.cpp)
 add_dependencies(test tinyxml2)
 add_dependencies(test ${TARGET_DATA_COPY})
 target_link_libraries(test tinyxml2)
+
+SET(CMAKE_INSTALL_LIBDIR lib CACHE PATH "")
+IF(BUILD_STATIC_LIBS)
+	INSTALL(TARGETS tinyxml2 tinyxml2static
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ELSE(BUILD_STATIC_LIBS)
+	INSTALL(TARGETS tinyxml2
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ENDIF(BUILD_STATIC_LIBS)
+INSTALL(FILES tinyxml2.h xmltest.h DESTINATION include)
+
 #add_test(test ${SAMPLE_NAME} COMMAND $<TARGET_FILE:${SAMPLE_NAME}>)
