@@ -8,32 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		037AE8A5151E692700E0F29F /* xmltest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 037AE8A3151E692700E0F29F /* xmltest.cpp */; };
-		037AE9BE151E694400E0F29F /* dream.xml in CopyFiles */ = {isa = PBXBuildFile; fileRef = 037AE062151CCC6D00E0F29F /* dream.xml */; };
-		037AE9BF151E694400E0F29F /* utf8test.xml in CopyFiles */ = {isa = PBXBuildFile; fileRef = 037AE065151CCC6D00E0F29F /* utf8test.xml */; };
-		037AE9C0151E694400E0F29F /* utf8testverify.xml in CopyFiles */ = {isa = PBXBuildFile; fileRef = 037AE066151CCC6D00E0F29F /* utf8testverify.xml */; };
 		03F28B53152E9B1B00D4CD90 /* tinyxml2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 03F28B4A152E9B1B00D4CD90 /* tinyxml2.cpp */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		037AE9CF151E697800E0F29F /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 7;
-			files = (
-				037AE9BE151E694400E0F29F /* dream.xml in CopyFiles */,
-				037AE9BF151E694400E0F29F /* utf8test.xml in CopyFiles */,
-				037AE9C0151E694400E0F29F /* utf8testverify.xml in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		037AE062151CCC6D00E0F29F /* dream.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = dream.xml; sourceTree = "<group>"; };
-		037AE065151CCC6D00E0F29F /* utf8test.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = utf8test.xml; sourceTree = "<group>"; };
-		037AE066151CCC6D00E0F29F /* utf8testverify.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = utf8testverify.xml; sourceTree = "<group>"; };
-		037AE86D151E685F00E0F29F /* tinyxml2 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = tinyxml2; sourceTree = BUILT_PRODUCTS_DIR; };
+		037AE86D151E685F00E0F29F /* xmltest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = xmltest; sourceTree = BUILT_PRODUCTS_DIR; };
 		037AE8A3151E692700E0F29F /* xmltest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xmltest.cpp; path = ../xmltest.cpp; sourceTree = SOURCE_ROOT; };
 		03F28B4A152E9B1B00D4CD90 /* tinyxml2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxml2.cpp; sourceTree = "<group>"; };
 		03F28B4B152E9B1B00D4CD90 /* tinyxml2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tinyxml2.h; sourceTree = "<group>"; };
@@ -54,7 +33,6 @@
 			isa = PBXGroup;
 			children = (
 				037AE069151CCC7000E0F29F /* Classes */,
-				037AE06A151CCC7C00E0F29F /* Resources */,
 				03F28B60152E9B4C00D4CD90 /* Libraries */,
 				037AE06F151CCCB900E0F29F /* Products */,
 			);
@@ -68,21 +46,10 @@
 			name = Classes;
 			sourceTree = "<group>";
 		};
-		037AE06A151CCC7C00E0F29F /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				037AE062151CCC6D00E0F29F /* dream.xml */,
-				037AE065151CCC6D00E0F29F /* utf8test.xml */,
-				037AE066151CCC6D00E0F29F /* utf8testverify.xml */,
-			);
-			name = Resources;
-			path = ..;
-			sourceTree = "<group>";
-		};
 		037AE06F151CCCB900E0F29F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				037AE86D151E685F00E0F29F /* tinyxml2 */,
+				037AE86D151E685F00E0F29F /* xmltest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,21 +75,20 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		037AE86C151E685F00E0F29F /* tinyxml2 */ = {
+		037AE86C151E685F00E0F29F /* xmltest */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 037AE873151E687E00E0F29F /* Build configuration list for PBXNativeTarget "tinyxml2" */;
+			buildConfigurationList = 037AE873151E687E00E0F29F /* Build configuration list for PBXNativeTarget "xmltest" */;
 			buildPhases = (
 				037AE86A151E685F00E0F29F /* Sources */,
 				037AE86B151E685F00E0F29F /* Frameworks */,
-				037AE9CF151E697800E0F29F /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = tinyxml2;
+			name = xmltest;
 			productName = tinyxml2;
-			productReference = 037AE86D151E685F00E0F29F /* tinyxml2 */;
+			productReference = 037AE86D151E685F00E0F29F /* xmltest */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -145,7 +111,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				037AE86C151E685F00E0F29F /* tinyxml2 */,
+				037AE86C151E685F00E0F29F /* xmltest */,
 			);
 		};
 /* End PBXProject section */
@@ -183,6 +149,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = ..;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -190,7 +157,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
-				PRODUCT_NAME = tinyxml2;
+				PRODUCT_NAME = xmltest;
 			};
 			name = Debug;
 		};
@@ -198,6 +165,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = ..;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
@@ -221,7 +189,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		037AE873151E687E00E0F29F /* Build configuration list for PBXNativeTarget "tinyxml2" */ = {
+		037AE873151E687E00E0F29F /* Build configuration list for PBXNativeTarget "xmltest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				037AE86F151E686000E0F29F /* Debug */,
