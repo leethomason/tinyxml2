@@ -77,3 +77,31 @@ def doxRule( line ):
 
 fileProcess( "dox", doxRule )
 
+
+#### Write the CMakeLists.txt ####
+
+def cmakeRule1( line ):
+
+	matchVersion = "set(GENERIC_LIB_VERSION"
+
+	if line[0:len(matchVersion)] == matchVersion:
+		print "1)tinyxml2.h Major found"
+		return matchVersion + " \"" + `major` + "." + `minor` + "." + `build` + "\")" + "\n"
+
+	else:
+		return line;
+
+fileProcess( "CMakeLists.txt", cmakeRule1 )
+
+def cmakeRule2( line ):
+
+	matchSoversion = "set(GENERIC_LIB_SOVERSION"
+
+	if line[0:len(matchSoversion)] == matchSoversion:
+		print "1)tinyxml2.h Major found"
+		return matchSoversion + " \"" + `major` + "\")" + "\n"
+
+	else:
+		return line;
+
+fileProcess( "CMakeLists.txt", cmakeRule2 )
