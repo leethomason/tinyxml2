@@ -171,7 +171,7 @@ public:
 	~DynArray()
 	{
 		if ( mem != pool ) {
-			delete mem;
+			delete [] mem;
 		}
 	}
 	void Push( T t )
