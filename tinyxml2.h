@@ -1371,6 +1371,10 @@ public:
 		the XML file in memory.
 	*/
 	const char* CStr() const { return buffer.Mem(); }
+	/**
+   		Return the size of the XML file in memory
+  	*/
+  	const int SizeOfCStr()const{ return buffer.Size(); }
 
 private:
 	void SealElement();
