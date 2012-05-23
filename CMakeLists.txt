@@ -80,6 +80,6 @@ foreach(p LIB INCLUDE)
 endforeach()
 
 configure_file(tinyxml2.pc.in tinyxml2.pc @ONLY)
-install(FILES tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 #add_test(test ${SAMPLE_NAME} COMMAND $<TARGET_FILE:${SAMPLE_NAME}>)
