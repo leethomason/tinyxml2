@@ -824,6 +824,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 
 		static const char* result  = "\xef\xbb\xbf<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 		XMLTest( "BOM and default declaration", printer.CStr(), result, false );
+		XMLTest( "CStrSize", printer.CStrSize(), 42, false );
 	}
 
 	
