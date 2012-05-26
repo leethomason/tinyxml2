@@ -23,18 +23,10 @@ distribution.
 
 #include "tinyxml2.h"
 
-#if 1
-	#include <cstdio>
-	#include <cstdlib>
-	#include <new>
-#else
-	#include <string.h>
-	#include <stdlib.h>
-	#include <stdio.h>
-	#include <ctype.h>
-	#include <new>
-	#include <stdarg.h>
-#endif
+#include <cstdio>
+#include <cstdlib>
+#include <new>
+#include <cstddef>
 
 using namespace tinyxml2;
 
@@ -120,7 +112,7 @@ char* StrPair::ParseText( char* p, const char* endTag, int strFlags )
 
 	char* start = p;	// fixme: hides a member
 	char  endChar = *endTag;
-	int   length = strlen( endTag );	
+	size_t length = strlen( endTag );
 
 	// Inner loop of text parsing.
 	while ( *p ) {
@@ -316,7 +308,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 	if ( *(p+1) == '#' && *(p+2) )
 	{
 		unsigned long ucs = 0;
-		int delta = 0;
+		ptrdiff_t delta = 0;
 		unsigned mult = 1;
 
 		if ( *(p+2) == 'x' )
@@ -329,7 +321,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 
 			if ( !q || !*q ) return 0;
 
-			delta = (q-p);
+			delta = q-p;
 			--q;
 
 			while ( *q != 'x' )

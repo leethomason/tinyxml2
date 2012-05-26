@@ -75,7 +75,7 @@ void NullLineEndings( char* p )
 int example_1()
 {
 	XMLDocument doc;
-	doc.LoadFile( "dream.xml" );
+	doc.LoadFile( "resources/dream.xml" );
 
 	return doc.ErrorID();
 }
@@ -127,7 +127,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 	#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 	#endif
 
-	FILE* fp = fopen( "dream.xml", "r" );
+	FILE* fp = fopen( "resources/dream.xml", "r" );
 	if ( !fp ) {
 		printf( "Error opening test file 'dream.xml'.\n"
 				"Is your working directory the same as where \n"
@@ -260,9 +260,9 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		// XML2 :   469,073	bytes	in    323 allocations
 		//int newStart = gNew;
 		XMLDocument doc;
-		doc.LoadFile( "dream.xml" );
+		doc.LoadFile( "resources/dream.xml" );
 
-		doc.SaveFile( "dreamout.xml" );
+		doc.SaveFile( "resources/dreamout.xml" );
 		doc.PrintError();
 
 		XMLTest( "Dream", "xml version=\"1.0\"",
@@ -276,7 +276,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 			              doc.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
 
 		XMLDocument doc2;
-		doc2.LoadFile( "dreamout.xml" );
+		doc2.LoadFile( "resources/dreamout.xml" );
 		XMLTest( "Dream-out", "xml version=\"1.0\"",
 			              doc2.FirstChild()->ToDeclaration()->Value() );
 		XMLTest( "Dream-out", true, doc2.FirstChild()->NextSibling()->ToUnknown() ? true : false );
@@ -352,7 +352,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 
 	{
 		XMLDocument doc;
-		doc.LoadFile( "utf8test.xml" );
+		doc.LoadFile( "resources/utf8test.xml" );
 
 		// Get the attribute "value" from the "Russian" element and check it.
 		XMLElement* element = doc.FirstChildElement( "document" )->FirstChildElement( "Russian" );
@@ -373,7 +373,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 				 text->Value() );
 
 		// Now try for a round trip.
-		doc.SaveFile( "utf8testout.xml" );
+		doc.SaveFile( "resources/utf8testout.xml" );
 
 		// Check the round trip.
 		char savedBuf[256];
@@ -385,8 +385,8 @@ int main( int /*argc*/, const char ** /*argv*/ )
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 #endif
-		FILE* saved  = fopen( "utf8testout.xml", "r" );
-		FILE* verify = fopen( "utf8testverify.xml", "r" );
+		FILE* saved  = fopen( "resources/utf8testout.xml", "r" );
+		FILE* verify = fopen( "resources/utf8testverify.xml", "r" );
 #if defined(_MSC_VER)
 #pragma warning ( pop )
 #endif
@@ -506,7 +506,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 #endif
-		FILE* textfile = fopen( "textfile.txt", "w" );
+		FILE* textfile = fopen( "resources/textfile.txt", "w" );
 #if defined(_MSC_VER)
 #pragma warning ( pop )
 #endif
@@ -520,7 +520,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 #endif
-		textfile = fopen( "textfile.txt", "r" );
+		textfile = fopen( "resources/textfile.txt", "r" );
 #if defined(_MSC_VER)
 #pragma warning ( pop )
 #endif
@@ -589,9 +589,9 @@ int main( int /*argc*/, const char ** /*argv*/ )
 
 		XMLDocument doc;
 		doc.Parse( doctype );
-		doc.SaveFile( "test7.xml" );
+		doc.SaveFile( "resources/test7.xml" );
 		doc.DeleteChild( doc.RootElement() );
-		doc.LoadFile( "test7.xml" );
+		doc.LoadFile( "resources/test7.xml" );
 		doc.Print();
 		
 		const XMLUnknown* decl = doc.FirstChild()->NextSibling()->ToUnknown();
@@ -824,6 +824,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 
 		static const char* result  = "\xef\xbb\xbf<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 		XMLTest( "BOM and default declaration", printer.CStr(), result, false );
+		XMLTest( "CStrSize", printer.CStrSize(), 42, false );
 	}
 
 	
@@ -838,7 +839,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 #endif
-		FILE* fp  = fopen( "dream.xml", "r" );
+		FILE* fp  = fopen( "resources/dream.xml", "r" );
 #if defined(_MSC_VER)
 #pragma warning ( pop )
 #endif

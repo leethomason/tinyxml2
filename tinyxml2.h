@@ -171,7 +171,7 @@ public:
 	~DynArray()
 	{
 		if ( mem != pool ) {
-			delete mem;
+			delete [] mem;
 		}
 	}
 	void Push( T t )
@@ -225,7 +225,7 @@ private:
 
 
 /*
-	Parent virtual class a a pool for fast allocation
+	Parent virtual class of a pool for fast allocation
 	and deallocation of objects.
 */
 class MemPool
@@ -314,16 +314,16 @@ private:
 	Implements the interface to the "Visitor pattern" (see the Accept() method.)
 	If you call the Accept() method, it requires being passed a XMLVisitor
 	class to handle callbacks. For nodes that contain other nodes (Document, Element)
-	you will get called with a VisitEnter/VisitExit pair. Nodes that are always leaves
+	you will get called with a VisitEnter/VisitExit pair. Nodes that are always leafs
 	are simply called with Visit().
 
 	If you return 'true' from a Visit method, recursive parsing will continue. If you return
-	false, <b>no children of this node or its sibilings</b> will be Visited.
+	false, <b>no children of this node or its sibilings</b> will be visited.
 
 	All flavors of Visit methods have a default implementation that returns 'true' (continue 
 	visiting). You need to only override methods that are interesting to you.
 
-	Generally Accept() is called on the TiXmlDocument, although all nodes suppert Visiting.
+	Generally Accept() is called on the TiXmlDocument, although all nodes support visiting.
 
 	You should never change the document from a callback.
 
@@ -344,13 +344,13 @@ public:
 	/// Visit an element.
 	virtual bool VisitExit( const XMLElement& /*element*/ )			{ return true; }
 
-	/// Visit a declaration
+	/// Visit a declaration.
 	virtual bool Visit( const XMLDeclaration& /*declaration*/ )		{ return true; }
-	/// Visit a text node
+	/// Visit a text node.
 	virtual bool Visit( const XMLText& /*text*/ )					{ return true; }
-	/// Visit a comment node
+	/// Visit a comment node.
 	virtual bool Visit( const XMLComment& /*comment*/ )				{ return true; }
-	/// Visit an unknown node
+	/// Visit an unknown node.
 	virtual bool Visit( const XMLUnknown& /*unknown*/ )				{ return true; }
 };
 
@@ -398,7 +398,7 @@ public:
 	The type of a XMLNode can be queried, and it can 
 	be cast to its more defined type.
 
-	An XMLDocument allocates memory for all its Nodes.
+	A XMLDocument allocates memory for all its Nodes.
 	When the XMLDocument gets deleted, all its Nodes
 	will also be deleted.
 
@@ -443,7 +443,7 @@ public:
 
 	/** The meaning of 'value' changes for the specific type.
 		@verbatim
-		Document:	empy
+		Document:	empty
 		Element:	name of the element
 		Comment:	the comment text
 		Unknown:	the tag contents
@@ -542,7 +542,7 @@ public:
 	*/
 	virtual bool ShallowEqual( const XMLNode* compare ) const = 0;
 
-	/** Accept a hierchical visit the nodes in the TinyXML DOM. Every node in the 
+	/** Accept a hierarchical visit of the nodes in the TinyXML DOM. Every node in the 
 		XML tree will be conditionally visited and the host will be called back
 		via the TiXmlVisitor interface.
 
@@ -869,9 +869,9 @@ public:
 	/// See IntAttribute()
 	bool	 BoolAttribute( const char* name ) const	{ bool b=false; QueryBoolAttribute( name, &b );		return b; }
 	/// See IntAttribute()
-	double 	 DoubleAttribute( const char* name ) const	{ double d=0;	QueryDoubleAttribute( name, &d );		return d; }
+	double 	 DoubleAttribute( const char* name ) const	{ double d=0;	QueryDoubleAttribute( name, &d );	return d; }
 	/// See IntAttribute()
-	float	 FloatAttribute( const char* name ) const	{ float f=0;	QueryFloatAttribute( name, &f );		return f; }
+	float	 FloatAttribute( const char* name ) const	{ float f=0;	QueryFloatAttribute( name, &f );	return f; }
 
 	/** Given an attribute name, QueryIntAttribute() returns 
 		XML_NO_ERROR, XML_WRONG_ATTRIBUTE_TYPE if the conversion
@@ -886,7 +886,7 @@ public:
 		QueryIntAttribute( "foo", &value );		// if "foo" isn't found, value will still be 10
 		@endverbatim
 	*/
-	int QueryIntAttribute( const char* name, int* _value ) const					{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryIntValue( _value ); } 
+	int QueryIntAttribute( const char* name, int* _value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryIntValue( _value ); } 
 	/// See QueryIntAttribute()
 	int QueryUnsignedAttribute( const char* name, unsigned int* _value ) const	{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryUnsignedValue( _value ); }
 	/// See QueryIntAttribute()
@@ -894,7 +894,7 @@ public:
 	/// See QueryIntAttribute()
 	int QueryDoubleAttribute( const char* name, double* _value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryDoubleValue( _value ); }
 	/// See QueryIntAttribute()
-	int QueryFloatAttribute( const char* name, float* _value ) const				{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryFloatValue( _value ); }
+	int QueryFloatAttribute( const char* name, float* _value ) const			{ const XMLAttribute* a = FindAttribute( name ); if ( !a ) return XML_NO_ATTRIBUTE; return a->QueryFloatValue( _value ); }
 
 	/// Sets the named attribute to value.
 	void SetAttribute( const char* name, const char* _value )	{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
@@ -905,7 +905,7 @@ public:
 	/// Sets the named attribute to value.
 	void SetAttribute( const char* name, bool _value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
 	/// Sets the named attribute to value.
-	void SetAttribute( const char* name, double _value )			{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
+	void SetAttribute( const char* name, double _value )		{ XMLAttribute* a = FindOrCreateAttribute( name ); a->SetAttribute( _value ); }
 
 	/**
 		Delete an attribute.
@@ -977,7 +977,7 @@ private:
 };
 
 
-/** A document binds together all the functionality. 
+/** A Document binds together all the functionality. 
 	It can be saved, loaded, and printed to the screen.
 	All Nodes are connected and allocated to a Document.
 	If the Document is deleted, all its Nodes are also deleted.
@@ -1024,7 +1024,7 @@ public:
 	int SaveFile( const char* filename );
 
 	/**
-		Save the XML file to disk.  You are responsible
+		Save the XML file to disk. You are responsible
 		for providing and closing the FILE*.
 
 		Returns XML_NO_ERROR (0) on success, or
@@ -1103,7 +1103,7 @@ public:
 	XMLUnknown* NewUnknown( const char* text );
 
 	/**
-		Delete a node associated with this documented.
+		Delete a node associated with this document.
 		It will be unlinked from the DOM.
 	*/
 	void DeleteNode( XMLNode* node )	{ node->parent->DeleteChild( node ); }
@@ -1116,9 +1116,9 @@ public:
 	int  ErrorID() const { return errorID; }
 	/// Return a possibly helpful diagnostic location or string.
 	const char* GetErrorStr1() const { return errorStr1; }
-	/// Return possibly helpful secondary diagnostic location or string.
+	/// Return a possibly helpful secondary diagnostic location or string.
 	const char* GetErrorStr2() const { return errorStr2; }
-	/// If there is an error, print it to stdout
+	/// If there is an error, print it to stdout.
 	void PrintError() const;
 
 	// internal
@@ -1158,7 +1158,7 @@ private:
 			<Child attributeB = "value1" />
 			<Child attributeB = "value2" />
 		</Element>
-	<Document>
+	</Document>
 	@endverbatim
 
 	Assuming you want the value of "attributeB" in the 2nd "Child" element, it's very 
@@ -1286,7 +1286,7 @@ private:
 
 	It can:
 	-# Print to memory.
-	-# Print to a file you provide
+	-# Print to a file you provide.
 	-# Print XML without a XMLDocument.
 
 	Print to Memory
@@ -1294,7 +1294,7 @@ private:
 	@verbatim
 	XMLPrinter printer;
 	doc->Print( &printer );
-	SomeFunctior( printer.CStr() );
+	SomeFunction( printer.CStr() );
 	@endverbatim
 
 	Print to a File
@@ -1349,7 +1349,7 @@ public:
 
 	/// Add a text node.
 	void PushText( const char* text, bool cdata=false );
-	/// Add a comment
+	/// Add a comment.
 	void PushComment( const char* comment );
 
 	void PushDeclaration( const char* value );
@@ -1371,6 +1371,12 @@ public:
 		the XML file in memory.
 	*/
 	const char* CStr() const { return buffer.Mem(); }
+	/**
+   		If in print to memory mode, return the size 
+		of the XML file in memory. (Note the size returned
+		includes the terminating null.)
+  	*/
+  	const int CStrSize()const{ return buffer.Size(); }
 
 private:
 	void SealElement();
