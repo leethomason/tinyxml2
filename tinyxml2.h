@@ -1329,7 +1329,7 @@ public:
 		this will print to the FILE. Else it will print
 		to memory, and the result is available in CStr()
 	*/
-	XMLPrinter( FILE* file=0 );
+	XMLPrinter( FILE* file=0, bool compact = false );
 	~XMLPrinter()	{}
 
 	/** If streaming, write the BOM and declaration. */
@@ -1378,6 +1378,14 @@ public:
   	*/
   	const int CStrSize()const{ return buffer.Size(); }
 
+	/**
+  	Set printer to compact mode, for printing without '\n' and space,
+		let output file smaller.
+	*/
+	void SetCompactMode( bool on ){ compactMode = on; }
+	bool IsCompactMode()const{ return compactMode; };
+  
+
 private:
 	void SealElement();
 	void PrintSpace( int depth );
@@ -1390,6 +1398,7 @@ private:
 	int depth;
 	int textDepth;
 	bool processEntities;
+	bool compactMode;
 
 	enum {
 		ENTITY_RANGE = 64,
