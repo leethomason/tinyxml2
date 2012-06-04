@@ -1501,13 +1501,14 @@ void XMLDocument::PrintError() const
 }
 
 
-XMLPrinter::XMLPrinter( FILE* file ) : 
+XMLPrinter::XMLPrinter( FILE* file, bool compact ) : 
 	elementJustOpened( false ), 
 	firstElement( true ),
 	fp( file ), 
 	depth( 0 ), 
 	textDepth( -1 ),
-	processEntities( true )
+	processEntities( true ),
+	compactMode( compact )
 {
 	for( int i=0; i<ENTITY_RANGE; ++i ) {
 		entityFlag[i] = false;
@@ -1627,7 +1628,7 @@ void XMLPrinter::OpenElement( const char* name )
 	}
 	stack.Push( name );
 
-	if ( textDepth < 0 && !firstElement ) {
+	if ( textDepth < 0 && !firstElement && !compactMode ) {
 		Print( "\n" );
 		PrintSpace( depth );
 	}
@@ -1689,7 +1690,7 @@ void XMLPrinter::CloseElement()
 		Print( "/>" );
 	}
 	else {
-		if ( textDepth < 0 ) {
+		if ( textDepth < 0 && !compactMode) {
 			Print( "\n" );
 			PrintSpace( depth );
 		}
@@ -1698,7 +1699,7 @@ void XMLPrinter::CloseElement()
 
 	if ( textDepth == depth )
 		textDepth = -1;
-	if ( depth == 0 )
+	if ( depth == 0 && !compactMode)
 		Print( "\n" );
 	elementJustOpened = false;
 }
@@ -1734,7 +1735,7 @@ void XMLPrinter::PushComment( const char* comment )
 	if ( elementJustOpened ) {
 		SealElement();
 	}
-	if ( textDepth < 0 && !firstElement ) {
+	if ( textDepth < 0 && !firstElement && !compactMode) {
 		Print( "\n" );
 		PrintSpace( depth );
 	}
@@ -1748,7 +1749,7 @@ void XMLPrinter::PushDeclaration( const char* value )
 	if ( elementJustOpened ) {
 		SealElement();
 	}
-	if ( textDepth < 0 && !firstElement) {
+	if ( textDepth < 0 && !firstElement && !compactMode) {
 		Print( "\n" );
 		PrintSpace( depth );
 	}
@@ -1762,7 +1763,7 @@ void XMLPrinter::PushUnknown( const char* value )
 	if ( elementJustOpened ) {
 		SealElement();
 	}
-	if ( textDepth < 0 && !firstElement ) {
+	if ( textDepth < 0 && !firstElement && !compactMode) {
 		Print( "\n" );
 		PrintSpace( depth );
 	}
