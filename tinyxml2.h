@@ -1378,14 +1378,6 @@ public:
   	*/
   	const int CStrSize()const{ return buffer.Size(); }
 
-	/**
-  	Set printer to compact mode, for printing without '\n' and space,
-		let output file smaller.
-	*/
-	void SetCompactMode( bool on ){ compactMode = on; }
-	bool IsCompactMode()const{ return compactMode; };
-  
-
 private:
 	void SealElement();
 	void PrintSpace( int depth );

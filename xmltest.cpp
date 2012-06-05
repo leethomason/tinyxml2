@@ -248,10 +248,16 @@ int main( int /*argc*/, const char ** /*argv*/ )
 
 		doc->Print();
 
-		XMLPrinter streamer;
-		doc->Print( &streamer );
-		printf( "%s", streamer.CStr() );
-
+		{
+			XMLPrinter streamer;
+			doc->Print( &streamer );
+			printf( "%s", streamer.CStr() );
+		}
+		{
+			XMLPrinter streamer( 0, true );
+			doc->Print( &streamer );
+			XMLTest( "Compact mode", "<element><sub attrib=\"1\"/><sub/></element>", streamer.CStr(), false );
+		}
 		delete doc;
 	}
 	{
