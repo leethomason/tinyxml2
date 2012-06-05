@@ -1327,7 +1327,9 @@ class XMLPrinter : public XMLVisitor
 public:
 	/** Construct the printer. If the FILE* is specified,
 		this will print to the FILE. Else it will print
-		to memory, and the result is available in CStr()
+		to memory, and the result is available in CStr().
+		If 'compact' is set to true, then output is created
+		with only required whitespace and newlines.
 	*/
 	XMLPrinter( FILE* file=0, bool compact = false );
 	~XMLPrinter()	{}
