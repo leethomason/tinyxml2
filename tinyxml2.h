@@ -1378,7 +1378,7 @@ public:
 		of the XML file in memory. (Note the size returned
 		includes the terminating null.)
   	*/
-  	const int CStrSize()const{ return buffer.Size(); }
+  	int CStrSize() const { return buffer.Size(); }
 
 private:
 	void SealElement();
