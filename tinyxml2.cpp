@@ -1394,7 +1394,12 @@ int XMLDocument::LoadFile( FILE* fp )
 	}
 
 	charBuffer = new char[size+1];
-	fread( charBuffer, size, 1, fp );
+	size_t read = fread( charBuffer, 1, size, fp );
+	if ( read != size ) {
+		SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
+		return errorID;
+	}
+	
 	charBuffer[size] = 0;
 
 	const char* p = charBuffer;
