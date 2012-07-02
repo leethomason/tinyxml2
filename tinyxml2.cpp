@@ -1242,6 +1242,8 @@ bool XMLElement::ShallowEqual( const XMLNode* compare ) const
 			if ( !XMLUtil::StringEqual( a->Value(), b->Value() ) ) {
 				return false;
 			}
+			a = a->Next();
+			b = b->Next();
 		}	
 		if ( a || b ) {
 			// different count

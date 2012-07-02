@@ -793,6 +793,28 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLTest( "Attribute order (empty)", false, ele->FirstAttribute() ? true : false );
 	}
 
+	{
+		// Make sure an attribute with a space in it succeeds.
+		static const char* xml = "<element attribute1=\"Test Attribute\"/>";
+		XMLDocument doc;
+		doc.Parse( xml );
+
+		XMLElement* ele = doc.FirstChildElement();
+		XMLTest( "Attribute with space", "Test Attribute", ele->Attribute( "attribute1" ) );
+	}
+
+	{
+		// Make sure we don't go into an infinite loop.
+		static const char* xml = "<doc><element attribute='attribute'/><element attribute='attribute'/></doc>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLElement* ele0 = doc.FirstChildElement()->FirstChildElement();
+		XMLElement* ele1 = ele0->NextSiblingElement();
+		bool equal = ele0->ShallowEqual( ele1 );
+
+		XMLTest( "Infinite loop in shallow equal.", true, equal );
+	}
+
 	// -------- Handles ------------
 	{
 		static const char* xml = "<element attrib='bar'><sub>Text</sub></element>";
