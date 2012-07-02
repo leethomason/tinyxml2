@@ -85,7 +85,7 @@ distribution.
 
 static const int TIXML2_MAJOR_VERSION = 1;
 static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 4;
+static const int TIXML2_PATCH_VERSION = 5;
 
 namespace tinyxml2
 {
@@ -134,7 +134,7 @@ public:
 	void SetInternedStr( const char* str ) { Reset(); this->start = const_cast<char*>(str); }
 	void SetStr( const char* str, int flags=0 );
 
-	char* ParseText( char* in, const char* endTag, int strFlags );
+	char* ParseText( char* in, const char* endTag, int strFlags );	
 	char* ParseName( char* in );
 
 

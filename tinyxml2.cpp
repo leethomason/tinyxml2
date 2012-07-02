@@ -914,13 +914,22 @@ bool XMLUnknown::Accept( XMLVisitor* visitor ) const
 // --------- XMLAttribute ---------- //
 char* XMLAttribute::ParseDeep( char* p, bool processEntities )
 {
-	p = name.ParseText( p, "=", StrPair::ATTRIBUTE_NAME );
+	// Parse using the name rules: bug fix, was using ParseText before
+	p = name.ParseName( p );
 	if ( !p || !*p ) return 0;
 
+	// Skip white space before =
+	p = XMLUtil::SkipWhiteSpace( p );
+	if ( !p || *p != '=' ) return 0;
+
+	++p;	// move up to opening quote
+	p = XMLUtil::SkipWhiteSpace( p );
+	if ( *p != '\"' && *p != '\'' ) return 0;
+
 	char endTag[2] = { *p, 0 };
-	++p;
+	++p;	// move past opening quote
+
 	p = value.ParseText( p, endTag, processEntities ? StrPair::ATTRIBUTE_VALUE : StrPair::ATTRIBUTE_VALUE_LEAVE_ENTITIES );
-	//if ( value.Empty() ) return 0;
 	return p;
 }
 

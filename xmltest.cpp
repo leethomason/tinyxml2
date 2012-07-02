@@ -795,12 +795,23 @@ int main( int /*argc*/, const char ** /*argv*/ )
 
 	{
 		// Make sure an attribute with a space in it succeeds.
-		static const char* xml = "<element attribute1=\"Test Attribute\"/>";
-		XMLDocument doc;
-		doc.Parse( xml );
+		static const char* xml0 = "<element attribute1= \"Test Attribute\"/>";
+		static const char* xml1 = "<element attribute1 =\"Test Attribute\"/>";
+		static const char* xml2 = "<element attribute1 = \"Test Attribute\"/>";
+		XMLDocument doc0;
+		doc0.Parse( xml0 );
+		XMLDocument doc1;
+		doc1.Parse( xml1 );
+		XMLDocument doc2;
+		doc2.Parse( xml2 );
 
-		XMLElement* ele = doc.FirstChildElement();
-		XMLTest( "Attribute with space", "Test Attribute", ele->Attribute( "attribute1" ) );
+		XMLElement* ele = 0;
+		ele = doc0.FirstChildElement();
+		XMLTest( "Attribute with space #1", "Test Attribute", ele->Attribute( "attribute1" ) );
+		ele = doc1.FirstChildElement();
+		XMLTest( "Attribute with space #2", "Test Attribute", ele->Attribute( "attribute1" ) );
+		ele = doc2.FirstChildElement();
+		XMLTest( "Attribute with space #3", "Test Attribute", ele->Attribute( "attribute1" ) );
 	}
 
 	{
