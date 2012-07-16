@@ -49,7 +49,7 @@ template< class T > bool XMLTest( const char* testString, T expected, T found, b
 	if ( !echo )
 		printf (" %s\n", testString);
 	else
-		printf (" %s [%d][%d]\n", testString, expected, found);
+		printf (" %s [%d][%d]\n", testString, static_cast<int>(expected), static_cast<int>(found) );
 
 	if ( pass )
 		++gPass;
