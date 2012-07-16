@@ -411,8 +411,6 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		doc.SaveFile( "resources/utf8testout.xml" );
 
 		// Check the round trip.
-		char savedBuf[256];
-		char verifyBuf[256];
 		int okay = 0;
 
 
@@ -429,8 +427,10 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		if ( saved && verify )
 		{
 			okay = 1;
+			char verifyBuf[256];
 			while ( fgets( verifyBuf, 256, verify ) )
 			{
+				char savedBuf[256];
 				fgets( savedBuf, 256, saved );
 				NullLineEndings( verifyBuf );
 				NullLineEndings( savedBuf );
@@ -568,8 +568,8 @@ int main( int /*argc*/, const char ** /*argv*/ )
 					 "<psg context=\"Line 5 has &quot;quotation marks&quot; and &apos;apostrophe marks&apos;."
 					 " It also has &lt;, &gt;, and &amp;, as well as a fake copyright \xC2\xA9.\"/>\n",
 					 buf, false );
+			fclose( textfile );
 		}
-		fclose( textfile );
 	}
 
 	{

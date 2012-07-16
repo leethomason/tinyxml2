@@ -190,8 +190,6 @@ const char* StrPair::GetStr()
 					*q++ = LF;
 				}
 				else if ( (flags & NEEDS_ENTITY_PROCESSING) && *p == '&' ) {
-					int i=0;
-
 					// Entities handled by tinyXML2:
 					// - special entities in the entity table [in/out]
 					// - numeric character reference [in]
@@ -207,7 +205,8 @@ const char* StrPair::GetStr()
 						TIXMLASSERT( q <= p );
 					}
 					else {
-						for( i=0; i<NUM_ENTITIES; ++i ) {
+						int i=0;
+						for(; i<NUM_ENTITIES; ++i ) {
 							if (    strncmp( p+1, entities[i].pattern, entities[i].length ) == 0
 								 && *(p+entities[i].length+1) == ';' ) 
 							{
@@ -768,7 +767,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
 		// We read the end tag. Return it to the parent.
 		if ( node->ToElement() && node->ToElement()->ClosingType() == XMLElement::CLOSING ) {
 			if ( parentEnd ) {
-				*parentEnd = ((XMLElement*)node)->value;
+				*parentEnd = static_cast<XMLElement*>(node)->value;
 			}
 			DELETE_NODE( node );
 			return p;
