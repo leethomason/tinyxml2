@@ -587,7 +587,7 @@ protected:
 	XMLNode( XMLDocument* );
 	virtual ~XMLNode();
 	XMLNode( const XMLNode& );	// not supported
-	void operator=( const XMLNode& );	// not supported
+	XMLNode& operator=( const XMLNode& );	// not supported
 	
 	XMLDocument*	document;
 	XMLNode*		parent;
@@ -641,7 +641,7 @@ protected:
 	XMLText( XMLDocument* doc )	: XMLNode( doc ), isCData( false )	{}
 	virtual ~XMLText()												{}
 	XMLText( const XMLText& );	// not supported
-	void operator=( const XMLText& );	// not supported
+	XMLText& operator=( const XMLText& );	// not supported
 
 private:
 	bool isCData;
@@ -666,7 +666,7 @@ protected:
 	XMLComment( XMLDocument* doc );
 	virtual ~XMLComment();
 	XMLComment( const XMLComment& );	// not supported
-	void operator=( const XMLComment& );	// not supported
+	XMLComment& operator=( const XMLComment& );	// not supported
 
 private:
 };
@@ -700,7 +700,7 @@ protected:
 	XMLDeclaration( XMLDocument* doc );
 	virtual ~XMLDeclaration();
 	XMLDeclaration( const XMLDeclaration& );	// not supported
-	void operator=( const XMLDeclaration& );	// not supported
+	XMLDeclaration& operator=( const XMLDeclaration& );	// not supported
 };
 
 
@@ -728,7 +728,7 @@ protected:
 	XMLUnknown( XMLDocument* doc );
 	virtual ~XMLUnknown();
 	XMLUnknown( const XMLUnknown& );	// not supported
-	void operator=( const XMLUnknown& );	// not supported
+	XMLUnknown& operator=( const XMLUnknown& );	// not supported
 };
 
 
@@ -1265,7 +1265,7 @@ public:
 	/// Copy constructor
 	XMLHandle( const XMLHandle& ref )										{ node = ref.node; }
 	/// Assignment
-	XMLHandle operator=( const XMLHandle& ref )								{ node = ref.node; return *this; }
+	XMLHandle& operator=( const XMLHandle& ref )							{ node = ref.node; return *this; }
 
 	/// Get the first child of this handle.
 	XMLHandle FirstChild() 													{ return XMLHandle( node ? node->FirstChild() : 0 ); }
@@ -1311,7 +1311,7 @@ public:
 	XMLConstHandle( const XMLNode& _node )											{ node = &_node; }
 	XMLConstHandle( const XMLConstHandle& ref )										{ node = ref.node; }
 
-	XMLConstHandle operator=( const XMLConstHandle& ref )							{ node = ref.node; return *this; }
+	XMLConstHandle& operator=( const XMLConstHandle& ref )							{ node = ref.node; return *this; }
 
 	const XMLConstHandle FirstChild() const											{ return XMLConstHandle( node ? node->FirstChild() : 0 ); }
 	const XMLConstHandle FirstChildElement( const char* value=0 ) const				{ return XMLConstHandle( node ? node->FirstChildElement( value ) : 0 ); }
