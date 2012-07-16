@@ -1467,7 +1467,10 @@ private:
 	bool restrictedEntityFlag[ENTITY_RANGE];
 
 	DynArray< const char*, 10 > stack;
-	DynArray< char, 20 > buffer, accumulator;
+	DynArray< char, 20 > buffer;
+#ifdef _MSC_VER
+	DynArray< char, 20 > accumulator;
+#endif
 };
 
 
