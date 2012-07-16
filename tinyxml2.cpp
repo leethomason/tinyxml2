@@ -369,6 +369,86 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 }
 
 
+void XMLUtil::ToStr( int v, char* buffer, int bufferSize ) 
+{
+	TIXML_SNPRINTF( buffer, bufferSize, "%d", v );	
+}
+
+
+void XMLUtil::ToStr( unsigned v, char* buffer, int bufferSize )
+{
+	TIXML_SNPRINTF( buffer, bufferSize, "%u", v );	
+}
+
+
+void XMLUtil::ToStr( bool v, char* buffer, int bufferSize )
+{
+	TIXML_SNPRINTF( buffer, bufferSize, "%d", v ? 1 : 0 );	
+}
+
+
+void XMLUtil::ToStr( float v, char* buffer, int bufferSize )
+{
+	TIXML_SNPRINTF( buffer, bufferSize, "%f", v );	
+}
+
+
+void XMLUtil::ToStr( double v, char* buffer, int bufferSize )
+{
+	TIXML_SNPRINTF( buffer, bufferSize, "%f", v );	
+}
+
+
+bool XMLUtil::ToInt( const char* str, int* value )
+{
+	if ( TIXML_SSCANF( str, "%d", value ) == 1 )
+		return true;
+	return false;
+}
+
+bool XMLUtil::ToUnsigned( const char* str, unsigned *value )
+{
+	if ( TIXML_SSCANF( str, "%u", value ) == 1 )
+		return true;
+	return false;
+}
+
+bool XMLUtil::ToBool( const char* str, bool* value )
+{
+	int ival = 0;
+	if ( ToInt( str, &ival )) {
+		*value = (ival==0) ? false : true;
+		return true;
+	}
+	if ( StringEqual( str, "true" ) ) {
+		*value = true;
+		return true;
+	}
+	else if ( StringEqual( str, "false" ) ) {
+		*value = false;
+		return true;
+	}
+	return false;
+}
+
+
+bool XMLUtil::ToFloat( const char* str, float* value )
+{
+	if ( TIXML_SSCANF( str, "%f", value ) == 1 ) {
+		return true;
+	}
+	return false;
+}
+
+bool XMLUtil::ToDouble( const char* str, double* value )
+{
+	if ( TIXML_SSCANF( str, "%lf", value ) == 1 ) {
+		return true;
+	}
+	return false;
+}
+
+
 char* XMLDocument::Identify( char* p, XMLNode** node ) 
 {
 	XMLNode* returnNode = 0;
@@ -942,7 +1022,7 @@ void XMLAttribute::SetName( const char* n )
 
 int XMLAttribute::QueryIntValue( int* value ) const
 {
-	if ( TIXML_SSCANF( Value(), "%d", value ) == 1 )
+	if ( XMLUtil::ToInt( Value(), value ))
 		return XML_NO_ERROR;
 	return XML_WRONG_ATTRIBUTE_TYPE;
 }
@@ -950,7 +1030,7 @@ int XMLAttribute::QueryIntValue( int* value ) const
 
 int XMLAttribute::QueryUnsignedValue( unsigned int* value ) const
 {
-	if ( TIXML_SSCANF( Value(), "%u", value ) == 1 )
+	if ( XMLUtil::ToUnsigned( Value(), value ))
 		return XML_NO_ERROR;
 	return XML_WRONG_ATTRIBUTE_TYPE;
 }
@@ -958,32 +1038,24 @@ int XMLAttribute::QueryUnsignedValue( unsigned int* value ) const
 
 int XMLAttribute::QueryBoolValue( bool* value ) const
 {
-	int ival = -1;
-	QueryIntValue( &ival );
-
-	if ( ival > 0 || XMLUtil::StringEqual( Value(), "true" ) ) {
-		*value = true;
+	if ( XMLUtil::ToBool( Value(), value )) {
 		return XML_NO_ERROR;
 	}
-	else if ( ival == 0 || XMLUtil::StringEqual( Value(), "false" ) ) {
-		*value = false;
-		return XML_NO_ERROR;
-	}
-	return XML_WRONG_ATTRIBUTE_TYPE;
-}
-
-
-int XMLAttribute::QueryDoubleValue( double* value ) const
-{
-	if ( TIXML_SSCANF( Value(), "%lf", value ) == 1 )
-		return XML_NO_ERROR;
 	return XML_WRONG_ATTRIBUTE_TYPE;
 }
 
 
 int XMLAttribute::QueryFloatValue( float* value ) const
 {
-	if ( TIXML_SSCANF( Value(), "%f", value ) == 1 )
+	if ( XMLUtil::ToFloat( Value(), value ))
+		return XML_NO_ERROR;
+	return XML_WRONG_ATTRIBUTE_TYPE;
+}
+
+
+int XMLAttribute::QueryDoubleValue( double* value ) const
+{
+	if ( XMLUtil::ToDouble( Value(), value ))
 		return XML_NO_ERROR;
 	return XML_WRONG_ATTRIBUTE_TYPE;
 }
@@ -998,7 +1070,7 @@ void XMLAttribute::SetAttribute( const char* v )
 void XMLAttribute::SetAttribute( int v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	value.SetStr( buf );
 }
 
@@ -1006,7 +1078,7 @@ void XMLAttribute::SetAttribute( int v )
 void XMLAttribute::SetAttribute( unsigned v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%u", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	value.SetStr( buf );
 }
 
@@ -1014,21 +1086,21 @@ void XMLAttribute::SetAttribute( unsigned v )
 void XMLAttribute::SetAttribute( bool v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v ? 1 : 0 );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	value.SetStr( buf );
 }
 
 void XMLAttribute::SetAttribute( double v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	value.SetStr( buf );
 }
 
 void XMLAttribute::SetAttribute( float v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	value.SetStr( buf );
 }
 
@@ -1091,6 +1163,72 @@ const char* XMLElement::GetText() const
 	}
 	return 0;
 }
+
+
+int XMLElement::QueryIntText( int* _value ) const
+{
+	if ( FirstChild() && FirstChild()->ToText() ) {
+		const char* t = FirstChild()->ToText()->Value();
+		if ( XMLUtil::ToInt( t, _value ) ) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_NODE;
+}
+
+
+int XMLElement::QueryUnsignedText( unsigned* _value ) const
+{
+	if ( FirstChild() && FirstChild()->ToText() ) {
+		const char* t = FirstChild()->ToText()->Value();
+		if ( XMLUtil::ToUnsigned( t, _value ) ) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_NODE;
+}
+
+
+int XMLElement::QueryBoolText( bool* _value ) const
+{
+	if ( FirstChild() && FirstChild()->ToText() ) {
+		const char* t = FirstChild()->ToText()->Value();
+		if ( XMLUtil::ToBool( t, _value ) ) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_NODE;
+}
+
+
+int XMLElement::QueryDoubleText( double* _value ) const
+{
+	if ( FirstChild() && FirstChild()->ToText() ) {
+		const char* t = FirstChild()->ToText()->Value();
+		if ( XMLUtil::ToDouble( t, _value ) ) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_NODE;
+}
+
+
+int XMLElement::QueryFloatText( float* _value ) const
+{
+	if ( FirstChild() && FirstChild()->ToText() ) {
+		const char* t = FirstChild()->ToText()->Value();
+		if ( XMLUtil::ToFloat( t, _value ) ) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_NODE;
+}
+
 
 
 XMLAttribute* XMLElement::FindOrCreateAttribute( const char* name )
@@ -1668,7 +1806,7 @@ void XMLPrinter::PushAttribute( const char* name, const char* value )
 void XMLPrinter::PushAttribute( const char* name, int v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	PushAttribute( name, buf );
 }
 
@@ -1676,7 +1814,7 @@ void XMLPrinter::PushAttribute( const char* name, int v )
 void XMLPrinter::PushAttribute( const char* name, unsigned v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%u", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	PushAttribute( name, buf );
 }
 
@@ -1684,7 +1822,7 @@ void XMLPrinter::PushAttribute( const char* name, unsigned v )
 void XMLPrinter::PushAttribute( const char* name, bool v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%d", v ? 1 : 0 );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	PushAttribute( name, buf );
 }
 
@@ -1692,7 +1830,7 @@ void XMLPrinter::PushAttribute( const char* name, bool v )
 void XMLPrinter::PushAttribute( const char* name, double v )
 {
 	char buf[BUF_SIZE];
-	TIXML_SNPRINTF( buf, BUF_SIZE, "%f", v );	
+	XMLUtil::ToStr( v, buf, BUF_SIZE );
 	PushAttribute( name, buf );
 }
 
@@ -1743,6 +1881,45 @@ void XMLPrinter::PushText( const char* text, bool cdata )
 	else {
 		PrintString( text, true );
 	}
+}
+
+void XMLPrinter::PushText( int value ) 
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr( value, buf, BUF_SIZE );
+	PushText( buf, false );
+}
+
+
+void XMLPrinter::PushText( unsigned value ) 
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr( value, buf, BUF_SIZE );
+	PushText( buf, false );
+}
+
+
+void XMLPrinter::PushText( bool value ) 
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr( value, buf, BUF_SIZE );
+	PushText( buf, false );
+}
+
+
+void XMLPrinter::PushText( float value ) 
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr( value, buf, BUF_SIZE );
+	PushText( buf, false );
+}
+
+
+void XMLPrinter::PushText( double value ) 
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr( value, buf, BUF_SIZE );
+	PushText( buf, false );
 }
 
 

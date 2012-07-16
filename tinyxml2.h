@@ -85,7 +85,7 @@ distribution.
 
 static const int TIXML2_MAJOR_VERSION = 1;
 static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 5;
+static const int TIXML2_PATCH_VERSION = 6;
 
 namespace tinyxml2
 {
@@ -388,6 +388,20 @@ public:
 	// the UTF-8 value of the entity will be placed in value, and length filled in.
 	static const char* GetCharacterRef( const char* p, char* value, int* length );
 	static void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
+
+	// converts primitive types to strings
+	static void ToStr( int v, char* buffer, int bufferSize );
+	static void ToStr( unsigned v, char* buffer, int bufferSize );
+	static void ToStr( bool v, char* buffer, int bufferSize );
+	static void ToStr( float v, char* buffer, int bufferSize );
+	static void ToStr( double v, char* buffer, int bufferSize );
+
+	// converts strings to primitive types
+	static bool	ToInt( const char* str, int* value );
+	static bool ToUnsigned( const char* str, unsigned* value );
+	static bool	ToBool( const char* str, bool* value );
+	static bool	ToFloat( const char* str, float* value );
+	static bool ToDouble( const char* str, double* value );
 };
 
 
@@ -739,7 +753,10 @@ enum {
 	XML_ERROR_PARSING_UNKNOWN,
 	XML_ERROR_EMPTY_DOCUMENT,
 	XML_ERROR_MISMATCHED_ELEMENT,
-	XML_ERROR_PARSING
+	XML_ERROR_PARSING,
+
+	XML_CAN_NOT_CONVERT_TEXT,
+	XML_NO_TEXT_NODE
 };
 
 
@@ -928,7 +945,7 @@ public:
 		This is a convenient method for getting the text of simple contained text:
 		@verbatim
 		<foo>This is text</foo>
-		const char* str = fooElement->GetText();
+			const char* str = fooElement->GetText();
 		@endverbatim
 
 		'str' will be a pointer to "This is text". 
@@ -936,17 +953,53 @@ public:
 		Note that this function can be misleading. If the element foo was created from
 		this XML:
 		@verbatim
-		<foo><b>This is text</b></foo> 
+			<foo><b>This is text</b></foo> 
 		@endverbatim
 
 		then the value of str would be null. The first child node isn't a text node, it is
 		another element. From this XML:
 		@verbatim
-		<foo>This is <b>text</b></foo> 
+			<foo>This is <b>text</b></foo> 
 		@endverbatim
 		GetText() will return "This is ".
 	*/
 	const char* GetText() const;
+
+	/** 
+		Convenience method to query the value of a child text node. This is probably best
+		shown by example. Given you have a document is this form:
+		@verbatim
+			<point>
+				<x>1</x>
+				<y>1.4</y>
+			</point>
+		@endverbatim
+
+		The QueryIntText() and similar functions provide a safe and easier way to get to the
+		"value" of x and y.
+
+		@verbatim
+			int x = 0;
+			float y = 0;	// types of x and y are contrived for example
+			const XMLElement* xElement = pointElement->FirstChildElement( "x" );
+			const XMLElement* yElement = pointElement->FirstChildElement( "y" );
+			xElement->QueryIntText( &x );
+			yElement->QueryFloatText( &y );
+		@endverbatim
+
+		@returns XML_SUCCESS (0) on success, XML_CAN_NOT_CONVERT_TEXT if the text cannot be converted
+				 to the requested type, and XML_NO_TEXT_NODE if there is no child text to query.
+			
+	*/
+	int QueryIntText( int* _value ) const;
+	/// See QueryIntText()
+	int QueryUnsignedText( unsigned* _value ) const;
+	/// See QueryIntText()
+	int QueryBoolText( bool* _value ) const;
+	/// See QueryIntText()
+	int QueryDoubleText( double* _value ) const;
+	/// See QueryIntText()
+	int QueryFloatText( float* _value ) const;
 
 	// internal:
 	enum {
@@ -1352,7 +1405,18 @@ public:
 
 	/// Add a text node.
 	void PushText( const char* text, bool cdata=false );
-	/// Add a comment.
+	/// Add a text node from an integer.
+	void PushText( int value );
+	/// Add a text node from an unsigned.
+	void PushText( unsigned value );
+	/// Add a text node from a bool.
+	void PushText( bool value );
+	/// Add a text node from a float.
+	void PushText( float value );
+	/// Add a text node from a double.
+	void PushText( double value );
+
+	/// Add a comment
 	void PushComment( const char* comment );
 
 	void PushDeclaration( const char* value );

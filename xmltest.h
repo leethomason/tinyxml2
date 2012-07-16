@@ -92,3 +92,38 @@
 	looking for XMLText, not an element, and ToText()
 	is a cast from a Node to a XMLText. 
 */
+
+/** @page Example-4 Read attributes and text information.
+	@dontinclude ./xmltest.cpp
+
+	There are fundamentally 2 ways of writing a key-value
+	pair into an XML file. (Something that's always annoyed
+	me about XML.) Either by using attributes, or by writing
+	the key name into an element and the value into
+	the text node wrapped by the element. Both approaches
+	are illustrated in this example, which shows two ways
+	to encode the value "2" into the key "v":
+
+	@skip example_4
+	@until "</information>";
+
+	TinyXML-2 has accessors for both approaches. 
+
+	When using an attribute, you navigate to the XMLElement
+	with that attribute and use the QueryIntAttribute()
+	group of methods. (Also QueryFloatAttribute(), etc.)
+
+	@skip XMLElement* attributeApproachElement
+	@until &v0 );
+
+	When using the text approach, you need to navigate
+	down one more step to the XMLElement that contains
+	the text. Note the extra FirstChildElement( "v" )
+	in the code below. The value of the text can then
+	be safely queried with the QueryIntText() group
+	of methods. (Also QueryFloatText(), etc.)
+
+	@skip XMLElement* textApproachElement
+	@until &v1 );
+*/
+

@@ -38,7 +38,7 @@ bool XMLTest (const char* testString, const char* expected, const char* found, b
 }
 
 
-bool XMLTest( const char* testString, int expected, int found, bool echo=true )
+template< class T > bool XMLTest( const char* testString, T expected, T found, bool echo=true )
 {
 	bool pass = ( expected == found );
 	if ( pass )
@@ -116,6 +116,34 @@ int example_3()
 }
 
 
+bool example_4()
+{
+	static const char* xml =
+		"<information>"
+		"	<attributeApproach v='2' />"
+		"	<textApproach>"
+		"		<v>2</v>"
+		"	</textApproach>"
+		"</information>";
+	
+	XMLDocument doc;
+	doc.Parse( xml );
+
+	int v0 = 0;
+	int v1 = 0;
+
+	XMLElement* attributeApproachElement = doc.FirstChildElement()->FirstChildElement( "attributeApproach" );
+	attributeApproachElement->QueryIntAttribute( "v", &v0 );
+
+	XMLElement* textApproachElement = doc.FirstChildElement()->FirstChildElement( "textApproach" );
+	textApproachElement->FirstChildElement( "v" )->QueryIntText( &v1 );
+
+	printf( "Both values are the same: %d and %d\n", v0, v1 );
+
+	return !doc.Error() && ( v0 == v1 );
+}
+
+
 int main( int /*argc*/, const char ** /*argv*/ )
 {
 	#if defined( _MSC_VER ) && defined( DEBUG )
@@ -148,6 +176,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 	XMLTest( "Example-1", 0, example_1() );
 	XMLTest( "Example-2", 0, example_2() );
 	XMLTest( "Example-3", 0, example_3() );
+	XMLTest( "Example-4", true, example_4() );
 
 	/* ------ Example 2: Lookup information. ---- */	
 
@@ -243,7 +272,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLTest( "Programmatic DOM", true, doc->FirstChildElement()->FirstChildElement()->BoolAttribute( "attrib" ) );
 		int value = 10;
 		int result = doc->FirstChildElement()->LastChildElement()->QueryIntAttribute( "attrib", &value );
-		XMLTest( "Programmatic DOM", result, XML_NO_ATTRIBUTE );
+		XMLTest( "Programmatic DOM", result, (int)XML_NO_ATTRIBUTE );
 		XMLTest( "Programmatic DOM", value, 10 );
 
 		doc->Print();
@@ -303,7 +332,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 
 		XMLDocument doc;
 		doc.Parse( error );
-		XMLTest( "Bad XML", doc.ErrorID(), XML_ERROR_PARSING_ATTRIBUTE );
+		XMLTest( "Bad XML", doc.ErrorID(), (int)XML_ERROR_PARSING_ATTRIBUTE );
 	}
 
 	{
@@ -318,17 +347,17 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		double dVal;
 
 		result = ele->QueryDoubleAttribute( "attr0", &dVal );
-		XMLTest( "Query attribute: int as double", result, XML_NO_ERROR );
+		XMLTest( "Query attribute: int as double", result, (int)XML_NO_ERROR );
 		XMLTest( "Query attribute: int as double", (int)dVal, 1 );
 		result = ele->QueryDoubleAttribute( "attr1", &dVal );
 		XMLTest( "Query attribute: double as double", (int)dVal, 2 );
 		result = ele->QueryIntAttribute( "attr1", &iVal );
-		XMLTest( "Query attribute: double as int", result, XML_NO_ERROR );
+		XMLTest( "Query attribute: double as int", result, (int)XML_NO_ERROR );
 		XMLTest( "Query attribute: double as int", iVal, 2 );
 		result = ele->QueryIntAttribute( "attr2", &iVal );
-		XMLTest( "Query attribute: not a number", result, XML_WRONG_ATTRIBUTE_TYPE );
+		XMLTest( "Query attribute: not a number", result, (int)XML_WRONG_ATTRIBUTE_TYPE );
 		result = ele->QueryIntAttribute( "bar", &iVal );
-		XMLTest( "Query attribute: does not exist", result, XML_NO_ATTRIBUTE );
+		XMLTest( "Query attribute: does not exist", result, (int)XML_NO_ATTRIBUTE );
 	}
 
 	{
@@ -566,7 +595,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 
 		XMLDocument doc;
         doc.Parse( test );
-        XMLTest( "dot in names", doc.Error(), 0);
+        XMLTest( "dot in names", doc.Error(), false );
         XMLTest( "dot in names", doc.FirstChildElement()->Name(), "a.elem" );
         XMLTest( "dot in names", doc.FirstChildElement()->Attribute( "xmi.version" ), "2.0" );
 	}
@@ -623,7 +652,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLDocument doc;
 		doc.Parse( doctype );
 		
-		XMLTest( "Parsing repeated attributes.", XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );	// is an  error to tinyxml (didn't use to be, but caused issues)
+		XMLTest( "Parsing repeated attributes.", (int)XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );	// is an  error to tinyxml (didn't use to be, but caused issues)
 		doc.PrintError();
 	}
 
@@ -641,7 +670,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		const char* str = "    ";
 		XMLDocument doc;
 		doc.Parse( str );
-		XMLTest( "Empty document error", XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
+		XMLTest( "Empty document error", (int)XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
 	}
 
 	{
@@ -668,7 +697,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		xml.Parse("<x> ");
 		XMLTest("Missing end tag with trailing whitespace", xml.Error(), true);
 		xml.Parse("<x></y>");
-		XMLTest("Mismatched tags", xml.ErrorID(), XML_ERROR_MISMATCHED_ELEMENT);
+		XMLTest("Mismatched tags", xml.ErrorID(), (int)XML_ERROR_MISMATCHED_ELEMENT);
 	} 
 
 
@@ -864,6 +893,40 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		static const char* result  = "\xef\xbb\xbf<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 		XMLTest( "BOM and default declaration", printer.CStr(), result, false );
 		XMLTest( "CStrSize", printer.CStrSize(), 42, false );
+	}
+	{
+		const char* xml = "<ipxml ws='1'><info bla=' /></ipxml>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLTest( "Ill formed XML", true, doc.Error() );
+	}
+
+	// QueryXYZText
+	{
+		const char* xml = "<point> <x>1.2</x> <y>1</y> <z>38</z> <valid>true</valid> </point>";
+		XMLDocument doc;
+		doc.Parse( xml );
+
+		const XMLElement* pointElement = doc.RootElement();
+
+		int intValue = 0;
+		unsigned unsignedValue = 0;
+		float floatValue = 0;
+		double doubleValue = 0;
+		bool boolValue = false;
+
+		pointElement->FirstChildElement( "y" )->QueryIntText( &intValue );
+		pointElement->FirstChildElement( "y" )->QueryUnsignedText( &unsignedValue );
+		pointElement->FirstChildElement( "x" )->QueryFloatText( &floatValue );
+		pointElement->FirstChildElement( "x" )->QueryDoubleText( &doubleValue );
+		pointElement->FirstChildElement( "valid" )->QueryBoolText( &boolValue );
+
+
+		XMLTest( "QueryIntText", intValue, 1,						false );
+		XMLTest( "QueryUnsignedText", unsignedValue, (unsigned)1,	false );
+		XMLTest( "QueryFloatText", floatValue, 1.2f,				false );
+		XMLTest( "QueryDoubleText", doubleValue, 1.2,				false );
+		XMLTest( "QueryBoolText", boolValue, true,					false );
 	}
 
 	
