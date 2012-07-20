@@ -1,19 +1,19 @@
-/** @mainpage
-
-<h1> TinyXML-2 </h1>
+TinyXML-2
+=========
 
 TinyXML is a simple, small, efficient, C++ XML parser that can be 
 easily integrated into other programs.
 
 The master is hosted on github:
-github.com/leethomason/tinyxml2
+https://github.com/leethomason/tinyxml2
 
 The online HTML version of these docs:
 http://grinninglizard.com/tinyxml2docs/index.html
 
 Examples are in the "related pages" tab of the HTML docs.
 
-<h2> What it does. </h2>
+What it does.
+-------------
 	
 In brief, TinyXML parses an XML document, and builds from that a 
 Document Object Model (DOM) that can be read, modified, and saved.
@@ -45,7 +45,8 @@ TinyXML-2 attempts to be a flexible parser, but with truly correct and
 compliant XML output. TinyXML-2 should compile on any reasonably C++
 compliant system. It does not rely on exceptions, RTTI, or the STL.
 
-<h2> What it doesn't do. </h2>
+What it doesn’t do.
+-------------------
 
 TinyXML-2 doesn't parse or use DTDs (Document Type Definitions) or XSLs
 (eXtensible Stylesheet Language.) There are other parsers out there 
@@ -55,7 +56,8 @@ your project, have a higher learning curve, and often have a more
 restrictive license. If you are working with browsers or have more
 complete XML needs, TinyXML-2 is not the parser for you.
 
-<h2> TinyXML-1 vs. TinyXML-2 </h2>
+TinyXML-1 vs. TinyXML-2
+-----------------------
 
 Which should you use? TinyXML-2 uses a similar API to TinyXML-1 and the same
 rich test cases. But the implementation of the parser is completely re-written
@@ -67,31 +69,30 @@ strings are query and set as 'const char*'. This allows the use of internal
 allocators, and keeps the code much simpler.
 
 Both parsers:
-<ol>
-	<li>Simple to use with similar APIs.</li>
-	<li>DOM based parser.</li>
-	<li>UTF-8 Unicode support. http://en.wikipedia.org/wiki/UTF-8 </li>
-</ol>
+
+1.  Simple to use with similar APIs.
+2.  DOM based parser.
+3.  UTF-8 Unicode support. http://en.wikipedia.org/wiki/UTF-8
 
 Advantages of TinyXML-2
-<ol>
-	<li>The focus of all future dev.</li>	
-	<li>Many fewer memory allocation (1/10th to 1/100th), uses less memory (about 40% of TinyXML-1), and faster.</li>
-	<li>No STL requirement.</li>
-	<li>More modern C++, including a proper namespace.</li>
-	<li>Proper and useful handling of whitespace</li>
-</ol>
+
+1.  The focus of all future dev.
+2.  Many fewer memory allocation (1/10th to 1/100th), uses less memory
+    (about 40% of TinyXML-1), and faster.
+3.  No STL requirement.
+4.  More modern C++, including a proper namespace.
+5.  Proper and useful handling of whitespace
 
 Advantages of TinyXML-1
-<ol>
-	<li>Can report the location of parsing errors.</li>
-	<li>Support for some C++ STL conventions: streams and strings</li>
-	<li>Very mature and well debugged code base.</li>
-</ol>
-	
-<h2> Features </h2>
 
-<h3> Memory Model </h3>
+1.  Can report the location of parsing errors.
+2.  Support for some C++ STL conventions: streams and strings
+3.  Very mature and well debugged code base.
+
+Features
+--------
+
+### Memory Model
 
 An XMLDocument is a C++ object like any other, that can be on the stack, or
 new'd and deleted on the heap.
@@ -101,7 +102,7 @@ be created by calling the appropriate XMLDocument::NewElement, NewText, etc.
 method. Although you have pointers to these objects, they are still owned
 by the Document. When the Document is deleted, so are all the nodes it contains.
 
-<h3> White Space </h3>
+### White Space
 
 Microsoft has an excellent article on white space: http://msdn.microsoft.com/en-us/library/ms256097.aspx
 
@@ -121,19 +122,20 @@ preserved. Line-feeds are preserved, as in this example:
 	<element> Hello again,  
 	          World</element>
 
-However, white space between elements is *not* preserved. Although not strictly 
+However, white space between elements is **not** preserved. Although not strictly 
 compliant, tracking and reporting inter-element space is awkward, and not normally
 valuable. TinyXML-2 sees these as the same XML:
 
 	<document>
-	<data>1</data>
-	<data>2</data>
-	<data>3</data>
+		<data>1</data>
+		<data>2</data>
+		<data>3</data>
 	</document>
 
 	<document><data>1</data><data>2</data><data>3</data></document>
 
-<h3> Entities </h3>
+### Entities
+
 TinyXML-2 recognizes the pre-defined "character entities", meaning special
 characters. Namely:
 
@@ -157,9 +159,9 @@ This is called a 'numeric character reference'. Any numeric character reference
 that isn't one of the special entities above, will be read, but written as a
 regular code point. The output is correct, but the entity syntax isn't preserved.
 
-<h3> Printing </h3>
+### Printing
 
-<h4> Print to file </h4>
+#### Print to file
 You can directly use the convenience function:
 
 	XMLDocument doc;
@@ -171,14 +173,14 @@ Or the XMLPrinter class:
 	XMLPrinter printer( fp );
 	doc.Print( &printer );
 
-<h4> Print to memory </h4>
+#### Print to memory
 Printing to memory is supported by the XMLPrinter.
 
 	XMLPrinter printer;
 	doc->Print( &printer );
 	// printer.CStr() has a const char* to the XML
 
-<h4> Print without an XMLDocument </h4>
+#### Print without an XMLDocument
 
 When loading, an XML parser is very useful. However, sometimes
 when saving, it just gets in the way. The code is often set up
@@ -193,19 +195,19 @@ an XML document.
 	printer.PushAttribute( "foo", "bar" );
 	printer.CloseElement();
 
-<h2> Examples </h2>
+Examples
+--------
 
-<h4> Load and parse an XML file. </h4>
-@verbatim
+#### Load and parse an XML file.
+
 	/* ------ Example 1: Load and parse an XML file. ---- */	
 	{
 		XMLDocument doc;
 		doc.LoadFile( "dream.xml" );
 	}
-@endverbatim
 
-<h4> Lookup information. </h4>
-@verbatim
+#### Lookup information.
+
 	/* ------ Example 2: Lookup information. ---- */	
 	{
 		XMLDocument doc;
@@ -228,30 +230,29 @@ an XML document.
 		title = textNode->Value();
 		printf( "Name of play (2): %s\n", title );
 	}
-@endverbatim
 
-<h2> Using and Installing </h2>
+Using and Installing
+--------------------
 
 There are 2 files in TinyXML-2:
-<ol>
-	<li>tinyxml2.cpp</li>
-	<li>tinyxml2.h</li>
-</ol>
+* tinyxml2.cpp
+* tinyxml2.h
+
 And additionally a test file:
-<ol>
-	<li>xmltest.cpp</li>
-</ol>
+* xmltest.cpp
 
 Simply compile and run. There is a visual studio 2010 project included, a simple Makefile, 
 an XCode project, and a cmake CMakeLists.txt included to help you. The top of tinyxml.h
 even has a simple g++ command line if you are are *nix and don't want to use a build system.
 
-<h2> Documentation </h2>
+Documentation
+-------------
 
 The documentation is build with Doxygen, using the 'dox' 
 configuration file.
 
-<h2> License </h2>
+License
+-------
 
 TinyXML-2 is released under the zlib license:
 
@@ -267,14 +268,13 @@ redistribute it freely, subject to the following restrictions:
 not claim that you wrote the original software. If you use this 
 software in a product, an acknowledgment in the product documentation 
 would be appreciated but is not required.
-
 2. Altered source versions must be plainly marked as such, and 
 must not be misrepresented as being the original software.
-
 3. This notice may not be removed or altered from any source 
 distribution.
 
-<h2> Contributors </h2>
+Contributors
+------------
 
 Thanks very much to everyone who sends suggestions, bugs, ideas, and 
 encouragement. It all helps, and makes this project fun.
@@ -286,4 +286,3 @@ Berquin and Andrew Ellerton who were key contributors.
 TinyXML-2 grew from that effort. Lee Thomason is the original author
 of TinyXML-2 (and TinyXML-1) but hopefully TinyXML-2 will be improved
 by many contributors.
-*/
