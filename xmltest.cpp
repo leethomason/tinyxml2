@@ -155,6 +155,8 @@ int main( int /*argc*/, const char ** /*argv*/ )
 	#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 	#endif
 
+	CreateDirectory( L"resources/out/", NULL );
+
 	FILE* fp = fopen( "resources/dream.xml", "r" );
 	if ( !fp ) {
 		printf( "Error opening test file 'dream.xml'.\n"
@@ -297,7 +299,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLDocument doc;
 		doc.LoadFile( "resources/dream.xml" );
 
-		doc.SaveFile( "resources/dreamout.xml" );
+		doc.SaveFile( "resources/out/dreamout.xml" );
 		doc.PrintError();
 
 		XMLTest( "Dream", "xml version=\"1.0\"",
@@ -311,7 +313,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 			              doc.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
 
 		XMLDocument doc2;
-		doc2.LoadFile( "resources/dreamout.xml" );
+		doc2.LoadFile( "resources/out/dreamout.xml" );
 		XMLTest( "Dream-out", "xml version=\"1.0\"",
 			              doc2.FirstChild()->ToDeclaration()->Value() );
 		XMLTest( "Dream-out", true, doc2.FirstChild()->NextSibling()->ToUnknown() ? true : false );
@@ -408,7 +410,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 				 text->Value() );
 
 		// Now try for a round trip.
-		doc.SaveFile( "resources/utf8testout.xml" );
+		doc.SaveFile( "resources/out/utf8testout.xml" );
 
 		// Check the round trip.
 		int okay = 0;
@@ -541,7 +543,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 #endif
-		FILE* textfile = fopen( "resources/textfile.txt", "w" );
+		FILE* textfile = fopen( "resources/out/textfile.txt", "w" );
 #if defined(_MSC_VER)
 #pragma warning ( pop )
 #endif
@@ -555,7 +557,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 #endif
-		textfile = fopen( "resources/textfile.txt", "r" );
+		textfile = fopen( "resources/out/textfile.txt", "r" );
 #if defined(_MSC_VER)
 #pragma warning ( pop )
 #endif
@@ -624,9 +626,9 @@ int main( int /*argc*/, const char ** /*argv*/ )
 
 		XMLDocument doc;
 		doc.Parse( doctype );
-		doc.SaveFile( "resources/test7.xml" );
+		doc.SaveFile( "resources/out/test7.xml" );
 		doc.DeleteChild( doc.RootElement() );
-		doc.LoadFile( "resources/test7.xml" );
+		doc.LoadFile( "resources/out/test7.xml" );
 		doc.Print();
 		
 		const XMLUnknown* decl = doc.FirstChild()->NextSibling()->ToUnknown();

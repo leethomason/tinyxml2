@@ -1,0 +1,8 @@
+# intermediate files
+Win32/
+x64/
+resources/out/
+*.sdf
+*.suo
+*.opensdf
+*.user
