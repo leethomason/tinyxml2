@@ -1,5 +1,6 @@
 #include "tinyxml2.h"
 
+#include <direct.h>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
@@ -155,7 +156,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 	#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 	#endif
 
-	CreateDirectory( L"resources/out/", NULL );
+	mkdir( "resources/out/" );
 
 	FILE* fp = fopen( "resources/dream.xml", "r" );
 	if ( !fp ) {
@@ -184,14 +185,14 @@ int main( int /*argc*/, const char ** /*argv*/ )
 
 	{
 		static const char* test[] = {	"<element />",
-									    "<element></element>",
+										"<element></element>",
 										"<element><subelement/></element>",
-									    "<element><subelement></subelement></element>",
-									    "<element><subelement><subsub/></subelement></element>",
-									    "<!--comment beside elements--><element><subelement></subelement></element>",
-									    "<!--comment beside elements, this time with spaces-->  \n <element>  <subelement> \n </subelement> </element>",
-									    "<element attrib1='foo' attrib2=\"bar\" ></element>",
-									    "<element attrib1='foo' attrib2=\"bar\" ><subelement attrib3='yeehaa' /></element>",
+										"<element><subelement></subelement></element>",
+										"<element><subelement><subsub/></subelement></element>",
+										"<!--comment beside elements--><element><subelement></subelement></element>",
+										"<!--comment beside elements, this time with spaces-->  \n <element>  <subelement> \n </subelement> </element>",
+										"<element attrib1='foo' attrib2=\"bar\" ></element>",
+										"<element attrib1='foo' attrib2=\"bar\" ><subelement attrib3='yeehaa' /></element>",
 										"<element>Text inside element.</element>",
 										"<element><b></b></element>",
 										"<element>Text inside and <b>bolded</b> in the element.</element>",
@@ -210,10 +211,10 @@ int main( int /*argc*/, const char ** /*argv*/ )
 #if 1
 	{
 		static const char* test = "<!--hello world\n"
-			                      "          line 2\r"
-			                      "          line 3\r\n"
-			                      "          line 4\n\r"
-			                      "          line 5\r-->";
+								  "          line 2\r"
+								  "          line 3\r\n"
+								  "          line 4\n\r"
+								  "          line 5\r-->";
 
 		XMLDocument doc;
 		doc.Parse( test );
@@ -303,24 +304,24 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		doc.PrintError();
 
 		XMLTest( "Dream", "xml version=\"1.0\"",
-			              doc.FirstChild()->ToDeclaration()->Value() );
+						  doc.FirstChild()->ToDeclaration()->Value() );
 		XMLTest( "Dream", true, doc.FirstChild()->NextSibling()->ToUnknown() ? true : false );
 		XMLTest( "Dream", "DOCTYPE PLAY SYSTEM \"play.dtd\"",
 						  doc.FirstChild()->NextSibling()->ToUnknown()->Value() );
 		XMLTest( "Dream", "And Robin shall restore amends.",
-			              doc.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
+						  doc.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
 		XMLTest( "Dream", "And Robin shall restore amends.",
-			              doc.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
+						  doc.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
 
 		XMLDocument doc2;
 		doc2.LoadFile( "resources/out/dreamout.xml" );
 		XMLTest( "Dream-out", "xml version=\"1.0\"",
-			              doc2.FirstChild()->ToDeclaration()->Value() );
+						  doc2.FirstChild()->ToDeclaration()->Value() );
 		XMLTest( "Dream-out", true, doc2.FirstChild()->NextSibling()->ToUnknown() ? true : false );
 		XMLTest( "Dream-out", "DOCTYPE PLAY SYSTEM \"play.dtd\"",
 						  doc2.FirstChild()->NextSibling()->ToUnknown()->Value() );
 		XMLTest( "Dream-out", "And Robin shall restore amends.",
-			              doc2.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
+						  doc2.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
 
 		//gNewTotal = gNew - newStart;
 	}
@@ -593,26 +594,26 @@ int main( int /*argc*/, const char ** /*argv*/ )
 	}
 
 	{
-        const char* test = "<?xml version='1.0'?><a.elem xmi.version='2.0'/>";
+		const char* test = "<?xml version='1.0'?><a.elem xmi.version='2.0'/>";
 
 		XMLDocument doc;
-        doc.Parse( test );
-        XMLTest( "dot in names", doc.Error(), false );
-        XMLTest( "dot in names", doc.FirstChildElement()->Name(), "a.elem" );
-        XMLTest( "dot in names", doc.FirstChildElement()->Attribute( "xmi.version" ), "2.0" );
+		doc.Parse( test );
+		XMLTest( "dot in names", doc.Error(), false );
+		XMLTest( "dot in names", doc.FirstChildElement()->Name(), "a.elem" );
+		XMLTest( "dot in names", doc.FirstChildElement()->Attribute( "xmi.version" ), "2.0" );
 	}
 
 	{
-        const char* test = "<element><Name>1.1 Start easy ignore fin thickness&#xA;</Name></element>";
+		const char* test = "<element><Name>1.1 Start easy ignore fin thickness&#xA;</Name></element>";
 
-        XMLDocument doc;
+		XMLDocument doc;
 		doc.Parse( test );
 
 		XMLText* text = doc.FirstChildElement()->FirstChildElement()->FirstChild()->ToText();
 		XMLTest( "Entity with one digit.",
 				 text->Value(), "1.1 Start easy ignore fin thickness\n",
 				 false );
-    }
+	}
 
 	{
 		// DOCTYPE not preserved (950171)

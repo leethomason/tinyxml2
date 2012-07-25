@@ -1,6 +1,7 @@
 # intermediate files
 Win32/
 x64/
+ipch/
 resources/out/
 *.sdf
 *.suo
