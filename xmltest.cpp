@@ -1,16 +1,18 @@
 #include "tinyxml2.h"
 
-#include <direct.h>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 
 #if defined( _MSC_VER )
+	#include <direct.h>		// _mkdir
 	#include <crtdbg.h>
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 	_CrtMemState startMemState;
 	_CrtMemState endMemState;
+#else
+	#include <sys/stat.h>	// mkdir
 #endif
 
 using namespace tinyxml2;
@@ -156,7 +158,11 @@ int main( int /*argc*/, const char ** /*argv*/ )
 	#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 	#endif
 
-	mkdir( "resources/out/" );
+	#if defined(_MSC_VER)
+		_mkdir( "resources/out/" );
+	#else
+		mkdir( "resources/out/", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	#endif
 
 	FILE* fp = fopen( "resources/dream.xml", "r" );
 	if ( !fp ) {
