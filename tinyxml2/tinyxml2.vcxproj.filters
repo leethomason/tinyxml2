@@ -20,7 +20,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\readme.txt">
+    <None Include="..\readme.md">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
