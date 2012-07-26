@@ -427,7 +427,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 #pragma warning ( push )
 #pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
 #endif
-		FILE* saved  = fopen( "resources/utf8testout.xml", "r" );
+		FILE* saved  = fopen( "resources/out/utf8testout.xml", "r" );
 		FILE* verify = fopen( "resources/utf8testverify.xml", "r" );
 #if defined(_MSC_VER)
 #pragma warning ( pop )
