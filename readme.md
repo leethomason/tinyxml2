@@ -166,7 +166,7 @@ You can directly use the convenience function:
 
 	XMLDocument doc;
 	...
-	doc.Save( "foo.xml" );
+	doc.SaveFile( "foo.xml" );
 
 Or the XMLPrinter class:
 
