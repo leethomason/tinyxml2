@@ -23,10 +23,12 @@ distribution.
 
 #include "tinyxml2.h"
 
-#include <cstdio>
-#include <cstdlib>
-#include <new>
-#include <cstddef>
+#include <new>		// yes, this one new style header, is in the Android SDK.
+#ifdef ANDROID_NDK
+	#include <stddef.h>
+#else
+	#include <cstddef>
+#endif
 
 using namespace tinyxml2;
 
@@ -156,6 +158,31 @@ char* StrPair::ParseName( char* p )
 }
 
 
+void StrPair::CollapseWhitespace()
+{
+	// Trim leading space.
+	start = XMLUtil::SkipWhiteSpace( start );
+
+	if ( start && *start ) {
+		char* p = start;	// the read pointer
+		char* q = start;	// the write pointer
+
+		while( *p ) {
+			if ( XMLUtil::IsWhiteSpace( *p )) {
+				p = XMLUtil::SkipWhiteSpace( p );
+				if ( *p == 0 ) 
+					break;	// don't write to q; this trims the trailing space.
+				*q = ' ';
+				++q;
+			}
+			*q = *p;
+			++q;
+			++p;
+		}
+		*q = 0;
+	}
+}
+
 
 const char* StrPair::GetStr()
 {
@@ -231,6 +258,11 @@ const char* StrPair::GetStr()
 				}
 			}
 			*q = 0;
+		}
+		// The loop below has plenty going on, and this
+		// is a less useful mode. Break it out.
+		if ( flags & COLLAPSE_WHITESPACE ) {
+			CollapseWhitespace();
 		}
 		flags = (flags & NEEDS_DELETE);
 	}
@@ -815,7 +847,11 @@ char* XMLText::ParseDeep( char* p, StrPair* )
 		return p;
 	}
 	else {
-		p = value.ParseText( p, "<", document->ProcessEntities() ? StrPair::TEXT_ELEMENT : StrPair::TEXT_ELEMENT_LEAVE_ENTITIES );
+		int flags = document->ProcessEntities() ? StrPair::TEXT_ELEMENT : StrPair::TEXT_ELEMENT_LEAVE_ENTITIES;
+		if ( document->WhitespaceMode() == COLLAPSE_WHITESPACE )
+			flags |= StrPair::COLLAPSE_WHITESPACE;
+
+		p = value.ParseText( p, "<", flags );
 		if ( !p ) {
 			document->SetError( XML_ERROR_PARSING_TEXT, start, 0 );
 		}
@@ -1416,11 +1452,12 @@ bool XMLElement::Accept( XMLVisitor* visitor ) const
 
 
 // --------- XMLDocument ----------- //
-XMLDocument::XMLDocument( bool _processEntities ) :
+XMLDocument::XMLDocument( bool _processEntities, Whitespace _whitespace ) :
 	XMLNode( 0 ),
 	writeBOM( false ),
 	processEntities( _processEntities ),
 	errorID( 0 ),
+	whitespace( _whitespace ),
 	errorStr1( 0 ),
 	errorStr2( 0 ),
 	charBuffer( 0 )

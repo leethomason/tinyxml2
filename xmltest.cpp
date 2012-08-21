@@ -938,6 +938,25 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLTest( "QueryBoolText", boolValue, true,					false );
 	}
 
+	// ----------- Whitespace ------------
+	{
+		const char* xml = "<element>"
+							"<a> This \nis &apos;  text  &apos; </a>"
+							"<b>  This is &apos; text &apos;  \n</b>"
+							"<c>This  is  &apos;  \n\n text &apos;</c>"
+						  "</element>";
+		XMLDocument doc( true, COLLAPSE_WHITESPACE );
+		doc.Parse( xml );
+
+		const XMLElement* element = doc.FirstChildElement();
+		for( const XMLElement* parent = element->FirstChildElement();
+			 parent;
+			 parent = parent->NextSiblingElement() )
+		{
+			XMLTest( "Whitespace collapse", "This is ' text '", parent->GetText() );
+		}
+	}
+
 	
 	// ----------- Performance tracking --------------
 	{
