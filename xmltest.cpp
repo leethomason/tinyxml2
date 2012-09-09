@@ -965,6 +965,13 @@ int main( int /*argc*/, const char ** /*argv*/ )
 			XMLTest( "Whitespace collapse", "This is ' text '", parent->GetText() );
 		}
 	}
+
+	{
+		const char* xml = "<element>    </element>";
+		XMLDocument doc( true, COLLAPSE_WHITESPACE );
+		doc.Parse( xml );
+		XMLTest( "Whitespace  all space", true, 0 == doc.FirstChildElement()->FirstChild() );
+	}
 	
 	// ----------- Performance tracking --------------
 	{
