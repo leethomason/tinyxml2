@@ -282,7 +282,9 @@ public:
 		if ( !mem ) return;
 		--currentAllocs;
 		Chunk* chunk = (Chunk*)mem;
+#ifdef DEBUG
 		memset( chunk, 0xfe, sizeof(Chunk) );
+#endif
 		chunk->next = root;
 		root = chunk;
 	}
