@@ -296,6 +296,8 @@ int main( int /*argc*/, const char ** /*argv*/ )
 			doc->Print( &streamer );
 			XMLTest( "Compact mode", "<element><sub attrib=\"1\"/><sub/></element>", streamer.CStr(), false );
 		}
+		doc->SaveFile( "./resources/out/pretty.xml" );
+		doc->SaveFile( "./resources/out/compact.xml", true );
 		delete doc;
 	}
 	{
