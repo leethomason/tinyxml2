@@ -940,6 +940,12 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLTest( "QueryBoolText", boolValue, true,					false );
 	}
 
+	{
+		const char* xml = "<element><_sub/><:sub/><sub:sub/><sub-sub/></element>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLTest( "Non-alpha element lead letter parses.", doc.Error(), false );
+	}
 	
 	// ----------- Performance tracking --------------
 	{
