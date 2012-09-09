@@ -95,7 +95,7 @@ distribution.
 
 static const int TIXML2_MAJOR_VERSION = 1;
 static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 6;
+static const int TIXML2_PATCH_VERSION = 7;
 
 namespace tinyxml2
 {
@@ -294,7 +294,9 @@ public:
 		if ( !mem ) return;
 		--currentAllocs;
 		Chunk* chunk = (Chunk*)mem;
+#ifdef DEBUG
 		memset( chunk, 0xfe, sizeof(Chunk) );
+#endif
 		chunk->next = root;
 		root = chunk;
 	}
@@ -1094,7 +1096,7 @@ public:
 		Returns XML_NO_ERROR (0) on success, or
 		an errorID.
 	*/
-	int SaveFile( const char* filename );
+	int SaveFile( const char* filename, bool compact = false );
 
 	/**
 		Save the XML file to disk. You are responsible
@@ -1103,7 +1105,7 @@ public:
 		Returns XML_NO_ERROR (0) on success, or
 		an errorID.
 	*/
-	int SaveFile( FILE* );
+	int SaveFile( FILE* fp, bool compact = false );
 
 	bool ProcessEntities() const		{ return processEntities; }
 	Whitespace WhitespaceMode() const	{ return whitespace; }

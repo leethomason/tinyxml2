@@ -1600,7 +1600,7 @@ int XMLDocument::LoadFile( FILE* fp )
 }
 
 
-int XMLDocument::SaveFile( const char* filename )
+int XMLDocument::SaveFile( const char* filename, bool compact )
 {
 #if defined(_MSC_VER)
 #pragma warning ( push )
@@ -1614,15 +1614,15 @@ int XMLDocument::SaveFile( const char* filename )
 		SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
 		return errorID;
 	}
-	SaveFile(fp);
+	SaveFile(fp, compact);
 	fclose( fp );
 	return errorID;
 }
 
 
-int XMLDocument::SaveFile( FILE* fp )
+int XMLDocument::SaveFile( FILE* fp, bool compact )
 {
-	XMLPrinter stream( fp );
+	XMLPrinter stream( fp, compact );
 	Print( &stream );
 	return errorID;
 }
