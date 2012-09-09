@@ -106,7 +106,7 @@ by the Document. When the Document is deleted, so are all the nodes it contains.
 
 Microsoft has an excellent article on white space: http://msdn.microsoft.com/en-us/library/ms256097.aspx
 
-TinyXML-2 preserves white space in a (hopefully) sane way that is almost complient with the
+By default, TinyXML-2 preserves white space in a (hopefully) sane way that is almost complient with the
 spec.(TinyXML-1 used a completely outdated model.)
 
 As a first step, all newlines / carriage-returns / line-feeds are normalized to a
@@ -133,6 +133,23 @@ valuable. TinyXML-2 sees these as the same XML:
 	</document>
 
 	<document><data>1</data><data>2</data><data>3</data></document>
+
+#### Whitespace Collapse
+
+For some applications, it is preferable to collapse whitespace. TinyXML-2
+supports this with the 'whitespace' parameter to the XMLDocument constructor.
+(The default is to preserve whitespace, as described above.)
+
+However, you may also use COLLAPSE_WHITESPACE, which will:
+
+	* Remove leading and trailing whitespace
+	* Convert newlines and line-feeds into a space character
+	* Collapse a run of any number of space characters into a single space character
+
+This can be useful for text documents stored in XML.
+
+Note that (currently) there is a performance impact for using COLLAPSE_WHITESPACE.
+It essentially causes the XML to be parsed twice.
 
 ### Entities
 
