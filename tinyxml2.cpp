@@ -136,16 +136,12 @@ char* StrPair::ParseName( char* p )
 		return 0;
 	}
 
-	if ( !XMLUtil::IsAlpha( *p ) ) {
-		return 0;
-	}
-
 	while( *p && (
 			   XMLUtil::IsAlphaNum( (unsigned char) *p ) 
 			|| *p == '_'
-			|| *p == '-'
-			|| *p == '.'
-			|| *p == ':' ))
+			|| *p == ':'
+			|| (*p == '-' && p>start )		// can be in a name, but not lead it.
+			|| (*p == '.' && p>start ) ))	// can be in a name, but not lead it.
 	{
 		++p;
 	}
