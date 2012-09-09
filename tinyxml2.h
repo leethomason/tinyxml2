@@ -1077,7 +1077,7 @@ public:
 		Returns XML_NO_ERROR (0) on success, or
 		an errorID.
 	*/
-	int SaveFile( const char* filename );
+	int SaveFile( const char* filename, bool compact = false );
 
 	/**
 		Save the XML file to disk. You are responsible
@@ -1086,7 +1086,7 @@ public:
 		Returns XML_NO_ERROR (0) on success, or
 		an errorID.
 	*/
-	int SaveFile( FILE* );
+	int SaveFile( FILE* fp, bool compact = false );
 
 	bool ProcessEntities() const						{ return processEntities; }
 
