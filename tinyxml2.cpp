@@ -1607,13 +1607,8 @@ int XMLDocument::SaveFile( const char* filename, bool compact )
 	#endif
 		SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
 		return errorID;
-<<<<<<< HEAD
 	}
 	SaveFile(fp, compact);
-=======
-		}
-	SaveFile(fp);
->>>>>>> martell/master
 	fclose( fp );
 	return errorID;
 }
