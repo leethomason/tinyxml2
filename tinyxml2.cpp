@@ -1542,16 +1542,15 @@ int XMLDocument::LoadFile( const char* filename )
 {
 	DeleteChildren();
 	InitDocument();
+	FILE* fp = 0;
 
-#if defined(_MSC_VER)
-#pragma warning ( push )
-#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
-#endif
-	FILE* fp = fopen( filename, "rb" );
-#if defined(_MSC_VER)
-#pragma warning ( pop )
-#endif
-	if ( !fp ) {
+	#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
+		errno_t err = fopen_s(&fp, filename, "rb" );
+		if ( !fp || err) {
+	#else
+		fp = fopen( filename, "rb" );
+		if ( !fp) {
+	#endif
 		SetError( XML_ERROR_FILE_NOT_FOUND, filename, 0 );
 		return errorID;
 	}
@@ -1598,19 +1597,23 @@ int XMLDocument::LoadFile( FILE* fp )
 
 int XMLDocument::SaveFile( const char* filename, bool compact )
 {
-#if defined(_MSC_VER)
-#pragma warning ( push )
-#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
-#endif
-	FILE* fp = fopen( filename, "w" );
-#if defined(_MSC_VER)
-#pragma warning ( pop )
-#endif
-	if ( !fp ) {
+	FILE* fp = 0;
+	#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
+		errno_t err = fopen_s(&fp, filename, "w" );
+		if ( !fp || err) {
+	#else
+		fp = fopen( filename, "rb" );
+		if ( !fp) {
+	#endif
 		SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
 		return errorID;
+<<<<<<< HEAD
 	}
 	SaveFile(fp, compact);
+=======
+		}
+	SaveFile(fp);
+>>>>>>> martell/master
 	fclose( fp );
 	return errorID;
 }
