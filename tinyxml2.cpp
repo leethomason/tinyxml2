@@ -23,11 +23,11 @@ distribution.
 
 #include "tinyxml2.h"
 
-#include <new>		// yes, this one new style header, is in the Android SDK.
+#include <new>      // yes, this one new style header, is in the Android SDK.
 #ifdef ANDROID_NDK
-	#include <stddef.h>
+    #include <stddef.h>
 #else
-	#include <cstddef>
+    #include <cstddef>
 #endif
 
 using namespace tinyxml2;
@@ -148,15 +148,15 @@ char* StrPair::ParseName(char* p)
     }
 
 <<<<<<< HEAD
-	while( *p && (
-			   XMLUtil::IsAlphaNum( (unsigned char) *p ) 
-			|| *p == '_'
-			|| *p == ':'
-			|| (*p == '-' && p>start )		// can be in a name, but not lead it.
-			|| (*p == '.' && p>start ) ))	// can be in a name, but not lead it.
-	{
-		++p;
-	}
+    while( *p && (
+               XMLUtil::IsAlphaNum( (unsigned char) *p )
+            || *p == '_'
+            || *p == ':'
+            || (*p == '-' && p>start )      // can be in a name, but not lead it.
+            || (*p == '.' && p>start ) ))   // can be in a name, but not lead it.
+    {
+        ++p;
+    }
 =======
     if ( !XMLUtil::IsAlpha( *p ) ) {
         return 0;
@@ -190,27 +190,27 @@ char* StrPair::ParseName(char* p)
 
 void StrPair::CollapseWhitespace()
 {
-	// Trim leading space.
-	start = XMLUtil::SkipWhiteSpace( start );
+    // Trim leading space.
+    start = XMLUtil::SkipWhiteSpace( start );
 
-	if ( start && *start ) {
-		char* p = start;	// the read pointer
-		char* q = start;	// the write pointer
+    if ( start && *start ) {
+        char* p = start;    // the read pointer
+        char* q = start;    // the write pointer
 
-		while( *p ) {
-			if ( XMLUtil::IsWhiteSpace( *p )) {
-				p = XMLUtil::SkipWhiteSpace( p );
-				if ( *p == 0 ) 
-					break;	// don't write to q; this trims the trailing space.
-				*q = ' ';
-				++q;
-			}
-			*q = *p;
-			++q;
-			++p;
-		}
-		*q = 0;
-	}
+        while( *p ) {
+            if ( XMLUtil::IsWhiteSpace( *p )) {
+                p = XMLUtil::SkipWhiteSpace( p );
+                if ( *p == 0 )
+                    break;  // don't write to q; this trims the trailing space.
+                *q = ' ';
+                ++q;
+            }
+            *q = *p;
+            ++q;
+            ++p;
+        }
+        *q = 0;
+    }
 }
 
 
@@ -218,87 +218,87 @@ const char* StrPair::GetStr()
 {
 <<<<<<< HEAD
 <<<<<<< HEAD
-	if ( flags & NEEDS_FLUSH ) {
-		*end = 0;
-		flags ^= NEEDS_FLUSH;
+    if ( flags & NEEDS_FLUSH ) {
+        *end = 0;
+        flags ^= NEEDS_FLUSH;
 
-		if ( flags ) {
-			char* p = start;	// the read pointer
-			char* q = start;	// the write pointer
+        if ( flags ) {
+            char* p = start;    // the read pointer
+            char* q = start;    // the write pointer
 
-			while( p < end ) {
-				if ( (flags & NEEDS_NEWLINE_NORMALIZATION) && *p == CR ) {
-					// CR-LF pair becomes LF
-					// CR alone becomes LF
-					// LF-CR becomes LF
-					if ( *(p+1) == LF ) {
-						p += 2;
-					}
-					else {
-						++p;
-					}
-					*q++ = LF;
-				}
-				else if ( (flags & NEEDS_NEWLINE_NORMALIZATION) && *p == LF ) {
-					if ( *(p+1) == CR ) {
-						p += 2;
-					}
-					else {
-						++p;
-					}
-					*q++ = LF;
-				}
-				else if ( (flags & NEEDS_ENTITY_PROCESSING) && *p == '&' ) {
-					// Entities handled by tinyXML2:
-					// - special entities in the entity table [in/out]
-					// - numeric character reference [in]
-					//   &#20013; or &#x4e2d;
+            while( p < end ) {
+                if ( (flags & NEEDS_NEWLINE_NORMALIZATION) && *p == CR ) {
+                    // CR-LF pair becomes LF
+                    // CR alone becomes LF
+                    // LF-CR becomes LF
+                    if ( *(p+1) == LF ) {
+                        p += 2;
+                    }
+                    else {
+                        ++p;
+                    }
+                    *q++ = LF;
+                }
+                else if ( (flags & NEEDS_NEWLINE_NORMALIZATION) && *p == LF ) {
+                    if ( *(p+1) == CR ) {
+                        p += 2;
+                    }
+                    else {
+                        ++p;
+                    }
+                    *q++ = LF;
+                }
+                else if ( (flags & NEEDS_ENTITY_PROCESSING) && *p == '&' ) {
+                    // Entities handled by tinyXML2:
+                    // - special entities in the entity table [in/out]
+                    // - numeric character reference [in]
+                    //   &#20013; or &#x4e2d;
 
-					if ( *(p+1) == '#' ) {
-						char buf[10] = { 0 };
-						int len;
-						p = const_cast<char*>( XMLUtil::GetCharacterRef( p, buf, &len ) );
-						for( int i=0; i<len; ++i ) {
-							*q++ = buf[i];
-						}
-						TIXMLASSERT( q <= p );
-					}
-					else {
-						int i=0;
-						for(; i<NUM_ENTITIES; ++i ) {
-							if (    strncmp( p+1, entities[i].pattern, entities[i].length ) == 0
-								 && *(p+entities[i].length+1) == ';' ) 
-							{
-								// Found an entity convert;
-								*q = entities[i].value;
-								++q;
-								p += entities[i].length + 2;
-								break;
-							}
-						}
-						if ( i == NUM_ENTITIES ) {
-							// fixme: treat as error?
-							++p;
-							++q;
-						}
-					}
-				}
-				else {
-					*q = *p;
-					++p;
-					++q;
-				}
-			}
-			*q = 0;
-		}
-		// The loop below has plenty going on, and this
-		// is a less useful mode. Break it out.
-		if ( flags & COLLAPSE_WHITESPACE ) {
-			CollapseWhitespace();
-		}
-		flags = (flags & NEEDS_DELETE);
-	}
-	return start;
+                    if ( *(p+1) == '#' ) {
+                        char buf[10] = { 0 };
+                        int len;
+                        p = const_cast<char*>( XMLUtil::GetCharacterRef( p, buf, &len ) );
+                        for( int i=0; i<len; ++i ) {
+                            *q++ = buf[i];
+                        }
+                        TIXMLASSERT( q <= p );
+                    }
+                    else {
+                        int i=0;
+                        for(; i<NUM_ENTITIES; ++i ) {
+                            if (    strncmp( p+1, entities[i].pattern, entities[i].length ) == 0
+                                 && *(p+entities[i].length+1) == ';' )
+                            {
+                                // Found an entity convert;
+                                *q = entities[i].value;
+                                ++q;
+                                p += entities[i].length + 2;
+                                break;
+                            }
+                        }
+                        if ( i == NUM_ENTITIES ) {
+                            // fixme: treat as error?
+                            ++p;
+                            ++q;
+                        }
+                    }
+                }
+                else {
+                    *q = *p;
+                    ++p;
+                    ++q;
+                }
+            }
+            *q = 0;
+        }
+        // The loop below has plenty going on, and this
+        // is a less useful mode. Break it out.
+        if ( flags & COLLAPSE_WHITESPACE ) {
+            CollapseWhitespace();
+        }
+        flags = (flags & NEEDS_DELETE);
+    }
+    return start;
 =======
     if ( flags & NEEDS_FLUSH ) {
         *end = 0;
@@ -1133,28 +1133,28 @@ char* XMLNode::ParseDeep(char* p, StrPair* parentEnd)
 char* XMLText::ParseDeep(char* p, StrPair*)
 {
 <<<<<<< HEAD
-	const char* start = p;
-	if ( this->CData() ) {
-		p = value.ParseText( p, "]]>", StrPair::NEEDS_NEWLINE_NORMALIZATION );
-		if ( !p ) {
-			document->SetError( XML_ERROR_PARSING_CDATA, start, 0 );
-		}
-		return p;
-	}
-	else {
-		int flags = document->ProcessEntities() ? StrPair::TEXT_ELEMENT : StrPair::TEXT_ELEMENT_LEAVE_ENTITIES;
-		if ( document->WhitespaceMode() == COLLAPSE_WHITESPACE )
-			flags |= StrPair::COLLAPSE_WHITESPACE;
+    const char* start = p;
+    if ( this->CData() ) {
+        p = value.ParseText( p, "]]>", StrPair::NEEDS_NEWLINE_NORMALIZATION );
+        if ( !p ) {
+            document->SetError( XML_ERROR_PARSING_CDATA, start, 0 );
+        }
+        return p;
+    }
+    else {
+        int flags = document->ProcessEntities() ? StrPair::TEXT_ELEMENT : StrPair::TEXT_ELEMENT_LEAVE_ENTITIES;
+        if ( document->WhitespaceMode() == COLLAPSE_WHITESPACE )
+            flags |= StrPair::COLLAPSE_WHITESPACE;
 
-		p = value.ParseText( p, "<", flags );
-		if ( !p ) {
-			document->SetError( XML_ERROR_PARSING_TEXT, start, 0 );
-		}
-		if ( p && *p ) {
-			return p-1;
-		}
-	}
-	return 0;
+        p = value.ParseText( p, "<", flags );
+        if ( !p ) {
+            document->SetError( XML_ERROR_PARSING_TEXT, start, 0 );
+        }
+        if ( p && *p ) {
+            return p-1;
+        }
+    }
+    return 0;
 =======
     const char* start = p;
 
@@ -1943,14 +1943,14 @@ bool XMLElement::Accept(XMLVisitor* visitor) const
 <<<<<<< HEAD
 <<<<<<< HEAD
 XMLDocument::XMLDocument( bool _processEntities, Whitespace _whitespace ) :
-	XMLNode( 0 ),
-	writeBOM( false ),
-	processEntities( _processEntities ),
-	errorID( 0 ),
-	whitespace( _whitespace ),
-	errorStr1( 0 ),
-	errorStr2( 0 ),
-	charBuffer( 0 )
+    XMLNode( 0 ),
+    writeBOM( false ),
+    processEntities( _processEntities ),
+    errorID( 0 ),
+    whitespace( _whitespace ),
+    errorStr1( 0 ),
+    errorStr2( 0 ),
+    charBuffer( 0 )
 =======
 XMLDocument::XMLDocument( bool _processEntities ) :
     XMLNode( 0 ),
@@ -2059,23 +2059,23 @@ XMLUnknown* XMLDocument::NewUnknown(const char* str)
 int XMLDocument::LoadFile(const char* filename)
 {
 <<<<<<< HEAD
-	DeleteChildren();
-	InitDocument();
-	FILE* fp = 0;
+    DeleteChildren();
+    InitDocument();
+    FILE* fp = 0;
 
-	#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
-		errno_t err = fopen_s(&fp, filename, "rb" );
-		if ( !fp || err) {
-	#else
-		fp = fopen( filename, "rb" );
-		if ( !fp) {
-	#endif
-		SetError( XML_ERROR_FILE_NOT_FOUND, filename, 0 );
-		return errorID;
-	}
-	LoadFile( fp );
-	fclose( fp );
-	return errorID;
+    #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
+        errno_t err = fopen_s(&fp, filename, "rb" );
+        if ( !fp || err) {
+    #else
+        fp = fopen( filename, "rb" );
+        if ( !fp) {
+    #endif
+        SetError( XML_ERROR_FILE_NOT_FOUND, filename, 0 );
+        return errorID;
+    }
+    LoadFile( fp );
+    fclose( fp );
+    return errorID;
 =======
     DeleteChildren();
     InitDocument();
@@ -2150,20 +2150,20 @@ int XMLDocument::LoadFile(FILE* fp)
 int XMLDocument::SaveFile( const char* filename, bool compact )
 {
 <<<<<<< HEAD
-	FILE* fp = 0;
-	#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
-		errno_t err = fopen_s(&fp, filename, "w" );
-		if ( !fp || err) {
-	#else
-		fp = fopen( filename, "rb" );
-		if ( !fp) {
-	#endif
-		SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
-		return errorID;
-	}
-	SaveFile(fp, compact);
-	fclose( fp );
-	return errorID;
+    FILE* fp = 0;
+    #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
+        errno_t err = fopen_s(&fp, filename, "w" );
+        if ( !fp || err) {
+    #else
+        fp = fopen( filename, "rb" );
+        if ( !fp) {
+    #endif
+        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
+        return errorID;
+    }
+    SaveFile(fp, compact);
+    fclose( fp );
+    return errorID;
 =======
 #if defined(_MSC_VER)
 #pragma warning ( push )
@@ -2200,9 +2200,9 @@ int XMLDocument::SaveFile(const char* filename)
 int XMLDocument::SaveFile( FILE* fp, bool compact )
 {
 <<<<<<< HEAD
-	XMLPrinter stream( fp, compact );
-	Print( &stream );
-	return errorID;
+    XMLPrinter stream( fp, compact );
+    Print( &stream );
+    return errorID;
 =======
     XMLPrinter stream( fp );
     Print( &stream );
