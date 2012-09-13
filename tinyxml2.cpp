@@ -142,41 +142,20 @@ char* StrPair::ParseName(char* p)
 {
     char* start = p;
 
-<<<<<<< HEAD
-    if ( !start || !(*start) ) {
-        return 0;
-    }
-
-<<<<<<< HEAD
-    while( *p && (
-               XMLUtil::IsAlphaNum( (unsigned char) *p )
-            || *p == '_'
-            || *p == ':'
-            || (*p == '-' && p>start )      // can be in a name, but not lead it.
-            || (*p == '.' && p>start ) ))   // can be in a name, but not lead it.
-    {
-        ++p;
-    }
-=======
-    if ( !XMLUtil::IsAlpha( *p ) ) {
-        return 0;
-=======
-    if (!start || !(*start) || !XMLUtil::IsAlpha(*p))
+    if (!start || !(*start))
     {
         return nullptr;
->>>>>>> Whitespace and formatting change
     }
 
     while (*p &&
            (XMLUtil::IsAlphaNum((unsigned char)*p)
             || *p == '_'
-            || *p == '-'
-            || *p == '.'
-            || *p == ':'))
+            || *p == ':'
+            || (*p == '-' && p > start)     // can be in a name, but not lead it.
+            || (*p == '.' && p > start)))  // can be in a name, but not lead it.
     {
         ++p;
     }
->>>>>>> Whitespace and working files cleanup
 
     if (p > start)
     {
@@ -188,27 +167,37 @@ char* StrPair::ParseName(char* p)
     return nullptr;
 }
 
+
 void StrPair::CollapseWhitespace()
 {
     // Trim leading space.
-    start = XMLUtil::SkipWhiteSpace( start );
+    _start = XMLUtil::SkipWhiteSpace(_start);
 
-    if ( start && *start ) {
-        char* p = start;    // the read pointer
-        char* q = start;    // the write pointer
+    if (_start && *_start)
+    {
+        char* p = _start;    // the read pointer
+        char* q = _start;    // the write pointer
 
-        while( *p ) {
-            if ( XMLUtil::IsWhiteSpace( *p )) {
-                p = XMLUtil::SkipWhiteSpace( p );
-                if ( *p == 0 )
-                    break;  // don't write to q; this trims the trailing space.
+        while (*p)
+        {
+            if (XMLUtil::IsWhiteSpace(*p))
+            {
+                p = XMLUtil::SkipWhiteSpace(p);
+
+                if (*p == 0)
+                {
+                    break;    // don't write to q; this trims the trailing space.
+                }
+
                 *q = ' ';
                 ++q;
             }
+
             *q = *p;
             ++q;
             ++p;
         }
+
         *q = 0;
     }
 }
@@ -216,99 +205,10 @@ void StrPair::CollapseWhitespace()
 
 const char* StrPair::GetStr()
 {
-<<<<<<< HEAD
-<<<<<<< HEAD
-    if ( flags & NEEDS_FLUSH ) {
-        *end = 0;
-        flags ^= NEEDS_FLUSH;
-
-        if ( flags ) {
-            char* p = start;    // the read pointer
-            char* q = start;    // the write pointer
-
-            while( p < end ) {
-                if ( (flags & NEEDS_NEWLINE_NORMALIZATION) && *p == CR ) {
-                    // CR-LF pair becomes LF
-                    // CR alone becomes LF
-                    // LF-CR becomes LF
-                    if ( *(p+1) == LF ) {
-                        p += 2;
-                    }
-                    else {
-                        ++p;
-                    }
-                    *q++ = LF;
-                }
-                else if ( (flags & NEEDS_NEWLINE_NORMALIZATION) && *p == LF ) {
-                    if ( *(p+1) == CR ) {
-                        p += 2;
-                    }
-                    else {
-                        ++p;
-                    }
-                    *q++ = LF;
-                }
-                else if ( (flags & NEEDS_ENTITY_PROCESSING) && *p == '&' ) {
-                    // Entities handled by tinyXML2:
-                    // - special entities in the entity table [in/out]
-                    // - numeric character reference [in]
-                    //   &#20013; or &#x4e2d;
-
-                    if ( *(p+1) == '#' ) {
-                        char buf[10] = { 0 };
-                        int len;
-                        p = const_cast<char*>( XMLUtil::GetCharacterRef( p, buf, &len ) );
-                        for( int i=0; i<len; ++i ) {
-                            *q++ = buf[i];
-                        }
-                        TIXMLASSERT( q <= p );
-                    }
-                    else {
-                        int i=0;
-                        for(; i<NUM_ENTITIES; ++i ) {
-                            if (    strncmp( p+1, entities[i].pattern, entities[i].length ) == 0
-                                 && *(p+entities[i].length+1) == ';' )
-                            {
-                                // Found an entity convert;
-                                *q = entities[i].value;
-                                ++q;
-                                p += entities[i].length + 2;
-                                break;
-                            }
-                        }
-                        if ( i == NUM_ENTITIES ) {
-                            // fixme: treat as error?
-                            ++p;
-                            ++q;
-                        }
-                    }
-                }
-                else {
-                    *q = *p;
-                    ++p;
-                    ++q;
-                }
-            }
-            *q = 0;
-        }
-        // The loop below has plenty going on, and this
-        // is a less useful mode. Break it out.
-        if ( flags & COLLAPSE_WHITESPACE ) {
-            CollapseWhitespace();
-        }
-        flags = (flags & NEEDS_DELETE);
-    }
-    return start;
-=======
-    if ( flags & NEEDS_FLUSH ) {
-        *end = 0;
-        flags ^= NEEDS_FLUSH;
-=======
     if (_flags & NEEDS_FLUSH)
     {
         *_end = 0;
         _flags ^= NEEDS_FLUSH;
->>>>>>> Whitespace and formatting change
 
         if (_flags)
         {
@@ -357,7 +257,6 @@ const char* StrPair::GetStr()
                     {
                         char buf[10] = { 0 };
                         int len;
-
                         p = const_cast<char*>(XMLUtil::GetCharacterRef(p, buf, &len));
 
                         for (int i = 0; i < len; ++i)
@@ -380,7 +279,6 @@ const char* StrPair::GetStr()
                                 *q = entities[i].value;
                                 ++q;
                                 p += entities[i].length + 2;
-
                                 break;
                             }
                         }
@@ -403,16 +301,15 @@ const char* StrPair::GetStr()
 
             *q = 0;
         }
-<<<<<<< HEAD
-        flags = (flags & NEEDS_DELETE);
-    }
-    return start;
->>>>>>> Whitespace and working files cleanup
-}
-=======
->>>>>>> Whitespace and formatting change
 
-        _flags &= NEEDS_DELETE;
+        // The loop below has plenty going on, and this
+        // is a less useful mode. Break it out.
+        if (_flags & COLLAPSE_WHITESPACE)
+        {
+            CollapseWhitespace();
+        }
+
+        _flags = (_flags & NEEDS_DELETE);
     }
 
     return _start;
@@ -1132,33 +1029,9 @@ char* XMLNode::ParseDeep(char* p, StrPair* parentEnd)
 // --------- XMLText ---------- //
 char* XMLText::ParseDeep(char* p, StrPair*)
 {
-<<<<<<< HEAD
-    const char* start = p;
-    if ( this->CData() ) {
-        p = value.ParseText( p, "]]>", StrPair::NEEDS_NEWLINE_NORMALIZATION );
-        if ( !p ) {
-            document->SetError( XML_ERROR_PARSING_CDATA, start, 0 );
-        }
-        return p;
-    }
-    else {
-        int flags = document->ProcessEntities() ? StrPair::TEXT_ELEMENT : StrPair::TEXT_ELEMENT_LEAVE_ENTITIES;
-        if ( document->WhitespaceMode() == COLLAPSE_WHITESPACE )
-            flags |= StrPair::COLLAPSE_WHITESPACE;
-
-        p = value.ParseText( p, "<", flags );
-        if ( !p ) {
-            document->SetError( XML_ERROR_PARSING_TEXT, start, 0 );
-        }
-        if ( p && *p ) {
-            return p-1;
-        }
-    }
-    return 0;
-=======
     const char* start = p;
 
-    if (CData())
+    if (this->CData())
     {
         p = _value.ParseText(p, "]]>", StrPair::NEEDS_NEWLINE_NORMALIZATION);
 
@@ -1171,7 +1044,14 @@ char* XMLText::ParseDeep(char* p, StrPair*)
     }
     else
     {
-        p = _value.ParseText(p, "<", _document->ProcessEntities() ? StrPair::TEXT_ELEMENT : StrPair::TEXT_ELEMENT_LEAVE_ENTITIES);
+        int flags = _document->ProcessEntities() ? StrPair::TEXT_ELEMENT : StrPair::TEXT_ELEMENT_LEAVE_ENTITIES;
+
+        if (_document->WhitespaceMode() == COLLAPSE_WHITESPACE)
+        {
+            flags |= StrPair::COLLAPSE_WHITESPACE;
+        }
+
+        p = _value.ParseText(p, "<", flags);
 
         if (!p)
         {
@@ -1183,13 +1063,8 @@ char* XMLText::ParseDeep(char* p, StrPair*)
             return p - 1;
         }
     }
-<<<<<<< HEAD
-    return 0;
->>>>>>> Whitespace and working files cleanup
-=======
 
     return nullptr;
->>>>>>> Whitespace and formatting change
 }
 
 
@@ -1707,7 +1582,7 @@ XMLAttribute* XMLElement::FindOrCreateAttribute(const char* name)
 
     if (!attrib)
     {
-        attrib = new (_document->_attributePool.Alloc()) XMLAttribute();
+        attrib = new(_document->_attributePool.Alloc()) XMLAttribute();
         attrib->_memPool = &(_document->_attributePool);
 
         if (last)
@@ -1940,37 +1815,16 @@ bool XMLElement::Accept(XMLVisitor* visitor) const
 
 
 // --------- XMLDocument ----------- //
-<<<<<<< HEAD
-<<<<<<< HEAD
-XMLDocument::XMLDocument( bool _processEntities, Whitespace _whitespace ) :
-    XMLNode( 0 ),
-    writeBOM( false ),
-    processEntities( _processEntities ),
-    errorID( 0 ),
-    whitespace( _whitespace ),
-    errorStr1( 0 ),
-    errorStr2( 0 ),
-    charBuffer( 0 )
-=======
-XMLDocument::XMLDocument( bool _processEntities ) :
-    XMLNode( 0 ),
-    writeBOM( false ),
-    processEntities( _processEntities ),
-    errorID( 0 ),
-    errorStr1( 0 ),
-    errorStr2( 0 ),
-    charBuffer( 0 )
->>>>>>> Whitespace and working files cleanup
-=======
-XMLDocument::XMLDocument(bool processEntities) :
+XMLDocument::XMLDocument(bool processEntities, Whitespace whitespace)
+    :
     XMLNode(0),
     _writeBOM(false),
     _processEntities(processEntities),
     _errorID(0),
-    _errorStr1(0),
-    _errorStr2(0),
-    _charBuffer(0)
->>>>>>> Whitespace and formatting change
+    _whitespace(whitespace),
+    _errorStr1(nullptr),
+    _errorStr2(nullptr),
+    _charBuffer(nullptr)
 {
     _document = this;    // avoid warning about 'this' in initializer list
 }
@@ -2058,25 +1912,6 @@ XMLUnknown* XMLDocument::NewUnknown(const char* str)
 
 int XMLDocument::LoadFile(const char* filename)
 {
-<<<<<<< HEAD
-    DeleteChildren();
-    InitDocument();
-    FILE* fp = 0;
-
-    #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
-        errno_t err = fopen_s(&fp, filename, "rb" );
-        if ( !fp || err) {
-    #else
-        fp = fopen( filename, "rb" );
-        if ( !fp) {
-    #endif
-        SetError( XML_ERROR_FILE_NOT_FOUND, filename, 0 );
-        return errorID;
-    }
-    LoadFile( fp );
-    fclose( fp );
-    return errorID;
-=======
     DeleteChildren();
     InitDocument();
 
@@ -2088,18 +1923,12 @@ int XMLDocument::LoadFile(const char* filename)
 
         return _errorID;
     }
-<<<<<<< HEAD
-    LoadFile( fp );
-    fclose( fp );
-    return errorID;
->>>>>>> Whitespace and working files cleanup
-=======
 
     LoadFile(fp);
+
     fclose(fp);
 
     return _errorID;
->>>>>>> Whitespace and formatting change
 }
 
 
@@ -2146,86 +1975,36 @@ int XMLDocument::LoadFile(FILE* fp)
 }
 
 
-<<<<<<< HEAD
-int XMLDocument::SaveFile( const char* filename, bool compact )
+int XMLDocument::SaveFile(const char* filename, bool compact)
 {
-<<<<<<< HEAD
-    FILE* fp = 0;
-    #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
-        errno_t err = fopen_s(&fp, filename, "w" );
-        if ( !fp || err) {
-    #else
-        fp = fopen( filename, "rb" );
-        if ( !fp) {
-    #endif
-        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
-        return errorID;
-    }
-    SaveFile(fp, compact);
-    fclose( fp );
-    return errorID;
-=======
-#if defined(_MSC_VER)
-#pragma warning ( push )
-#pragma warning ( disable : 4996 )      // Fail to see a compelling reason why this should be deprecated.
-#endif
-    FILE* fp = fopen( filename, "w" );
-#if defined(_MSC_VER)
-#pragma warning ( pop )
-#endif
-    if ( !fp ) {
-        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
-        return errorID;
-=======
-int XMLDocument::SaveFile(const char* filename)
-{
-    FILE* fp = fopen(filename, "w");
+    FILE* fp = fopen(filename, "rb");
 
     if (!fp)
     {
         SetError(XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0);
 
         return _errorID;
->>>>>>> Whitespace and formatting change
     }
 
-    SaveFile(fp);
-<<<<<<< HEAD
-    fclose( fp );
-    return errorID;
->>>>>>> Whitespace and working files cleanup
-}
+    SaveFile(fp, compact);
 
-
-int XMLDocument::SaveFile( FILE* fp, bool compact )
-{
-<<<<<<< HEAD
-    XMLPrinter stream( fp, compact );
-    Print( &stream );
-    return errorID;
-=======
-    XMLPrinter stream( fp );
-    Print( &stream );
-    return errorID;
->>>>>>> Whitespace and working files cleanup
-=======
     fclose(fp);
 
     return _errorID;
 }
 
 
-int XMLDocument::SaveFile(FILE* fp)
+int XMLDocument::SaveFile(FILE* fp, bool compact)
 {
-    XMLPrinter stream(fp);
+    XMLPrinter stream(fp, compact);
+
     Print(&stream);
 
     return _errorID;
->>>>>>> Whitespace and formatting change
 }
 
 
-int XMLDocument::Parse(const char* p)
+int XMLDocument::Parse(const char * p)
 {
     DeleteChildren();
     InitDocument();
@@ -2257,7 +2036,7 @@ int XMLDocument::Parse(const char* p)
 }
 
 
-void XMLDocument::Print(XMLPrinter* streamer)
+void XMLDocument::Print(XMLPrinter * streamer)
 {
     XMLPrinter stdStreamer(stdout);
 
@@ -2270,7 +2049,7 @@ void XMLDocument::Print(XMLPrinter* streamer)
 }
 
 
-void XMLDocument::SetError(int error, const char* str1, const char* str2)
+void XMLDocument::SetError(int error, const char * str1, const char * str2)
 {
     _errorID = error;
     _errorStr1 = str1;
@@ -2302,7 +2081,7 @@ void XMLDocument::PrintError() const
 }
 
 
-XMLPrinter::XMLPrinter(FILE* file, bool compact)
+XMLPrinter::XMLPrinter(FILE * file, bool compact)
     :
     _elementJustOpened(false),
     _firstElement(true),
@@ -2335,7 +2114,7 @@ XMLPrinter::XMLPrinter(FILE* file, bool compact)
 }
 
 
-void XMLPrinter::Print(const char* format, ...)
+void XMLPrinter::Print(const char * format, ...)
 {
     va_list va;
     va_start(va, format);
@@ -2388,7 +2167,7 @@ void XMLPrinter::PrintSpace(int depth)
 }
 
 
-void XMLPrinter::PrintString(const char* p, bool restricted)
+void XMLPrinter::PrintString(const char * p, bool restricted)
 {
     // Look for runs of bytes between entities to print.
     const char* q = p;
@@ -2454,7 +2233,7 @@ void XMLPrinter::PushHeader(bool writeBOM, bool writeDec)
 }
 
 
-void XMLPrinter::OpenElement(const char* name)
+void XMLPrinter::OpenElement(const char * name)
 {
     if (_elementJustOpened)
     {
@@ -2476,7 +2255,7 @@ void XMLPrinter::OpenElement(const char* name)
 }
 
 
-void XMLPrinter::PushAttribute(const char* name, const char* value)
+void XMLPrinter::PushAttribute(const char * name, const char * value)
 {
     TIXMLASSERT(_elementJustOpened);
     Print(" %s=\"", name);
@@ -2485,7 +2264,7 @@ void XMLPrinter::PushAttribute(const char* name, const char* value)
 }
 
 
-void XMLPrinter::PushAttribute(const char* name, int v)
+void XMLPrinter::PushAttribute(const char * name, int v)
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr(v, buf, BUF_SIZE);
@@ -2493,7 +2272,7 @@ void XMLPrinter::PushAttribute(const char* name, int v)
 }
 
 
-void XMLPrinter::PushAttribute(const char* name, unsigned v)
+void XMLPrinter::PushAttribute(const char * name, unsigned v)
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr(v, buf, BUF_SIZE);
@@ -2501,7 +2280,7 @@ void XMLPrinter::PushAttribute(const char* name, unsigned v)
 }
 
 
-void XMLPrinter::PushAttribute(const char* name, bool v)
+void XMLPrinter::PushAttribute(const char * name, bool v)
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr(v, buf, BUF_SIZE);
@@ -2509,7 +2288,7 @@ void XMLPrinter::PushAttribute(const char* name, bool v)
 }
 
 
-void XMLPrinter::PushAttribute(const char* name, double v)
+void XMLPrinter::PushAttribute(const char * name, double v)
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr(v, buf, BUF_SIZE);
@@ -2558,7 +2337,7 @@ void XMLPrinter::SealElement()
 }
 
 
-void XMLPrinter::PushText(const char* text, bool cdata)
+void XMLPrinter::PushText(const char * text, bool cdata)
 {
     _textDepth = _depth - 1;
 
@@ -2578,6 +2357,7 @@ void XMLPrinter::PushText(const char* text, bool cdata)
         PrintString(text, true);
     }
 }
+
 
 void XMLPrinter::PushText(int value)
 {
@@ -2619,7 +2399,7 @@ void XMLPrinter::PushText(double value)
 }
 
 
-void XMLPrinter::PushComment(const char* comment)
+void XMLPrinter::PushComment(const char * comment)
 {
     if (_elementJustOpened)
     {
@@ -2638,7 +2418,7 @@ void XMLPrinter::PushComment(const char* comment)
 }
 
 
-void XMLPrinter::PushDeclaration(const char* value)
+void XMLPrinter::PushDeclaration(const char * value)
 {
     if (_elementJustOpened)
     {
@@ -2657,7 +2437,7 @@ void XMLPrinter::PushDeclaration(const char* value)
 }
 
 
-void XMLPrinter::PushUnknown(const char* value)
+void XMLPrinter::PushUnknown(const char * value)
 {
     if (_elementJustOpened)
     {
@@ -2675,7 +2455,7 @@ void XMLPrinter::PushUnknown(const char* value)
 }
 
 
-bool XMLPrinter::VisitEnter(const XMLDocument& doc)
+bool XMLPrinter::VisitEnter(const XMLDocument & doc)
 {
     _processEntities = doc.ProcessEntities();
 
@@ -2688,7 +2468,7 @@ bool XMLPrinter::VisitEnter(const XMLDocument& doc)
 }
 
 
-bool XMLPrinter::VisitEnter(const XMLElement& element, const XMLAttribute* attribute)
+bool XMLPrinter::VisitEnter(const XMLElement & element, const XMLAttribute * attribute)
 {
     OpenElement(element.Name());
 
@@ -2705,32 +2485,37 @@ bool XMLPrinter::VisitEnter(const XMLElement& element, const XMLAttribute* attri
 bool XMLPrinter::VisitExit(const XMLElement&)
 {
     CloseElement();
+
     return true;
 }
 
 
-bool XMLPrinter::Visit(const XMLText& text)
+bool XMLPrinter::Visit(const XMLText & text)
 {
     PushText(text.Value(), text.CData());
+
     return true;
 }
 
 
-bool XMLPrinter::Visit(const XMLComment& comment)
+bool XMLPrinter::Visit(const XMLComment & comment)
 {
     PushComment(comment.Value());
+
     return true;
 }
 
-bool XMLPrinter::Visit(const XMLDeclaration& declaration)
+bool XMLPrinter::Visit(const XMLDeclaration & declaration)
 {
     PushDeclaration(declaration.Value());
+
     return true;
 }
 
 
-bool XMLPrinter::Visit(const XMLUnknown& unknown)
+bool XMLPrinter::Visit(const XMLUnknown & unknown)
 {
     PushUnknown(unknown.Value());
+
     return true;
 }

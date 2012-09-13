@@ -56,13 +56,13 @@ distribution.
 
 #if defined(DEBUG)
     #if defined(_MSC_VER)
-        #define TIXMLASSERT(x) if (!(x)) { __debugbreak(); } //if ( !(x)) WinDebugBreak()
+        #define TIXMLASSERT(x) if (!(x)) { __debugbreak(); } //if (!(x)) WinDebugBreak()
     #elif defined (ANDROID_NDK)
         #include <android/log.h>
         #define TIXMLASSERT(x) if (!(x)) { __android_log_assert( "assert", "grinliz", "ASSERT in '%s' at %d.", __FILE__, __LINE__ ); }
     #else
-        #include <assert.h>
-        #define TIXMLASSERT                assert
+         #include <assert.h>
+         #define TIXMLASSERT assert
     #endif
 #else
     #define TIXMLASSERT(x) { }
@@ -71,14 +71,13 @@ distribution.
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
     // Microsoft visual studio, version 2005 and higher.
-    /* int _snprintf_s(
+    /*int _snprintf_s(
        char *buffer,
        size_t sizeOfBuffer,
        size_t count,
        const char *format [,
           argument] ...
-       ); */
-
+    );*/
     inline int TIXML_SNPRINTF(char* buffer, size_t size, const char* format, ...)
     {
         va_list va;
@@ -89,10 +88,10 @@ distribution.
         return result;
     }
 
-    #define TIXML_SSCANF sscanf_s
+    #define TIXML_SSCANF   sscanf_s
 #else
     // GCC version 3 and higher
-    // #warning( "Using sn* functions." )
+    //#warning( "Using sn* functions." )
     #define TIXML_SNPRINTF snprintf
     #define TIXML_SSCANF   sscanf
 #endif
@@ -125,58 +124,27 @@ namespace tinyxml2
     public:
         enum
         {
-            NEEDS_ENTITY_PROCESSING        = 0x01,
-            NEEDS_NEWLINE_NORMALIZATION    = 0x02,
+            NEEDS_ENTITY_PROCESSING         = 0x01,
+            NEEDS_NEWLINE_NORMALIZATION     = 0x02,
+            COLLAPSE_WHITESPACE             = 0x04,
 
-            TEXT_ELEMENT                   = NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
-            TEXT_ELEMENT_LEAVE_ENTITIES    = NEEDS_NEWLINE_NORMALIZATION,
-            ATTRIBUTE_NAME                 = 0,
-            ATTRIBUTE_VALUE                = NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
-            ATTRIBUTE_VALUE_LEAVE_ENTITIES = NEEDS_NEWLINE_NORMALIZATION,
-            COMMENT                        = NEEDS_NEWLINE_NORMALIZATION
+            TEXT_ELEMENT        = NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
+            TEXT_ELEMENT_LEAVE_ENTITIES     = NEEDS_NEWLINE_NORMALIZATION,
+            ATTRIBUTE_NAME      = 0,
+            ATTRIBUTE_VALUE     = NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
+            ATTRIBUTE_VALUE_LEAVE_ENTITIES      = NEEDS_NEWLINE_NORMALIZATION,
+            COMMENT             = NEEDS_NEWLINE_NORMALIZATION
         };
 
-        StrPair()
-            : _flags(0), _start(0), _end(0)
+        StrPair() : _flags(0), _start(0), _end(0)
         {
         }
 
         ~StrPair();
 
-<<<<<<< HEAD
-/*
-    A class that wraps strings. Normally stores the start and end
-    pointers into the XML file itself, and will apply normalization
-    and entity translation if actually read. Can also store (and memory
-    manage) a traditional char[]
-*/
-class StrPair
-{
-public:
-<<<<<<< HEAD
-    enum {
-        NEEDS_ENTITY_PROCESSING         = 0x01,
-        NEEDS_NEWLINE_NORMALIZATION     = 0x02,
-        COLLAPSE_WHITESPACE             = 0x04,
-=======
-    enum {
-        NEEDS_ENTITY_PROCESSING         = 0x01,
-        NEEDS_NEWLINE_NORMALIZATION     = 0x02,
->>>>>>> Whitespace and working files cleanup
-
-        TEXT_ELEMENT        = NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
-        TEXT_ELEMENT_LEAVE_ENTITIES     = NEEDS_NEWLINE_NORMALIZATION,
-        ATTRIBUTE_NAME      = 0,
-        ATTRIBUTE_VALUE     = NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
-        ATTRIBUTE_VALUE_LEAVE_ENTITIES      = NEEDS_NEWLINE_NORMALIZATION,
-        COMMENT             = NEEDS_NEWLINE_NORMALIZATION
-    };
-=======
         void Set(char* start, char* end, int flags)
         {
             Reset();
->>>>>>> Whitespace and formatting change
-
             _start = start;
             _end = end;
             _flags = flags | NEEDS_FLUSH;
@@ -192,27 +160,17 @@ public:
         void SetInternedStr(const char* str)
         {
             Reset();
-
             _start = const_cast<char*>(str);
         }
 
-<<<<<<< HEAD
-private:
-<<<<<<< HEAD
-    void Reset();
-    void CollapseWhitespace();
-=======
-    void Reset();
->>>>>>> Whitespace and working files cleanup
-=======
         void SetStr(const char* str, int flags = 0);
->>>>>>> Whitespace and formatting change
 
         char* ParseText(char* in, const char* endTag, int strFlags);
         char* ParseName(char* in);
 
     private:
         void Reset();
+        void CollapseWhitespace();
 
         enum
         {
@@ -271,72 +229,10 @@ private:
             return _mem[--_size];
         }
 
-<<<<<<< HEAD
-/*
-    Template child class to create pools of the correct type.
-*/
-template< int SIZE >
-class MemPoolT : public MemPool
-{
-public:
-<<<<<<< HEAD
-    MemPoolT() : root(0), currentAllocs(0), nAllocs(0), maxAllocs(0)    {}
-    ~MemPoolT() {
-        // Delete the blocks.
-        for( int i=0; i<blockPtrs.Size(); ++i ) {
-            delete blockPtrs[i];
-        }
-    }
-
-    virtual int ItemSize() const    { return SIZE; }
-    int CurrentAllocs() const       { return currentAllocs; }
-
-    virtual void* Alloc() {
-        if ( !root ) {
-            // Need a new block.
-            Block* block = new Block();
-            blockPtrs.Push( block );
-
-            for( int i=0; i<COUNT-1; ++i ) {
-                block->chunk[i].next = &block->chunk[i+1];
-            }
-            block->chunk[COUNT-1].next = 0;
-            root = block->chunk;
-        }
-        void* result = root;
-        root = root->next;
-
-        ++currentAllocs;
-        if ( currentAllocs > maxAllocs ) maxAllocs = currentAllocs;
-        nAllocs++;
-        return result;
-    }
-    virtual void Free( void* mem ) {
-        if ( !mem ) return;
-        --currentAllocs;
-        Chunk* chunk = (Chunk*)mem;
-#ifdef DEBUG
-        memset( chunk, 0xfe, sizeof(Chunk) );
-#endif
-        chunk->next = root;
-        root = chunk;
-    }
-    void Trace( const char* name ) {
-        printf( "Mempool %s watermark=%d [%dk] current=%d size=%d nAlloc=%d blocks=%d\n",
-                 name, maxAllocs, maxAllocs*SIZE/1024, currentAllocs, SIZE, nAllocs, blockPtrs.Size() );
-    }
-=======
-    MemPoolT() : root(0), currentAllocs(0), nAllocs(0), maxAllocs(0)    {}
-    ~MemPoolT() {
-        // Delete the blocks.
-        for( int i=0; i<blockPtrs.Size(); ++i ) {
-            delete blockPtrs[i];
-=======
         void PopArr(int count)
         {
             TIXMLASSERT(_size >= count);
             _size -= count;
->>>>>>> Whitespace and formatting change
         }
 
         bool Empty() const
@@ -351,42 +247,9 @@ public:
             return _mem[i];
         }
 
-<<<<<<< HEAD
-        ++currentAllocs;
-        if ( currentAllocs > maxAllocs ) maxAllocs = currentAllocs;
-        nAllocs++;
-        return result;
-    }
-    virtual void Free( void* mem ) {
-        if ( !mem ) return;
-        --currentAllocs;
-        Chunk* chunk = (Chunk*)mem;
-        memset( chunk, 0xfe, sizeof(Chunk) );
-        chunk->next = root;
-        root = chunk;
-    }
-    void Trace( const char* name ) {
-        printf( "Mempool %s watermark=%d [%dk] current=%d size=%d nAlloc=%d blocks=%d\n",
-                 name, maxAllocs, maxAllocs*SIZE/1024, currentAllocs, SIZE, nAllocs, blockPtrs.Size() );
-    }
->>>>>>> Whitespace and working files cleanup
-
-private:
-    enum { COUNT = 1024/SIZE };
-    union Chunk {
-        Chunk* next;
-        char mem[SIZE];
-    };
-    struct Block {
-        Chunk chunk[COUNT];
-    };
-    DynArray< Block*, 10 > blockPtrs;
-    Chunk* root;
-=======
         const T& operator[](int i) const
         {
             TIXMLASSERT(i >= 0 && i < _size);
->>>>>>> Whitespace and formatting change
 
             return _mem[i];
         }
@@ -418,7 +281,7 @@ private:
             {
                 int newAllocated = cap * 2;
                 T* newMem = new T[newAllocated];
-                memcpy(newMem, _mem, sizeof(T) * _size);  // warning: not using constructors, only works for PODs
+                memcpy(newMem, _mem, sizeof(T) * _size);    // warning: not using constructors, only works for PODs
 
                 if (_mem != _pool)
                 {
@@ -437,165 +300,9 @@ private:
     };
 
 
-<<<<<<< HEAD
-/*
-    Utility functionality.
-*/
-class XMLUtil
-{
-public:
-<<<<<<< HEAD
-    // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
-    // correct, but simple, and usually works.
-    static const char* SkipWhiteSpace( const char* p )  { while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<const unsigned char*>(p) ) ) { ++p; } return p; }
-    static char* SkipWhiteSpace( char* p )              { while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<unsigned char*>(p) ) )       { ++p; } return p; }
-    static bool IsWhiteSpace( char p )                  { return !IsUTF8Continuation(p) && isspace( static_cast<unsigned char>(p) ); }
-
-    inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
-        int n = 0;
-        if ( p == q ) {
-            return true;
-        }
-        while( *p && *q && *p == *q && n<nChar ) {
-            ++p; ++q; ++n;
-        }
-        if ( (n == nChar) || ( *p == 0 && *q == 0 ) ) {
-            return true;
-        }
-        return false;
-    }
-    inline static int IsUTF8Continuation( const char p ) { return p & 0x80; }
-    inline static int IsAlphaNum( unsigned char anyByte )   { return ( anyByte < 128 ) ? isalnum( anyByte ) : 1; }
-    inline static int IsAlpha( unsigned char anyByte )      { return ( anyByte < 128 ) ? isalpha( anyByte ) : 1; }
-
-    static const char* ReadBOM( const char* p, bool* hasBOM );
-    // p is the starting location,
-    // the UTF-8 value of the entity will be placed in value, and length filled in.
-    static const char* GetCharacterRef( const char* p, char* value, int* length );
-    static void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
-
-    // converts primitive types to strings
-    static void ToStr( int v, char* buffer, int bufferSize );
-    static void ToStr( unsigned v, char* buffer, int bufferSize );
-    static void ToStr( bool v, char* buffer, int bufferSize );
-    static void ToStr( float v, char* buffer, int bufferSize );
-    static void ToStr( double v, char* buffer, int bufferSize );
-
-    // converts strings to primitive types
-    static bool ToInt( const char* str, int* value );
-    static bool ToUnsigned( const char* str, unsigned* value );
-    static bool ToBool( const char* str, bool* value );
-    static bool ToFloat( const char* str, float* value );
-    static bool ToDouble( const char* str, double* value );
-=======
-    // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
-    // correct, but simple, and usually works.
-    static const char* SkipWhiteSpace( const char* p )  { while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<const unsigned char*>(p) ) ) { ++p; } return p; }
-    static char* SkipWhiteSpace( char* p )              { while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<unsigned char*>(p) ) )       { ++p; } return p; }
-
-    inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
-        int n = 0;
-        if ( p == q ) {
-            return true;
-        }
-        while( *p && *q && *p == *q && n<nChar ) {
-            ++p; ++q; ++n;
-        }
-        if ( (n == nChar) || ( *p == 0 && *q == 0 ) ) {
-            return true;
-        }
-        return false;
-    }
-    inline static int IsUTF8Continuation( const char p ) { return p & 0x80; }
-    inline static int IsAlphaNum( unsigned char anyByte )   { return ( anyByte < 128 ) ? isalnum( anyByte ) : 1; }
-    inline static int IsAlpha( unsigned char anyByte )      { return ( anyByte < 128 ) ? isalpha( anyByte ) : 1; }
-
-    static const char* ReadBOM( const char* p, bool* hasBOM );
-    // p is the starting location,
-    // the UTF-8 value of the entity will be placed in value, and length filled in.
-    static const char* GetCharacterRef( const char* p, char* value, int* length );
-    static void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
-
-    // converts primitive types to strings
-    static void ToStr( int v, char* buffer, int bufferSize );
-    static void ToStr( unsigned v, char* buffer, int bufferSize );
-    static void ToStr( bool v, char* buffer, int bufferSize );
-    static void ToStr( float v, char* buffer, int bufferSize );
-    static void ToStr( double v, char* buffer, int bufferSize );
-
-    // converts strings to primitive types
-    static bool ToInt( const char* str, int* value );
-    static bool ToUnsigned( const char* str, unsigned* value );
-    static bool ToBool( const char* str, bool* value );
-    static bool ToFloat( const char* str, float* value );
-    static bool ToDouble( const char* str, double* value );
->>>>>>> Whitespace and working files cleanup
-};
-
-
-/** XMLNode is a base class for every object that is in the
-    XML Document Object Model (DOM), except XMLAttributes.
-    Nodes have siblings, a parent, and children which can
-    be navigated. A node is always in a XMLDocument.
-    The type of a XMLNode can be queried, and it can
-    be cast to its more defined type.
-
-    A XMLDocument allocates memory for all its Nodes.
-    When the XMLDocument gets deleted, all its Nodes
-    will also be deleted.
-
-    @verbatim
-    A Document can contain: Element (container or leaf)
-                            Comment (leaf)
-                            Unknown (leaf)
-                            Declaration( leaf )
-
-    An Element can contain: Element (container or leaf)
-                            Text    (leaf)
-                            Attributes (not on tree)
-                            Comment (leaf)
-                            Unknown (leaf)
-
-    @endverbatim
-*/
-class XMLNode
-{
-    friend class XMLDocument;
-    friend class XMLElement;
-public:
-
-    /// Get the XMLDocument that owns this XMLNode.
-    const XMLDocument* GetDocument() const  { return document; }
-    /// Get the XMLDocument that owns this XMLNode.
-    XMLDocument* GetDocument()              { return document; }
-
-    virtual XMLElement*     ToElement()     { return 0; }   ///< Safely cast to an Element, or null.
-    virtual XMLText*        ToText()        { return 0; }   ///< Safely cast to Text, or null.
-    virtual XMLComment*     ToComment()     { return 0; }   ///< Safely cast to a Comment, or null.
-    virtual XMLDocument*    ToDocument()    { return 0; }   ///< Safely cast to a Document, or null.
-    virtual XMLDeclaration* ToDeclaration() { return 0; }   ///< Safely cast to a Declaration, or null.
-    virtual XMLUnknown*     ToUnknown()     { return 0; }   ///< Safely cast to an Unknown, or null.
-
-    virtual const XMLElement*       ToElement() const       { return 0; }
-    virtual const XMLText*          ToText() const          { return 0; }
-    virtual const XMLComment*       ToComment() const       { return 0; }
-    virtual const XMLDocument*      ToDocument() const      { return 0; }
-    virtual const XMLDeclaration*   ToDeclaration() const   { return 0; }
-    virtual const XMLUnknown*       ToUnknown() const       { return 0; }
-
-    /** The meaning of 'value' changes for the specific type.
-        @verbatim
-        Document:   empty
-        Element:    name of the element
-        Comment:    the comment text
-        Unknown:    the tag contents
-        Text:       the text string
-        @endverbatim
-=======
     /*
         Parent virtual class of a pool for fast allocation
         and deallocation of objects.
->>>>>>> Whitespace and formatting change
     */
     class MemPool
     {
@@ -616,8 +323,7 @@ public:
     class MemPoolT : public MemPool
     {
     public:
-        MemPoolT()
-            : _root(0), _currentAllocs(0), _nAllocs(0), _maxAllocs(0)
+        MemPoolT() : _root(0), _currentAllocs(0), _nAllocs(0), _maxAllocs(0)
         {
         }
 
@@ -681,7 +387,9 @@ public:
 
             --_currentAllocs;
             Chunk* chunk = (Chunk*)mem;
+#ifdef DEBUG
             memset(chunk, 0xfe, sizeof(Chunk));
+#endif
             chunk->next = _root;
             _root = chunk;
         }
@@ -707,7 +415,6 @@ public:
         };
 
         DynArray<Block*, 10> _blockPtrs;
-
         Chunk* _root;
 
         int _currentAllocs;
@@ -738,7 +445,9 @@ public:
     class XMLVisitor
     {
     public:
-        virtual ~XMLVisitor() {}
+        virtual ~XMLVisitor()
+        {
+        }
 
         /// Visit a document.
         virtual bool VisitEnter(const XMLDocument& /*doc*/)
@@ -816,6 +525,11 @@ public:
             }
 
             return p;
+        }
+
+        static bool IsWhiteSpace(char p)
+        {
+            return !IsUTF8Continuation(p) && isspace(static_cast<unsigned char>(p));
         }
 
         inline static bool StringEqual(const char* p, const char* q, int nChar = INT_MAX)
@@ -1033,7 +747,7 @@ public:
         /** Get the first child element, or optionally the first child
             element with the specified name.
         */
-        const XMLElement* FirstChildElement(const char* value = 0) const;
+        const XMLElement* FirstChildElement(const char* value = nullptr) const;
 
         XMLElement* FirstChildElement(const char* value = 0)
         {
@@ -1054,9 +768,9 @@ public:
         /** Get the last child element or optionally the last child
             element with the specified name.
         */
-        const XMLElement* LastChildElement(const char* value = 0) const;
+        const XMLElement* LastChildElement(const char* value = nullptr) const;
 
-        XMLElement* LastChildElement(const char* value = 0)
+        XMLElement* LastChildElement(const char* value = nullptr)
         {
             return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(value));
         }
@@ -1073,9 +787,9 @@ public:
         }
 
         /// Get the previous (left) sibling element of this node, with an opitionally supplied name.
-        const XMLElement* PreviousSiblingElement(const char* value = 0) const;
+        const XMLElement* PreviousSiblingElement(const char* value = nullptr) const ;
 
-        XMLElement* PreviousSiblingElement(const char* value = 0)
+        XMLElement* PreviousSiblingElement(const char* value = nullptr)
         {
             return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement(value));
         }
@@ -1092,9 +806,9 @@ public:
         }
 
         /// Get the next (right) sibling element of this node, with an opitionally supplied name.
-        const XMLElement* NextSiblingElement(const char* value = 0) const;
+        const XMLElement* NextSiblingElement(const char* value = nullptr) const;
 
-        XMLElement* NextSiblingElement(const char* value = 0)
+        XMLElement* NextSiblingElement(const char* value = nullptr)
         {
             return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement(value));
         }
@@ -1193,6 +907,7 @@ public:
 
     private:
         MemPool*        _memPool;
+
         void Unlink(XMLNode* child);
     };
 
@@ -1213,7 +928,6 @@ public:
     {
         friend class XMLBase;
         friend class XMLDocument;
-
     public:
         virtual bool Accept(XMLVisitor* visitor) const;
 
@@ -1230,7 +944,7 @@ public:
         /// Declare whether this should be CDATA or standard text.
         void SetCData(bool isCData)
         {
-            this->_isCData = isCData;
+            _isCData = isCData;
         }
 
         /// Returns true if this is a CDATA text element.
@@ -1244,7 +958,9 @@ public:
         virtual bool ShallowEqual(const XMLNode* compare) const;
 
     protected:
-        XMLText(XMLDocument* doc) : XMLNode(doc), _isCData(false)
+        XMLText(XMLDocument* doc)
+            : XMLNode(doc),
+              _isCData(false)
         {
         }
 
@@ -1340,7 +1056,6 @@ public:
     class XMLUnknown : public XMLNode
     {
         friend class XMLDocument;
-
     public:
         virtual XMLUnknown* ToUnknown()
         {
@@ -1408,17 +1123,17 @@ public:
     public:
         const char* Name() const
         {
-            return _name.GetStr(); ///< The name of the attribute.
+            return _name.GetStr();    ///< The name of the attribute.
         }
 
         const char* Value() const
         {
-            return _value.GetStr(); ///< The value of the attribute.
+            return _value.GetStr();    ///< The value of the attribute.
         }
 
         const XMLAttribute* Next() const
         {
-            return _next; ///< The next attribute in the list.
+            return _next;    ///< The next attribute in the list.
         }
 
         /** IntAttribute interprets the attribute as an integer, and returns the value.
@@ -1508,7 +1223,7 @@ public:
     private:
         enum { BUF_SIZE = 200 };
 
-        XMLAttribute() : _next(0)
+        XMLAttribute() : _next(nullptr)
         {
         }
 
@@ -1563,7 +1278,6 @@ public:
 
         virtual bool Accept(XMLVisitor* visitor) const;
 
-
         /** Given an attribute name, Attribute() returns the value
             for the attribute of that name, or null if none
             exists. For example:
@@ -1587,8 +1301,7 @@ public:
             }
             @endverbatim
         */
-        const char* Attribute(const char* name, const char* value = 0) const;
-
+        const char* Attribute(const char* name, const char* value = nullptr) const;
 
         /** Given an attribute name, IntAttribute() returns the value
             of the attribute interpreted as an integer. 0 will be
@@ -1849,9 +1562,7 @@ public:
         }
 
         char* ParseDeep(char* p, StrPair* endTag);
-
         virtual XMLNode* ShallowClone(XMLDocument* document) const;
-
         virtual bool ShallowEqual(const XMLNode* compare) const;
 
     private:
@@ -1862,7 +1573,6 @@ public:
 
         XMLAttribute* FindAttribute(const char* name);
         XMLAttribute* FindOrCreateAttribute(const char* name);
-
         //void LinkAttribute( XMLAttribute* attrib );
         char* ParseAttributes(char* p);
 
@@ -1872,6 +1582,13 @@ public:
         // because the list needs to be scanned for dupes before adding
         // a new attribute.
         XMLAttribute* _rootAttribute;
+    };
+
+
+    enum Whitespace
+    {
+        PRESERVE_WHITESPACE,
+        COLLAPSE_WHITESPACE
     };
 
 
@@ -1885,7 +1602,7 @@ public:
         friend class XMLElement;
     public:
         /// constructor
-        XMLDocument(bool processEntities = true);
+        XMLDocument(bool processEntities = true, Whitespace whitespace = PRESERVE_WHITESPACE);
         ~XMLDocument();
 
         virtual XMLDocument* ToDocument()
@@ -1926,7 +1643,7 @@ public:
             Returns XML_NO_ERROR (0) on success, or
             an errorID.
         */
-        int SaveFile(const char* filename);
+        int SaveFile(const char* filename, bool compact = false);
 
         /**
             Save the XML file to disk. You are responsible
@@ -1935,11 +1652,16 @@ public:
             Returns XML_NO_ERROR (0) on success, or
             an errorID.
         */
-        int SaveFile(FILE*);
+        int SaveFile(FILE* fp, bool compact = false);
 
         bool ProcessEntities() const
         {
             return _processEntities;
+        }
+
+        Whitespace WhitespaceMode() const
+        {
+            return _whitespace;
         }
 
         /**
@@ -2007,8 +1729,8 @@ public:
             this Document. The memory for the Text
             is managed by the Document.
         */
-
         XMLText* NewText(const char* text);
+
         /**
             Create a new Declaration associated with
             this Document. The memory for the object
@@ -2020,7 +1742,6 @@ public:
                 <?xml version="1.0" encoding="UTF-8"?>
             @endverbatim
         */
-
         XMLDeclaration* NewDeclaration(const char* text = 0);
 
         /**
@@ -2048,7 +1769,7 @@ public:
         }
 
         /// Return the errorID.
-        int ErrorID() const
+        int  ErrorID() const
         {
             return _errorID;
         }
@@ -2089,6 +1810,7 @@ public:
         bool _writeBOM;
         bool _processEntities;
         int _errorID;
+        Whitespace _whitespace;
         const char* _errorStr1;
         const char* _errorStr2;
         char* _charBuffer;
@@ -2159,325 +1881,97 @@ public:
     {
     public:
         /// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
-        XMLHandle(XMLNode* node)
+        XMLHandle(XMLNode* _node)
         {
-            _node = node;
+            node = _node;
         }
-
         /// Create a handle from a node.
-        XMLHandle(XMLNode& node)
+        XMLHandle(XMLNode& _node)
         {
-            _node = &node;
+            node = &_node;
         }
-
         /// Copy constructor
         XMLHandle(const XMLHandle& ref)
         {
-            _node = ref._node;
+            node = ref.node;
         }
-
         /// Assignment
         XMLHandle& operator=(const XMLHandle& ref)
         {
-            _node = ref._node;
-
+            node = ref.node;
             return *this;
         }
 
         /// Get the first child of this handle.
         XMLHandle FirstChild()
         {
-            return XMLHandle(_node ? _node->FirstChild() : nullptr);
+            return XMLHandle(node ? node->FirstChild() : 0);
         }
-
         /// Get the first child element of this handle.
         XMLHandle FirstChildElement(const char* value = nullptr)
         {
-            return XMLHandle(_node ? _node->FirstChildElement(value) : nullptr);
+            return XMLHandle(node ? node->FirstChildElement(value) : 0);
         }
-
         /// Get the last child of this handle.
         XMLHandle LastChild()
         {
-            return XMLHandle(_node ? _node->LastChild() : nullptr);
+            return XMLHandle(node ? node->LastChild() : 0);
         }
-
         /// Get the last child element of this handle.
-        XMLHandle LastChildElement(const char* value = nullptr)
+        XMLHandle LastChildElement(const char* value = 0)
         {
-            return XMLHandle(_node ? _node->LastChildElement(value) : nullptr);
+            return XMLHandle(node ? node->LastChildElement(value) : 0);
         }
-
         /// Get the previous sibling of this handle.
         XMLHandle PreviousSibling()
         {
-            return XMLHandle(_node ? _node->PreviousSibling() : nullptr);
+            return XMLHandle(node ? node->PreviousSibling() : 0);
         }
-
         /// Get the previous sibling element of this handle.
-        XMLHandle PreviousSiblingElement(const char* value = nullptr)
+        XMLHandle PreviousSiblingElement(const char* value = 0)
         {
-            return XMLHandle(_node ? _node->PreviousSiblingElement(value) : nullptr);
+            return XMLHandle(node ? node->PreviousSiblingElement(value) : 0);
         }
-
         /// Get the next sibling of this handle.
         XMLHandle NextSibling()
         {
-            return XMLHandle(_node ? _node->NextSibling() : nullptr);
+            return XMLHandle(node ? node->NextSibling() : 0);
         }
-
         /// Get the next sibling element of this handle.
-        XMLHandle NextSiblingElement(const char* value = nullptr)
+        XMLHandle NextSiblingElement(const char* value = 0)
         {
-            return XMLHandle(_node ? _node->NextSiblingElement(value) : nullptr);
+            return XMLHandle(node ? node->NextSiblingElement(value) : 0);
         }
 
         /// Safe cast to XMLNode. This can return null.
         XMLNode* ToNode()
         {
-            return _node;
+            return node;
         }
-
         /// Safe cast to XMLElement. This can return null.
         XMLElement* ToElement()
         {
-            return ((_node && _node->ToElement()) ? _node->ToElement() : nullptr);
+            return ((node && node->ToElement()) ? node->ToElement() : 0);
         }
-
         /// Safe cast to XMLText. This can return null.
         XMLText* ToText()
         {
-            return ((_node && _node->ToText()) ? _node->ToText() : nullptr);
+            return ((node && node->ToText()) ? node->ToText() : 0);
         }
-
         /// Safe cast to XMLUnknown. This can return null.
         XMLUnknown* ToUnknown()
         {
-            return ((_node && _node->ToUnknown()) ? _node->ToUnknown() : nullptr);
+            return ((node && node->ToUnknown()) ? node->ToUnknown() : 0);
         }
-
         /// Safe cast to XMLDeclaration. This can return null.
         XMLDeclaration* ToDeclaration()
         {
-            return ((_node && _node->ToDeclaration()) ? _node->ToDeclaration() : nullptr);
+            return ((node && node->ToDeclaration()) ? node->ToDeclaration() : 0);
         }
 
     private:
-        XMLNode* _node;
+        XMLNode* node;
     };
-<<<<<<< HEAD
-    int ClosingType() const { return closingType; }
-    char* ParseDeep( char* p, StrPair* endTag );
-    virtual XMLNode* ShallowClone( XMLDocument* document ) const;
-    virtual bool ShallowEqual( const XMLNode* compare ) const;
-
-private:
-    XMLElement( XMLDocument* doc );
-    virtual ~XMLElement();
-    XMLElement( const XMLElement& );    // not supported
-    void operator=( const XMLElement& );    // not supported
-
-    XMLAttribute* FindAttribute( const char* name );
-    XMLAttribute* FindOrCreateAttribute( const char* name );
-    //void LinkAttribute( XMLAttribute* attrib );
-    char* ParseAttributes( char* p );
-
-    int closingType;
-    // The attribute list is ordered; there is no 'lastAttribute'
-    // because the list needs to be scanned for dupes before adding
-    // a new attribute.
-    XMLAttribute* rootAttribute;
-};
-
-
-<<<<<<< HEAD
-enum Whitespace {
-    PRESERVE_WHITESPACE,
-    COLLAPSE_WHITESPACE
-};
-
-
-/** A Document binds together all the functionality.
-    It can be saved, loaded, and printed to the screen.
-    All Nodes are connected and allocated to a Document.
-    If the Document is deleted, all its Nodes are also deleted.
-=======
-/** A Document binds together all the functionality.
-    It can be saved, loaded, and printed to the screen.
-    All Nodes are connected and allocated to a Document.
-    If the Document is deleted, all its Nodes are also deleted.
->>>>>>> Whitespace and working files cleanup
-*/
-class XMLDocument : public XMLNode
-{
-    friend class XMLElement;
-public:
-<<<<<<< HEAD
-    /// constructor
-    XMLDocument( bool processEntities = true, Whitespace = PRESERVE_WHITESPACE );
-    ~XMLDocument();
-
-    virtual XMLDocument* ToDocument()               { return this; }
-    virtual const XMLDocument* ToDocument() const   { return this; }
-
-    /**
-        Parse an XML file from a character string.
-        Returns XML_NO_ERROR (0) on success, or
-        an errorID.
-    */
-    int Parse( const char* xml );
-
-    /**
-        Load an XML file from disk.
-        Returns XML_NO_ERROR (0) on success, or
-        an errorID.
-    */
-    int LoadFile( const char* filename );
-
-    /**
-        Load an XML file from disk. You are responsible
-        for providing and closing the FILE*.
-
-        Returns XML_NO_ERROR (0) on success, or
-        an errorID.
-    */
-    int LoadFile( FILE* );
-
-    /**
-        Save the XML file to disk.
-        Returns XML_NO_ERROR (0) on success, or
-        an errorID.
-    */
-    int SaveFile( const char* filename, bool compact = false );
-
-    /**
-        Save the XML file to disk. You are responsible
-        for providing and closing the FILE*.
-
-        Returns XML_NO_ERROR (0) on success, or
-        an errorID.
-    */
-    int SaveFile( FILE* fp, bool compact = false );
-
-    bool ProcessEntities() const        { return processEntities; }
-    Whitespace WhitespaceMode() const   { return whitespace; }
-
-    /**
-        Returns true if this document has a leading Byte Order Mark of UTF8.
-    */
-    bool HasBOM() const { return writeBOM; }
-    /** Sets whether to write the BOM when writing the file.
-    */
-    void SetBOM( bool useBOM ) { writeBOM = useBOM; }
-
-    /** Return the root element of DOM. Equivalent to FirstChildElement().
-        To get the first node, use FirstChild().
-    */
-    XMLElement* RootElement()               { return FirstChildElement(); }
-    const XMLElement* RootElement() const   { return FirstChildElement(); }
-
-    /** Print the Document. If the Printer is not provided, it will
-        print to stdout. If you provide Printer, this can print to a file:
-        @verbatim
-        XMLPrinter printer( fp );
-        doc.Print( &printer );
-        @endverbatim
-
-        Or you can use a printer to print to memory:
-        @verbatim
-        XMLPrinter printer;
-        doc->Print( &printer );
-        // printer.CStr() has a const char* to the XML
-        @endverbatim
-    */
-    void Print( XMLPrinter* streamer=0 );
-    virtual bool Accept( XMLVisitor* visitor ) const;
-
-    /**
-        Create a new Element associated with
-        this Document. The memory for the Element
-        is managed by the Document.
-    */
-    XMLElement* NewElement( const char* name );
-    /**
-        Create a new Comment associated with
-        this Document. The memory for the Comment
-        is managed by the Document.
-    */
-    XMLComment* NewComment( const char* comment );
-    /**
-        Create a new Text associated with
-        this Document. The memory for the Text
-        is managed by the Document.
-    */
-    XMLText* NewText( const char* text );
-    /**
-        Create a new Declaration associated with
-        this Document. The memory for the object
-        is managed by the Document.
-
-        If the 'text' param is null, the standard
-        declaration is used.:
-        @verbatim
-            <?xml version="1.0" encoding="UTF-8"?>
-        @endverbatim
-    */
-    XMLDeclaration* NewDeclaration( const char* text=0 );
-    /**
-        Create a new Unknown associated with
-        this Document. The memory for the object
-        is managed by the Document.
-    */
-    XMLUnknown* NewUnknown( const char* text );
-
-    /**
-        Delete a node associated with this document.
-        It will be unlinked from the DOM.
-    */
-    void DeleteNode( XMLNode* node )    { node->parent->DeleteChild( node ); }
-
-    void SetError( int error, const char* str1, const char* str2 );
-
-    /// Return true if there was an error parsing the document.
-    bool Error() const { return errorID != XML_NO_ERROR; }
-    /// Return the errorID.
-    int  ErrorID() const { return errorID; }
-    /// Return a possibly helpful diagnostic location or string.
-    const char* GetErrorStr1() const { return errorStr1; }
-    /// Return a possibly helpful secondary diagnostic location or string.
-    const char* GetErrorStr2() const { return errorStr2; }
-    /// If there is an error, print it to stdout.
-    void PrintError() const;
-
-    // internal
-    char* Identify( char* p, XMLNode** node );
-
-    virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const    { return 0; }
-    virtual bool ShallowEqual( const XMLNode* /*compare*/ ) const   { return false; }
-
-private:
-    XMLDocument( const XMLDocument& );  // not supported
-    void operator=( const XMLDocument& );   // not supported
-    void InitDocument();
-
-    bool writeBOM;
-    bool processEntities;
-    int errorID;
-    Whitespace whitespace;
-    const char* errorStr1;
-    const char* errorStr2;
-    char* charBuffer;
-
-    MemPoolT< sizeof(XMLElement) >  elementPool;
-    MemPoolT< sizeof(XMLAttribute) > attributePool;
-    MemPoolT< sizeof(XMLText) >     textPool;
-    MemPoolT< sizeof(XMLComment) >  commentPool;
-=======
-    /// constructor
-    XMLDocument( bool processEntities = true );
-    ~XMLDocument();
-=======
->>>>>>> Whitespace and formatting change
 
 
     /**
@@ -2519,14 +2013,14 @@ private:
             return XMLConstHandle(_node ? _node->FirstChildElement(value) : nullptr);
         }
 
-        const XMLConstHandle LastChild()    const
+        const XMLConstHandle LastChild() const
         {
             return XMLConstHandle(_node ? _node->LastChild() : nullptr);
         }
 
-        const XMLConstHandle LastChildElement(const char* _value = nullptr) const
+        const XMLConstHandle LastChildElement(const char* value = nullptr) const
         {
-            return XMLConstHandle(_node ? _node->LastChildElement(_value) : nullptr);
+            return XMLConstHandle(_node ? _node->LastChildElement(value) : nullptr);
         }
 
         const XMLConstHandle PreviousSibling() const
@@ -2534,9 +2028,9 @@ private:
             return XMLConstHandle(_node ? _node->PreviousSibling() : nullptr);
         }
 
-        const XMLConstHandle PreviousSiblingElement(const char* _value = nullptr) const
+        const XMLConstHandle PreviousSiblingElement(const char* value = nullptr) const
         {
-            return XMLConstHandle(_node ? _node->PreviousSiblingElement(_value) : nullptr);
+            return XMLConstHandle(_node ? _node->PreviousSiblingElement(value) : nullptr);
         }
 
         const XMLConstHandle NextSibling() const
@@ -2544,9 +2038,9 @@ private:
             return XMLConstHandle(_node ? _node->NextSibling() : nullptr);
         }
 
-        const XMLConstHandle NextSiblingElement(const char* _value = nullptr) const
+        const XMLConstHandle NextSiblingElement(const char* value = nullptr) const
         {
-            return XMLConstHandle(_node ? _node->NextSiblingElement(_value) : nullptr);
+            return XMLConstHandle(_node ? _node->NextSiblingElement(value) : nullptr);
         }
 
         const XMLNode* ToNode() const
@@ -2604,92 +2098,11 @@ private:
         doc.Print( &printer );
         @endverbatim
 
-<<<<<<< HEAD
-    /**
-        Delete a node associated with this document.
-        It will be unlinked from the DOM.
-    */
-    void DeleteNode( XMLNode* node )    { node->parent->DeleteChild( node ); }
-
-    void SetError( int error, const char* str1, const char* str2 );
-
-    /// Return true if there was an error parsing the document.
-    bool Error() const { return errorID != XML_NO_ERROR; }
-    /// Return the errorID.
-    int  ErrorID() const { return errorID; }
-    /// Return a possibly helpful diagnostic location or string.
-    const char* GetErrorStr1() const { return errorStr1; }
-    /// Return a possibly helpful secondary diagnostic location or string.
-    const char* GetErrorStr2() const { return errorStr2; }
-    /// If there is an error, print it to stdout.
-    void PrintError() const;
-
-    // internal
-    char* Identify( char* p, XMLNode** node );
-
-    virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const    { return 0; }
-    virtual bool ShallowEqual( const XMLNode* /*compare*/ ) const   { return false; }
-
-private:
-    XMLDocument( const XMLDocument& );  // not supported
-    void operator=( const XMLDocument& );   // not supported
-    void InitDocument();
-
-    bool writeBOM;
-    bool processEntities;
-    int errorID;
-    const char* errorStr1;
-    const char* errorStr2;
-    char* charBuffer;
-
-    MemPoolT< sizeof(XMLElement) >  elementPool;
-    MemPoolT< sizeof(XMLAttribute) > attributePool;
-    MemPoolT< sizeof(XMLText) >     textPool;
-    MemPoolT< sizeof(XMLComment) >  commentPool;
->>>>>>> Whitespace and working files cleanup
-};
-
-
-/**
-    A XMLHandle is a class that wraps a node pointer with null checks; this is
-    an incredibly useful thing. Note that XMLHandle is not part of the TinyXML
-    DOM structure. It is a separate utility class.
-
-    Take an example:
-    @verbatim
-    <Document>
-        <Element attributeA = "valueA">
-            <Child attributeB = "value1" />
-            <Child attributeB = "value2" />
-        </Element>
-    </Document>
-    @endverbatim
-
-    Assuming you want the value of "attributeB" in the 2nd "Child" element, it's very
-    easy to write a *lot* of code that looks like:
-
-    @verbatim
-    XMLElement* root = document.FirstChildElement( "Document" );
-    if ( root )
-    {
-        XMLElement* element = root->FirstChildElement( "Element" );
-        if ( element )
-        {
-            XMLElement* child = element->FirstChildElement( "Child" );
-            if ( child )
-            {
-                XMLElement* child2 = child->NextSiblingElement( "Child" );
-                if ( child2 )
-                {
-                    // Finally do something useful.
-    @endverbatim
-=======
         Print without a XMLDocument
 
         When loading, an XML parser is very useful. However, sometimes
         when saving, it just gets in the way. The code is often set up
         for streaming, and constructing the DOM is just overhead.
->>>>>>> Whitespace and formatting change
 
         The Printer supports the streaming case. The following code
         prints out a trivially simple XML file without ever creating
@@ -2712,33 +2125,44 @@ private:
             with only required whitespace and newlines.
         */
         XMLPrinter(FILE* file = 0, bool compact = false);
-        ~XMLPrinter()   {}
+
+        ~XMLPrinter()
+        {
+        }
 
         /** If streaming, write the BOM and declaration. */
         void PushHeader(bool writeBOM, bool writeDeclaration);
+
         /** If streaming, start writing an element.
             The element must be closed with CloseElement()
         */
         void OpenElement(const char* name);
+
         /// If streaming, add an attribute to an open element.
         void PushAttribute(const char* name, const char* value);
         void PushAttribute(const char* name, int value);
         void PushAttribute(const char* name, unsigned value);
         void PushAttribute(const char* name, bool value);
         void PushAttribute(const char* name, double value);
+
         /// If streaming, close the Element.
         void CloseElement();
 
         /// Add a text node.
         void PushText(const char* text, bool cdata = false);
+
         /// Add a text node from an integer.
         void PushText(int value);
+
         /// Add a text node from an unsigned.
         void PushText(unsigned value);
+
         /// Add a text node from a bool.
         void PushText(bool value);
+
         /// Add a text node from a float.
         void PushText(float value);
+
         /// Add a text node from a double.
         void PushText(double value);
 
@@ -2746,9 +2170,11 @@ private:
         void PushComment(const char* comment);
 
         void PushDeclaration(const char* value);
+
         void PushUnknown(const char* value);
 
         virtual bool VisitEnter(const XMLDocument& /*doc*/);
+
         virtual bool VisitExit(const XMLDocument& /*doc*/)
         {
             return true;
@@ -2770,6 +2196,7 @@ private:
         {
             return _buffer.Mem();
         }
+
         /**
             If in print to memory mode, return the size
             of the XML file in memory. (Note the size returned
@@ -2805,13 +2232,12 @@ private:
 
         DynArray<const char*, 10> _stack;
         DynArray<char, 20> _buffer;
+
 #ifdef _MSC_VER
         DynArray<char, 20> _accumulator;
 #endif
     };
 
-
 }   // tinyxml2
-
 
 #endif // TINYXML2_INCLUDED

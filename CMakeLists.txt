@@ -39,33 +39,34 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/.")
 # Add custom target to copy all data
 
 set(TARGET_DATA_COPY DATA_COPY)
-if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+if (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 	add_custom_target(
 		${TARGET_DATA_COPY}
 	 	COMMAND ${CMAKE_COMMAND} -E echo "In source build")
-else(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+else (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 	make_directory(${CMAKE_CURRENT_BINARY_DIR}/resources/)
 	add_custom_target(
 		${TARGET_DATA_COPY}
 		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/dream.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
 		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/utf8test.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
 		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/utf8testverify.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/)
-endif(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+endif (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 
 ################################
 # Add definitions
 
-if(MSVC)
+if (MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-endif(MSVC)
+endif (MSVC)
 
 ################################
 # Add targets
 set(BUILD_STATIC_LIBS ON CACHE BOOL "Set to ON to build static libraries")
-if(BUILD_STATIC_LIBS)
+if (BUILD_STATIC_LIBS)
 	add_library(tinyxml2static STATIC tinyxml2.cpp tinyxml2.h)
 	set_target_properties(tinyxml2static PROPERTIES OUTPUT_NAME tinyxml2)
-endif(BUILD_STATIC_LIBS)
+endif (BUILD_STATIC_LIBS)
+
 add_library(tinyxml2 SHARED tinyxml2.cpp tinyxml2.h)
 set_target_properties(tinyxml2 PROPERTIES
 	VERSION "${GENERIC_LIB_VERSION}"
@@ -76,20 +77,21 @@ add_dependencies(test tinyxml2)
 add_dependencies(test ${TARGET_DATA_COPY})
 target_link_libraries(test tinyxml2)
 
-
-if(BUILD_STATIC_LIBS)
+if (BUILD_STATIC_LIBS)
 	install(TARGETS tinyxml2 tinyxml2static
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-else(BUILD_STATIC_LIBS)
+else (BUILD_STATIC_LIBS)
 	install(TARGETS tinyxml2
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-endif(BUILD_STATIC_LIBS)
+endif (BUILD_STATIC_LIBS)
+
 install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-foreach(p LIB INCLUDE)
+foreach (p LIB INCLUDE)
 	set(var CMAKE_INSTALL_${p}DIR)
-	if(NOT IS_ABSOLUTE "${${var}}")
+
+	if (NOT IS_ABSOLUTE "${${var}}")
 		set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
 	endif()
 endforeach()
