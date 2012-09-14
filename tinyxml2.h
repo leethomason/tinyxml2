@@ -124,16 +124,16 @@ namespace tinyxml2
     public:
         enum
         {
-            NEEDS_ENTITY_PROCESSING         = 0x01,
-            NEEDS_NEWLINE_NORMALIZATION     = 0x02,
-            COLLAPSE_WHITESPACE             = 0x04,
+            NEEDS_ENTITY_PROCESSING        = 0x01,
+            NEEDS_NEWLINE_NORMALIZATION    = 0x02,
+            COLLAPSE_WHITESPACE            = 0x04,
 
-            TEXT_ELEMENT        = NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
-            TEXT_ELEMENT_LEAVE_ENTITIES     = NEEDS_NEWLINE_NORMALIZATION,
-            ATTRIBUTE_NAME      = 0,
-            ATTRIBUTE_VALUE     = NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
-            ATTRIBUTE_VALUE_LEAVE_ENTITIES      = NEEDS_NEWLINE_NORMALIZATION,
-            COMMENT             = NEEDS_NEWLINE_NORMALIZATION
+            TEXT_ELEMENT                   = NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
+            TEXT_ELEMENT_LEAVE_ENTITIES    = NEEDS_NEWLINE_NORMALIZATION,
+            ATTRIBUTE_NAME                 = 0,
+            ATTRIBUTE_VALUE                = NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
+            ATTRIBUTE_VALUE_LEAVE_ENTITIES = NEEDS_NEWLINE_NORMALIZATION,
+            COMMENT                        = NEEDS_NEWLINE_NORMALIZATION
         };
 
         StrPair() : _flags(0), _start(0), _end(0)
@@ -359,7 +359,7 @@ namespace tinyxml2
                     block->chunk[i].next = &block->chunk[i + 1];
                 }
 
-                block->chunk[COUNT - 1].next = 0;
+                block->chunk[COUNT - 1].next = nullptr;
                 _root = block->chunk;
             }
 
@@ -749,7 +749,7 @@ namespace tinyxml2
         */
         const XMLElement* FirstChildElement(const char* value = nullptr) const;
 
-        XMLElement* FirstChildElement(const char* value = 0)
+        XMLElement* FirstChildElement(const char* value = nullptr)
         {
             return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement(value));
         }
@@ -1706,7 +1706,7 @@ namespace tinyxml2
             // printer.CStr() has a const char* to the XML
             @endverbatim
         */
-        void Print(XMLPrinter* streamer = 0);
+        void Print(XMLPrinter* streamer = nullptr);
 
         virtual bool Accept(XMLVisitor* visitor) const;
 
@@ -1742,7 +1742,7 @@ namespace tinyxml2
                 <?xml version="1.0" encoding="UTF-8"?>
             @endverbatim
         */
-        XMLDeclaration* NewDeclaration(const char* text = 0);
+        XMLDeclaration* NewDeclaration(const char* text = nullptr);
 
         /**
             Create a new Unknown associated with
@@ -1885,62 +1885,73 @@ namespace tinyxml2
         {
             node = _node;
         }
+
         /// Create a handle from a node.
         XMLHandle(XMLNode& _node)
         {
             node = &_node;
         }
+
         /// Copy constructor
         XMLHandle(const XMLHandle& ref)
         {
             node = ref.node;
         }
+
         /// Assignment
         XMLHandle& operator=(const XMLHandle& ref)
         {
             node = ref.node;
+
             return *this;
         }
 
         /// Get the first child of this handle.
         XMLHandle FirstChild()
         {
-            return XMLHandle(node ? node->FirstChild() : 0);
+            return XMLHandle(node ? node->FirstChild() : nullptr);
         }
+
         /// Get the first child element of this handle.
         XMLHandle FirstChildElement(const char* value = nullptr)
         {
-            return XMLHandle(node ? node->FirstChildElement(value) : 0);
+            return XMLHandle(node ? node->FirstChildElement(value) : nullptr);
         }
+
         /// Get the last child of this handle.
         XMLHandle LastChild()
         {
-            return XMLHandle(node ? node->LastChild() : 0);
+            return XMLHandle(node ? node->LastChild() : nullptr);
         }
+
         /// Get the last child element of this handle.
-        XMLHandle LastChildElement(const char* value = 0)
+        XMLHandle LastChildElement(const char* value = nullptr)
         {
-            return XMLHandle(node ? node->LastChildElement(value) : 0);
+            return XMLHandle(node ? node->LastChildElement(value) : nullptr);
         }
+
         /// Get the previous sibling of this handle.
         XMLHandle PreviousSibling()
         {
-            return XMLHandle(node ? node->PreviousSibling() : 0);
+            return XMLHandle(node ? node->PreviousSibling() : nullptr);
         }
+
         /// Get the previous sibling element of this handle.
-        XMLHandle PreviousSiblingElement(const char* value = 0)
+        XMLHandle PreviousSiblingElement(const char* value = nullptr)
         {
-            return XMLHandle(node ? node->PreviousSiblingElement(value) : 0);
+            return XMLHandle(node ? node->PreviousSiblingElement(value) : nullptr);
         }
+
         /// Get the next sibling of this handle.
         XMLHandle NextSibling()
         {
-            return XMLHandle(node ? node->NextSibling() : 0);
+            return XMLHandle(node ? node->NextSibling() : nullptr);
         }
+
         /// Get the next sibling element of this handle.
-        XMLHandle NextSiblingElement(const char* value = 0)
+        XMLHandle NextSiblingElement(const char* value = nullptr)
         {
-            return XMLHandle(node ? node->NextSiblingElement(value) : 0);
+            return XMLHandle(node ? node->NextSiblingElement(value) : nullptr);
         }
 
         /// Safe cast to XMLNode. This can return null.
@@ -1948,25 +1959,29 @@ namespace tinyxml2
         {
             return node;
         }
+
         /// Safe cast to XMLElement. This can return null.
         XMLElement* ToElement()
         {
-            return ((node && node->ToElement()) ? node->ToElement() : 0);
+            return ((node && node->ToElement()) ? node->ToElement() : nullptr);
         }
+
         /// Safe cast to XMLText. This can return null.
         XMLText* ToText()
         {
-            return ((node && node->ToText()) ? node->ToText() : 0);
+            return ((node && node->ToText()) ? node->ToText() : nullptr);
         }
+
         /// Safe cast to XMLUnknown. This can return null.
         XMLUnknown* ToUnknown()
         {
-            return ((node && node->ToUnknown()) ? node->ToUnknown() : 0);
+            return ((node && node->ToUnknown()) ? node->ToUnknown() : nullptr);
         }
+
         /// Safe cast to XMLDeclaration. This can return null.
         XMLDeclaration* ToDeclaration()
         {
-            return ((node && node->ToDeclaration()) ? node->ToDeclaration() : 0);
+            return ((node && node->ToDeclaration()) ? node->ToDeclaration() : nullptr);
         }
 
     private:
@@ -2124,7 +2139,7 @@ namespace tinyxml2
             If 'compact' is set to true, then output is created
             with only required whitespace and newlines.
         */
-        XMLPrinter(FILE* file = 0, bool compact = false);
+        XMLPrinter(FILE* file = nullptr, bool compact = false);
 
         ~XMLPrinter()
         {

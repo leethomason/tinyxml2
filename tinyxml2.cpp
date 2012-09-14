@@ -95,8 +95,8 @@ void StrPair::Reset()
     }
 
     _flags = 0;
-    _start = 0;
-    _end = 0;
+    _start = nullptr;
+    _end = nullptr;
 }
 
 
@@ -592,7 +592,7 @@ bool XMLUtil::ToDouble(const char* str, double* value)
 
 char* XMLDocument::Identify(char* p, XMLNode** node)
 {
-    XMLNode* returnNode = 0;
+    XMLNode* returnNode = nullptr;
     char* start = p;
     p = XMLUtil::SkipWhiteSpace(p);
 
@@ -788,7 +788,7 @@ XMLNode* XMLNode::InsertEndChild(XMLNode* addThis)
         addThis->_prev = _lastChild;
         _lastChild = addThis;
 
-        addThis->_next = 0;
+        addThis->_next = nullptr;
     }
     else
     {
@@ -947,11 +947,11 @@ char* XMLNode::ParseDeep(char* p, StrPair* parentEnd)
 
     while (p && *p)
     {
-        XMLNode* node = 0;
+        XMLNode* node = nullptr;
 
         p = _document->Identify(p, &node);
 
-        if (p == 0 || node == 0)
+        if (p == nullptr || node == nullptr)
         {
             break;
         }
@@ -962,7 +962,7 @@ char* XMLNode::ParseDeep(char* p, StrPair* parentEnd)
         if (!p)
         {
             DELETE_NODE(node);
-            node = 0;
+            node = nullptr;
 
             if (!_document->Error())
             {
@@ -994,27 +994,27 @@ char* XMLNode::ParseDeep(char* p, StrPair* parentEnd)
             if (endTag.Empty() && ele->ClosingType() == XMLElement::OPEN)
             {
                 _document->SetError(XML_ERROR_MISMATCHED_ELEMENT, node->Value(), 0);
-                p = 0;
+                p = nullptr;
             }
             else if (!endTag.Empty() && ele->ClosingType() != XMLElement::OPEN)
             {
                 _document->SetError(XML_ERROR_MISMATCHED_ELEMENT, node->Value(), 0);
-                p = 0;
+                p = nullptr;
             }
             else if (!endTag.Empty())
             {
                 if (!XMLUtil::StringEqual(endTag.GetStr(), node->Value()))
                 {
                     _document->SetError(XML_ERROR_MISMATCHED_ELEMENT, node->Value(), 0);
-                    p = 0;
+                    p = nullptr;
                 }
             }
         }
 
-        if (p == 0)
+        if (p == nullptr)
         {
             DELETE_NODE(node);
-            node = 0;
+            node = nullptr;
         }
 
         if (node)
@@ -1112,7 +1112,7 @@ char* XMLComment::ParseDeep(char* p, StrPair*)
     const char* start = p;
     p = _value.ParseText(p, "-->", StrPair::COMMENT);
 
-    if (p == 0)
+    if (p == nullptr)
     {
         _document->SetError(XML_ERROR_PARSING_COMMENT, start, 0);
     }
@@ -1165,7 +1165,7 @@ char* XMLDeclaration::ParseDeep(char* p, StrPair*)
     const char* start = p;
     p = _value.ParseText(p, "?>", StrPair::NEEDS_NEWLINE_NORMALIZATION);
 
-    if (p == 0)
+    if (p == nullptr)
     {
         _document->SetError(XML_ERROR_PARSING_DECLARATION, start, 0);
     }
@@ -1261,7 +1261,7 @@ char* XMLAttribute::ParseDeep(char* p, bool processEntities)
 
     if (!p || !*p)
     {
-        return 0;
+        return nullptr;
     }
 
     // Skip white space before =
@@ -1269,7 +1269,7 @@ char* XMLAttribute::ParseDeep(char* p, bool processEntities)
 
     if (!p || *p != '=')
     {
-        return 0;
+        return nullptr;
     }
 
     ++p;    // move up to opening quote
@@ -1277,7 +1277,7 @@ char* XMLAttribute::ParseDeep(char* p, bool processEntities)
 
     if (*p != '\"' && *p != '\'')
     {
-        return 0;
+        return nullptr;
     }
 
     char endTag[2] = { *p, 0 };
@@ -1415,7 +1415,7 @@ XMLElement::~XMLElement()
 
 XMLAttribute* XMLElement::FindAttribute(const char* name)
 {
-    XMLAttribute* a = 0;
+    XMLAttribute* a = nullptr;
 
     for (a = _rootAttribute; a; a = a->_next)
     {
@@ -1425,13 +1425,13 @@ XMLAttribute* XMLElement::FindAttribute(const char* name)
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 
 const XMLAttribute* XMLElement::FindAttribute(const char* name) const
 {
-    XMLAttribute* a = 0;
+    XMLAttribute* a = nullptr;
 
     for (a = _rootAttribute; a; a = a->_next)
     {
@@ -1441,7 +1441,7 @@ const XMLAttribute* XMLElement::FindAttribute(const char* name) const
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 
@@ -1451,7 +1451,7 @@ const char* XMLElement::Attribute(const char* name, const char* value) const
 
     if (!a)
     {
-        return 0;
+        return nullptr;
     }
 
     if (!value || XMLUtil::StringEqual(a->Value(), value))
@@ -1459,7 +1459,7 @@ const char* XMLElement::Attribute(const char* name, const char* value) const
         return a->Value();
     }
 
-    return 0;
+    return nullptr;
 }
 
 
@@ -1470,7 +1470,7 @@ const char* XMLElement::GetText() const
         return FirstChild()->ToText()->Value();
     }
 
-    return 0;
+    return nullptr;
 }
 
 
@@ -1567,8 +1567,8 @@ int XMLElement::QueryFloatText(float* _value) const
 
 XMLAttribute* XMLElement::FindOrCreateAttribute(const char* name)
 {
-    XMLAttribute* last = 0;
-    XMLAttribute* attrib = 0;
+    XMLAttribute* last = nullptr;
+    XMLAttribute* attrib = nullptr;
 
     for (attrib = _rootAttribute;
          attrib;
@@ -1603,7 +1603,7 @@ XMLAttribute* XMLElement::FindOrCreateAttribute(const char* name)
 
 void XMLElement::DeleteAttribute(const char* name)
 {
-    XMLAttribute* prev = 0;
+    XMLAttribute* prev = nullptr;
 
     for (XMLAttribute* a = _rootAttribute; a; a = a->_next)
     {
@@ -1630,7 +1630,7 @@ void XMLElement::DeleteAttribute(const char* name)
 char* XMLElement::ParseAttributes(char* p)
 {
     const char* start = p;
-    XMLAttribute* prevAttribute = 0;
+    XMLAttribute* prevAttribute = nullptr;
 
     // Read the attributes.
     while (p)
@@ -1641,7 +1641,7 @@ char* XMLElement::ParseAttributes(char* p)
         {
             _document->SetError(XML_ERROR_PARSING_ELEMENT, start, Name());
 
-            return 0;
+            return nullptr;
         }
 
         // attribute.
@@ -1657,7 +1657,7 @@ char* XMLElement::ParseAttributes(char* p)
                 DELETE_ATTRIBUTE(attrib);
                 _document->SetError(XML_ERROR_PARSING_ATTRIBUTE, start, p);
 
-                return 0;
+                return nullptr;
             }
 
             // There is a minor bug here: if the attribute in the source xml
@@ -1693,7 +1693,7 @@ char* XMLElement::ParseAttributes(char* p)
         {
             _document->SetError(XML_ERROR_PARSING_ELEMENT, start, p);
 
-            return 0;
+            return nullptr;
         }
     }
 
@@ -1712,7 +1712,7 @@ char* XMLElement::ParseDeep(char* p, StrPair* strPair)
 
     if (!p)
     {
-        return 0;
+        return nullptr;
     }
 
     // The closing element is the </element> form. It is
@@ -1728,7 +1728,7 @@ char* XMLElement::ParseDeep(char* p, StrPair* strPair)
 
     if (_value.Empty())
     {
-        return 0;
+        return nullptr;
     }
 
     p = ParseAttributes(p);
@@ -1852,8 +1852,8 @@ XMLDocument::~XMLDocument()
 void XMLDocument::InitDocument()
 {
     _errorID = XML_NO_ERROR;
-    _errorStr1 = 0;
-    _errorStr2 = 0;
+    _errorStr1 = nullptr;
+    _errorStr2 = nullptr;
 
     delete [] _charBuffer;
     _charBuffer = nullptr;
