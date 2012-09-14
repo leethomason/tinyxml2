@@ -745,7 +745,7 @@ void XMLNode::DeleteChildren()
 
 void XMLNode::Unlink(XMLNode* child)
 {
-    TIXMLASSERT(child->parent == this);
+    TIXMLASSERT(child->_parent == this);
 
     if (child == _firstChild)
     {
@@ -773,7 +773,7 @@ void XMLNode::Unlink(XMLNode* child)
 
 void XMLNode::DeleteChild(XMLNode* node)
 {
-    TIXMLASSERT(node->parent == this);
+    TIXMLASSERT(node->_parent == this);
     DELETE_NODE(node);
 }
 
@@ -820,7 +820,7 @@ XMLNode* XMLNode::InsertFirstChild(XMLNode* addThis)
     }
     else
     {
-        TIXMLASSERT(lastChild == nullptr);
+        TIXMLASSERT(_lastChild == nullptr);
         _firstChild = _lastChild = addThis;
 
         addThis->_prev = nullptr;
