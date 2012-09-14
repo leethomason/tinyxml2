@@ -7,3 +7,11 @@ resources/out/
 *.suo
 *.opensdf
 *.user
+CMakeCache.txt
+CMakeFiles
+*.dylib
+*.a
+test
+*.pc
+cmake_install.cmake
+Makefile
