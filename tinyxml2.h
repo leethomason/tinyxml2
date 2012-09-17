@@ -1190,6 +1190,8 @@ public:
 	bool Error() const { return errorID != XML_NO_ERROR; }
 	/// Return the errorID.
 	int  ErrorID() const { return errorID; }
+	/// Reture the errorID`s as String 
+	const char* GetErrorIDAsStr();
 	/// Return a possibly helpful diagnostic location or string.
 	const char* GetErrorStr1() const { return errorStr1; }
 	/// Return a possibly helpful secondary diagnostic location or string.
