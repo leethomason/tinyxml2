@@ -1622,7 +1622,7 @@ int XMLDocument::SaveFile( FILE* fp, bool compact )
 }
 
 
-int XMLDocument::Parse( const char* p )
+int XMLDocument::Parse( const char* p, size_t len )
 {
 	DeleteChildren();
 	InitDocument();
@@ -1631,17 +1631,19 @@ int XMLDocument::Parse( const char* p )
 		SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
 		return errorID;
 	}
+	if ( len == (size_t)(-1) ) {
+		len = strlen( p );
+	}
+	charBuffer = new char[ len+1 ];
+	memcpy( charBuffer, p, len );
+	charBuffer[len] = 0;
+
 	p = XMLUtil::SkipWhiteSpace( p );
 	p = XMLUtil::ReadBOM( p, &writeBOM );
 	if ( !p || !*p ) {
 		SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
 		return errorID;
 	}
-
-	size_t len = strlen( p );
-	charBuffer = new char[ len+1 ];
-	memcpy( charBuffer, p, len+1 );
-
 
 	ParseDeep( charBuffer, 0 );
 	return errorID;

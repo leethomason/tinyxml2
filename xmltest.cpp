@@ -947,6 +947,14 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLTest( "Non-alpha element lead letter parses.", doc.Error(), false );
 	}
 
+	{
+		const char* xml = "<element/>WOA THIS ISN'T GOING TO PARSE";
+		XMLDocument doc;
+		doc.Parse( xml, 10 );
+		//doc.Print();
+		XMLTest( "Set length of incoming data", doc.Error(), false );
+	}
+
 	// ----------- Whitespace ------------
 	{
 		const char* xml = "<element>"

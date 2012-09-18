@@ -1072,8 +1072,13 @@ public:
 		Parse an XML file from a character string.
 		Returns XML_NO_ERROR (0) on success, or
 		an errorID.
+
+		You may optionally pass in the 'nBytes', which is
+		the number of bytes which will be parsed. If not
+		specified, TinyXML will assume 'xml' points to a
+		null terminated string.
 	*/
-	int Parse( const char* xml );
+	int Parse( const char* xml, size_t nBytes=(size_t)(-1) );
 
 	/**
 		Load an XML file from disk.
