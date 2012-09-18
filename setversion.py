@@ -17,15 +17,15 @@ def fileProcess( name, lineFunction ):
 		if not line: break
 		output += lineFunction( line )
 	filestream.close()
-	
+
 	if not output: return			# basic error checking
-	
+
 	print( "Writing file " + name )
 	filestream = open( name, "w" );
 	filestream.write( output );
 	filestream.close()
-	
-	
+
+
 def echoInput( line ):
 	return line
 

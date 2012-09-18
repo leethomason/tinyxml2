@@ -15,7 +15,7 @@ set(GENERIC_LIB_SOVERSION "1")
 
 
 ################################
-# Add common source 
+# Add common source
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/.")
 
@@ -26,7 +26,7 @@ set(TARGET_DATA_COPY DATA_COPY)
 if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 	add_custom_target(
 		${TARGET_DATA_COPY}
-	 	COMMAND ${CMAKE_COMMAND} -E echo "In source build")
+		COMMAND ${CMAKE_COMMAND} -E echo "In source build")
 else(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 	make_directory(${CMAKE_CURRENT_BINARY_DIR}/resources/)
 	add_custom_target(

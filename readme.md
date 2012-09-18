@@ -14,7 +14,7 @@ Examples are in the "related pages" tab of the HTML docs.
 
 What it does.
 -------------
-	
+
 In brief, TinyXML parses an XML document, and builds from that a 
 Document Object Model (DOM) that can be read, modified, and saved.
 
@@ -121,7 +121,7 @@ White space in text is preserved. For example:
 The leading space before the "Hello" and the double space after the comma are 
 preserved. Line-feeds are preserved, as in this example:
 
-	<element> Hello again,  
+	<element> Hello again,
 	          World</element>
 
 However, white space between elements is **not** preserved. Although not strictly 
@@ -220,7 +220,7 @@ Examples
 
 #### Load and parse an XML file.
 
-	/* ------ Example 1: Load and parse an XML file. ---- */	
+	/* ------ Example 1: Load and parse an XML file. ---- */
 	{
 		XMLDocument doc;
 		doc.LoadFile( "dream.xml" );
@@ -228,22 +228,22 @@ Examples
 
 #### Lookup information.
 
-	/* ------ Example 2: Lookup information. ---- */	
+	/* ------ Example 2: Lookup information. ---- */
 	{
 		XMLDocument doc;
 		doc.LoadFile( "dream.xml" );
 
 		// Structure of the XML file:
-		// - Element "PLAY"      the root Element, which is the 
+		// - Element "PLAY"      the root Element, which is the
 		//                       FirstChildElement of the Document
 		// - - Element "TITLE"   child of the root PLAY Element
 		// - - - Text            child of the TITLE Element
-		
+
 		// Navigate to the title, using the convenience function,
 		// with a dangerous lack of error checking.
 		const char* title = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->GetText();
 		printf( "Name of play (1): %s\n", title );
-		
+
 		// Text is just another Node to TinyXML-2. The more
 		// general way to get to the XMLText:
 		XMLText* textNode = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->FirstChild()->ToText();
@@ -268,8 +268,7 @@ even has a simple g++ command line if you are are *nix and don't want to use a b
 Documentation
 -------------
 
-The documentation is build with Doxygen, using the 'dox' 
-configuration file.
+The documentation is build with Doxygen, using the 'dox' configuration file.
 
 License
 -------
