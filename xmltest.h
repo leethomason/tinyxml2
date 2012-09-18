@@ -3,7 +3,7 @@
 
 // What follows is the docs for the examples.
 // I'd like the docs to be just before the
-// actual examples in xmltest.cpp, but I 
+// actual examples in xmltest.cpp, but I
 // can't seem to get doxygen to do that. It
 // would be a wonderful patch if anyone figures
 // it out.
@@ -37,8 +37,8 @@
 	checking; working code should check for null
 	pointers when walking an XML tree, or use
 	XMLHandle.
-	
-	(The XML is an excerpt from "dream.xml"). 
+
+	(The XML is an excerpt from "dream.xml").
 
 	@skip example_3
 	@until </PLAY>";
@@ -52,12 +52,12 @@
 		<ul>
 			<li>Element "TITLE"</li>
 			<ul>
-			    <li>Text "A Midsummer Night's Dream"</li>
+				<li>Text "A Midsummer Night's Dream"</li>
 			</ul>
 		</ul>
 	</ul>
 
-	For this example, we want to print out the 
+	For this example, we want to print out the
 	title of the play. The text of the title (what
 	we want) is child of the "TITLE" element which
 	is a child of the "PLAY" element.
@@ -77,8 +77,8 @@
 
 	Text is just another Node in the XML DOM. And in
 	fact you should be a little cautious with it, as
-	text nodes can contain elements. 
-	
+	text nodes can contain elements.
+
 	@verbatim
 	Consider: A Midsummer Night's <b>Dream</b>
 	@endverbatim
@@ -90,7 +90,7 @@
 
 	Noting that here we use FirstChild() since we are
 	looking for XMLText, not an element, and ToText()
-	is a cast from a Node to a XMLText. 
+	is a cast from a Node to a XMLText.
 */
 
 /** @page Example-4 Read attributes and text information.
@@ -107,7 +107,7 @@
 	@skip example_4
 	@until "</information>";
 
-	TinyXML-2 has accessors for both approaches. 
+	TinyXML-2 has accessors for both approaches.
 
 	When using an attribute, you navigate to the XMLElement
 	with that attribute and use the QueryIntAttribute()
@@ -126,4 +126,3 @@
 	@skip XMLElement* textApproachElement
 	@until &v1 );
 */
-

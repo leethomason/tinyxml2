@@ -1,9 +1,11 @@
 # intermediate files
-Win32/
-x64/
-ipch/
-resources/out/
+*.opensdf
 *.sdf
 *.suo
-*.opensdf
 *.user
+/gccxmltest.exe
+/xmltest.exe
+ipch/
+resources/out/
+Win32/
+x64/
