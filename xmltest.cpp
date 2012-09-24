@@ -951,7 +951,6 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		const char* xml = "<element/>WOA THIS ISN'T GOING TO PARSE";
 		XMLDocument doc;
 		doc.Parse( xml, 10 );
-		//doc.Print();
 		XMLTest( "Set length of incoming data", doc.Error(), false );
 	}
 
@@ -980,6 +979,18 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		doc.Parse( xml );
 		XMLTest( "Whitespace  all space", true, 0 == doc.FirstChildElement()->FirstChild() );
 	}
+
+#if 0		// the question being explored is what kind of print to use: 
+			// https://github.com/leethomason/tinyxml2/issues/63
+	{
+		const char* xml = "<element attrA='123456789.123456789' attrB='1.001e9'/>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		doc.FirstChildElement()->SetAttribute( "attrA", 123456789.123456789 );
+		doc.FirstChildElement()->SetAttribute( "attrB", 1.001e9 );
+		doc.Print();
+	}
+#endif
 
 	// ----------- Performance tracking --------------
 	{
