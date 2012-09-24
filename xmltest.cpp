@@ -154,11 +154,6 @@ int main( int /*argc*/, const char ** /*argv*/ )
 	#endif
 
 	#if defined(_MSC_VER)
-	#pragma warning ( push )
-	#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
-	#endif
-
-	#if defined(_MSC_VER)
 		_mkdir( "resources/out/" );
 	#else
 		mkdir( "resources/out/", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -177,10 +172,6 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		exit( 1 );
 	}
 	fclose( fp );
-
-	#if defined(_MSC_VER)
-	#pragma warning ( pop )
-	#endif
 
 	XMLTest( "Example-1", 0, example_1() );
 	XMLTest( "Example-2", 0, example_2() );
@@ -424,16 +415,8 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		// Check the round trip.
 		int okay = 0;
 
-
-#if defined(_MSC_VER)
-#pragma warning ( push )
-#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
-#endif
 		FILE* saved  = fopen( "resources/out/utf8testout.xml", "r" );
 		FILE* verify = fopen( "resources/utf8testverify.xml", "r" );
-#if defined(_MSC_VER)
-#pragma warning ( pop )
-#endif
 
 		if ( saved && verify )
 		{
@@ -548,28 +531,15 @@ int main( int /*argc*/, const char ** /*argv*/ )
 
 		XMLTest( "Entity transformation: read. ", expected, context, true );
 
-#if defined(_MSC_VER)
-#pragma warning ( push )
-#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
-#endif
 		FILE* textfile = fopen( "resources/out/textfile.txt", "w" );
-#if defined(_MSC_VER)
-#pragma warning ( pop )
-#endif
 		if ( textfile )
 		{
 			XMLPrinter streamer( textfile );
 			psg->Accept( &streamer );
 			fclose( textfile );
 		}
-#if defined(_MSC_VER)
-#pragma warning ( push )
-#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
-#endif
-		textfile = fopen( "resources/out/textfile.txt", "r" );
-#if defined(_MSC_VER)
-#pragma warning ( pop )
-#endif
+
+        textfile = fopen( "resources/out/textfile.txt", "r" );
 		TIXMLASSERT( textfile );
 		if ( textfile )
 		{
@@ -999,14 +969,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		QueryPerformanceFrequency( (LARGE_INTEGER*) &freq );
 #endif
 
-#if defined(_MSC_VER)
-#pragma warning ( push )
-#pragma warning ( disable : 4996 )		// Fail to see a compelling reason why this should be deprecated.
-#endif
 		FILE* fp  = fopen( "resources/dream.xml", "r" );
-#if defined(_MSC_VER)
-#pragma warning ( pop )
-#endif
 		fseek( fp, 0, SEEK_END );
 		long size = ftell( fp );
 		fseek( fp, 0, SEEK_SET );
