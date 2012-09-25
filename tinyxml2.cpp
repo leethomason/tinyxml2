@@ -1602,7 +1602,7 @@ int XMLDocument::SaveFile( const char* filename, bool compact )
 		errno_t err = fopen_s(&fp, filename, "w" );
 		if ( !fp || err) {
 	#else
-		fp = fopen( filename, "rb" );
+		fp = fopen( filename, "w" );
 		if ( !fp) {
 	#endif
 		SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
