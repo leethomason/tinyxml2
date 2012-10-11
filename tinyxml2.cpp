@@ -1566,7 +1566,7 @@ int XMLDocument::LoadFile( FILE* fp )
 	InitDocument();
 
 	fseek( fp, 0, SEEK_END );
-	unsigned size = ftell( fp );
+	size_t size = ftell( fp );
 	fseek( fp, 0, SEEK_SET );
 
 	if ( size == 0 ) {
