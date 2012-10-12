@@ -189,31 +189,31 @@ class DynArray
 {
 public:
     DynArray< T, INIT >() {
-        mem = pool;
+        _mem = pool;
         allocated = INIT;
         size = 0;
     }
 
     ~DynArray() {
-        if ( mem != pool ) {
-            delete [] mem;
+        if ( _mem != pool ) {
+            delete [] _mem;
         }
     }
 
     void Push( T t ) {
         EnsureCapacity( size+1 );
-        mem[size++] = t;
+        _mem[size++] = t;
     }
 
     T* PushArr( int count ) {
         EnsureCapacity( size+count );
-        T* ret = &mem[size];
+        T* ret = &_mem[size];
         size += count;
         return ret;
     }
 
     T Pop() {
-        return mem[--size];
+        return _mem[--size];
     }
 
     void PopArr( int count ) {
@@ -227,12 +227,12 @@ public:
 
     T& operator[](int i)				{
         TIXMLASSERT( i>= 0 && i < size );
-        return mem[i];
+        return _mem[i];
     }
 
     const T& operator[](int i) const	{
         TIXMLASSERT( i>= 0 && i < size );
-        return mem[i];
+        return _mem[i];
     }
 
     int Size() const					{
@@ -244,11 +244,11 @@ public:
     }
 
     const T* Mem() const				{
-        return mem;
+        return _mem;
     }
 
     T* Mem()							{
-        return mem;
+        return _mem;
     }
 
 private:
@@ -256,16 +256,16 @@ private:
         if ( cap > allocated ) {
             int newAllocated = cap * 2;
             T* newMem = new T[newAllocated];
-            memcpy( newMem, mem, sizeof(T)*size );	// warning: not using constructors, only works for PODs
-            if ( mem != pool ) {
-                delete [] mem;
+            memcpy( newMem, _mem, sizeof(T)*size );	// warning: not using constructors, only works for PODs
+            if ( _mem != pool ) {
+                delete [] _mem;
             }
-            mem = newMem;
+            _mem = newMem;
             allocated = newAllocated;
         }
     }
 
-    T* mem;
+    T* _mem;
     T pool[INIT];
     int allocated;		// objects allocated
     int size;			// number objects in use
