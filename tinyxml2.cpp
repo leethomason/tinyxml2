@@ -87,12 +87,12 @@ StrPair::~StrPair()
 
 void StrPair::Reset()
 {
-    if ( flags & NEEDS_DELETE ) {
-        delete [] start;
+    if ( _flags & NEEDS_DELETE ) {
+        delete [] _start;
     }
-    flags = 0;
-    start = 0;
-    end = 0;
+    _flags = 0;
+    _start = 0;
+    _end = 0;
 }
 
 
@@ -100,10 +100,10 @@ void StrPair::SetStr( const char* str, int flags )
 {
     Reset();
     size_t len = strlen( str );
-    start = new char[ len+1 ];
-    memcpy( start, str, len+1 );
-    end = start + len;
-    this->flags = flags | NEEDS_DELETE;
+    _start = new char[ len+1 ];
+    memcpy( _start, str, len+1 );
+    _end = _start + len;
+    _flags = flags | NEEDS_DELETE;
 }
 
 
@@ -155,11 +155,11 @@ char* StrPair::ParseName( char* p )
 void StrPair::CollapseWhitespace()
 {
     // Trim leading space.
-    start = XMLUtil::SkipWhiteSpace( start );
+    _start = XMLUtil::SkipWhiteSpace( _start );
 
-    if ( start && *start ) {
-        char* p = start;	// the read pointer
-        char* q = start;	// the write pointer
+    if ( _start && *_start ) {
+        char* p = _start;	// the read pointer
+        char* q = _start;	// the write pointer
 
         while( *p ) {
             if ( XMLUtil::IsWhiteSpace( *p )) {
@@ -181,16 +181,16 @@ void StrPair::CollapseWhitespace()
 
 const char* StrPair::GetStr()
 {
-    if ( flags & NEEDS_FLUSH ) {
-        *end = 0;
-        flags ^= NEEDS_FLUSH;
+    if ( _flags & NEEDS_FLUSH ) {
+        *_end = 0;
+        _flags ^= NEEDS_FLUSH;
 
-        if ( flags ) {
-            char* p = start;	// the read pointer
-            char* q = start;	// the write pointer
+        if ( _flags ) {
+            char* p = _start;	// the read pointer
+            char* q = _start;	// the write pointer
 
-            while( p < end ) {
-                if ( (flags & NEEDS_NEWLINE_NORMALIZATION) && *p == CR ) {
+            while( p < _end ) {
+                if ( (_flags & NEEDS_NEWLINE_NORMALIZATION) && *p == CR ) {
                     // CR-LF pair becomes LF
                     // CR alone becomes LF
                     // LF-CR becomes LF
@@ -202,7 +202,7 @@ const char* StrPair::GetStr()
                     }
                     *q++ = LF;
                 }
-                else if ( (flags & NEEDS_NEWLINE_NORMALIZATION) && *p == LF ) {
+                else if ( (_flags & NEEDS_NEWLINE_NORMALIZATION) && *p == LF ) {
                     if ( *(p+1) == CR ) {
                         p += 2;
                     }
@@ -211,7 +211,7 @@ const char* StrPair::GetStr()
                     }
                     *q++ = LF;
                 }
-                else if ( (flags & NEEDS_ENTITY_PROCESSING) && *p == '&' ) {
+                else if ( (_flags & NEEDS_ENTITY_PROCESSING) && *p == '&' ) {
                     // Entities handled by tinyXML2:
                     // - special entities in the entity table [in/out]
                     // - numeric character reference [in]
@@ -255,12 +255,12 @@ const char* StrPair::GetStr()
         }
         // The loop below has plenty going on, and this
         // is a less useful mode. Break it out.
-        if ( flags & COLLAPSE_WHITESPACE ) {
+        if ( _flags & COLLAPSE_WHITESPACE ) {
             CollapseWhitespace();
         }
-        flags = (flags & NEEDS_DELETE);
+        _flags = (_flags & NEEDS_DELETE);
     }
-    return start;
+    return _start;
 }
 
 

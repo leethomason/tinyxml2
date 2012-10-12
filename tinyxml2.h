@@ -137,29 +137,31 @@ public:
         COMMENT				= NEEDS_NEWLINE_NORMALIZATION
     };
 
-    StrPair() : flags( 0 ), start( 0 ), end( 0 ) {}
+    StrPair() : _flags( 0 ), _start( 0 ), _end( 0 ) {}
     ~StrPair();
 
-    void Set( char* _start, char* _end, int _flags ) {
+    void Set( char* start, char* end, int flags ) {
         Reset();
-        this->start = _start;
-        this->end = _end;
-        this->flags = _flags | NEEDS_FLUSH;
+        _start  = start;
+        _end    = end;
+        _flags  = flags | NEEDS_FLUSH;
     }
+
     const char* GetStr();
+
     bool Empty() const {
-        return start == end;
+        return _start == _end;
     }
 
     void SetInternedStr( const char* str ) {
         Reset();
-        this->start = const_cast<char*>(str);
+        _start = const_cast<char*>(str);
     }
+
     void SetStr( const char* str, int flags=0 );
 
     char* ParseText( char* in, const char* endTag, int strFlags );
     char* ParseName( char* in );
-
 
 private:
     void Reset();
@@ -171,9 +173,9 @@ private:
     };
 
     // After parsing, if *end != 0, it can be set to zero.
-    int flags;
-    char* start;
-    char* end;
+    int     _flags;
+    char*   _start;
+    char*   _end;
 };
 
 
@@ -191,11 +193,13 @@ public:
         allocated = INIT;
         size = 0;
     }
+
     ~DynArray() {
         if ( mem != pool ) {
             delete [] mem;
         }
     }
+
     void Push( T t ) {
         EnsureCapacity( size+1 );
         mem[size++] = t;
@@ -207,9 +211,11 @@ public:
         size += count;
         return ret;
     }
+
     T Pop() {
         return mem[--size];
     }
+
     void PopArr( int count ) {
         TIXMLASSERT( size >= count );
         size -= count;
@@ -218,27 +224,32 @@ public:
     bool Empty() const					{
         return size == 0;
     }
+
     T& operator[](int i)				{
         TIXMLASSERT( i>= 0 && i < size );
         return mem[i];
     }
+
     const T& operator[](int i) const	{
         TIXMLASSERT( i>= 0 && i < size );
         return mem[i];
     }
+
     int Size() const					{
         return size;
     }
+
     int Capacity() const				{
         return allocated;
     }
+
     const T* Mem() const				{
         return mem;
     }
+
     T* Mem()							{
         return mem;
     }
-
 
 private:
     void EnsureCapacity( int cap ) {
