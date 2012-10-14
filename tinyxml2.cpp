@@ -1762,7 +1762,7 @@ void XMLPrinter::Print( const char* format, ... )
             len = vsnprintf_s( _accumulator.Mem(), _accumulator.Capacity(), _TRUNCATE, format, va );
             if ( len < 0 ) {
                 expand *= 3/2;
-                accumulator.PushArr( expand );
+                _accumulator.PushArr( expand );
             }
         }
         char* p = _buffer.PushArr( len ) - 1;
