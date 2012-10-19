@@ -356,7 +356,7 @@ private:
         char    mem[SIZE];
     };
     struct Block {
-        Chunk chunk[1024/SIZE];
+        Chunk chunk[COUNT];
     };
     DynArray< Block*, 10 > _blockPtrs;
     Chunk* _root;
