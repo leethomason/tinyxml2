@@ -943,6 +943,19 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		}
 	}
 
+#if 0
+	{
+		// Passes if assert doesn't fire.
+		XMLDocument xmlDoc;
+
+	    xmlDoc.NewDeclaration();
+	    xmlDoc.NewComment("Configuration file");
+
+	    XMLElement *root = xmlDoc.NewElement("settings");
+	    root->SetAttribute("version", 2);
+	}
+#endif
+
 	{
 		const char* xml = "<element>    </element>";
 		XMLDocument doc( true, COLLAPSE_WHITESPACE );
