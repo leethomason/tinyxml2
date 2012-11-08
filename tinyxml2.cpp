@@ -30,7 +30,6 @@ distribution.
 #   include <cstddef>
 #endif
 
-using namespace tinyxml2;
 using namespace std;
 
 static const char LINE_FEED				= (char)0x0a;			// all line endings are normalized to LF
@@ -63,6 +62,9 @@ static const unsigned char TIXML_UTF_LEAD_2 = 0xbfU;
             pool->Free( attrib );				\
         }										\
     }
+
+namespace tinyxml2
+{
 
 struct Entity {
     const char* pattern;
@@ -2083,4 +2085,6 @@ bool XMLPrinter::Visit( const XMLUnknown& unknown )
 {
     PushUnknown( unknown.Value() );
     return true;
+}
+
 }
