@@ -541,23 +541,29 @@ public:
         return _document;
     }
 
+    /// Safely cast to an Element, or null.
     virtual XMLElement*		ToElement()		{
-        return 0;    ///< Safely cast to an Element, or null.
+        return 0;    
     }
+    /// Safely cast to Text, or null.
     virtual XMLText*		ToText()		{
-        return 0;    ///< Safely cast to Text, or null.
+        return 0;    
     }
+    /// Safely cast to a Comment, or null.
     virtual XMLComment*		ToComment()		{
-        return 0;    ///< Safely cast to a Comment, or null.
+        return 0;    
     }
+    /// Safely cast to a Document, or null.
     virtual XMLDocument*	ToDocument()	{
-        return 0;    ///< Safely cast to a Document, or null.
+        return 0;    
     }
+    /// Safely cast to a Declaration, or null.
     virtual XMLDeclaration*	ToDeclaration()	{
-        return 0;    ///< Safely cast to a Declaration, or null.
+        return 0;    
     }
+    /// Safely cast to an Unknown, or null.
     virtual XMLUnknown*		ToUnknown()		{
-        return 0;    ///< Safely cast to an Unknown, or null.
+        return 0;    
     }
 
     virtual const XMLElement*		ToElement() const		{
@@ -920,7 +926,7 @@ protected:
 };
 
 
-enum {
+enum XMLError {
     XML_NO_ERROR = 0,
     XML_SUCCESS = 0,
 
@@ -958,14 +964,17 @@ class XMLAttribute
 {
     friend class XMLElement;
 public:
+    /// The name of the attribute.
     const char* Name() const {
-        return _name.GetStr();    ///< The name of the attribute.
+        return _name.GetStr();    
     }
+    /// The value of the attribute.
     const char* Value() const {
-        return _value.GetStr();    ///< The value of the attribute.
+        return _value.GetStr();    
     }
+    /// The next attribute in the list.
     const XMLAttribute* Next() const {
-        return _next;    ///< The next attribute in the list.
+        return _next;    
     }
 
     /** IntAttribute interprets the attribute as an integer, and returns the value.
@@ -1006,15 +1015,15 @@ public:
     	in the provided paremeter. The function will return XML_NO_ERROR on success,
     	and XML_WRONG_ATTRIBUTE_TYPE if the conversion is not successful.
     */
-    int QueryIntValue( int* value ) const;
+    XMLError QueryIntValue( int* value ) const;
     /// See QueryIntAttribute
-    int QueryUnsignedValue( unsigned int* value ) const;
+    XMLError QueryUnsignedValue( unsigned int* value ) const;
     /// See QueryIntAttribute
-    int QueryBoolValue( bool* value ) const;
+    XMLError QueryBoolValue( bool* value ) const;
     /// See QueryIntAttribute
-    int QueryDoubleValue( double* value ) const;
+    XMLError QueryDoubleValue( double* value ) const;
     /// See QueryIntAttribute
-    int QueryFloatValue( float* value ) const;
+    XMLError QueryFloatValue( float* value ) const;
 
     /// Set the attribute to a string value.
     void SetAttribute( const char* value );
@@ -1147,7 +1156,7 @@ public:
     	QueryIntAttribute( "foo", &value );		// if "foo" isn't found, value will still be 10
     	@endverbatim
     */
-    int QueryIntAttribute( const char* name, int* value ) const				{
+    XMLError QueryIntAttribute( const char* name, int* value ) const				{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
@@ -1155,7 +1164,7 @@ public:
         return a->QueryIntValue( value );
     }
     /// See QueryIntAttribute()
-    int QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{
+    XMLError QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
@@ -1163,7 +1172,7 @@ public:
         return a->QueryUnsignedValue( value );
     }
     /// See QueryIntAttribute()
-    int QueryBoolAttribute( const char* name, bool* value ) const				{
+    XMLError QueryBoolAttribute( const char* name, bool* value ) const				{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
@@ -1171,7 +1180,7 @@ public:
         return a->QueryBoolValue( value );
     }
     /// See QueryIntAttribute()
-    int QueryDoubleAttribute( const char* name, double* value ) const			{
+    XMLError QueryDoubleAttribute( const char* name, double* value ) const			{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
@@ -1179,7 +1188,7 @@ public:
         return a->QueryDoubleValue( value );
     }
     /// See QueryIntAttribute()
-    int QueryFloatAttribute( const char* name, float* value ) const			{
+    XMLError QueryFloatAttribute( const char* name, float* value ) const			{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
@@ -1281,15 +1290,15 @@ public:
     			 to the requested type, and XML_NO_TEXT_NODE if there is no child text to query.
 
     */
-    int QueryIntText( int* _value ) const;
+    XMLError QueryIntText( int* _value ) const;
     /// See QueryIntText()
-    int QueryUnsignedText( unsigned* _value ) const;
+    XMLError QueryUnsignedText( unsigned* _value ) const;
     /// See QueryIntText()
-    int QueryBoolText( bool* _value ) const;
+    XMLError QueryBoolText( bool* _value ) const;
     /// See QueryIntText()
-    int QueryDoubleText( double* _value ) const;
+    XMLError QueryDoubleText( double* _value ) const;
     /// See QueryIntText()
-    int QueryFloatText( float* _value ) const;
+    XMLError QueryFloatText( float* _value ) const;
 
     // internal:
     enum {
@@ -1359,14 +1368,14 @@ public:
     	specified, TinyXML will assume 'xml' points to a
     	null terminated string.
     */
-    int Parse( const char* xml, size_t nBytes=(size_t)(-1) );
+    XMLError Parse( const char* xml, size_t nBytes=(size_t)(-1) );
 
     /**
     	Load an XML file from disk.
     	Returns XML_NO_ERROR (0) on success, or
     	an errorID.
     */
-    int LoadFile( const char* filename );
+    XMLError LoadFile( const char* filename );
 
     /**
     	Load an XML file from disk. You are responsible
@@ -1375,14 +1384,14 @@ public:
     	Returns XML_NO_ERROR (0) on success, or
     	an errorID.
     */
-    int LoadFile( std::FILE* );
+    XMLError LoadFile( std::FILE* );
 
     /**
     	Save the XML file to disk.
     	Returns XML_NO_ERROR (0) on success, or
     	an errorID.
     */
-    int SaveFile( const char* filename, bool compact = false );
+    XMLError SaveFile( const char* filename, bool compact = false );
 
     /**
     	Save the XML file to disk. You are responsible
@@ -1391,7 +1400,7 @@ public:
     	Returns XML_NO_ERROR (0) on success, or
     	an errorID.
     */
-    int SaveFile( std::FILE* fp, bool compact = false );
+    XMLError SaveFile( std::FILE* fp, bool compact = false );
 
     bool ProcessEntities() const		{
         return _processEntities;
@@ -1484,14 +1493,14 @@ public:
         node->_parent->DeleteChild( node );
     }
 
-    void SetError( int error, const char* str1, const char* str2 );
+    void SetError( XMLError error, const char* str1, const char* str2 );
 
     /// Return true if there was an error parsing the document.
     bool Error() const {
         return _errorID != XML_NO_ERROR;
     }
     /// Return the errorID.
-    int  ErrorID() const {
+    XMLError  ErrorID() const {
         return _errorID;
     }
     /// Return a possibly helpful diagnostic location or string.
@@ -1520,13 +1529,13 @@ private:
     void operator=( const XMLDocument& );	// not supported
     void InitDocument();
 
-    bool _writeBOM;
-    bool _processEntities;
-    int  _errorID;
-    Whitespace _whitespace;
+    bool        _writeBOM;
+    bool        _processEntities;
+    XMLError    _errorID;
+    Whitespace  _whitespace;
     const char* _errorStr1;
     const char* _errorStr2;
-    char* _charBuffer;
+    char*       _charBuffer;
 
     MemPoolT< sizeof(XMLElement) >	 _elementPool;
     MemPoolT< sizeof(XMLAttribute) > _attributePool;

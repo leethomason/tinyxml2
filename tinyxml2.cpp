@@ -1072,7 +1072,7 @@ void XMLAttribute::SetName( const char* n )
 }
 
 
-int XMLAttribute::QueryIntValue( int* value ) const
+XMLError XMLAttribute::QueryIntValue( int* value ) const
 {
     if ( XMLUtil::ToInt( Value(), value )) {
         return XML_NO_ERROR;
@@ -1081,7 +1081,7 @@ int XMLAttribute::QueryIntValue( int* value ) const
 }
 
 
-int XMLAttribute::QueryUnsignedValue( unsigned int* value ) const
+XMLError XMLAttribute::QueryUnsignedValue( unsigned int* value ) const
 {
     if ( XMLUtil::ToUnsigned( Value(), value )) {
         return XML_NO_ERROR;
@@ -1090,7 +1090,7 @@ int XMLAttribute::QueryUnsignedValue( unsigned int* value ) const
 }
 
 
-int XMLAttribute::QueryBoolValue( bool* value ) const
+XMLError XMLAttribute::QueryBoolValue( bool* value ) const
 {
     if ( XMLUtil::ToBool( Value(), value )) {
         return XML_NO_ERROR;
@@ -1099,7 +1099,7 @@ int XMLAttribute::QueryBoolValue( bool* value ) const
 }
 
 
-int XMLAttribute::QueryFloatValue( float* value ) const
+XMLError XMLAttribute::QueryFloatValue( float* value ) const
 {
     if ( XMLUtil::ToFloat( Value(), value )) {
         return XML_NO_ERROR;
@@ -1108,7 +1108,7 @@ int XMLAttribute::QueryFloatValue( float* value ) const
 }
 
 
-int XMLAttribute::QueryDoubleValue( double* value ) const
+XMLError XMLAttribute::QueryDoubleValue( double* value ) const
 {
     if ( XMLUtil::ToDouble( Value(), value )) {
         return XML_NO_ERROR;
@@ -1225,7 +1225,7 @@ const char* XMLElement::GetText() const
 }
 
 
-int XMLElement::QueryIntText( int* _value ) const
+XMLError XMLElement::QueryIntText( int* _value ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->ToText()->Value();
@@ -1238,7 +1238,7 @@ int XMLElement::QueryIntText( int* _value ) const
 }
 
 
-int XMLElement::QueryUnsignedText( unsigned* _value ) const
+XMLError XMLElement::QueryUnsignedText( unsigned* _value ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->ToText()->Value();
@@ -1251,7 +1251,7 @@ int XMLElement::QueryUnsignedText( unsigned* _value ) const
 }
 
 
-int XMLElement::QueryBoolText( bool* _value ) const
+XMLError XMLElement::QueryBoolText( bool* _value ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->ToText()->Value();
@@ -1264,7 +1264,7 @@ int XMLElement::QueryBoolText( bool* _value ) const
 }
 
 
-int XMLElement::QueryDoubleText( double* _value ) const
+XMLError XMLElement::QueryDoubleText( double* _value ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->ToText()->Value();
@@ -1277,7 +1277,7 @@ int XMLElement::QueryDoubleText( double* _value ) const
 }
 
 
-int XMLElement::QueryFloatText( float* _value ) const
+XMLError XMLElement::QueryFloatText( float* _value ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->ToText()->Value();
@@ -1484,7 +1484,7 @@ XMLDocument::XMLDocument( bool processEntities, Whitespace whitespace ) :
     XMLNode( 0 ),
     _writeBOM( false ),
     _processEntities( processEntities ),
-    _errorID( 0 ),
+    _errorID( XML_NO_ERROR ),
     _whitespace( whitespace ),
     _errorStr1( 0 ),
     _errorStr2( 0 ),
@@ -1569,7 +1569,7 @@ XMLUnknown* XMLDocument::NewUnknown( const char* str )
 }
 
 
-int XMLDocument::LoadFile( const char* filename )
+XMLError XMLDocument::LoadFile( const char* filename )
 {
     DeleteChildren();
     InitDocument();
@@ -1591,7 +1591,7 @@ int XMLDocument::LoadFile( const char* filename )
 }
 
 
-int XMLDocument::LoadFile( FILE* fp )
+XMLError XMLDocument::LoadFile( FILE* fp )
 {
     DeleteChildren();
     InitDocument();
@@ -1626,7 +1626,7 @@ int XMLDocument::LoadFile( FILE* fp )
 }
 
 
-int XMLDocument::SaveFile( const char* filename, bool compact )
+XMLError XMLDocument::SaveFile( const char* filename, bool compact )
 {
     FILE* fp = 0;
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
@@ -1645,7 +1645,7 @@ int XMLDocument::SaveFile( const char* filename, bool compact )
 }
 
 
-int XMLDocument::SaveFile( FILE* fp, bool compact )
+XMLError XMLDocument::SaveFile( FILE* fp, bool compact )
 {
     XMLPrinter stream( fp, compact );
     Print( &stream );
@@ -1653,7 +1653,7 @@ int XMLDocument::SaveFile( FILE* fp, bool compact )
 }
 
 
-int XMLDocument::Parse( const char* p, size_t len )
+XMLError XMLDocument::Parse( const char* p, size_t len )
 {
     DeleteChildren();
     InitDocument();
@@ -1691,7 +1691,7 @@ void XMLDocument::Print( XMLPrinter* streamer )
 }
 
 
-void XMLDocument::SetError( int error, const char* str1, const char* str2 )
+void XMLDocument::SetError( XMLError error, const char* str1, const char* str2 )
 {
     _errorID = error;
     _errorStr1 = str1;

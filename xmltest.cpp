@@ -334,7 +334,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 
 		XMLDocument doc;
 		doc.Parse( error );
-		XMLTest( "Bad XML", doc.ErrorID(), (int)XML_ERROR_PARSING_ATTRIBUTE );
+		XMLTest( "Bad XML", doc.ErrorID(), XML_ERROR_PARSING_ATTRIBUTE );
 	}
 
 	{
@@ -633,7 +633,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLDocument doc;
 		doc.Parse( doctype );
 
-		XMLTest( "Parsing repeated attributes.", (int)XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );	// is an  error to tinyxml (didn't use to be, but caused issues)
+		XMLTest( "Parsing repeated attributes.", XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );	// is an  error to tinyxml (didn't use to be, but caused issues)
 		doc.PrintError();
 	}
 
@@ -651,7 +651,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		const char* str = "    ";
 		XMLDocument doc;
 		doc.Parse( str );
-		XMLTest( "Empty document error", (int)XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
+		XMLTest( "Empty document error", XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
 	}
 
 	{
@@ -678,7 +678,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		xml.Parse("<x> ");
 		XMLTest("Missing end tag with trailing whitespace", xml.Error(), true);
 		xml.Parse("<x></y>");
-		XMLTest("Mismatched tags", xml.ErrorID(), (int)XML_ERROR_MISMATCHED_ELEMENT);
+		XMLTest("Mismatched tags", xml.ErrorID(), XML_ERROR_MISMATCHED_ELEMENT);
 	}
 
 
