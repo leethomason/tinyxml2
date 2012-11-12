@@ -2087,4 +2087,5 @@ bool XMLPrinter::Visit( const XMLUnknown& unknown )
     return true;
 }
 
-}
+}   // namespace tinyxml2
+
