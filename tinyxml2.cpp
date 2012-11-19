@@ -669,6 +669,7 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
         addThis->_next = 0;
     }
     addThis->_parent = this;
+    addThis->_memPool->SetTracked();
     return addThis;
 }
 
@@ -693,6 +694,7 @@ XMLNode* XMLNode::InsertFirstChild( XMLNode* addThis )
         addThis->_next = 0;
     }
     addThis->_parent = this;
+    addThis->_memPool->SetTracked();
     return addThis;
 }
 
@@ -713,6 +715,7 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
     afterThis->_next->_prev = addThis;
     afterThis->_next = addThis;
     addThis->_parent = this;
+    addThis->_memPool->SetTracked();
     return addThis;
 }
 
@@ -814,6 +817,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
             if ( parentEnd ) {
                 *parentEnd = static_cast<XMLElement*>(node)->_value;
             }
+			node->_memPool->SetTracked();	// created and then immediately deleted.
             DELETE_NODE( node );
             return p;
         }
@@ -1314,6 +1318,7 @@ XMLAttribute* XMLElement::FindOrCreateAttribute( const char* name )
             _rootAttribute = attrib;
         }
         attrib->SetName( name );
+        attrib->_memPool->SetTracked(); // always created and linked.
     }
     return attrib;
 }
@@ -1355,6 +1360,7 @@ char* XMLElement::ParseAttributes( char* p )
         if ( XMLUtil::IsAlpha( *p ) ) {
             XMLAttribute* attrib = new (_document->_attributePool.Alloc() ) XMLAttribute();
             attrib->_memPool = &_document->_attributePool;
+			attrib->_memPool->SetTracked();
 
             p = attrib->ParseDeep( p, _document->ProcessEntities() );
             if ( !p || Attribute( attrib->Name() ) ) {
@@ -1508,10 +1514,14 @@ XMLDocument::~XMLDocument()
     attributePool.Trace( "attribute" );
 #endif
 
-    TIXMLASSERT( _textPool.CurrentAllocs() == 0 );
-    TIXMLASSERT( _elementPool.CurrentAllocs() == 0 );
-    TIXMLASSERT( _commentPool.CurrentAllocs() == 0 );
-    TIXMLASSERT( _attributePool.CurrentAllocs() == 0 );
+#ifdef DEBUG
+	if ( Error() == false ) {
+		TIXMLASSERT( _elementPool.CurrentAllocs()   == _elementPool.Untracked() );
+		TIXMLASSERT( _attributePool.CurrentAllocs() == _attributePool.Untracked() );
+		TIXMLASSERT( _textPool.CurrentAllocs()      == _textPool.Untracked() );
+		TIXMLASSERT( _commentPool.CurrentAllocs()   == _commentPool.Untracked() );
+	}
+#endif
 }
 
 

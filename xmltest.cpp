@@ -1,5 +1,8 @@
-#include "tinyxml2.h"
+#if defined( _MSC_VER )
+	#define _CRT_SECURE_NO_WARNINGS		// This test file is not intended to be secure.
+#endif
 
+#include "tinyxml2.h"
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
@@ -974,6 +977,15 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		doc.Print();
 	}
 #endif
+
+	{
+		// An assert should not fire.
+		const char* xml = "<element/>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLElement* ele = doc.NewElement( "unused" );		// This will get cleaned up with the 'doc' going out of scope.
+		XMLTest( "Tracking unused elements", true, ele != 0, false );
+	}
 
 	// ----------- Performance tracking --------------
 	{

@@ -45,7 +45,7 @@ distribution.
 */
 /*
 	gcc:
-        g++ -Wall tinyxml2.cpp xmltest.cpp -o gccxmltest.exe
+        g++ -Wall -DDEBUG tinyxml2.cpp xmltest.cpp -o gccxmltest.exe
     
     Formatting, Artistic Style:
         AStyle.exe --style=1tbs --indent-switches --break-closing-brackets --indent-preprocessor tinyxml2.cpp tinyxml2.h
@@ -285,6 +285,7 @@ public:
     virtual int ItemSize() const = 0;
     virtual void* Alloc() = 0;
     virtual void Free( void* ) = 0;
+    virtual void SetTracked() = 0;
 };
 
 
@@ -295,7 +296,7 @@ template< int SIZE >
 class MemPoolT : public MemPool
 {
 public:
-    MemPoolT() : _root(0), _currentAllocs(0), _nAllocs(0), _maxAllocs(0)	{}
+    MemPoolT() : _root(0), _currentAllocs(0), _nAllocs(0), _maxAllocs(0), _nUntracked(0)	{}
     ~MemPoolT() {
         // Delete the blocks.
         for( int i=0; i<_blockPtrs.Size(); ++i ) {
@@ -330,6 +331,7 @@ public:
             _maxAllocs = _currentAllocs;
         }
         _nAllocs++;
+        _nUntracked++;
         return result;
     }
     virtual void Free( void* mem ) {
@@ -349,6 +351,14 @@ public:
                 name, _maxAllocs, _maxAllocs*SIZE/1024, _currentAllocs, SIZE, _nAllocs, _blockPtrs.Size() );
     }
 
+    void SetTracked() {
+        _nUntracked--;
+    }
+
+    int Untracked() const {
+        return _nUntracked;
+    }
+
     enum { COUNT = 1024/SIZE }; // Some compilers do not accept to use COUNT in private part if COUNT is private
 
 private:
@@ -365,6 +375,7 @@ private:
     int _currentAllocs;
     int _nAllocs;
     int _maxAllocs;
+    int _nUntracked;
 };
 
 
