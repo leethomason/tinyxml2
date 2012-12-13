@@ -987,6 +987,19 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		XMLTest( "Tracking unused elements", true, ele != 0, false );
 	}
 
+
+	{
+		const char* xml = "<parent><child>abc</child></parent>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLElement* ele = doc.FirstChildElement( "parent")->FirstChildElement( "child");
+
+		XMLPrinter printer;
+		ele->Accept( &printer );
+		XMLTest( "Printing of sub-element", "<child>abc</child>\n", printer.CStr(), false );
+	}
+
+
 	// ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )
