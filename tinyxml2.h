@@ -24,7 +24,7 @@ distribution.
 #ifndef TINYXML2_INCLUDED
 #define TINYXML2_INCLUDED
 
-#ifdef ANDROID_NDK
+#if defined(ANDROID_NDK) || defined(__BORLANDC__)
 #   include <ctype.h>
 #   include <limits.h>
 #   include <stdio.h>
@@ -450,19 +450,19 @@ public:
     // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
     // correct, but simple, and usually works.
     static const char* SkipWhiteSpace( const char* p )	{
-        while( !IsUTF8Continuation(*p) && std::isspace( *reinterpret_cast<const unsigned char*>(p) ) ) {
+        while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<const unsigned char*>(p) ) ) {
             ++p;
         }
         return p;
     }
     static char* SkipWhiteSpace( char* p )				{
-        while( !IsUTF8Continuation(*p) && std::isspace( *reinterpret_cast<unsigned char*>(p) ) )		{
+        while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<unsigned char*>(p) ) )		{
             ++p;
         }
         return p;
     }
     static bool IsWhiteSpace( char p )					{
-        return !IsUTF8Continuation(p) && std::isspace( static_cast<unsigned char>(p) );
+        return !IsUTF8Continuation(p) && isspace( static_cast<unsigned char>(p) );
     }
 
     inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
@@ -484,10 +484,10 @@ public:
         return p & 0x80;
     }
     inline static int IsAlphaNum( unsigned char anyByte )	{
-        return ( anyByte < 128 ) ? std::isalnum( anyByte ) : 1;
+        return ( anyByte < 128 ) ? isalnum( anyByte ) : 1;
     }
     inline static int IsAlpha( unsigned char anyByte )		{
-        return ( anyByte < 128 ) ? std::isalpha( anyByte ) : 1;
+        return ( anyByte < 128 ) ? isalpha( anyByte ) : 1;
     }
 
     static const char* ReadBOM( const char* p, bool* hasBOM );
@@ -1395,7 +1395,7 @@ public:
     	Returns XML_NO_ERROR (0) on success, or
     	an errorID.
     */
-    XMLError LoadFile( std::FILE* );
+    XMLError LoadFile( FILE* );
 
     /**
     	Save the XML file to disk.
@@ -1411,7 +1411,7 @@ public:
     	Returns XML_NO_ERROR (0) on success, or
     	an errorID.
     */
-    XMLError SaveFile( std::FILE* fp, bool compact = false );
+    XMLError SaveFile( FILE* fp, bool compact = false );
 
     bool ProcessEntities() const		{
         return _processEntities;
@@ -1810,7 +1810,7 @@ public:
     	If 'compact' is set to true, then output is created
     	with only required whitespace and newlines.
     */
-    XMLPrinter( std::FILE* file=0, bool compact = false );
+    XMLPrinter( FILE* file=0, bool compact = false );
     ~XMLPrinter()	{}
 
     /** If streaming, write the BOM and declaration. */
@@ -1884,7 +1884,7 @@ private:
 
     bool _elementJustOpened;
     bool _firstElement;
-    std::FILE* _fp;
+    FILE* _fp;
     int _depth;
     int _textDepth;
     bool _processEntities;
