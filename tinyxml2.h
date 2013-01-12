@@ -40,6 +40,7 @@ distribution.
 #   include <cstdarg>
 #endif
 
+#include "config/version.h"
 
 // Import and export macros for shared libs; critical for Windows
 #if !defined(TINYXML2_STATIC)
@@ -135,10 +136,6 @@ inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
 #define TIXML_SNPRINTF snprintf
 #define TIXML_SSCANF   sscanf
 #endif
-
-static const int TIXML2_MAJOR_VERSION = 1;
-static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 9;
 
 namespace tinyxml2
 {
