@@ -159,7 +159,7 @@ class TINYXML2_API XMLPrinter;
 	and entity translation if actually read. Can also store (and memory
 	manage) a traditional char[]
 */
-class StrPair
+class TINYXML2_API StrPair
 {
 public:
     enum {
@@ -223,7 +223,7 @@ private:
 	cause a call to new/delete
 */
 template <class T, int INIT>
-class DynArray
+class TINYXML2_API DynArray
 {
 public:
     DynArray< T, INIT >() {
@@ -314,7 +314,7 @@ private:
 	Parent virtual class of a pool for fast allocation
 	and deallocation of objects.
 */
-class MemPool
+class TINYXML2_API MemPool
 {
 public:
     MemPool() {}
@@ -331,7 +331,7 @@ public:
 	Template child class to create pools of the correct type.
 */
 template< int SIZE >
-class MemPoolT : public MemPool
+class TINYXML2_API MemPoolT : public MemPool
 {
 public:
     MemPoolT() : _root(0), _currentAllocs(0), _nAllocs(0), _maxAllocs(0), _nUntracked(0)	{}
@@ -482,28 +482,28 @@ public:
 /*
 	Utility functionality.
 */
-class XMLUtil
+class TINYXML2_API XMLUtil
 {
 public:
     // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
     // correct, but simple, and usually works.
-    static TINYXML2_API const char* SkipWhiteSpace( const char* p )	{
+    static const char* SkipWhiteSpace( const char* p )	{
         while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<const unsigned char*>(p) ) ) {
             ++p;
         }
         return p;
     }
-    static TINYXML2_API char* SkipWhiteSpace( char* p )				{
+    static char* SkipWhiteSpace( char* p )				{
         while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<unsigned char*>(p) ) )		{
             ++p;
         }
         return p;
     }
-    static TINYXML2_API bool IsWhiteSpace( char p )					{
+    static bool IsWhiteSpace( char p )					{
         return !IsUTF8Continuation(p) && isspace( static_cast<unsigned char>(p) );
     }
 
-    inline static TINYXML2_API bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
+    inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
         int n = 0;
         if ( p == q ) {
             return true;
@@ -518,35 +518,35 @@ public:
         }
         return false;
     }
-    inline static TINYXML2_API int IsUTF8Continuation( const char p ) {
+    inline static int IsUTF8Continuation( const char p ) {
         return p & 0x80;
     }
-    inline static TINYXML2_API int IsAlphaNum( unsigned char anyByte )	{
+    inline static int IsAlphaNum( unsigned char anyByte )	{
         return ( anyByte < 128 ) ? isalnum( anyByte ) : 1;
     }
-    inline static TINYXML2_API int IsAlpha( unsigned char anyByte )		{
+    inline static int IsAlpha( unsigned char anyByte )		{
         return ( anyByte < 128 ) ? isalpha( anyByte ) : 1;
     }
 
-    static TINYXML2_API const char* ReadBOM( const char* p, bool* hasBOM );
+    static const char* ReadBOM( const char* p, bool* hasBOM );
     // p is the starting location,
     // the UTF-8 value of the entity will be placed in value, and length filled in.
-    static TINYXML2_API const char* GetCharacterRef( const char* p, char* value, int* length );
-    static TINYXML2_API void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
+    static const char* GetCharacterRef( const char* p, char* value, int* length );
+    static void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
 
     // converts primitive types to strings
-    static TINYXML2_API void ToStr( int v, char* buffer, int bufferSize );
-    static TINYXML2_API void ToStr( unsigned v, char* buffer, int bufferSize );
-    static TINYXML2_API void ToStr( bool v, char* buffer, int bufferSize );
-    static TINYXML2_API void ToStr( float v, char* buffer, int bufferSize );
-    static TINYXML2_API void ToStr( double v, char* buffer, int bufferSize );
+    static void ToStr( int v, char* buffer, int bufferSize );
+    static void ToStr( unsigned v, char* buffer, int bufferSize );
+    static void ToStr( bool v, char* buffer, int bufferSize );
+    static void ToStr( float v, char* buffer, int bufferSize );
+    static void ToStr( double v, char* buffer, int bufferSize );
 
     // converts strings to primitive types
-    static TINYXML2_API bool	ToInt( const char* str, int* value );
-    static TINYXML2_API bool    ToUnsigned( const char* str, unsigned* value );
-    static TINYXML2_API bool	ToBool( const char* str, bool* value );
-    static TINYXML2_API bool	ToFloat( const char* str, float* value );
-    static TINYXML2_API bool    ToDouble( const char* str, double* value );
+    static bool	ToInt( const char* str, int* value );
+    static bool    ToUnsigned( const char* str, unsigned* value );
+    static bool	ToBool( const char* str, bool* value );
+    static bool	ToFloat( const char* str, float* value );
+    static bool    ToDouble( const char* str, double* value );
 };
 
 
@@ -975,7 +975,7 @@ protected:
 };
 
 
-enum TINYXML2_API XMLError {
+enum XMLError {
     XML_NO_ERROR = 0,
     XML_SUCCESS = 0,
 
@@ -1381,7 +1381,7 @@ private:
 };
 
 
-enum TINYXML2_API Whitespace {
+enum Whitespace {
     PRESERVE_WHITESPACE,
     COLLAPSE_WHITESPACE
 };
