@@ -1,18 +1,24 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 cmake_policy(VERSION 2.6)
 
+set(CMAKE_BUILD_TYPE Release CACHE STRING "Set build type (Release | Debug)" FORCE)
+
 project(tinyxml2)
 include(GNUInstallDirs)
 #enable_testing()
 
-#CMAKE_BUILD_TOOL
+################################
+# Options
+
+option(BUILD_SHARED_LIBS "Build as shared library (Yes | No)" ON)
+option(TINYXML2_BUILD_TEST_EXEC "Build test executable (Yes | No)" OFF)
 
 ################################
-# set lib version here
+# Library versions
 
-set(GENERIC_LIB_VERSION "1.0.9")
-set(GENERIC_LIB_SOVERSION "1")
-
+set(VERSION_MAJOR 1)
+set(VERSION_MINOR 0)
+set(VERSION_PATCH 9)
 
 ################################
 # Add common source 
@@ -22,6 +28,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/.")
 ################################
 # Add custom target to copy all data
 
+# this should be changed to install target
 set(TARGET_DATA_COPY DATA_COPY)
 if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 	add_custom_target(
@@ -39,37 +46,50 @@ endif(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 ################################
 # Add definitions
 
+if(NOT BUILD_SHARED_LIBS)
+	add_definitions(-DTX2_STATIC)
+endif()
+
+
 if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif(MSVC)
 
 ################################
-# Add targets
-set(BUILD_STATIC_LIBS ON CACHE BOOL "Set to ON to build static libraries")
-if(BUILD_STATIC_LIBS)
-	add_library(tinyxml2static STATIC tinyxml2.cpp tinyxml2.h)
-	set_target_properties(tinyxml2static PROPERTIES OUTPUT_NAME tinyxml2)
-endif(BUILD_STATIC_LIBS)
-add_library(tinyxml2 SHARED tinyxml2.cpp tinyxml2.h)
-set_target_properties(tinyxml2 PROPERTIES
-	VERSION "${GENERIC_LIB_VERSION}"
-	SOVERSION "${GENERIC_LIB_SOVERSION}")
+# Add and set up targets
 
+# Set up library
+add_library(${CMAKE_PROJECT_NAME} tinyxml2.cpp tinyxml2.h)
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES DEFINE_SYMBOL TINYXML2_EXPORTS)
+if(BUILD_SHARED_LIBS)
+	if(MSVS)
+		set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES DEBUG_POSTFIX -d)
+		set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES SUFFIX "-${VERSION_MAJOR}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+	else()
+		set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES DEBUG_POSTFIX -d)
+	endif()
+else()
+	set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES DEBUG_POSTFIX -s-d)
+	set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES RELEASE_POSTFIX -s)
+endif()
+
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES SOVERSION ${VERSION_MAJOR})
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
+
+install(TARGETS ${CMAKE_PROJECT_NAME}
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES tinyxml2.h
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+#Set up test executable
+if(TINYXML2_BUILD_TEST_EXEC)
 add_executable(test xmltest.cpp)
 add_dependencies(test tinyxml2)
 add_dependencies(test ${TARGET_DATA_COPY})
 target_link_libraries(test tinyxml2)
+endif()
 
-
-if(BUILD_STATIC_LIBS)
-	install(TARGETS tinyxml2 tinyxml2static
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-else(BUILD_STATIC_LIBS)
-	install(TARGETS tinyxml2
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-endif(BUILD_STATIC_LIBS)
-install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 foreach(p LIB INCLUDE)
 	set(var CMAKE_INSTALL_${p}DIR)
