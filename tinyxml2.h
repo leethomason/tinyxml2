@@ -40,6 +40,7 @@ distribution.
 #   include <cstdarg>
 #endif
 
+
 // Import and export macros for shared libs; critical for Windows
 #if !defined(TINYXML2_STATIC)
     #if defined(_WIN32) || defined(__WIN32__)  // Windows
@@ -67,6 +68,7 @@ distribution.
     #define TINYXML2_API_IMPORT
 #endif
 
+
 #if defined(TINYXML2_EXPORTS)
     // We define TINYXML2_EXPORTS when compiling the shared lib
     #define TINYXML2_API TINYXML2_API_EXPORT
@@ -74,6 +76,8 @@ distribution.
     // If it's not defined, tinyxml2 is being linked to
     #define TINYXML2_API TINYXML2_API_IMPORT
 #endif
+
+
 /*
    TODO: intern strings instead of allocation.
 */
@@ -138,16 +142,16 @@ static const int TIXML2_PATCH_VERSION = 9;
 
 namespace tinyxml2
 {
-class XMLDocument;
-class XMLElement;
-class XMLAttribute;
-class XMLComment;
-class XMLNode;
-class XMLText;
-class XMLDeclaration;
-class XMLUnknown;
+class TINYXML2_API XMLDocument;
+class TINYXML2_API XMLElement;
+class TINYXML2_API XMLAttribute;
+class TINYXML2_API XMLComment;
+class TINYXML2_API XMLNode;
+class TINYXML2_API XMLText;
+class TINYXML2_API XMLDeclaration;
+class TINYXML2_API XMLUnknown;
 
-class XMLPrinter;
+class TINYXML2_API XMLPrinter;
 
 /*
 	A class that wraps strings. Normally stores the start and end
@@ -433,7 +437,7 @@ private:
 
 	@sa XMLNode::Accept()
 */
-class XMLVisitor
+class TINYXML2_API XMLVisitor
 {
 public:
     virtual ~XMLVisitor() {}
@@ -483,23 +487,23 @@ class XMLUtil
 public:
     // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
     // correct, but simple, and usually works.
-    static const char* SkipWhiteSpace( const char* p )	{
+    static TINYXML2_API const char* SkipWhiteSpace( const char* p )	{
         while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<const unsigned char*>(p) ) ) {
             ++p;
         }
         return p;
     }
-    static char* SkipWhiteSpace( char* p )				{
+    static TINYXML2_API char* SkipWhiteSpace( char* p )				{
         while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<unsigned char*>(p) ) )		{
             ++p;
         }
         return p;
     }
-    static bool IsWhiteSpace( char p )					{
+    static TINYXML2_API bool IsWhiteSpace( char p )					{
         return !IsUTF8Continuation(p) && isspace( static_cast<unsigned char>(p) );
     }
 
-    inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
+    inline static TINYXML2_API bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
         int n = 0;
         if ( p == q ) {
             return true;
@@ -514,35 +518,35 @@ public:
         }
         return false;
     }
-    inline static int IsUTF8Continuation( const char p ) {
+    inline static TINYXML2_API int IsUTF8Continuation( const char p ) {
         return p & 0x80;
     }
-    inline static int IsAlphaNum( unsigned char anyByte )	{
+    inline static TINYXML2_API int IsAlphaNum( unsigned char anyByte )	{
         return ( anyByte < 128 ) ? isalnum( anyByte ) : 1;
     }
-    inline static int IsAlpha( unsigned char anyByte )		{
+    inline static TINYXML2_API int IsAlpha( unsigned char anyByte )		{
         return ( anyByte < 128 ) ? isalpha( anyByte ) : 1;
     }
 
-    static const char* ReadBOM( const char* p, bool* hasBOM );
+    static TINYXML2_API const char* ReadBOM( const char* p, bool* hasBOM );
     // p is the starting location,
     // the UTF-8 value of the entity will be placed in value, and length filled in.
-    static const char* GetCharacterRef( const char* p, char* value, int* length );
-    static void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
+    static TINYXML2_API const char* GetCharacterRef( const char* p, char* value, int* length );
+    static TINYXML2_API void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
 
     // converts primitive types to strings
-    static void ToStr( int v, char* buffer, int bufferSize );
-    static void ToStr( unsigned v, char* buffer, int bufferSize );
-    static void ToStr( bool v, char* buffer, int bufferSize );
-    static void ToStr( float v, char* buffer, int bufferSize );
-    static void ToStr( double v, char* buffer, int bufferSize );
+    static TINYXML2_API void ToStr( int v, char* buffer, int bufferSize );
+    static TINYXML2_API void ToStr( unsigned v, char* buffer, int bufferSize );
+    static TINYXML2_API void ToStr( bool v, char* buffer, int bufferSize );
+    static TINYXML2_API void ToStr( float v, char* buffer, int bufferSize );
+    static TINYXML2_API void ToStr( double v, char* buffer, int bufferSize );
 
     // converts strings to primitive types
-    static bool	ToInt( const char* str, int* value );
-    static bool ToUnsigned( const char* str, unsigned* value );
-    static bool	ToBool( const char* str, bool* value );
-    static bool	ToFloat( const char* str, float* value );
-    static bool ToDouble( const char* str, double* value );
+    static TINYXML2_API bool	ToInt( const char* str, int* value );
+    static TINYXML2_API bool    ToUnsigned( const char* str, unsigned* value );
+    static TINYXML2_API bool	ToBool( const char* str, bool* value );
+    static TINYXML2_API bool	ToFloat( const char* str, float* value );
+    static TINYXML2_API bool    ToDouble( const char* str, double* value );
 };
 
 
@@ -571,7 +575,7 @@ public:
 
 	@endverbatim
 */
-class XMLNode
+class TINYXML2_API XMLNode
 {
     friend class XMLDocument;
     friend class XMLElement;
@@ -837,7 +841,7 @@ private:
 	you generally want to leave it alone, but you can change the output mode with
 	SetCDATA() and query it with CDATA().
 */
-class XMLText : public XMLNode
+class TINYXML2_API XMLText : public XMLNode
 {
     friend class XMLBase;
     friend class XMLDocument;
@@ -876,7 +880,7 @@ private:
 
 
 /** An XML Comment. */
-class XMLComment : public XMLNode
+class TINYXML2_API XMLComment : public XMLNode
 {
     friend class XMLDocument;
 public:
@@ -914,7 +918,7 @@ private:
 	The text of the declaration isn't interpreted. It is parsed
 	and written as a string.
 */
-class XMLDeclaration : public XMLNode
+class TINYXML2_API XMLDeclaration : public XMLNode
 {
     friend class XMLDocument;
 public:
@@ -946,7 +950,7 @@ protected:
 
 	DTD tags get thrown into TiXmlUnknowns.
 */
-class XMLUnknown : public XMLNode
+class TINYXML2_API XMLUnknown : public XMLNode
 {
     friend class XMLDocument;
 public:
@@ -971,7 +975,7 @@ protected:
 };
 
 
-enum XMLError {
+enum TINYXML2_API XMLError {
     XML_NO_ERROR = 0,
     XML_SUCCESS = 0,
 
@@ -1005,7 +1009,7 @@ enum XMLError {
 	@note The attributes are not XMLNodes. You may only query the
 	Next() attribute in a list.
 */
-class XMLAttribute
+class TINYXML2_API XMLAttribute
 {
     friend class XMLElement;
 public:
@@ -1106,7 +1110,7 @@ private:
 	and can contain other elements, text, comments, and unknowns.
 	Elements also contain an arbitrary number of attributes.
 */
-class XMLElement : public XMLNode
+class TINYXML2_API XMLElement : public XMLNode
 {
     friend class XMLBase;
     friend class XMLDocument;
@@ -1377,7 +1381,7 @@ private:
 };
 
 
-enum Whitespace {
+enum TINYXML2_API Whitespace {
     PRESERVE_WHITESPACE,
     COLLAPSE_WHITESPACE
 };
@@ -1388,7 +1392,7 @@ enum Whitespace {
 	All Nodes are connected and allocated to a Document.
 	If the Document is deleted, all its Nodes are also deleted.
 */
-class XMLDocument : public XMLNode
+class TINYXML2_API XMLDocument : public XMLNode
 {
     friend class XMLElement;
 public:
@@ -1644,7 +1648,7 @@ private:
 
 	See also XMLConstHandle, which is the same as XMLHandle, but operates on const objects.
 */
-class XMLHandle
+class TINYXML2_API XMLHandle
 {
 public:
     /// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
@@ -1728,7 +1732,7 @@ private:
 	A variant of the XMLHandle class for working with const XMLNodes and Documents. It is the
 	same in all regards, except for the 'const' qualifiers. See XMLHandle for API.
 */
-class XMLConstHandle
+class TINYXML2_API XMLConstHandle
 {
 public:
     XMLConstHandle( const XMLNode* node )											{
@@ -1835,7 +1839,7 @@ private:
 	printer.CloseElement();
 	@endverbatim
 */
-class XMLPrinter : public XMLVisitor
+class TINYXML2_API XMLPrinter : public XMLVisitor
 {
 public:
     /** Construct the printer. If the FILE* is specified,
