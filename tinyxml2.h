@@ -52,11 +52,11 @@ distribution.
         #endif
     #else  // *nixes and friends
         #if __GNUC__ >= 4
-            // GCC 4.x has special keywords for showing/hidding symbols
+            // GCC 4.x has special keywords for showing/hidding symbols, and they're identical for both
             #define TINY2_API_EXPORT __attribute__ ((__visibility__ ("default")))
-            #define TINY2_API_EXPORT __attribute__ ((__visibility__ ("default")))
+            #define TINY2_API_IMPORT __attribute__ ((__visibility__ ("default")))
         #else
-            // GCC before 4 has no such keywords
+            // GCC before 4.x has no such keywords
             #define TINYXML2_API_EXPORT
             #define TINYXML2_API_IMPORT
         #endif
@@ -65,6 +65,14 @@ distribution.
     // Static builds don't need import/export macros
     #define TINYXML2_API_EXPORT
     #define TINYXML2_API_IMPORT
+#endif
+
+#if defined(TINYXML2_EXPORTS)
+    // We define TINYXML2_EXPORTS when compiling the shared lib
+    #define TINYXML2_API TINYXML2_API_EXPORT
+#else
+    // If it's not defined, tinyxml2 is being linked to
+    #define TINYXML2_API TINYXML2_API_IMPORT
 #endif
 /*
    TODO: intern strings instead of allocation.
