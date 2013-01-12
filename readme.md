@@ -1,4 +1,4 @@
-TinyXML-2
+TinyXML-2 {#mainpage}
 =========
 
 TinyXML is a simple, small, efficient, C++ XML parser that can be 
