@@ -40,6 +40,32 @@ distribution.
 #   include <cstdarg>
 #endif
 
+// Import and export macros for shared libs; critical for Windows
+#if !defined(TINYXML2_STATIC)
+    #if defined(_WIN32) || defined(__WIN32__)  // Windows
+        #define TINYXML2_API_EXPORT __declspec(dllexport)
+        #define TINYXML2_API_IMPORT __declspec(dllimport)
+        
+        #if defined(_MSC_VER)
+            // Suppress warning C4251 when compiling with MSVC
+            #pragma warning(disable: 4251)
+        #endif
+    #else  // *nixes and friends
+        #if __GNUC__ >= 4
+            // GCC 4.x has special keywords for showing/hidding symbols
+            #define TINY2_API_EXPORT __attribute__ ((__visibility__ ("default")))
+            #define TINY2_API_EXPORT __attribute__ ((__visibility__ ("default")))
+        #else
+            // GCC before 4 has no such keywords
+            #define TINYXML2_API_EXPORT
+            #define TINYXML2_API_IMPORT
+        #endif
+    #endif
+#else
+    // Static builds don't need import/export macros
+    #define TINYXML2_API_EXPORT
+    #define TINYXML2_API_IMPORT
+#endif
 /*
    TODO: intern strings instead of allocation.
 */
