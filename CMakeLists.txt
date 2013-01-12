@@ -14,11 +14,10 @@ option(BUILD_SHARED_LIBS "Build as shared library (Yes | No)" ON)
 option(TINYXML2_BUILD_TESTS "Build test executable (Yes | No)" OFF)
 
 ################################
-# Library versions
+# Set library versions
 
-set(VERSION_MAJOR 1)
-set(VERSION_MINOR 0)
-set(VERSION_PATCH 9)
+# Read from external file
+include("${CMAKE_CURRENT_SOURCE_DIR}/config/version.cmake")
 
 ################################
 # Add common source 
@@ -31,7 +30,6 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/.")
 if(NOT BUILD_SHARED_LIBS)
 	add_definitions(-DTINYXML2_STATIC)
 endif()
-
 
 if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -67,7 +65,7 @@ install(TARGETS ${LIB_NAME}
 install(FILES tinyxml2.h
 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-#Set up tests executable
+# Set up tests executable
 if(TINYXML2_BUILD_TESTS)
 add_executable(tests xmltest.cpp)
 add_dependencies(tests tinyxml2)
@@ -80,7 +78,7 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/resources"
 		DESTINATION "${CMAKE_INSTALL_PREFIX}/tests")
 endif()
 
-
+# Write pkgconfig file
 configure_file(tinyxml2.pc.in tinyxml2.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
