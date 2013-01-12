@@ -79,13 +79,6 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/resources"
 endif()
 
 
-foreach(p LIB INCLUDE)
-	set(var CMAKE_INSTALL_${p}DIR)
-	if(NOT IS_ABSOLUTE "${${var}}")
-		set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
-	endif()
-endforeach()
-
 configure_file(tinyxml2.pc.in tinyxml2.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
