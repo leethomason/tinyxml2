@@ -11,7 +11,7 @@ include(GNUInstallDirs)
 # Options
 
 option(BUILD_SHARED_LIBS "Build as shared library (Yes | No)" ON)
-option(TINYXML2_BUILD_TEST_EXEC "Build test executable (Yes | No)" OFF)
+option(TINYXML2_BUILD_TESTS "Build test executable (Yes | No)" OFF)
 
 ################################
 # Library versions
@@ -24,24 +24,6 @@ set(VERSION_PATCH 9)
 # Add common source 
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/.")
-
-################################
-# Add custom target to copy all data
-
-# this should be changed to install target
-set(TARGET_DATA_COPY DATA_COPY)
-if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
-	add_custom_target(
-		${TARGET_DATA_COPY}
-	 	COMMAND ${CMAKE_COMMAND} -E echo "In source build")
-else(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
-	make_directory(${CMAKE_CURRENT_BINARY_DIR}/resources/)
-	add_custom_target(
-		${TARGET_DATA_COPY}
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/dream.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/utf8test.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/utf8testverify.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/)
-endif(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 
 ################################
 # Add definitions
@@ -83,12 +65,17 @@ install(TARGETS ${CMAKE_PROJECT_NAME}
 install(FILES tinyxml2.h
 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-#Set up test executable
-if(TINYXML2_BUILD_TEST_EXEC)
-add_executable(test xmltest.cpp)
-add_dependencies(test tinyxml2)
-add_dependencies(test ${TARGET_DATA_COPY})
-target_link_libraries(test tinyxml2)
+#Set up tests executable
+if(TINYXML2_BUILD_TESTS)
+add_executable(tests xmltest.cpp)
+add_dependencies(tests tinyxml2)
+target_link_libraries(tests tinyxml2)
+set_target_properties(tests PROPERTIES OUTPUT_NAME run_tests)
+
+install(TARGETS tests
+		RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/tests")
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/resources"
+		DESTINATION "${CMAKE_INSTALL_PREFIX}/tests")
 endif()
 
 
