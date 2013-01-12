@@ -1,7 +1,3 @@
-#if defined( _MSC_VER )
-	#define _CRT_SECURE_NO_WARNINGS		// This test file is not intended to be secure.
-#endif
-
 #include "tinyxml2.h"
 #include <cstdlib>
 #include <cstring>
