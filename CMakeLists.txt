@@ -41,24 +41,26 @@ endif(MSVC)
 # Add and set up targets
 
 # Set up library
-add_library(${CMAKE_PROJECT_NAME} tinyxml2.cpp tinyxml2.h)
-set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES DEFINE_SYMBOL TINYXML2_EXPORTS)
+set(LIB_NAME ${CMAKE_PROJECT_NAME})
+add_library(${LIB_NAME} tinyxml2.cpp tinyxml2.h)
+set_target_properties(${LIB_NAME} PROPERTIES DEFINE_SYMBOL TINYXML2_EXPORTS)
+
 if(BUILD_SHARED_LIBS)
 	if(MSVC)
-		set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES DEBUG_POSTFIX -d)
-		set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES SUFFIX "-${VERSION_MAJOR}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+		set_target_properties(${LIB_NAME} PROPERTIES DEBUG_POSTFIX -d)
+		set_target_properties(${LIB_NAME} PROPERTIES SUFFIX "-${VERSION_MAJOR}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 	else()
-		set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES DEBUG_POSTFIX -d)
+		set_target_properties(${LIB_NAME} PROPERTIES DEBUG_POSTFIX -d)
 	endif()
 else()
-	set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES DEBUG_POSTFIX -s-d)
-	set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES RELEASE_POSTFIX -s)
+	set_target_properties(${LIB_NAME} PROPERTIES DEBUG_POSTFIX -s-d)
+	set_target_properties(${LIB_NAME} PROPERTIES RELEASE_POSTFIX -s)
 endif()
 
-set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES SOVERSION ${VERSION_MAJOR})
-set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
+set_target_properties(${LIB_NAME} PROPERTIES SOVERSION ${VERSION_MAJOR})
+set_target_properties(${LIB_NAME} PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
 
-install(TARGETS ${CMAKE_PROJECT_NAME}
+install(TARGETS ${LIB_NAME}
 		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -82,4 +84,4 @@ endif()
 configure_file(tinyxml2.pc.in tinyxml2.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
-#add_test(test ${SAMPLE_NAME} COMMAND $<TARGET_FILE:${SAMPLE_NAME}>)
+#add_test(tests ${SAMPLE_NAME} COMMAND $<TARGET_FILE:${SAMPLE_NAME}>)
