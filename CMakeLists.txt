@@ -47,7 +47,7 @@ endif(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 # Add definitions
 
 if(NOT BUILD_SHARED_LIBS)
-	add_definitions(-DTX2_STATIC)
+	add_definitions(-DTINYXML2_STATIC)
 endif()
 
 
