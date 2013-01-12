@@ -5,6 +5,9 @@ set(CMAKE_BUILD_TYPE Release CACHE STRING "Set build type (Release | Debug)" FOR
 
 project(tinyxml2)
 include(GNUInstallDirs)
+
+find_package(Doxygen)
+
 #enable_testing()
 
 ################################
@@ -12,6 +15,9 @@ include(GNUInstallDirs)
 
 option(BUILD_SHARED_LIBS "Build as shared library (Yes | No)" ON)
 option(TINYXML2_BUILD_TESTS "Build test executable (Yes | No)" OFF)
+if(DOXYGEN_FOUND)
+option(TINYXML2_BUILD_DOCS "Build documentation with Doxygen (Yes | No)" OFF)
+endif()
 
 ################################
 # Set library versions
@@ -76,6 +82,19 @@ install(TARGETS tests
 		RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/tests")
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/resources"
 		DESTINATION "${CMAKE_INSTALL_PREFIX}/tests")
+endif()
+
+# Set up docs, if Doxygen is available
+if(DOXYGEN_FOUND AND TINYXML2_BUILD_DOCS)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Doxyfile.in
+				   ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+	add_custom_target(docs
+					  ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+					  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+					  VERBATIM)
+	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs
+			DESTINATION ${CMAKE_INSTALL_PREFIX}
+			OPTIONAL)
 endif()
 
 # Write pkgconfig file
