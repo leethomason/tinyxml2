@@ -42,6 +42,8 @@ distribution.
 
 #include "config/version.h"
 
+// Following import/export macro is near-verbatim copy from SFML (http://www.sfml-dev.org/)
+
 // Import and export macros for shared libs; critical for Windows
 #if !defined(TINYXML2_STATIC)
     #if defined(_WIN32) || defined(__WIN32__)  // Windows
