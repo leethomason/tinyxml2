@@ -40,6 +40,47 @@ distribution.
 #   include <cstdarg>
 #endif
 
+#include "config/version.h"
+
+// Following import/export macro is near-verbatim copy from SFML (http://www.sfml-dev.org/)
+
+// Import and export macros for shared libs; critical for Windows
+#if !defined(TINYXML2_STATIC)
+    #if defined(_WIN32) || defined(__WIN32__)  // Windows
+        #define TINYXML2_API_EXPORT __declspec(dllexport)
+        #define TINYXML2_API_IMPORT __declspec(dllimport)
+        
+        #if defined(_MSC_VER)
+            // Suppress warning C4251 when compiling with MSVC
+            #pragma warning(disable: 4251)
+        #endif
+    #else  // *nixes and friends
+        #if __GNUC__ >= 4
+            // GCC 4.x has special keywords for showing/hidding symbols, and they're identical for both
+            #define TINY2_API_EXPORT __attribute__ ((__visibility__ ("default")))
+            #define TINY2_API_IMPORT __attribute__ ((__visibility__ ("default")))
+        #else
+            // GCC before 4.x has no such keywords
+            #define TINYXML2_API_EXPORT
+            #define TINYXML2_API_IMPORT
+        #endif
+    #endif
+#else
+    // Static builds don't need import/export macros
+    #define TINYXML2_API_EXPORT
+    #define TINYXML2_API_IMPORT
+#endif
+
+
+#if defined(TINYXML2_EXPORTS)
+    // We define TINYXML2_EXPORTS when compiling the shared lib
+    #define TINYXML2_API TINYXML2_API_EXPORT
+#else
+    // If it's not defined, tinyxml2 is being linked to
+    #define TINYXML2_API TINYXML2_API_IMPORT
+#endif
+
+
 /*
    TODO: intern strings instead of allocation.
 */
@@ -98,22 +139,18 @@ inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
 #define TIXML_SSCANF   sscanf
 #endif
 
-static const int TIXML2_MAJOR_VERSION = 1;
-static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 9;
-
 namespace tinyxml2
 {
-class XMLDocument;
-class XMLElement;
-class XMLAttribute;
-class XMLComment;
-class XMLNode;
-class XMLText;
-class XMLDeclaration;
-class XMLUnknown;
+class TINYXML2_API XMLDocument;
+class TINYXML2_API XMLElement;
+class TINYXML2_API XMLAttribute;
+class TINYXML2_API XMLComment;
+class TINYXML2_API XMLNode;
+class TINYXML2_API XMLText;
+class TINYXML2_API XMLDeclaration;
+class TINYXML2_API XMLUnknown;
 
-class XMLPrinter;
+class TINYXML2_API XMLPrinter;
 
 /*
 	A class that wraps strings. Normally stores the start and end
@@ -121,7 +158,7 @@ class XMLPrinter;
 	and entity translation if actually read. Can also store (and memory
 	manage) a traditional char[]
 */
-class StrPair
+class TINYXML2_API StrPair
 {
 public:
     enum {
@@ -185,7 +222,7 @@ private:
 	cause a call to new/delete
 */
 template <class T, int INIT>
-class DynArray
+class TINYXML2_API DynArray
 {
 public:
     DynArray< T, INIT >() {
@@ -276,7 +313,7 @@ private:
 	Parent virtual class of a pool for fast allocation
 	and deallocation of objects.
 */
-class MemPool
+class TINYXML2_API MemPool
 {
 public:
     MemPool() {}
@@ -293,7 +330,7 @@ public:
 	Template child class to create pools of the correct type.
 */
 template< int SIZE >
-class MemPoolT : public MemPool
+class TINYXML2_API MemPoolT : public MemPool
 {
 public:
     MemPoolT() : _root(0), _currentAllocs(0), _nAllocs(0), _maxAllocs(0), _nUntracked(0)	{}
@@ -399,7 +436,7 @@ private:
 
 	@sa XMLNode::Accept()
 */
-class XMLVisitor
+class TINYXML2_API XMLVisitor
 {
 public:
     virtual ~XMLVisitor() {}
@@ -444,7 +481,7 @@ public:
 /*
 	Utility functionality.
 */
-class XMLUtil
+class TINYXML2_API XMLUtil
 {
 public:
     // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
@@ -505,10 +542,10 @@ public:
 
     // converts strings to primitive types
     static bool	ToInt( const char* str, int* value );
-    static bool ToUnsigned( const char* str, unsigned* value );
+    static bool    ToUnsigned( const char* str, unsigned* value );
     static bool	ToBool( const char* str, bool* value );
     static bool	ToFloat( const char* str, float* value );
-    static bool ToDouble( const char* str, double* value );
+    static bool    ToDouble( const char* str, double* value );
 };
 
 
@@ -537,7 +574,7 @@ public:
 
 	@endverbatim
 */
-class XMLNode
+class TINYXML2_API XMLNode
 {
     friend class XMLDocument;
     friend class XMLElement;
@@ -803,7 +840,7 @@ private:
 	you generally want to leave it alone, but you can change the output mode with
 	SetCDATA() and query it with CDATA().
 */
-class XMLText : public XMLNode
+class TINYXML2_API XMLText : public XMLNode
 {
     friend class XMLBase;
     friend class XMLDocument;
@@ -842,7 +879,7 @@ private:
 
 
 /** An XML Comment. */
-class XMLComment : public XMLNode
+class TINYXML2_API XMLComment : public XMLNode
 {
     friend class XMLDocument;
 public:
@@ -880,7 +917,7 @@ private:
 	The text of the declaration isn't interpreted. It is parsed
 	and written as a string.
 */
-class XMLDeclaration : public XMLNode
+class TINYXML2_API XMLDeclaration : public XMLNode
 {
     friend class XMLDocument;
 public:
@@ -912,7 +949,7 @@ protected:
 
 	DTD tags get thrown into TiXmlUnknowns.
 */
-class XMLUnknown : public XMLNode
+class TINYXML2_API XMLUnknown : public XMLNode
 {
     friend class XMLDocument;
 public:
@@ -971,7 +1008,7 @@ enum XMLError {
 	@note The attributes are not XMLNodes. You may only query the
 	Next() attribute in a list.
 */
-class XMLAttribute
+class TINYXML2_API XMLAttribute
 {
     friend class XMLElement;
 public:
@@ -1072,7 +1109,7 @@ private:
 	and can contain other elements, text, comments, and unknowns.
 	Elements also contain an arbitrary number of attributes.
 */
-class XMLElement : public XMLNode
+class TINYXML2_API XMLElement : public XMLNode
 {
     friend class XMLBase;
     friend class XMLDocument;
@@ -1354,7 +1391,7 @@ enum Whitespace {
 	All Nodes are connected and allocated to a Document.
 	If the Document is deleted, all its Nodes are also deleted.
 */
-class XMLDocument : public XMLNode
+class TINYXML2_API XMLDocument : public XMLNode
 {
     friend class XMLElement;
 public:
@@ -1610,7 +1647,7 @@ private:
 
 	See also XMLConstHandle, which is the same as XMLHandle, but operates on const objects.
 */
-class XMLHandle
+class TINYXML2_API XMLHandle
 {
 public:
     /// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
@@ -1694,7 +1731,7 @@ private:
 	A variant of the XMLHandle class for working with const XMLNodes and Documents. It is the
 	same in all regards, except for the 'const' qualifiers. See XMLHandle for API.
 */
-class XMLConstHandle
+class TINYXML2_API XMLConstHandle
 {
 public:
     XMLConstHandle( const XMLNode* node )											{
@@ -1801,7 +1838,7 @@ private:
 	printer.CloseElement();
 	@endverbatim
 */
-class XMLPrinter : public XMLVisitor
+class TINYXML2_API XMLPrinter : public XMLVisitor
 {
 public:
     /** Construct the printer. If the FILE* is specified,

@@ -1,7 +1,3 @@
-#if defined( _MSC_VER )
-	#define _CRT_SECURE_NO_WARNINGS		// This test file is not intended to be secure.
-#endif
-
 #include "tinyxml2.h"
 #include <cstdlib>
 #include <cstring>
@@ -14,6 +10,8 @@
 	#include <windows.h>
 	_CrtMemState startMemState;
 	_CrtMemState endMemState;
+#elif defined(MINGW32) || defined(__MINGW32__)
+    #include <io.h>  // mkdir
 #else
 	#include <sys/stat.h>	// mkdir
 #endif
@@ -156,7 +154,7 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		_CrtMemCheckpoint( &startMemState );
 	#endif
 
-	#if defined(_MSC_VER)
+	#if defined(_MSC_VER) || defined(MINGW32) || defined(__MINGW32__)
 		_mkdir( "resources/out/" );
 	#else
 		mkdir( "resources/out/", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
