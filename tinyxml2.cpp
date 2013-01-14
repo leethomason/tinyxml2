@@ -326,6 +326,8 @@ void XMLUtil::ConvertUTF32ToUTF8( unsigned long input, char* output, int* length
         case 1:
             --output;
             *output = (char)(input | FIRST_BYTE_MARK[*length]);
+        default:
+            break;
     }
 }
 
@@ -1229,11 +1231,11 @@ const char* XMLElement::GetText() const
 }
 
 
-XMLError XMLElement::QueryIntText( int* _value ) const
+XMLError XMLElement::QueryIntText( int* ival ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->ToText()->Value();
-        if ( XMLUtil::ToInt( t, _value ) ) {
+        if ( XMLUtil::ToInt( t, ival ) ) {
             return XML_SUCCESS;
         }
         return XML_CAN_NOT_CONVERT_TEXT;
@@ -1242,11 +1244,11 @@ XMLError XMLElement::QueryIntText( int* _value ) const
 }
 
 
-XMLError XMLElement::QueryUnsignedText( unsigned* _value ) const
+XMLError XMLElement::QueryUnsignedText( unsigned* uval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->ToText()->Value();
-        if ( XMLUtil::ToUnsigned( t, _value ) ) {
+        if ( XMLUtil::ToUnsigned( t, uval ) ) {
             return XML_SUCCESS;
         }
         return XML_CAN_NOT_CONVERT_TEXT;
@@ -1255,11 +1257,11 @@ XMLError XMLElement::QueryUnsignedText( unsigned* _value ) const
 }
 
 
-XMLError XMLElement::QueryBoolText( bool* _value ) const
+XMLError XMLElement::QueryBoolText( bool* bval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->ToText()->Value();
-        if ( XMLUtil::ToBool( t, _value ) ) {
+        if ( XMLUtil::ToBool( t, bval ) ) {
             return XML_SUCCESS;
         }
         return XML_CAN_NOT_CONVERT_TEXT;
@@ -1268,11 +1270,11 @@ XMLError XMLElement::QueryBoolText( bool* _value ) const
 }
 
 
-XMLError XMLElement::QueryDoubleText( double* _value ) const
+XMLError XMLElement::QueryDoubleText( double* dval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->ToText()->Value();
-        if ( XMLUtil::ToDouble( t, _value ) ) {
+        if ( XMLUtil::ToDouble( t, dval ) ) {
             return XML_SUCCESS;
         }
         return XML_CAN_NOT_CONVERT_TEXT;
@@ -1281,11 +1283,11 @@ XMLError XMLElement::QueryDoubleText( double* _value ) const
 }
 
 
-XMLError XMLElement::QueryFloatText( float* _value ) const
+XMLError XMLElement::QueryFloatText( float* fval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->ToText()->Value();
-        if ( XMLUtil::ToFloat( t, _value ) ) {
+        if ( XMLUtil::ToFloat( t, fval ) ) {
             return XML_SUCCESS;
         }
         return XML_CAN_NOT_CONVERT_TEXT;
