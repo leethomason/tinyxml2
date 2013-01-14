@@ -46,7 +46,7 @@ distribution.
 /*
 	gcc:
         g++ -Wall -DDEBUG tinyxml2.cpp xmltest.cpp -o gccxmltest.exe
-    
+
     Formatting, Artistic Style:
         AStyle.exe --style=1tbs --indent-switches --break-closing-brackets --indent-preprocessor tinyxml2.cpp tinyxml2.h
 */
@@ -554,27 +554,27 @@ public:
 
     /// Safely cast to an Element, or null.
     virtual XMLElement*		ToElement()		{
-        return 0;    
+        return 0;
     }
     /// Safely cast to Text, or null.
     virtual XMLText*		ToText()		{
-        return 0;    
+        return 0;
     }
     /// Safely cast to a Comment, or null.
     virtual XMLComment*		ToComment()		{
-        return 0;    
+        return 0;
     }
     /// Safely cast to a Document, or null.
     virtual XMLDocument*	ToDocument()	{
-        return 0;    
+        return 0;
     }
     /// Safely cast to a Declaration, or null.
     virtual XMLDeclaration*	ToDeclaration()	{
-        return 0;    
+        return 0;
     }
     /// Safely cast to an Unknown, or null.
     virtual XMLUnknown*		ToUnknown()		{
-        return 0;    
+        return 0;
     }
 
     virtual const XMLElement*		ToElement() const		{
@@ -608,7 +608,7 @@ public:
     const char* Value() const			{
         return _value.GetStr();
     }
-    
+
     /** Set the Value of an XML node.
     	@sa Value()
     */
@@ -618,7 +618,7 @@ public:
     const XMLNode*	Parent() const			{
         return _parent;
     }
-    
+
     XMLNode* Parent()						{
         return _parent;
     }
@@ -632,11 +632,11 @@ public:
     const XMLNode*  FirstChild() const		{
         return _firstChild;
     }
-    
+
     XMLNode*		FirstChild()			{
         return _firstChild;
     }
-    
+
     /** Get the first child element, or optionally the first child
         element with the specified name.
     */
@@ -977,15 +977,15 @@ class XMLAttribute
 public:
     /// The name of the attribute.
     const char* Name() const {
-        return _name.GetStr();    
+        return _name.GetStr();
     }
     /// The value of the attribute.
     const char* Value() const {
-        return _value.GetStr();    
+        return _value.GetStr();
     }
     /// The next attribute in the list.
     const XMLAttribute* Next() const {
-        return _next;    
+        return _next;
     }
 
     /** IntAttribute interprets the attribute as an integer, and returns the value.
@@ -1301,15 +1301,15 @@ public:
     			 to the requested type, and XML_NO_TEXT_NODE if there is no child text to query.
 
     */
-    XMLError QueryIntText( int* _value ) const;
+    XMLError QueryIntText( int* ival ) const;
     /// See QueryIntText()
-    XMLError QueryUnsignedText( unsigned* _value ) const;
+    XMLError QueryUnsignedText( unsigned* uval ) const;
     /// See QueryIntText()
-    XMLError QueryBoolText( bool* _value ) const;
+    XMLError QueryBoolText( bool* bval ) const;
     /// See QueryIntText()
-    XMLError QueryDoubleText( double* _value ) const;
+    XMLError QueryDoubleText( double* dval ) const;
     /// See QueryIntText()
-    XMLError QueryFloatText( float* _value ) const;
+    XMLError QueryFloatText( float* fval ) const;
 
     // internal:
     enum {
