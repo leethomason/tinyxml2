@@ -669,7 +669,7 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = tinyxml2.h \
-                         xmltest.h \
+                         xmltest.cpp \
                          readme.md
 
 # This tag can be used to specify the character encoding of the source files
