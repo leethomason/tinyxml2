@@ -264,7 +264,7 @@ bool example_4()
 */
 
 
-int main( int /*argc*/, const char ** /*argv*/ )
+int main( int argc, const char ** argv )
 {
 	#if defined( _MSC_VER ) && defined( DEBUG )
 		_CrtMemCheckpoint( &startMemState );
@@ -275,6 +275,23 @@ int main( int /*argc*/, const char ** /*argv*/ )
 	#else
 		mkdir( "resources/out/", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	#endif
+
+	if ( argc > 1 ) {
+		XMLDocument* doc = new XMLDocument();
+		clock_t startTime = clock();
+		doc->LoadFile( argv[1] );
+		clock_t loadTime = clock();
+		int errorID = doc->ErrorID();
+		delete doc; doc = 0;
+		clock_t deleteTime = clock();
+
+		printf( "Test file '%s' loaded. ErrorID=%d\n", argv[1], errorID );
+		if ( !errorID ) {
+			printf( "Load time=%d\n", loadTime - startTime );
+			printf( "Delete time=%d\n", deleteTime - loadTime );
+		}
+		exit(0);
+	}
 
 	FILE* fp = fopen( "resources/dream.xml", "r" );
 	if ( !fp ) {
