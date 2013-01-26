@@ -1033,6 +1033,13 @@ int main( int /*argc*/, const char ** /*argv*/ )
 		doc.Parse( xml );
 		XMLTest( "Non-alpha element lead letter parses.", doc.Error(), false );
 	}
+    
+    {
+        const char* xml = "<element _attr1=\"foo\" :attr2=\"bar\"></element>";
+        XMLDocument doc;
+        doc.Parse(xml);
+        XMLTest("Non-alpha attribute lead character parses.", doc.Error(), false);
+    }
 
 	{
 		const char* xml = "<element/>WOA THIS ISN'T GOING TO PARSE";
