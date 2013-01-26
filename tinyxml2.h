@@ -464,6 +464,19 @@ public:
     static bool IsWhiteSpace( char p )					{
         return !IsUTF8Continuation(p) && isspace( static_cast<unsigned char>(p) );
     }
+    
+    inline static bool IsNameStartChar( unsigned char ch ) {
+        return ( ( ch < 128 ) ? isalpha( ch ) : 1 )
+               || ch == ':'
+               || ch == '_';
+    }
+    
+    inline static bool IsNameChar( unsigned char ch ) {
+        return IsNameStartChar( ch )
+               || isdigit( ch )
+               || ch == '.'
+               || ch == '-';
+    }
 
     inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
         int n = 0;
@@ -480,14 +493,9 @@ public:
         }
         return false;
     }
+    
     inline static int IsUTF8Continuation( const char p ) {
         return p & 0x80;
-    }
-    inline static int IsAlphaNum( unsigned char anyByte )	{
-        return ( anyByte < 128 ) ? isalnum( anyByte ) : 1;
-    }
-    inline static int IsAlpha( unsigned char anyByte )		{
-        return ( anyByte < 128 ) ? isalpha( anyByte ) : 1;
     }
 
     static const char* ReadBOM( const char* p, bool* hasBOM );
