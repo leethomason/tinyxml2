@@ -136,12 +136,7 @@ char* StrPair::ParseName( char* p )
         return 0;
     }
 
-    while( *p && (
-                XMLUtil::IsAlphaNum( (unsigned char) *p )
-                || *p == '_'
-                || *p == ':'
-                || (*p == '-' && p>start )		// can be in a name, but not lead it.
-                || (*p == '.' && p>start ) )) {	// can be in a name, but not lead it.
+    while( *p && ( p == start ? XMLUtil::IsNameStartChar( *p ) : XMLUtil::IsNameChar( *p ) )) {
         ++p;
     }
 
@@ -1357,7 +1352,7 @@ char* XMLElement::ParseAttributes( char* p )
         }
 
         // attribute.
-        if ( XMLUtil::IsAlpha( *p ) ) {
+        if (XMLUtil::IsNameStartChar( *p ) ) {
             XMLAttribute* attrib = new (_document->_attributePool.Alloc() ) XMLAttribute();
             attrib->_memPool = &_document->_attributePool;
 			attrib->_memPool->SetTracked();
