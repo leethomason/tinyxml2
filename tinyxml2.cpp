@@ -1520,8 +1520,10 @@ XMLDocument::~XMLDocument()
 }
 
 
-void XMLDocument::InitDocument()
+void XMLDocument::Clear()
 {
+    DeleteChildren();
+
     _errorID = XML_NO_ERROR;
     _errorStr1 = 0;
     _errorStr2 = 0;
@@ -1578,8 +1580,7 @@ XMLUnknown* XMLDocument::NewUnknown( const char* str )
 
 XMLError XMLDocument::LoadFile( const char* filename )
 {
-    DeleteChildren();
-    InitDocument();
+    Clear();
     FILE* fp = 0;
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
@@ -1600,8 +1601,7 @@ XMLError XMLDocument::LoadFile( const char* filename )
 
 XMLError XMLDocument::LoadFile( FILE* fp )
 {
-    DeleteChildren();
-    InitDocument();
+    Clear();
 
     fseek( fp, 0, SEEK_END );
     size_t size = ftell( fp );
@@ -1662,8 +1662,7 @@ XMLError XMLDocument::SaveFile( FILE* fp, bool compact )
 
 XMLError XMLDocument::Parse( const char* p, size_t len )
 {
-    DeleteChildren();
-    InitDocument();
+    Clear();
 
     if ( !p || !*p ) {
         SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );

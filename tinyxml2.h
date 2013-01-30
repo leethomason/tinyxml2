@@ -1532,6 +1532,9 @@ public:
     }
     /// If there is an error, print it to stdout.
     void PrintError() const;
+    
+    /// Clear the document, resetting it to the initial state.
+    void Clear();
 
     // internal
     char* Identify( char* p, XMLNode** node );
@@ -1546,7 +1549,6 @@ public:
 private:
     XMLDocument( const XMLDocument& );	// not supported
     void operator=( const XMLDocument& );	// not supported
-    void InitDocument();
 
     bool        _writeBOM;
     bool        _processEntities;

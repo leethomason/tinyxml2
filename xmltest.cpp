@@ -1072,6 +1072,13 @@ int main( int argc, const char ** argv )
 		XMLTest( "Set length of incoming data", doc.Error(), false );
 	}
 
+    {
+        XMLDocument doc;
+        doc.LoadFile( "resources/dream.xml" );
+        doc.Clear();
+        XMLTest( "Document Clear()'s", doc.NoChildren(), true );
+    }
+    
 	// ----------- Whitespace ------------
 	{
 		const char* xml = "<element>"
