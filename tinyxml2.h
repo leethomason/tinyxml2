@@ -359,7 +359,16 @@ public:
         return _nUntracked;
     }
 
-    enum { COUNT = 1024/SIZE }; // Some compilers do not accept to use COUNT in private part if COUNT is private
+	// This number is perf sensitive. 4k seems like a good tradeoff on my machine.
+	// The test file is large, 170k.
+	// Release:		VS2010 gcc(no opt)
+	//		1k:		4000
+	//		2k:		4000
+	//		4k:		3900	21000
+	//		16k:	5200
+	//		32k:	4300
+	//		64k:	4000	21000
+    enum { COUNT = (4*1024)/SIZE }; // Some compilers do not accept to use COUNT in private part if COUNT is private
 
 private:
     union Chunk {

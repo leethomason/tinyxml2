@@ -289,6 +289,7 @@ int main( int argc, const char ** argv )
 		if ( !errorID ) {
 			printf( "Load time=%d\n", loadTime - startTime );
 			printf( "Delete time=%d\n", deleteTime - loadTime );
+			printf( "Total time=%d\n", deleteTime - startTime );
 		}
 		exit(0);
 	}

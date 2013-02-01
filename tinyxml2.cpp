@@ -1502,11 +1502,11 @@ XMLDocument::~XMLDocument()
     DeleteChildren();
     delete [] _charBuffer;
 
-#if 0
-    textPool.Trace( "text" );
-    elementPool.Trace( "element" );
-    commentPool.Trace( "comment" );
-    attributePool.Trace( "attribute" );
+#if 1
+    _textPool.Trace( "text" );
+    _elementPool.Trace( "element" );
+    _commentPool.Trace( "comment" );
+    _attributePool.Trace( "attribute" );
 #endif
 
 #ifdef DEBUG
