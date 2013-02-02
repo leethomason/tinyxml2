@@ -505,8 +505,8 @@ int main( int argc, const char ** argv )
 
 		XMLElement* ele = doc.FirstChildElement();
 
-		int iVal;
-		double dVal;
+		int iVal, iVal2;
+		double dVal, dVal2;
 
 		ele->SetAttribute( "str", "strValue" );
 		ele->SetAttribute( "int", 1 );
@@ -516,10 +516,15 @@ int main( int argc, const char ** argv )
 		ele->QueryIntAttribute( "int", &iVal );
 		ele->QueryDoubleAttribute( "double", &dVal );
 
+		ele->QueryAttribute( "int", &iVal2 );
+		ele->QueryAttribute( "double", &dVal2 );
+
 		XMLTest( "Attribute match test", ele->Attribute( "str", "strValue" ), "strValue" );
 		XMLTest( "Attribute round trip. c-string.", "strValue", cStr );
 		XMLTest( "Attribute round trip. int.", 1, iVal );
 		XMLTest( "Attribute round trip. double.", -1, (int)dVal );
+		XMLTest( "Alternate query", true, iVal == iVal2 );
+		XMLTest( "Alternate query", true, dVal == dVal2 );
 	}
 
 	{

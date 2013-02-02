@@ -1224,7 +1224,45 @@ public:
         return a->QueryFloatValue( value );
     }
 
-    /// Sets the named attribute to value.
+	
+    /** Given an attribute name, QueryAttribute() returns
+    	XML_NO_ERROR, XML_WRONG_ATTRIBUTE_TYPE if the conversion
+    	can't be performed, or XML_NO_ATTRIBUTE if the attribute
+    	doesn't exist. It is overloaded for the primitive types,
+		and is a generally more convenient replacement of
+		QueryIntAttribute() and related functions.
+		
+		If successful, the result of the conversion
+    	will be written to 'value'. If not successful, nothing will
+    	be written to 'value'. This allows you to provide default
+    	value:
+
+    	@verbatim
+    	int value = 10;
+    	QueryAttribute( "foo", &value );		// if "foo" isn't found, value will still be 10
+    	@endverbatim
+    */
+	int QueryAttribute( const char* name, int* value ) const {
+		return QueryIntAttribute( name, value );
+	}
+
+	int QueryAttribute( const char* name, unsigned int* value ) const {
+		return QueryUnsignedAttribute( name, value );
+	}
+
+	int QueryAttribute( const char* name, bool* value ) const {
+		return QueryBoolAttribute( name, value );
+	}
+
+	int QueryAttribute( const char* name, double* value ) const {
+		return QueryDoubleAttribute( name, value );
+	}
+
+	int QueryAttribute( const char* name, float* value ) const {
+		return QueryFloatAttribute( name, value );
+	}
+
+	/// Sets the named attribute to value.
     void SetAttribute( const char* name, const char* value )	{
         XMLAttribute* a = FindOrCreateAttribute( name );
         a->SetAttribute( value );
