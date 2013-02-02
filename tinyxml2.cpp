@@ -1502,7 +1502,7 @@ XMLDocument::~XMLDocument()
     DeleteChildren();
     delete [] _charBuffer;
 
-#if 1
+#if 0
     _textPool.Trace( "text" );
     _elementPool.Trace( "element" );
     _commentPool.Trace( "comment" );
