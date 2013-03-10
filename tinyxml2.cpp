@@ -499,8 +499,8 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
     // What is this thing?
     // - Elements start with a letter or underscore, but xml is reserved.
     // - Comments: <!--
-    // - Decleration: <?
-    // - Everthing else is unknown to tinyxml.
+    // - Declaration: <?
+    // - Everything else is unknown to tinyxml.
     //
 
     static const char* xmlHeader		= { "<?" };
