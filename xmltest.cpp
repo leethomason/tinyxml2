@@ -142,7 +142,7 @@ int example_3()
 	@dontinclude ./xmltest.cpp
 	In this example, we navigate a simple XML
 	file, and read some interesting text. Note
-	that this is examlpe doesn't use error
+	that this example doesn't use error
 	checking; working code should check for null
 	pointers when walking an XML tree, or use
 	XMLHandle.
