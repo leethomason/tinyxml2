@@ -172,7 +172,7 @@ private:
         NEEDS_DELETE = 0x200
     };
 
-    // After parsing, if *end != 0, it can be set to zero.
+    // After parsing, if *_end != 0, it can be set to zero.
     int     _flags;
     char*   _start;
     char*   _end;
