@@ -1016,6 +1016,17 @@ int main( int argc, const char ** argv )
 		XMLTest( "CStrSize", printer.CStrSize(), 42, false );
 	}
 	{
+		// BOM preservation
+		static const char* xml  = "\xef\xbb\xbf<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+		XMLDocument doc;
+		doc.Parse( xml );
+
+		XMLPrinter printer;
+		doc.Print( &printer );
+
+		XMLTest( "BOM preservation", printer.CStr(), xml, false );
+	}
+	{
 		const char* xml = "<ipxml ws='1'><info bla=' /></ipxml>";
 		XMLDocument doc;
 		doc.Parse( xml );

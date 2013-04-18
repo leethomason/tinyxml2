@@ -1668,12 +1668,6 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
         SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
         return _errorID;
     }
-    if ( len == (size_t)(-1) ) {
-        len = strlen( p );
-    }
-    _charBuffer = new char[ len+1 ];
-    memcpy( _charBuffer, p, len );
-    _charBuffer[len] = 0;
 
     p = XMLUtil::SkipWhiteSpace( p );
     p = XMLUtil::ReadBOM( p, &_writeBOM );
@@ -1681,6 +1675,17 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
         SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
         return _errorID;
     }
+
+    if ( len == (size_t)(-1) ) {
+        len = strlen( p );
+    }
+    else if (_writeBOM) {
+        len -= 3;
+    }
+
+    _charBuffer = new char[ len+1 ];
+    memcpy( _charBuffer, p, len );
+    _charBuffer[len] = 0;
 
     ParseDeep( _charBuffer, 0 );
     return _errorID;
