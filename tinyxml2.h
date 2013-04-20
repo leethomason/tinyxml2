@@ -127,14 +127,14 @@ public:
     enum {
         NEEDS_ENTITY_PROCESSING			= 0x01,
         NEEDS_NEWLINE_NORMALIZATION		= 0x02,
-        COLLAPSE_WHITESPACE				= 0x04,
+        COLLAPSE_WHITESPACE	                = 0x04,
 
-        TEXT_ELEMENT		            = NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
+        TEXT_ELEMENT		            	= NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
         TEXT_ELEMENT_LEAVE_ENTITIES		= NEEDS_NEWLINE_NORMALIZATION,
-        ATTRIBUTE_NAME		            = 0,
-        ATTRIBUTE_VALUE		            = NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
-        ATTRIBUTE_VALUE_LEAVE_ENTITIES  = NEEDS_NEWLINE_NORMALIZATION,
-        COMMENT				            = NEEDS_NEWLINE_NORMALIZATION
+        ATTRIBUTE_NAME		            	= 0,
+        ATTRIBUTE_VALUE		            	= NEEDS_ENTITY_PROCESSING | NEEDS_NEWLINE_NORMALIZATION,
+        ATTRIBUTE_VALUE_LEAVE_ENTITIES  	= NEEDS_NEWLINE_NORMALIZATION,
+        COMMENT				        = NEEDS_NEWLINE_NORMALIZATION
     };
 
     StrPair() : _flags( 0 ), _start( 0 ), _end( 0 ) {}
@@ -172,7 +172,7 @@ private:
         NEEDS_DELETE = 0x200
     };
 
-    // After parsing, if *end != 0, it can be set to zero.
+    // After parsing, if *_end != 0, it can be set to zero.
     int     _flags;
     char*   _start;
     char*   _end;
@@ -397,7 +397,7 @@ private:
 	are simply called with Visit().
 
 	If you return 'true' from a Visit method, recursive parsing will continue. If you return
-	false, <b>no children of this node or its sibilings</b> will be visited.
+	false, <b>no children of this node or its siblings</b> will be visited.
 
 	All flavors of Visit methods have a default implementation that returns 'true' (continue
 	visiting). You need to only override methods that are interesting to you.
@@ -690,7 +690,7 @@ public:
         return _prev;
     }
 
-    /// Get the previous (left) sibling element of this node, with an opitionally supplied name.
+    /// Get the previous (left) sibling element of this node, with an optionally supplied name.
     const XMLElement*	PreviousSiblingElement( const char* value=0 ) const ;
 
     XMLElement*	PreviousSiblingElement( const char* value=0 ) {
@@ -706,7 +706,7 @@ public:
         return _next;
     }
 
-    /// Get the next (right) sibling element of this node, with an opitionally supplied name.
+    /// Get the next (right) sibling element of this node, with an optionally supplied name.
     const XMLElement*	NextSiblingElement( const char* value=0 ) const;
 
     XMLElement*	NextSiblingElement( const char* value=0 )	{
@@ -1040,7 +1040,7 @@ public:
     }
 
     /** QueryIntAttribute interprets the attribute as an integer, and returns the value
-    	in the provided paremeter. The function will return XML_NO_ERROR on success,
+    	in the provided parameter. The function will return XML_NO_ERROR on success,
     	and XML_WRONG_ATTRIBUTE_TYPE if the conversion is not successful.
     */
     XMLError QueryIntValue( int* value ) const;
@@ -1546,7 +1546,7 @@ public:
     XMLDeclaration* NewDeclaration( const char* text=0 );
     /**
     	Create a new Unknown associated with
-    	this Document. The memory forthe object
+    	this Document. The memory for the object
     	is managed by the Document.
     */
     XMLUnknown* NewUnknown( const char* text );
