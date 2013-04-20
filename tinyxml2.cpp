@@ -1608,6 +1608,7 @@ XMLError XMLDocument::LoadFile( FILE* fp )
     fseek( fp, 0, SEEK_SET );
 
     if ( size == 0 ) {
+        SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
         return _errorID;
     }
 

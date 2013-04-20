@@ -1158,6 +1158,13 @@ int main( int argc, const char ** argv )
 	}
 
 
+	{
+		XMLDocument doc;
+		XMLError error = doc.LoadFile( "resources/empty.xml" );
+		XMLTest( "Loading an empty file", XML_ERROR_EMPTY_DOCUMENT, error );
+	}
+
+
 	// ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )
