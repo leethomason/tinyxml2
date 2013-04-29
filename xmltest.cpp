@@ -25,7 +25,7 @@ int gPass = 0;
 int gFail = 0;
 
 
-bool XMLTest (const char* testString, const char* expected, const char* found, bool echo=true )
+bool XMLTest (const char* testString, const char* expected, const char* found, bool echo=true, bool extraNL=false )
 {
 	bool pass = !strcmp( expected, found );
 	if ( pass )
@@ -33,10 +33,19 @@ bool XMLTest (const char* testString, const char* expected, const char* found, b
 	else
 		printf ("[fail]");
 
-	if ( !echo )
+	if ( !echo ) {
 		printf (" %s\n", testString);
-	else
-		printf (" %s [%s][%s]\n", testString, expected, found);
+	}
+	else {
+		if ( extraNL ) {
+			printf( " %s\n", testString );
+			printf( "%s\n", expected );
+			printf( "%s\n", found );
+		}
+		else {
+			printf (" %s [%s][%s]\n", testString, expected, found);
+		}
+	}
 
 	if ( pass )
 		++gPass;
@@ -1164,6 +1173,28 @@ int main( int argc, const char ** argv )
 		XMLTest( "Loading an empty file", XML_ERROR_EMPTY_DOCUMENT, error );
 	}
 
+	{
+        // BOM preservation
+        static const char* xml_bom_preservation  = "\xef\xbb\xbf<element/>\n";
+        {
+			XMLDocument doc;
+			XMLTest( "BOM preservation (parse)", XML_NO_ERROR, doc.Parse( xml_bom_preservation ), false );
+            XMLPrinter printer;
+            doc.Print( &printer );
+
+            XMLTest( "BOM preservation (compare)", xml_bom_preservation, printer.CStr(), false, true );
+			doc.SaveFile( "resources/bomtest.xml" );
+        }
+		{
+			XMLDocument doc;
+			doc.LoadFile( "resources/bomtest.xml" );
+			XMLTest( "BOM preservation (load)", true, doc.HasBOM(), false );
+
+            XMLPrinter printer;
+            doc.Print( &printer );
+            XMLTest( "BOM preservation (compare)", xml_bom_preservation, printer.CStr(), false, true );
+		}
+	}
 
 	// ----------- Performance tracking --------------
 	{
