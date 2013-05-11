@@ -402,7 +402,7 @@ private:
 	All flavors of Visit methods have a default implementation that returns 'true' (continue
 	visiting). You need to only override methods that are interesting to you.
 
-	Generally Accept() is called on the TiXmlDocument, although all nodes support visiting.
+	Generally Accept() is called on the XMLDocument, although all nodes support visiting.
 
 	You should never change the document from a callback.
 
@@ -759,12 +759,12 @@ public:
     */
     virtual bool ShallowEqual( const XMLNode* compare ) const = 0;
 
-    /** Accept a hierarchical visit of the nodes in the TinyXML DOM. Every node in the
+    /** Accept a hierarchical visit of the nodes in the TinyXML-2 DOM. Every node in the
     	XML tree will be conditionally visited and the host will be called back
-    	via the TiXmlVisitor interface.
+    	via the XMLVisitor interface.
 
-    	This is essentially a SAX interface for TinyXML. (Note however it doesn't re-parse
-    	the XML for the callbacks, so the performance of TinyXML is unchanged by using this
+    	This is essentially a SAX interface for TinyXML-2. (Note however it doesn't re-parse
+    	the XML for the callbacks, so the performance of TinyXML-2 is unchanged by using this
     	interface versus any other.)
 
     	The interface has been based on ideas from:
@@ -776,7 +776,7 @@ public:
 
     	An example of using Accept():
     	@verbatim
-    	TiXmlPrinter printer;
+    	XMLPrinter printer;
     	tinyxmlDoc.Accept( &printer );
     	const char* xmlcstr = printer.CStr();
     	@endverbatim
@@ -818,7 +818,7 @@ private:
 	A text node can have 2 ways to output the next. "normal" output
 	and CDATA. It will default to the mode it was parsed from the XML file and
 	you generally want to leave it alone, but you can change the output mode with
-	SetCDATA() and query it with CDATA().
+	SetCData() and query it with CData().
 */
 class XMLText : public XMLNode
 {
@@ -891,7 +891,7 @@ private:
 		<?xml version="1.0" standalone="yes"?>
 	@endverbatim
 
-	TinyXML2 will happily read or write files without a declaration,
+	TinyXML-2 will happily read or write files without a declaration,
 	however.
 
 	The text of the declaration isn't interpreted. It is parsed
@@ -922,12 +922,12 @@ protected:
 };
 
 
-/** Any tag that tinyXml doesn't recognize is saved as an
+/** Any tag that TinyXML-2 doesn't recognize is saved as an
 	unknown. It is a tag of text, but should not be modified.
 	It will be written back to the XML, unchanged, when the file
 	is saved.
 
-	DTD tags get thrown into TiXmlUnknowns.
+	DTD tags get thrown into XMLUnknowns.
 */
 class XMLUnknown : public XMLNode
 {
@@ -1005,52 +1005,52 @@ public:
         return _next;
     }
 
-    /** IntAttribute interprets the attribute as an integer, and returns the value.
+    /** IntValue interprets the attribute as an integer, and returns the value.
         If the value isn't an integer, 0 will be returned. There is no error checking;
-    	use QueryIntAttribute() if you need error checking.
+    	use QueryIntValue() if you need error checking.
     */
     int		 IntValue() const				{
         int i=0;
         QueryIntValue( &i );
         return i;
     }
-    /// Query as an unsigned integer. See IntAttribute()
+    /// Query as an unsigned integer. See IntValue()
     unsigned UnsignedValue() const			{
         unsigned i=0;
         QueryUnsignedValue( &i );
         return i;
     }
-    /// Query as a boolean. See IntAttribute()
+    /// Query as a boolean. See IntValue()
     bool	 BoolValue() const				{
         bool b=false;
         QueryBoolValue( &b );
         return b;
     }
-    /// Query as a double. See IntAttribute()
+    /// Query as a double. See IntValue()
     double 	 DoubleValue() const			{
         double d=0;
         QueryDoubleValue( &d );
         return d;
     }
-    /// Query as a float. See IntAttribute()
+    /// Query as a float. See IntValue()
     float	 FloatValue() const				{
         float f=0;
         QueryFloatValue( &f );
         return f;
     }
 
-    /** QueryIntAttribute interprets the attribute as an integer, and returns the value
+    /** QueryIntValue interprets the attribute as an integer, and returns the value
     	in the provided parameter. The function will return XML_NO_ERROR on success,
     	and XML_WRONG_ATTRIBUTE_TYPE if the conversion is not successful.
     */
     XMLError QueryIntValue( int* value ) const;
-    /// See QueryIntAttribute
+    /// See QueryIntValue
     XMLError QueryUnsignedValue( unsigned int* value ) const;
-    /// See QueryIntAttribute
+    /// See QueryIntValue
     XMLError QueryBoolValue( bool* value ) const;
-    /// See QueryIntAttribute
+    /// See QueryIntValue
     XMLError QueryDoubleValue( double* value ) const;
-    /// See QueryIntAttribute
+    /// See QueryIntValue
     XMLError QueryFloatValue( float* value ) const;
 
     /// Set the attribute to a string value.
@@ -1301,10 +1301,10 @@ public:
     const XMLAttribute* FindAttribute( const char* name ) const;
 
     /** Convenience function for easy access to the text inside an element. Although easy
-    	and concise, GetText() is limited compared to getting the TiXmlText child
+    	and concise, GetText() is limited compared to getting the XMLText child
     	and accessing it directly.
 
-    	If the first child of 'this' is a TiXmlText, the GetText()
+    	If the first child of 'this' is a XMLText, the GetText()
     	returns the character string of the Text node, else null is returned.
 
     	This is a convenient method for getting the text of simple contained text:
@@ -1431,7 +1431,7 @@ public:
 
     	You may optionally pass in the 'nBytes', which is
     	the number of bytes which will be parsed. If not
-    	specified, TinyXML will assume 'xml' points to a
+    	specified, TinyXML-2 will assume 'xml' points to a
     	null terminated string.
     */
     XMLError Parse( const char* xml, size_t nBytes=(size_t)(-1) );
@@ -1507,7 +1507,7 @@ public:
     	Or you can use a printer to print to memory:
     	@verbatim
     	XMLPrinter printer;
-    	doc->Print( &printer );
+    	doc.Print( &printer );
     	// printer.CStr() has a const char* to the XML
     	@endverbatim
     */
@@ -1614,7 +1614,7 @@ private:
 
 /**
 	A XMLHandle is a class that wraps a node pointer with null checks; this is
-	an incredibly useful thing. Note that XMLHandle is not part of the TinyXML
+	an incredibly useful thing. Note that XMLHandle is not part of the TinyXML-2
 	DOM structure. It is a separate utility class.
 
 	Take an example:
@@ -1829,7 +1829,7 @@ private:
 
 	@verbatim
 	XMLPrinter printer;
-	doc->Print( &printer );
+	doc.Print( &printer );
 	SomeFunction( printer.CStr() );
 	@endverbatim
 
