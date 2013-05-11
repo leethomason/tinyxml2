@@ -496,6 +496,7 @@ int main( int argc, const char ** argv )
 		XMLTest( "Query attribute: int as double", result, (int)XML_NO_ERROR );
 		XMLTest( "Query attribute: int as double", (int)dVal, 1 );
 		result = ele->QueryDoubleAttribute( "attr1", &dVal );
+		XMLTest( "Query attribute: double as double", result, (int)XML_NO_ERROR );
 		XMLTest( "Query attribute: double as double", (int)dVal, 2 );
 		result = ele->QueryIntAttribute( "attr1", &iVal );
 		XMLTest( "Query attribute: double as int", result, (int)XML_NO_ERROR );
