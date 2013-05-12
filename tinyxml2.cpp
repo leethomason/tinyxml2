@@ -581,7 +581,8 @@ XMLNode::XMLNode( XMLDocument* doc ) :
     _document( doc ),
     _parent( 0 ),
     _firstChild( 0 ), _lastChild( 0 ),
-    _prev( 0 ), _next( 0 )
+    _prev( 0 ), _next( 0 ),
+    _memPool( 0 )
 {
 }
 
