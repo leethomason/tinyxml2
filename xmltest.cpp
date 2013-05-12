@@ -280,7 +280,12 @@ int main( int argc, const char ** argv )
 	#endif
 
 	#if defined(_MSC_VER) || defined(MINGW32) || defined(__MINGW32__)
-		_mkdir( "resources/out/" );
+		#if defined __MINGW64_VERSION_MAJOR && defined __MINGW64_VERSION_MINOR
+			//MINGW64: both 32 and 64-bit
+			mkdir( "resources/out/" );
+                #else
+                	_mkdir( "resources/out/" );
+                #endif
 	#else
 		mkdir( "resources/out/", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	#endif
