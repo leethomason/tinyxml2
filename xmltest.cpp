@@ -301,9 +301,9 @@ int main( int argc, const char ** argv )
 
 		printf( "Test file '%s' loaded. ErrorID=%d\n", argv[1], errorID );
 		if ( !errorID ) {
-			printf( "Load time=%d\n", loadTime - startTime );
-			printf( "Delete time=%d\n", deleteTime - loadTime );
-			printf( "Total time=%d\n", deleteTime - startTime );
+			printf( "Load time=%u\n",   (unsigned)(loadTime - startTime) );
+			printf( "Delete time=%u\n", (unsigned)(deleteTime - loadTime) );
+			printf( "Total time=%u\n",  (unsigned)(deleteTime - startTime) );
 		}
 		exit(0);
 	}
