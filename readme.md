@@ -1,7 +1,7 @@
 TinyXML-2
 =========
 
-TinyXML is a simple, small, efficient, C++ XML parser that can be 
+TinyXML-2 is a simple, small, efficient, C++ XML parser that can be 
 easily integrated into other programs.
 
 The master is hosted on github:
@@ -15,7 +15,7 @@ Examples are in the "related pages" tab of the HTML docs.
 What it does.
 -------------
 	
-In brief, TinyXML parses an XML document, and builds from that a 
+In brief, TinyXML-2 parses an XML document, and builds from that a 
 Document Object Model (DOM) that can be read, modified, and saved.
 
 XML stands for "eXtensible Markup Language." It is a general purpose
@@ -197,7 +197,7 @@ Or the XMLPrinter class:
 Printing to memory is supported by the XMLPrinter.
 
 	XMLPrinter printer;
-	doc->Print( &printer );
+	doc.Print( &printer );
 	// printer.CStr() has a const char* to the XML
 
 #### Print without an XMLDocument
