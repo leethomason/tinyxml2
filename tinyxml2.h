@@ -58,6 +58,19 @@ distribution.
 #endif
 
 
+#ifdef _WIN32
+#   ifdef TINYXML2_EXPORT
+#       define TINYXML2_LIB __declspec(dllexport)
+#   elif defined(TINYXML2_IMPORT)
+#       define TINYXML2_LIB __declspec(dllimport)
+#   else
+#       define TINYXML2_LIB
+#   endif
+#else
+#   define TINYXML2_LIB
+#endif
+
+
 #if defined(DEBUG)
 #   if defined(_MSC_VER)
 #       define TIXMLASSERT( x )           if ( !(x)) { __debugbreak(); } //if ( !(x)) WinDebugBreak()
@@ -121,7 +134,7 @@ class XMLPrinter;
 	and entity translation if actually read. Can also store (and memory
 	manage) a traditional char[]
 */
-class StrPair
+class TINYXML2_LIB StrPair
 {
 public:
     enum {
@@ -185,7 +198,7 @@ private:
 	cause a call to new/delete
 */
 template <class T, int INIT>
-class DynArray
+class TINYXML2_LIB DynArray
 {
 public:
     DynArray< T, INIT >() {
@@ -276,7 +289,7 @@ private:
 	Parent virtual class of a pool for fast allocation
 	and deallocation of objects.
 */
-class MemPool
+class TINYXML2_LIB MemPool
 {
 public:
     MemPool() {}
@@ -293,7 +306,7 @@ public:
 	Template child class to create pools of the correct type.
 */
 template< int SIZE >
-class MemPoolT : public MemPool
+class TINYXML2_LIB MemPoolT : public MemPool
 {
 public:
     MemPoolT() : _root(0), _currentAllocs(0), _nAllocs(0), _maxAllocs(0), _nUntracked(0)	{}
@@ -408,7 +421,7 @@ private:
 
 	@sa XMLNode::Accept()
 */
-class XMLVisitor
+class TINYXML2_LIB XMLVisitor
 {
 public:
     virtual ~XMLVisitor() {}
@@ -554,7 +567,7 @@ public:
 
 	@endverbatim
 */
-class XMLNode
+class TINYXML2_LIB XMLNode
 {
     friend class XMLDocument;
     friend class XMLElement;
@@ -820,7 +833,7 @@ private:
 	you generally want to leave it alone, but you can change the output mode with
 	SetCData() and query it with CData().
 */
-class XMLText : public XMLNode
+class TINYXML2_LIB XMLText : public XMLNode
 {
     friend class XMLBase;
     friend class XMLDocument;
@@ -859,7 +872,7 @@ private:
 
 
 /** An XML Comment. */
-class XMLComment : public XMLNode
+class TINYXML2_LIB XMLComment : public XMLNode
 {
     friend class XMLDocument;
 public:
@@ -897,7 +910,7 @@ private:
 	The text of the declaration isn't interpreted. It is parsed
 	and written as a string.
 */
-class XMLDeclaration : public XMLNode
+class TINYXML2_LIB XMLDeclaration : public XMLNode
 {
     friend class XMLDocument;
 public:
@@ -929,7 +942,7 @@ protected:
 
 	DTD tags get thrown into XMLUnknowns.
 */
-class XMLUnknown : public XMLNode
+class TINYXML2_LIB XMLUnknown : public XMLNode
 {
     friend class XMLDocument;
 public:
@@ -988,7 +1001,7 @@ enum XMLError {
 	@note The attributes are not XMLNodes. You may only query the
 	Next() attribute in a list.
 */
-class XMLAttribute
+class TINYXML2_LIB XMLAttribute
 {
     friend class XMLElement;
 public:
@@ -1089,7 +1102,7 @@ private:
 	and can contain other elements, text, comments, and unknowns.
 	Elements also contain an arbitrary number of attributes.
 */
-class XMLElement : public XMLNode
+class TINYXML2_LIB XMLElement : public XMLNode
 {
     friend class XMLBase;
     friend class XMLDocument;
@@ -1409,7 +1422,7 @@ enum Whitespace {
 	All Nodes are connected and allocated to a Document.
 	If the Document is deleted, all its Nodes are also deleted.
 */
-class XMLDocument : public XMLNode
+class TINYXML2_LIB XMLDocument : public XMLNode
 {
     friend class XMLElement;
 public:
@@ -1667,7 +1680,7 @@ private:
 
 	See also XMLConstHandle, which is the same as XMLHandle, but operates on const objects.
 */
-class XMLHandle
+class TINYXML2_LIB XMLHandle
 {
 public:
     /// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
@@ -1751,7 +1764,7 @@ private:
 	A variant of the XMLHandle class for working with const XMLNodes and Documents. It is the
 	same in all regards, except for the 'const' qualifiers. See XMLHandle for API.
 */
-class XMLConstHandle
+class TINYXML2_LIB XMLConstHandle
 {
 public:
     XMLConstHandle( const XMLNode* node )											{
@@ -1858,7 +1871,7 @@ private:
 	printer.CloseElement();
 	@endverbatim
 */
-class XMLPrinter : public XMLVisitor
+class TINYXML2_LIB XMLPrinter : public XMLVisitor
 {
 public:
     /** Construct the printer. If the FILE* is specified,
