@@ -57,6 +57,10 @@ distribution.
 #   endif
 #endif
 
+#ifdef _MSC_VER
+#   pragma warning(push)
+#   pragma warning(disable: 4251)
+#endif
 
 #ifdef _WIN32
 #   ifdef TINYXML2_EXPORT
@@ -134,7 +138,7 @@ class XMLPrinter;
 	and entity translation if actually read. Can also store (and memory
 	manage) a traditional char[]
 */
-class TINYXML2_LIB StrPair
+class StrPair
 {
 public:
     enum {
@@ -198,7 +202,7 @@ private:
 	cause a call to new/delete
 */
 template <class T, int INIT>
-class TINYXML2_LIB DynArray
+class DynArray
 {
 public:
     DynArray< T, INIT >() {
@@ -289,7 +293,7 @@ private:
 	Parent virtual class of a pool for fast allocation
 	and deallocation of objects.
 */
-class TINYXML2_LIB MemPool
+class MemPool
 {
 public:
     MemPool() {}
@@ -306,7 +310,7 @@ public:
 	Template child class to create pools of the correct type.
 */
 template< int SIZE >
-class TINYXML2_LIB MemPoolT : public MemPool
+class MemPoolT : public MemPool
 {
 public:
     MemPoolT() : _root(0), _currentAllocs(0), _nAllocs(0), _maxAllocs(0), _nUntracked(0)	{}
@@ -1977,5 +1981,8 @@ private:
 
 }	// tinyxml2
 
+#if defined(_MSC_VER)
+#   pragma warning(pop)
+#endif
 
 #endif // TINYXML2_INCLUDED
