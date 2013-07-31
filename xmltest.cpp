@@ -21,6 +21,7 @@
 #endif
 
 using namespace tinyxml2;
+int gTests = 0;
 int gPass = 0;
 int gFail = 0;
 
@@ -47,6 +48,8 @@ bool XMLTest (const char* testString, const char* expected, const char* found, b
 		}
 	}
 
+    ++gTests;
+
 	if ( pass )
 		++gPass;
 	else
@@ -67,6 +70,8 @@ template< class T > bool XMLTest( const char* testString, T expected, T found, b
 		printf (" %s\n", testString);
 	else
 		printf (" %s [%d][%d]\n", testString, static_cast<int>(expected), static_cast<int>(found) );
+
+    ++gTests;
 
 	if ( pass )
 		++gPass;
@@ -1262,5 +1267,5 @@ int main( int argc, const char ** argv )
 	#endif
 
 	printf ("\nPass %d, Fail %d\n", gPass, gFail);
-	return 0;
+	return (gTests - gPass);
 }
