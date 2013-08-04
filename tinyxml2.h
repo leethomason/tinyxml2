@@ -125,11 +125,9 @@ class XMLDocument;
 class XMLElement;
 class XMLAttribute;
 class XMLComment;
-class XMLNode;
 class XMLText;
 class XMLDeclaration;
 class XMLUnknown;
-
 class XMLPrinter;
 
 /*
@@ -1884,7 +1882,7 @@ public:
     	If 'compact' is set to true, then output is created
     	with only required whitespace and newlines.
     */
-    XMLPrinter( FILE* file=0, bool compact = false );
+    XMLPrinter( FILE* file=0, bool compact = false, int depth = 0 );
     ~XMLPrinter()	{}
 
     /** If streaming, write the BOM and declaration. */
