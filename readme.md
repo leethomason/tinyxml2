@@ -60,7 +60,10 @@ complete XML needs, TinyXML-2 is not the parser for you.
 TinyXML-1 vs. TinyXML-2
 -----------------------
 
-Which should you use? TinyXML-2 uses a similar API to TinyXML-1 and the same
+TinyXML-2 is now the focus of all development, well tested, and your
+best choice unless you have a requirement to maintain TinyXML-1 code.
+
+TinyXML-2 uses a similar API to TinyXML-1 and the same
 rich test cases. But the implementation of the parser is completely re-written
 to make it more appropriate for use in a game. It uses less memory, is faster,
 and uses far fewer memory allocations.
@@ -308,3 +311,6 @@ Berquin and Andrew Ellerton who were key contributors.
 TinyXML-2 grew from that effort. Lee Thomason is the original author
 of TinyXML-2 (and TinyXML-1) but hopefully TinyXML-2 will be improved
 by many contributors.
+
+Thanks to John Mackay for the TinyXML-2 logo.
+
