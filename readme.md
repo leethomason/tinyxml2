@@ -1,5 +1,6 @@
 TinyXML-2
 =========
+![TinyXML-2 Logo](http://www.grinninglizard.com/tinyxml2/TinyXML2_small.png)
 
 TinyXML is a simple, small, efficient, C++ XML parser that can be 
 easily integrated into other programs.
