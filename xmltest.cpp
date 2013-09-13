@@ -1262,5 +1262,6 @@ int main( int argc, const char ** argv )
 	#endif
 
 	printf ("\nPass %d, Fail %d\n", gPass, gFail);
-	return 0;
+
+	return gFail;
 }
