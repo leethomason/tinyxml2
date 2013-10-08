@@ -251,6 +251,11 @@ public:
         return _mem[i];
     }
 
+    const T& PeekTop() const                            {
+        TIXMLASSERT( _size > 0 );
+        return _mem[ _size - 1];
+    }
+
     int Size() const					{
         return _size;
     }
@@ -1884,7 +1889,7 @@ public:
     	with only required whitespace and newlines.
     */
     XMLPrinter( FILE* file=0, bool compact = false, int depth = 0 );
-    ~XMLPrinter()	{}
+    virtual ~XMLPrinter()	{}
 
     /** If streaming, write the BOM and declaration. */
     void PushHeader( bool writeBOM, bool writeDeclaration );
@@ -1899,7 +1904,7 @@ public:
     void PushAttribute( const char* name, bool value );
     void PushAttribute( const char* name, double value );
     /// If streaming, close the Element.
-    void CloseElement();
+    virtual void CloseElement();
 
     /// Add a text node.
     void PushText( const char* text, bool cdata=false );
@@ -1949,13 +1954,16 @@ public:
         return _buffer.Size();
     }
 
-private:
+protected:
     void SealElement();
+    bool _elementJustOpened;
+    DynArray< const char*, 10 > _stack;
+
+private:
     void PrintSpace( int depth );
     void PrintString( const char*, bool restrictedEntitySet );	// prints out, after detecting entities.
     void Print( const char* format, ... );
 
-    bool _elementJustOpened;
     bool _firstElement;
     FILE* _fp;
     int _depth;
@@ -1970,7 +1978,6 @@ private:
     bool _entityFlag[ENTITY_RANGE];
     bool _restrictedEntityFlag[ENTITY_RANGE];
 
-    DynArray< const char*, 10 > _stack;
     DynArray< char, 20 > _buffer;
 #ifdef _MSC_VER
     DynArray< char, 20 > _accumulator;
