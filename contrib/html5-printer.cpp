@@ -37,51 +37,51 @@ static const char input[] =
 class	XMLPrinterHTML5 : public XMLPrinter
 {
 public:
-	XMLPrinterHTML5 (FILE* file=0, bool compact = false, int depth = 0) :
-		XMLPrinter (file, compact, depth)
-	{}
+    XMLPrinterHTML5 (FILE* file=0, bool compact = false, int depth = 0) :
+        XMLPrinter (file, compact, depth)
+    {}
 
 protected:
-	virtual void CloseElement () {
-		if (_elementJustOpened && !isVoidElement (_stack.PeekTop())) {
-			SealElement();
-		}
-		XMLPrinter::CloseElement();
-	}
+    virtual void CloseElement () {
+        if (_elementJustOpened && !isVoidElement (_stack.PeekTop())) {
+            SealElement();
+            }
+        XMLPrinter::CloseElement();
+    }
 
-	virtual bool isVoidElement (const char *name) {
+    virtual bool isVoidElement (const char *name) {
 // Complete list of all HTML5 "void elements",
 // http://dev.w3.org/html5/markup/syntax.html
-		static const char *list[] = {
-			"area", "base", "br", "col", "command", "embed", "hr", "img",
-			"input", "keygen", "link", "meta", "param", "source", "track", "wbr",
-			NULL
-		};
+        static const char *list[] = {
+            "area", "base", "br", "col", "command", "embed", "hr", "img",
+            "input", "keygen", "link", "meta", "param", "source", "track", "wbr",
+            NULL
+        };
 
 // I could use 'bsearch', but I don't have MSVC to test on (it would work with gcc/libc).
-		for (const char **p = list; *p; ++p) {
-			if (!strcasecmp (name, *p)) {
-				return true;
-			}
-		}
+        for (const char **p = list; *p; ++p) {
+            if (!strcasecmp (name, *p)) {
+                return true;
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 };
 
 int	main (void) {
-	XMLDocument doc (false);
-	doc.Parse (input);
+    XMLDocument doc (false);
+    doc.Parse (input);
 
-	std::cout << "INPUT:\n" << input << "\n\n";
+    std::cout << "INPUT:\n" << input << "\n\n";
 
-	XMLPrinter prn (NULL, true);
-	doc.Print (&prn);
-	std::cout << "XMLPrinter (not valid HTML5):\n" << prn.CStr() << "\n\n";
+    XMLPrinter prn (NULL, true);
+    doc.Print (&prn);
+    std::cout << "XMLPrinter (not valid HTML5):\n" << prn.CStr() << "\n\n";
 
-	XMLPrinterHTML5 html5 (NULL, true);
-	doc.Print (&html5);
-	std::cout << "XMLPrinterHTML5:\n" << html5.CStr() << "\n";
+    XMLPrinterHTML5 html5 (NULL, true);
+    doc.Print (&html5);
+    std::cout << "XMLPrinterHTML5:\n" << html5.CStr() << "\n";
 
-	return 0;
+    return 0;
 }
