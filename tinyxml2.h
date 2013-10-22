@@ -643,9 +643,7 @@ public:
     	Text:		the text string
     	@endverbatim
     */
-    const char* Value() const			{
-        return _value.GetStr();
-    }
+    const char* Value() const;
 
     /** Set the Value of an XML node.
     	@sa Value()
@@ -1014,13 +1012,11 @@ class TINYXML2_LIB XMLAttribute
     friend class XMLElement;
 public:
     /// The name of the attribute.
-    const char* Name() const {
-        return _name.GetStr();
-    }
+    const char* Name() const;
+
     /// The value of the attribute.
-    const char* Value() const {
-        return _value.GetStr();
-    }
+    const char* Value() const;
+
     /// The next attribute in the list.
     const XMLAttribute* Next() const {
         return _next;

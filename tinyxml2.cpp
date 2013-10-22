@@ -595,6 +595,10 @@ XMLNode::~XMLNode()
     }
 }
 
+const char* XMLNode::Value() const 
+{
+    return _value.GetStr();
+}
 
 void XMLNode::SetValue( const char* str, bool staticMem )
 {
@@ -1040,6 +1044,17 @@ bool XMLUnknown::Accept( XMLVisitor* visitor ) const
 }
 
 // --------- XMLAttribute ---------- //
+
+const char* XMLAttribute::Name() const 
+{
+    return _name.GetStr();
+}
+
+const char* XMLAttribute::Value() const 
+{
+    return _value.GetStr();
+}
+
 char* XMLAttribute::ParseDeep( char* p, bool processEntities )
 {
     // Parse using the name rules: bug fix, was using ParseText before
