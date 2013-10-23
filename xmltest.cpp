@@ -1202,6 +1202,77 @@ int main( int argc, const char ** argv )
 		}
 	}
 
+	{
+		// Insertion with Removal
+		const char* xml = "<?xml version=\"1.0\" ?>"
+			"<root>"
+			"<one>"
+			"<subtree>"
+			"<elem>element 1</elem>text<!-- comment -->"
+			"</subtree>"
+			"</one>"
+			"<two/>"
+			"</root>";
+		const char* xmlInsideTwo = "<?xml version=\"1.0\" ?>"
+			"<root>"
+			"<one/>"
+			"<two>"
+			"<subtree>"
+			"<elem>element 1</elem>text<!-- comment -->"
+			"</subtree>"
+			"</two>"
+			"</root>";
+		const char* xmlAfterOne = "<?xml version=\"1.0\" ?>"
+			"<root>"
+			"<one/>"
+			"<subtree>"
+			"<elem>element 1</elem>text<!-- comment -->"
+			"</subtree>"
+			"<two/>"
+			"</root>";
+		const char* xmlAfterTwo = "<?xml version=\"1.0\" ?>"
+			"<root>"
+			"<one/>"
+			"<two/>"
+			"<subtree>"
+			"<elem>element 1</elem>text<!-- comment -->"
+			"</subtree>"
+			"</root>";
+
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLElement* subtree = doc.RootElement()->FirstChildElement("one")->FirstChildElement("subtree");
+		XMLElement* two = doc.RootElement()->FirstChildElement("two");
+		two->InsertFirstChild(subtree);
+		XMLPrinter printer1( 0, true );
+		doc.Accept( &printer1 );
+		XMLTest( "Move node from within <one> to <two>", xmlInsideTwo, printer1.CStr());
+
+		doc.Parse( xml );
+		subtree = doc.RootElement()->FirstChildElement("one")->FirstChildElement("subtree");
+		two = doc.RootElement()->FirstChildElement("two");
+		doc.RootElement()->InsertAfterChild(two, subtree);
+		XMLPrinter printer2( 0, true );
+		doc.Accept( &printer2 );
+		XMLTest( "Move node from within <one> after <two>", xmlAfterTwo, printer2.CStr());
+
+		doc.Parse( xml );
+		XMLNode* one = doc.RootElement()->FirstChildElement("one");
+		subtree = one->FirstChildElement("subtree");
+		doc.RootElement()->InsertAfterChild(one, subtree);
+		XMLPrinter printer3( 0, true );
+		doc.Accept( &printer3 );
+		XMLTest( "Move node from within <one> after <one>", xmlAfterOne, printer3.CStr());
+
+		doc.Parse( xml );
+		subtree = doc.RootElement()->FirstChildElement("one")->FirstChildElement("subtree");
+		two = doc.RootElement()->FirstChildElement("two");
+		doc.RootElement()->InsertEndChild(subtree);
+		XMLPrinter printer4( 0, true );
+		doc.Accept( &printer4 );
+		XMLTest( "Move node from within <one> after <two>", xmlAfterTwo, printer4.CStr());
+	}
+
 	// ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )
