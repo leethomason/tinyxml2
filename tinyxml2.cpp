@@ -625,7 +625,6 @@ void XMLNode::DeleteChildren()
 
 void XMLNode::Unlink( XMLNode* child )
 {
-    TIXMLASSERT( child->_parent == this );
     if ( child == _firstChild ) {
         _firstChild = _firstChild->_next;
     }
@@ -639,7 +638,6 @@ void XMLNode::Unlink( XMLNode* child )
     if ( child->_next ) {
         child->_next->_prev = child->_prev;
     }
-    child->_parent = 0;
 }
 
 
@@ -652,6 +650,12 @@ void XMLNode::DeleteChild( XMLNode* node )
 
 XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 {
+	if (addThis->_document != _document)
+		return 0;
+	if (addThis->_parent)
+		addThis->_parent->Unlink( addThis );
+	else
+	   addThis->_memPool->SetTracked();
     if ( _lastChild ) {
         TIXMLASSERT( _firstChild );
         TIXMLASSERT( _lastChild->_next == 0 );
@@ -669,13 +673,18 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
         addThis->_next = 0;
     }
     addThis->_parent = this;
-    addThis->_memPool->SetTracked();
     return addThis;
 }
 
 
 XMLNode* XMLNode::InsertFirstChild( XMLNode* addThis )
 {
+	if (addThis->_document != _document)
+		return 0;
+	if (addThis->_parent)
+		addThis->_parent->Unlink( addThis );
+	else
+	   addThis->_memPool->SetTracked();
     if ( _firstChild ) {
         TIXMLASSERT( _lastChild );
         TIXMLASSERT( _firstChild->_prev == 0 );
@@ -694,13 +703,14 @@ XMLNode* XMLNode::InsertFirstChild( XMLNode* addThis )
         addThis->_next = 0;
     }
     addThis->_parent = this;
-    addThis->_memPool->SetTracked();
-    return addThis;
+     return addThis;
 }
 
 
 XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
 {
+	if (addThis->_document != _document)
+		return 0;
     TIXMLASSERT( afterThis->_parent == this );
     if ( afterThis->_parent != this ) {
         return 0;
@@ -710,12 +720,15 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
         // The last node or the only node.
         return InsertEndChild( addThis );
     }
+	if (addThis->_parent)
+		addThis->_parent->Unlink( addThis );
+	else
+	   addThis->_memPool->SetTracked();
     addThis->_prev = afterThis;
     addThis->_next = afterThis->_next;
     afterThis->_next->_prev = addThis;
     afterThis->_next = addThis;
     addThis->_parent = this;
-    addThis->_memPool->SetTracked();
     return addThis;
 }
 

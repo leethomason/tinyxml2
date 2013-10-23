@@ -734,6 +734,10 @@ public:
 
     /**
     	Add a child node as the last (right) child.
+		If the child node is already part of the document,
+		it is moved from its old location to the new location.
+		Returns the addThis argument or 0 if the node does not
+		belong to the same document.
     */
     XMLNode* InsertEndChild( XMLNode* addThis );
 
@@ -742,10 +746,19 @@ public:
     }
     /**
     	Add a child node as the first (left) child.
+		If the child node is already part of the document,
+		it is moved from its old location to the new location.
+		Returns the addThis argument or 0 if the node does not
+		belong to the same document.
     */
     XMLNode* InsertFirstChild( XMLNode* addThis );
     /**
     	Add a node after the specified child node.
+		If the child node is already part of the document,
+		it is moved from its old location to the new location.
+		Returns the addThis argument or 0 if the afterThis node
+		is not a child of this node, or if the node does not
+		belong to the same document.
     */
     XMLNode* InsertAfterChild( XMLNode* afterThis, XMLNode* addThis );
 
