@@ -169,7 +169,7 @@ characters. Namely:
 	&quot;	"
 	&apos;	'
 
-These are recognized when the XML document is read, and translated to there
+These are recognized when the XML document is read, and translated to their
 UTF-8 equivalents. For instance, text with the XML of:
 
 	Far &amp; Away
