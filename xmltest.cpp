@@ -1254,7 +1254,7 @@ int main( int argc, const char ** argv )
 		doc.RootElement()->InsertAfterChild(two, subtree);
 		XMLPrinter printer2( 0, true );
 		doc.Accept( &printer2 );
-		XMLTest( "Move node from within <one> after <two>", xmlAfterTwo, printer2.CStr());
+		XMLTest( "Move node from within <one> after <two>", xmlAfterTwo, printer2.CStr(), false );
 
 		doc.Parse( xml );
 		XMLNode* one = doc.RootElement()->FirstChildElement("one");
@@ -1262,7 +1262,7 @@ int main( int argc, const char ** argv )
 		doc.RootElement()->InsertAfterChild(one, subtree);
 		XMLPrinter printer3( 0, true );
 		doc.Accept( &printer3 );
-		XMLTest( "Move node from within <one> after <one>", xmlAfterOne, printer3.CStr());
+		XMLTest( "Move node from within <one> after <one>", xmlAfterOne, printer3.CStr(), false );
 
 		doc.Parse( xml );
 		subtree = doc.RootElement()->FirstChildElement("one")->FirstChildElement("subtree");
@@ -1270,7 +1270,7 @@ int main( int argc, const char ** argv )
 		doc.RootElement()->InsertEndChild(subtree);
 		XMLPrinter printer4( 0, true );
 		doc.Accept( &printer4 );
-		XMLTest( "Move node from within <one> after <two>", xmlAfterTwo, printer4.CStr());
+		XMLTest( "Move node from within <one> after <two>", xmlAfterTwo, printer4.CStr(), false );
 	}
 
 	// ----------- Performance tracking --------------
