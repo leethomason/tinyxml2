@@ -216,6 +216,10 @@ public:
         }
     }
 
+    void Reset() {
+        _size = 0;
+    }
+
     void Push( T t ) {
         EnsureCapacity( _size+1 );
         _mem[_size++] = t;
