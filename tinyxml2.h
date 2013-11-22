@@ -1966,6 +1966,14 @@ public:
     int CStrSize() const {
         return _buffer.Size();
     }
+    /**
+    	If in print to memory mode, reset the buffer to the
+    	beginning.
+    */
+    void ResetBuffer() {
+        _buffer.Reset();
+        _buffer.Push(0);
+    }
 
 protected:
     void SealElement();
