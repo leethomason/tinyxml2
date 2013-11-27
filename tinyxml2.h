@@ -216,7 +216,7 @@ public:
         }
     }
 
-    void Reset() {
+    void Clear() {
         _size = 0;
     }
 
@@ -1970,8 +1970,8 @@ public:
     	If in print to memory mode, reset the buffer to the
     	beginning.
     */
-    void ResetBuffer() {
-        _buffer.Reset();
+    void ClearBuffer() {
+        _buffer.Clear();
         _buffer.Push(0);
     }
 
