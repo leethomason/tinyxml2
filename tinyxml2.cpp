@@ -422,16 +422,19 @@ void XMLUtil::ToStr( bool v, char* buffer, int bufferSize )
     TIXML_SNPRINTF( buffer, bufferSize, "%d", v ? 1 : 0 );
 }
 
-
+/*
+	ToStr() of a number is a very tricky topic.
+	https://github.com/leethomason/tinyxml2/issues/106
+*/
 void XMLUtil::ToStr( float v, char* buffer, int bufferSize )
 {
-    TIXML_SNPRINTF( buffer, bufferSize, "%f", v );
+    TIXML_SNPRINTF( buffer, bufferSize, "%.8g", v );
 }
 
 
 void XMLUtil::ToStr( double v, char* buffer, int bufferSize )
 {
-    TIXML_SNPRINTF( buffer, bufferSize, "%f", v );
+    TIXML_SNPRINTF( buffer, bufferSize, "%.17g", v );
 }
 
 
@@ -497,12 +500,7 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
     }
 
     // What is this thing?
-    // - Elements start with a letter or underscore, but xml is reserved.
-    // - Comments: <!--
-    // - Declaration: <?
-    // - Everything else is unknown to tinyxml.
-    //
-
+	// These strings define the matching patters:
     static const char* xmlHeader		= { "<?" };
     static const char* commentHeader	= { "<!--" };
     static const char* dtdHeader		= { "<!" };

@@ -118,7 +118,7 @@ inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
 
 static const int TIXML2_MAJOR_VERSION = 1;
 static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 12;
+static const int TIXML2_PATCH_VERSION = 13;
 
 namespace tinyxml2
 {
@@ -1318,6 +1318,11 @@ public:
     }
     /// Sets the named attribute to value.
     void SetAttribute( const char* name, double value )		{
+        XMLAttribute* a = FindOrCreateAttribute( name );
+        a->SetAttribute( value );
+    }
+    /// Sets the named attribute to value.
+    void SetAttribute( const char* name, float value )		{
         XMLAttribute* a = FindOrCreateAttribute( name );
         a->SetAttribute( value );
     }
