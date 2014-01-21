@@ -617,6 +617,38 @@ int main( int argc, const char ** argv )
 	}
 
 
+	// --------SetText()-----------
+	{
+		const char* str = "<foo></foo>";
+		XMLDocument doc;
+		doc.Parse( str );
+		XMLElement* element = doc.RootElement();
+
+		element->SetText("He kept turning his head to left and right, but I could not see anything through the darkness.");
+		XMLTest( "SetText() normal use (open/close).", "He kept turning his head to left and right, but I could not see anything through the darkness.", element->GetText() );
+
+		element->SetText("Suddenly, away on our left I saw a faint flickering blue flame.");
+		XMLTest( "SetText() replace.", "Suddenly, away on our left I saw a faint flickering blue flame.", element->GetText() );
+
+		str = "<foo/>";
+		doc.Parse( str );
+		element = doc.RootElement();
+
+		element->SetText("The driver saw it at the same moment.");
+		XMLTest( "SetText() normal use. (self-closing)", "The driver saw it at the same moment.", element->GetText() );
+
+		element->SetText("<b>He at once checked the horses, and, jumping to the ground, disappeared into the darkness.</b>");
+		XMLTest( "SetText() replace with tag-like text.", "<b>He at once checked the horses, and, jumping to the ground, disappeared into the darkness.</b>", element->GetText() );
+
+		str = "<foo><bar>Text in nested element</bar></foo>";
+		doc.Parse( str );
+		element = doc.RootElement();
+		
+		element->SetText("I did not know what to do, the less as the howling of the wolves grew closer.");
+		XMLTest( "SetText() prefix to nested non-text children.", "I did not know what to do, the less as the howling of the wolves grew closer.", element->GetText() );
+	}
+
+
 	// ---------- CDATA ---------------
 	{
 		const char* str =	"<xmlElement>"
