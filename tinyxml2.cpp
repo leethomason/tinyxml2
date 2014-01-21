@@ -1336,13 +1336,25 @@ void	XMLElement::SetBoolFirstChild( bool inBool )
 }
 
 
-bool	XMLElement::BoolFirstChild()
+XMLError	XMLElement::QueryBoolFirstChild( bool *outBool )
 {
-	if ( FirstChild() && FirstChild()->ToElement() ) {
-		return strcmp( FirstChild()->Value(), "true" ) == 0;
+	if ( FirstChild() )
+	{
+		if ( FirstChild()->ToElement() )
+		{
+			bool	isTrue = strcmp( FirstChild()->Value(), "true" ) == 0;
+			bool	isFalse = strcmp( FirstChild()->Value(), "false" ) == 0;
+			if( !isTrue && !isFalse )
+				return XML_CAN_NOT_CONVERT_TEXT;
+			
+			*outBool = isTrue;
+			return XML_SUCCESS;
+		}
+		else
+			return XML_NO_ELEMENT_NODE;
 	}
-	
-	return false;
+	else
+		return XML_NO_ELEMENT_NODE;
 }
 
 

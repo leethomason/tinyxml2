@@ -1014,7 +1014,8 @@ enum XMLError {
     XML_ERROR_PARSING,
 
     XML_CAN_NOT_CONVERT_TEXT,
-    XML_NO_TEXT_NODE
+    XML_NO_TEXT_NODE,
+	XML_NO_ELEMENT_NODE
 };
 
 
@@ -1419,9 +1420,17 @@ public:
 
 
     /// Adds a sub-element equivalent to the given boolean.
-	void	SetBoolFirstChild( bool inBool );
+	void		SetBoolFirstChild( bool inBool );
 	
-	bool	BoolFirstChild();
+    /// Looks for a &lt;true /&gt; or &lt;false /&gt; as the first child and returns the corresponding bool.
+	bool		BoolFirstChild()
+	{
+		bool	b = false;
+		QueryBoolFirstChild(&b);
+		return b;
+	}
+
+	XMLError	QueryBoolFirstChild( bool *outBool );
 	
     /**
     	Convenience method to query the value of a child text node. This is probably best
