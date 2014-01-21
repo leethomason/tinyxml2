@@ -1262,7 +1262,7 @@ const char* XMLElement::GetText() const
 
 void	XMLElement::SetText( const char* inText )
 {
-	if ( FirstChild() )
+	if ( FirstChild() && FirstChild()->ToText() )
 		FirstChild()->SetValue( inText );
 	else {
 		XMLText*	theText = GetDocument()->NewText( inText );
