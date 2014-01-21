@@ -649,6 +649,61 @@ int main( int argc, const char ** argv )
 	}
 
 
+	// --------SetBoolFirstChild()-----------
+	{
+		const char* str = "<foo></foo>";
+		XMLDocument doc;
+		doc.Parse( str );
+		XMLElement* element = doc.RootElement();
+
+		element->SetBoolFirstChild(true);
+		XMLTest( "SetBoolFirstChild() normal use (open/close).", "true", element->FirstChild()->ToElement()->Value() );
+
+		element->SetBoolFirstChild(false);
+		XMLTest( "SetBoolFirstChild() replace.", "false", element->FirstChild()->ToElement()->Value() );
+
+		str = "<foo/>";
+		doc.Parse( str );
+		element = doc.RootElement();
+
+		element->SetBoolFirstChild(false);
+		XMLTest( "SetBoolFirstChild() normal use (self-closing).", "false", element->FirstChild()->ToElement()->Value() );
+	}
+
+
+	// --------BoolFirstChild()-----------
+	{
+		const char* str = "<foo><false /></foo>";
+		XMLDocument doc;
+		doc.Parse( str );
+		XMLElement* element = doc.RootElement();
+
+		XMLTest( "BoolFirstChild() normal use (open/close).", false, element->BoolFirstChild() );
+
+		str = "<foo><true /></foo>";
+		doc.Parse( str );
+		element = doc.RootElement();
+		XMLTest( "BoolFirstChild() normal use (open/close).", true, element->BoolFirstChild() );
+
+		str = "<foo></foo>";
+		doc.Parse( str );
+		element = doc.RootElement();
+		
+		element->SetBoolFirstChild(true);
+		XMLTest( "BoolFirstChild() after SetBoolFirstChild().", true, element->BoolFirstChild() );
+
+		element->SetBoolFirstChild(false);
+		XMLTest( "BoolFirstChild() after SetBoolFirstChild() replace.", false, element->BoolFirstChild() );
+
+		str = "<foo/>";
+		doc.Parse( str );
+		
+		element = doc.RootElement();
+		element->SetBoolFirstChild(false);
+		XMLTest( "BoolFirstChild() (self-closing) after SetBoolFirstChild() replace.", false, element->BoolFirstChild() );
+	}
+
+
 	// ---------- CDATA ---------------
 	{
 		const char* str =	"<xmlElement>"
