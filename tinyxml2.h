@@ -1417,7 +1417,39 @@ public:
 
     /// Sets the text to the given float.
 	void	SetText( float inNum );
+	
+	
+	/// Convenience for QueryIntText when you don't care if the text won't convert.
+	int		IntText()
+	{
+		int		i = 0;
+		QueryIntText( &i );
+		return i;
+	}
 
+	/// Convenience for QueryUnsignedText when you don't care if the text won't convert.
+	unsigned	UnsignedText()
+	{
+		unsigned		i = 0;
+		QueryUnsignedText( &i );
+		return i;
+	}
+
+	/// Convenience for QueryDoubleText when you don't care if the text won't convert.
+	double	DoubleText()
+	{
+		double		i = 0;
+		QueryDoubleText( &i );
+		return i;
+	}
+
+	/// Convenience for QueryFloatText when you don't care if the text won't convert.
+	float	FloatText()
+	{
+		float		i = 0;
+		QueryFloatText( &i );
+		return i;
+	}
 
     /// Adds a sub-element equivalent to the given boolean.
 	void		SetBoolFirstChild( bool inBool );
