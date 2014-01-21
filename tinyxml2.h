@@ -540,6 +540,7 @@ public:
 
     // converts primitive types to strings
     static void ToStr( int v, char* buffer, int bufferSize );
+    static void ToStr( long long v, char* buffer, int bufferSize );
     static void ToStr( unsigned v, char* buffer, int bufferSize );
     static void ToStr( bool v, char* buffer, int bufferSize );
     static void ToStr( float v, char* buffer, int bufferSize );
@@ -547,6 +548,7 @@ public:
 
     // converts strings to primitive types
     static bool	ToInt( const char* str, int* value );
+    static bool	ToLongLong( const char* str, long long* value );
     static bool ToUnsigned( const char* str, unsigned* value );
     static bool	ToBool( const char* str, bool* value );
     static bool	ToFloat( const char* str, float* value );
@@ -1014,7 +1016,8 @@ enum XMLError {
     XML_ERROR_PARSING,
 
     XML_CAN_NOT_CONVERT_TEXT,
-    XML_NO_TEXT_NODE
+    XML_NO_TEXT_NODE,
+	XML_NO_ELEMENT_NODE
 };
 
 
@@ -1091,6 +1094,8 @@ public:
     void SetAttribute( const char* value );
     /// Set the attribute to value.
     void SetAttribute( int value );
+    /// Set the attribute to value.
+    void SetAttribute( long long value );
     /// Set the attribute to value.
     void SetAttribute( unsigned value );
     /// Set the attribute to value.
@@ -1307,6 +1312,11 @@ public:
         a->SetAttribute( value );
     }
     /// Sets the named attribute to value.
+    void SetAttribute( const char* name, long long value )			{
+        XMLAttribute* a = FindOrCreateAttribute( name );
+        a->SetAttribute( value );
+    }
+    /// Sets the named attribute to value.
     void SetAttribute( const char* name, unsigned value )		{
         XMLAttribute* a = FindOrCreateAttribute( name );
         a->SetAttribute( value );
@@ -1369,6 +1379,110 @@ public:
     */
     const char* GetText() const;
 
+    /** Convenience function for easy access to the text inside an element. Although easy
+    	and concise, SetText() is limited compared to creating an XMLText child
+    	and mutating it directly.
+
+    	If the first child of 'this' is a XMLText, SetText() sets its value to
+		the given string, otherwise it will create a first child that is an XMLText.
+
+    	This is a convenient method for setting the text of simple contained text:
+    	@verbatim
+    	<foo>This is text</foo>
+    		fooElement->SetText( "Hullaballoo!" );
+     	<foo>Hullaballoo!</foo>
+		@endverbatim
+
+    	Note that this function can be misleading. If the element foo was created from
+    	this XML:
+    	@verbatim
+    		<foo><b>This is text</b></foo>
+    	@endverbatim
+
+    	then it will not change "This is text", but rather prefix it with a text element:
+    	@verbatim
+    		<foo>Hullaballoo!<b>This is text</b></foo>
+    	@endverbatim
+		
+		For this XML:
+    	@verbatim
+    		<foo />
+    	@endverbatim
+    	SetText() will generate
+    	@verbatim
+    		<foo>Hullaballoo!</foo>
+    	@endverbatim
+    */
+	void	SetText( const char* inText );
+
+    /// Sets the text to the given number.
+	void	SetText( int inNum );
+
+    /// Sets the text to the given number.
+	void	SetText( unsigned inNum );
+
+    /// Sets the text to the given double.
+	void	SetText( double inNum );
+
+    /// Sets the text to the given float.
+	void	SetText( float inNum );
+	
+    /// Sets the text to the given long long.
+	void	SetText( long long inNum );
+	
+	/// Convenience for QueryIntText when you don't care if the text won't convert.
+	int		IntText()
+	{
+		int		i = 0;
+		QueryIntText( &i );
+		return i;
+	}
+
+	/// Convenience for QueryLongLongText when you don't care if the text won't convert.
+	long long		LongLongText()
+	{
+		long long		i = 0;
+		QueryLongLongText( &i );
+		return i;
+	}
+
+	/// Convenience for QueryUnsignedText when you don't care if the text won't convert.
+	unsigned	UnsignedText()
+	{
+		unsigned		i = 0;
+		QueryUnsignedText( &i );
+		return i;
+	}
+
+	/// Convenience for QueryDoubleText when you don't care if the text won't convert.
+	double	DoubleText()
+	{
+		double		i = 0;
+		QueryDoubleText( &i );
+		return i;
+	}
+
+	/// Convenience for QueryFloatText when you don't care if the text won't convert.
+	float	FloatText()
+	{
+		float		i = 0;
+		QueryFloatText( &i );
+		return i;
+	}
+
+    /// Adds a sub-element equivalent to the given boolean.
+	void		SetBoolFirstChild( bool inBool );
+	
+    /// Looks for a &lt;true /&gt; or &lt;false /&gt; as the first child and returns the corresponding bool.
+	bool		BoolFirstChild()
+	{
+		bool	b = false;
+		QueryBoolFirstChild(&b);
+		return b;
+	}
+
+	XMLError	QueryBoolFirstChild( bool *outBool );
+	
     /**
     	Convenience method to query the value of a child text node. This is probably best
     	shown by example. Given you have a document is this form:
@@ -1397,6 +1511,8 @@ public:
     */
     XMLError QueryIntText( int* ival ) const;
     /// See QueryIntText()
+    XMLError QueryLongLongText( long long* ival ) const;
+    /// See QueryIntText()
     XMLError QueryUnsignedText( unsigned* uval ) const;
     /// See QueryIntText()
     XMLError QueryBoolText( bool* bval ) const;
@@ -1419,6 +1535,8 @@ public:
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 private:
+    enum { BUF_SIZE = 200 };
+
     XMLElement( XMLDocument* doc );
     virtual ~XMLElement();
     XMLElement( const XMLElement& );	// not supported

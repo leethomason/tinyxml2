@@ -617,6 +617,93 @@ int main( int argc, const char ** argv )
 	}
 
 
+	// --------SetText()-----------
+	{
+		const char* str = "<foo></foo>";
+		XMLDocument doc;
+		doc.Parse( str );
+		XMLElement* element = doc.RootElement();
+
+		element->SetText("He kept turning his head to left and right, but I could not see anything through the darkness.");
+		XMLTest( "SetText() normal use (open/close).", "He kept turning his head to left and right, but I could not see anything through the darkness.", element->GetText() );
+
+		element->SetText("Suddenly, away on our left I saw a faint flickering blue flame.");
+		XMLTest( "SetText() replace.", "Suddenly, away on our left I saw a faint flickering blue flame.", element->GetText() );
+
+		str = "<foo/>";
+		doc.Parse( str );
+		element = doc.RootElement();
+
+		element->SetText("The driver saw it at the same moment.");
+		XMLTest( "SetText() normal use. (self-closing)", "The driver saw it at the same moment.", element->GetText() );
+
+		element->SetText("<b>He at once checked the horses, and, jumping to the ground, disappeared into the darkness.</b>");
+		XMLTest( "SetText() replace with tag-like text.", "<b>He at once checked the horses, and, jumping to the ground, disappeared into the darkness.</b>", element->GetText() );
+
+		str = "<foo><bar>Text in nested element</bar></foo>";
+		doc.Parse( str );
+		element = doc.RootElement();
+		
+		element->SetText("I did not know what to do, the less as the howling of the wolves grew closer.");
+		XMLTest( "SetText() prefix to nested non-text children.", "I did not know what to do, the less as the howling of the wolves grew closer.", element->GetText() );
+	}
+
+
+	// --------SetBoolFirstChild()-----------
+	{
+		const char* str = "<foo></foo>";
+		XMLDocument doc;
+		doc.Parse( str );
+		XMLElement* element = doc.RootElement();
+
+		element->SetBoolFirstChild(true);
+		XMLTest( "SetBoolFirstChild() normal use (open/close).", "true", element->FirstChild()->ToElement()->Value() );
+
+		element->SetBoolFirstChild(false);
+		XMLTest( "SetBoolFirstChild() replace.", "false", element->FirstChild()->ToElement()->Value() );
+
+		str = "<foo/>";
+		doc.Parse( str );
+		element = doc.RootElement();
+
+		element->SetBoolFirstChild(false);
+		XMLTest( "SetBoolFirstChild() normal use (self-closing).", "false", element->FirstChild()->ToElement()->Value() );
+	}
+
+
+	// --------BoolFirstChild()-----------
+	{
+		const char* str = "<foo><false /></foo>";
+		XMLDocument doc;
+		doc.Parse( str );
+		XMLElement* element = doc.RootElement();
+
+		XMLTest( "BoolFirstChild() normal use (open/close).", false, element->BoolFirstChild() );
+
+		str = "<foo><true /></foo>";
+		doc.Parse( str );
+		element = doc.RootElement();
+		XMLTest( "BoolFirstChild() normal use (open/close).", true, element->BoolFirstChild() );
+
+		str = "<foo></foo>";
+		doc.Parse( str );
+		element = doc.RootElement();
+		
+		element->SetBoolFirstChild(true);
+		XMLTest( "BoolFirstChild() after SetBoolFirstChild().", true, element->BoolFirstChild() );
+
+		element->SetBoolFirstChild(false);
+		XMLTest( "BoolFirstChild() after SetBoolFirstChild() replace.", false, element->BoolFirstChild() );
+
+		str = "<foo/>";
+		doc.Parse( str );
+		
+		element = doc.RootElement();
+		element->SetBoolFirstChild(false);
+		XMLTest( "BoolFirstChild() (self-closing) after SetBoolFirstChild() replace.", false, element->BoolFirstChild() );
+	}
+
+
 	// ---------- CDATA ---------------
 	{
 		const char* str =	"<xmlElement>"
