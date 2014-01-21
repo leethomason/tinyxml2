@@ -1260,6 +1260,16 @@ const char* XMLElement::GetText() const
 }
 
 
+void	XMLElement::SetText( const char* inText )
+{
+	if ( FirstChild() )
+		FirstChild()->SetValue( inText );
+	else {
+		XMLText*	theText = GetDocument()->NewText( inText );
+		InsertFirstChild( theText );
+	}
+}
+
 XMLError XMLElement::QueryIntText( int* ival ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {

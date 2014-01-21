@@ -1369,6 +1369,8 @@ public:
     */
     const char* GetText() const;
 
+	void	SetText( const char* inText );
+
     /**
     	Convenience method to query the value of a child text node. This is probably best
     	shown by example. Given you have a document is this form:
