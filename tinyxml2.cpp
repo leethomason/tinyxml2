@@ -1297,19 +1297,6 @@ void	XMLElement::SetText( unsigned inNum )
 }
 
 
-void	XMLElement::SetText( bool inBool )
-{
-    char buf[BUF_SIZE];
-    XMLUtil::ToStr( inBool, buf, BUF_SIZE );
-	if ( FirstChild() && FirstChild()->ToText() )
-		FirstChild()->SetValue( buf );
-	else {
-		XMLText*	theText = GetDocument()->NewText( buf );
-		InsertFirstChild( theText );
-	}
-}
-
-
 void	XMLElement::SetText( double inNum )
 {
     char buf[BUF_SIZE];
@@ -1333,6 +1320,29 @@ void	XMLElement::SetText( float inNum )
 		XMLText*	theText = GetDocument()->NewText( buf );
 		InsertFirstChild( theText );
 	}
+}
+
+
+void	XMLElement::SetBoolFirstChild( bool inBool )
+{
+	if( FirstChild() && FirstChild()->ToElement()
+		&& (strcmp(FirstChild()->Value(),"true") == 0 || strcmp(FirstChild()->Value(),"false") == 0) ) {
+		FirstChild()->SetValue( inBool ? "true" : "false" );
+	}
+	else if( !FirstChild() ) {
+		XMLElement*	theText = GetDocument()->NewElement( inBool ? "true" : "false" );
+		InsertFirstChild( theText );
+	}
+}
+
+
+bool	XMLElement::BoolFirstChild()
+{
+	if ( FirstChild() && FirstChild()->ToElement() ) {
+		return strcmp( FirstChild()->Value(), "true" ) == 0;
+	}
+	
+	return false;
 }
 
 

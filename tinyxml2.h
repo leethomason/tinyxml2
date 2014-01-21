@@ -1411,9 +1411,6 @@ public:
     /// Sets the text to the given number.
 	void	SetText( unsigned inNum );
 
-    /// Sets the text to the given boolean.
-	void	SetText( bool inBool );
-	
     /// Sets the text to the given double.
 	void	SetText( double inNum );
 
@@ -1421,6 +1418,11 @@ public:
 	void	SetText( float inNum );
 
 
+    /// Adds a sub-element equivalent to the given boolean.
+	void	SetBoolFirstChild( bool inBool );
+	
+	bool	BoolFirstChild();
+	
     /**
     	Convenience method to query the value of a child text node. This is probably best
     	shown by example. Given you have a document is this form:
