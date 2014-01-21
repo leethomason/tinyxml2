@@ -1270,6 +1270,72 @@ void	XMLElement::SetText( const char* inText )
 	}
 }
 
+
+void	XMLElement::SetText( int inNum )
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( inNum, buf, BUF_SIZE );
+	if ( FirstChild() && FirstChild()->ToText() )
+		FirstChild()->SetValue( buf );
+	else {
+		XMLText*	theText = GetDocument()->NewText( buf );
+		InsertFirstChild( theText );
+	}
+}
+
+
+void	XMLElement::SetText( unsigned inNum )
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( inNum, buf, BUF_SIZE );
+	if ( FirstChild() && FirstChild()->ToText() )
+		FirstChild()->SetValue( buf );
+	else {
+		XMLText*	theText = GetDocument()->NewText( buf );
+		InsertFirstChild( theText );
+	}
+}
+
+
+void	XMLElement::SetText( bool inBool )
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( inBool, buf, BUF_SIZE );
+	if ( FirstChild() && FirstChild()->ToText() )
+		FirstChild()->SetValue( buf );
+	else {
+		XMLText*	theText = GetDocument()->NewText( buf );
+		InsertFirstChild( theText );
+	}
+}
+
+
+void	XMLElement::SetText( double inNum )
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( inNum, buf, BUF_SIZE );
+	if ( FirstChild() && FirstChild()->ToText() )
+		FirstChild()->SetValue( buf );
+	else {
+		XMLText*	theText = GetDocument()->NewText( buf );
+		InsertFirstChild( theText );
+	}
+}
+
+
+void	XMLElement::SetText( float inNum )
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( inNum, buf, BUF_SIZE );
+	if ( FirstChild() && FirstChild()->ToText() )
+		FirstChild()->SetValue( buf );
+	else {
+		XMLText*	theText = GetDocument()->NewText( buf );
+		InsertFirstChild( theText );
+	}
+}
+
+
 XMLError XMLElement::QueryIntText( int* ival ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {

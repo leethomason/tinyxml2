@@ -1405,6 +1405,22 @@ public:
     */
 	void	SetText( const char* inText );
 
+    /// Sets the text to the given number.
+	void	SetText( int inNum );
+
+    /// Sets the text to the given number.
+	void	SetText( unsigned inNum );
+
+    /// Sets the text to the given boolean.
+	void	SetText( bool inBool );
+	
+    /// Sets the text to the given double.
+	void	SetText( double inNum );
+
+    /// Sets the text to the given float.
+	void	SetText( float inNum );
+
+
     /**
     	Convenience method to query the value of a child text node. This is probably best
     	shown by example. Given you have a document is this form:
@@ -1455,6 +1471,8 @@ public:
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 private:
+    enum { BUF_SIZE = 200 };
+
     XMLElement( XMLDocument* doc );
     virtual ~XMLElement();
     XMLElement( const XMLElement& );	// not supported
