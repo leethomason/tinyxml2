@@ -1369,6 +1369,12 @@ public:
     */
     const char* GetText() const;
 
+
+    /// Adds a sub-element equivalent to the given boolean.
+	void	SetBoolFirstChild( bool inBool );
+	
+	bool	BoolFirstChild();
+	
     /**
     	Convenience method to query the value of a child text node. This is probably best
     	shown by example. Given you have a document is this form:
