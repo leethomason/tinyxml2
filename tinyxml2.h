@@ -118,7 +118,7 @@ inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
 
 static const int TIXML2_MAJOR_VERSION = 1;
 static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 13;
+static const int TIXML2_PATCH_VERSION = 14;
 
 namespace tinyxml2
 {
@@ -1403,7 +1403,17 @@ public:
     		<foo>Hullaballoo!</foo>
     	@endverbatim
     */
-	void	SetText( const char* inText );
+	void SetText( const char* inText );
+    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    void SetText( int value );
+    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    void SetText( unsigned value );  
+    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    void SetText( bool value );  
+    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    void SetText( double value );  
+    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    void SetText( float value );  
 
     /**
     	Convenience method to query the value of a child text node. This is probably best
@@ -1465,6 +1475,7 @@ private:
     //void LinkAttribute( XMLAttribute* attrib );
     char* ParseAttributes( char* p );
 
+    enum { BUF_SIZE = 200 };
     int _closingType;
     // The attribute list is ordered; there is no 'lastAttribute'
     // because the list needs to be scanned for dupes before adding

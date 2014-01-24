@@ -647,6 +647,28 @@ int main( int argc, const char ** argv )
 		
 		element->SetText("wolves");
 		XMLTest( "SetText() prefix to nested non-text children.", "wolves", element->GetText() );
+
+		str = "<foo/>";
+		doc.Parse( str );
+		element = doc.RootElement();
+		
+		element->SetText( "str" );
+		XMLTest( "SetText types", "str", element->GetText() );
+
+		element->SetText( 1 );
+		XMLTest( "SetText types", "1", element->GetText() );
+
+		element->SetText( 1U );
+		XMLTest( "SetText types", "1", element->GetText() );
+
+		element->SetText( true );
+		XMLTest( "SetText types", "1", element->GetText() ); // TODO: should be 'true'?
+
+		element->SetText( 1.5f );
+		XMLTest( "SetText types", "1.5", element->GetText() );
+
+		element->SetText( 1.5 );
+		XMLTest( "SetText types", "1.5", element->GetText() );
 	}
 
 
