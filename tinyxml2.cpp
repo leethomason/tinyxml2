@@ -1293,69 +1293,44 @@ void	XMLElement::SetText( const char* inText )
 }
 
 
-void	XMLElement::SetText( int inNum )
+void XMLElement::SetText( int v ) 
 {
     char buf[BUF_SIZE];
-    XMLUtil::ToStr( inNum, buf, BUF_SIZE );
-	if ( FirstChild() && FirstChild()->ToText() )
-		FirstChild()->SetValue( buf );
-	else {
-		XMLText*	theText = GetDocument()->NewText( buf );
-		InsertFirstChild( theText );
-	}
+    XMLUtil::ToStr( v, buf, BUF_SIZE );
+    SetText( buf );
 }
 
 
-void	XMLElement::SetText( unsigned inNum )
+void XMLElement::SetText( unsigned v ) 
 {
     char buf[BUF_SIZE];
-    XMLUtil::ToStr( inNum, buf, BUF_SIZE );
-	if ( FirstChild() && FirstChild()->ToText() )
-		FirstChild()->SetValue( buf );
-	else {
-		XMLText*	theText = GetDocument()->NewText( buf );
-		InsertFirstChild( theText );
-	}
+    XMLUtil::ToStr( v, buf, BUF_SIZE );
+    SetText( buf );
 }
 
 
-void	XMLElement::SetText( double inNum )
+void XMLElement::SetText( bool v ) 
 {
     char buf[BUF_SIZE];
-    XMLUtil::ToStr( inNum, buf, BUF_SIZE );
-	if ( FirstChild() && FirstChild()->ToText() )
-		FirstChild()->SetValue( buf );
-	else {
-		XMLText*	theText = GetDocument()->NewText( buf );
-		InsertFirstChild( theText );
-	}
+    XMLUtil::ToStr( v, buf, BUF_SIZE );
+    SetText( buf );
 }
 
 
-void	XMLElement::SetText( float inNum )
+void XMLElement::SetText( float v ) 
 {
     char buf[BUF_SIZE];
-    XMLUtil::ToStr( inNum, buf, BUF_SIZE );
-	if ( FirstChild() && FirstChild()->ToText() )
-		FirstChild()->SetValue( buf );
-	else {
-		XMLText*	theText = GetDocument()->NewText( buf );
-		InsertFirstChild( theText );
-	}
+    XMLUtil::ToStr( v, buf, BUF_SIZE );
+    SetText( buf );
 }
 
-void	XMLElement::SetText( long long inNum )
+
+void XMLElement::SetText( double v ) 
 {
     char buf[BUF_SIZE];
-    XMLUtil::ToStr( inNum, buf, BUF_SIZE );
-	if ( FirstChild() && FirstChild()->ToText() )
-		FirstChild()->SetValue( buf );
-	else {
-		XMLText*	theText = GetDocument()->NewText( buf );
-		InsertFirstChild( theText );
-	}
+    XMLUtil::ToStr( v, buf, BUF_SIZE );
+    SetText( buf );
 }
-
 
 
 void	XMLElement::SetBoolFirstChild( bool inBool )
