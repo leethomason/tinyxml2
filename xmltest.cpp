@@ -617,6 +617,61 @@ int main( int argc, const char ** argv )
 	}
 
 
+	// --------SetText()-----------
+	{
+		const char* str = "<foo></foo>";
+		XMLDocument doc;
+		doc.Parse( str );
+		XMLElement* element = doc.RootElement();
+
+		element->SetText("darkness.");
+		XMLTest( "SetText() normal use (open/close).", "darkness.", element->GetText() );
+
+		element->SetText("blue flame.");
+		XMLTest( "SetText() replace.", "blue flame.", element->GetText() );
+
+		str = "<foo/>";
+		doc.Parse( str );
+		element = doc.RootElement();
+
+		element->SetText("The driver");
+		XMLTest( "SetText() normal use. (self-closing)", "The driver", element->GetText() );
+
+		element->SetText("<b>horses</b>");
+		XMLTest( "SetText() replace with tag-like text.", "<b>horses</b>", element->GetText() );
+		//doc.Print();
+
+		str = "<foo><bar>Text in nested element</bar></foo>";
+		doc.Parse( str );
+		element = doc.RootElement();
+		
+		element->SetText("wolves");
+		XMLTest( "SetText() prefix to nested non-text children.", "wolves", element->GetText() );
+
+		str = "<foo/>";
+		doc.Parse( str );
+		element = doc.RootElement();
+		
+		element->SetText( "str" );
+		XMLTest( "SetText types", "str", element->GetText() );
+
+		element->SetText( 1 );
+		XMLTest( "SetText types", "1", element->GetText() );
+
+		element->SetText( 1U );
+		XMLTest( "SetText types", "1", element->GetText() );
+
+		element->SetText( true );
+		XMLTest( "SetText types", "1", element->GetText() ); // TODO: should be 'true'?
+
+		element->SetText( 1.5f );
+		XMLTest( "SetText types", "1.5", element->GetText() );
+
+		element->SetText( 1.5 );
+		XMLTest( "SetText types", "1.5", element->GetText() );
+	}
+
+
 	// ---------- CDATA ---------------
 	{
 		const char* str =	"<xmlElement>"
