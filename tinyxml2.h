@@ -1414,28 +1414,16 @@ public:
     	@endverbatim
     */
 	void SetText( const char* inText );
-    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
     void SetText( int value );
-    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
     void SetText( unsigned value );  
-    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
     void SetText( bool value );  
-    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
     void SetText( double value );  
-    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
     void SetText( float value );  
-
-    /// Sets the text to the given number.
-	void	SetText( int inNum );
-
-    /// Sets the text to the given number.
-	void	SetText( unsigned inNum );
-
-    /// Sets the text to the given double.
-	void	SetText( double inNum );
-
-    /// Sets the text to the given float.
-	void	SetText( float inNum );
 	
     /// Sets the text to the given long long.
 	void	SetText( long long inNum );
@@ -1545,8 +1533,6 @@ public:
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 private:
-    enum { BUF_SIZE = 200 };
-
     XMLElement( XMLDocument* doc );
     virtual ~XMLElement();
     XMLElement( const XMLElement& );	// not supported
