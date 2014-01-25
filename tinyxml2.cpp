@@ -1282,16 +1282,62 @@ const char* XMLElement::GetText() const
 }
 
 
+void	XMLElement::SetText( const char* inText )
+{
+	if ( FirstChild() && FirstChild()->ToText() )
+		FirstChild()->SetValue( inText );
+	else {
+		XMLText*	theText = GetDocument()->NewText( inText );
+		InsertFirstChild( theText );
+	}
+}
+
+
+void XMLElement::SetText( int v ) 
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( v, buf, BUF_SIZE );
+    SetText( buf );
+}
+
+
+void XMLElement::SetText( unsigned v ) 
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( v, buf, BUF_SIZE );
+    SetText( buf );
+}
+
+
+void XMLElement::SetText( bool v ) 
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( v, buf, BUF_SIZE );
+    SetText( buf );
+}
+
+
+void XMLElement::SetText( float v ) 
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( v, buf, BUF_SIZE );
+    SetText( buf );
+}
+
+
+void XMLElement::SetText( double v ) 
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( v, buf, BUF_SIZE );
+    SetText( buf );
+}
+
+
 void	XMLElement::SetText( long long inNum )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( inNum, buf, BUF_SIZE );
-	if ( FirstChild() && FirstChild()->ToText() )
-		FirstChild()->SetValue( buf );
-	else {
-		XMLText*	theText = GetDocument()->NewText( buf );
-		InsertFirstChild( theText );
-	}
+	SetText( buf );
 }
 
 

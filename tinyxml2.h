@@ -118,7 +118,7 @@ inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
 
 static const int TIXML2_MAJOR_VERSION = 1;
 static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 13;
+static const int TIXML2_PATCH_VERSION = 14;
 
 namespace tinyxml2
 {
@@ -1390,6 +1390,52 @@ public:
 	}
 
 	
+    /** Convenience function for easy access to the text inside an element. Although easy
+    	and concise, SetText() is limited compared to creating an XMLText child
+    	and mutating it directly.
+
+    	If the first child of 'this' is a XMLText, SetText() sets its value to
+		the given string, otherwise it will create a first child that is an XMLText.
+
+    	This is a convenient method for setting the text of simple contained text:
+    	@verbatim
+    	<foo>This is text</foo>
+    		fooElement->SetText( "Hullaballoo!" );
+     	<foo>Hullaballoo!</foo>
+		@endverbatim
+
+    	Note that this function can be misleading. If the element foo was created from
+    	this XML:
+    	@verbatim
+    		<foo><b>This is text</b></foo>
+    	@endverbatim
+
+    	then it will not change "This is text", but rather prefix it with a text element:
+    	@verbatim
+    		<foo>Hullaballoo!<b>This is text</b></foo>
+    	@endverbatim
+		
+		For this XML:
+    	@verbatim
+    		<foo />
+    	@endverbatim
+    	SetText() will generate
+    	@verbatim
+    		<foo>Hullaballoo!</foo>
+    	@endverbatim
+    */
+	void SetText( const char* inText );
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
+    void SetText( int value );
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
+    void SetText( unsigned value );  
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
+    void SetText( bool value );  
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
+    void SetText( double value );  
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
+    void SetText( float value );  
+
     /**
     	Convenience method to query the value of a child text node. This is probably best
     	shown by example. Given you have a document is this form:
@@ -1442,8 +1488,6 @@ public:
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 private:
-    enum { BUF_SIZE = 200 };
-
     XMLElement( XMLDocument* doc );
     virtual ~XMLElement();
     XMLElement( const XMLElement& );	// not supported
@@ -1454,6 +1498,7 @@ private:
     //void LinkAttribute( XMLAttribute* attrib );
     char* ParseAttributes( char* p );
 
+    enum { BUF_SIZE = 200 };
     int _closingType;
     // The attribute list is ordered; there is no 'lastAttribute'
     // because the list needs to be scanned for dupes before adding
