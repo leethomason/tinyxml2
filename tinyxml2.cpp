@@ -411,12 +411,6 @@ void XMLUtil::ToStr( int v, char* buffer, int bufferSize )
 }
 
 
-void XMLUtil::ToStr( long long v, char* buffer, int bufferSize )
-{
-    TIXML_SNPRINTF( buffer, bufferSize, "%lld", v );
-}
-
-
 void XMLUtil::ToStr( unsigned v, char* buffer, int bufferSize )
 {
     TIXML_SNPRINTF( buffer, bufferSize, "%u", v );
@@ -452,13 +446,6 @@ bool XMLUtil::ToInt( const char* str, int* value )
     return false;
 }
 
-bool XMLUtil::ToLongLong( const char* str, long long* value )
-{
-    if ( TIXML_SSCANF( str, "%lld", value ) == 1 ) {
-        return true;
-    }
-    return false;
-}
 
 bool XMLUtil::ToUnsigned( const char* str, unsigned *value )
 {
@@ -1180,14 +1167,6 @@ void XMLAttribute::SetAttribute( int v )
 }
 
 
-void XMLAttribute::SetAttribute( long long v )
-{
-    char buf[BUF_SIZE];
-    XMLUtil::ToStr( v, buf, BUF_SIZE );
-    _value.SetStr( buf );
-}
-
-
 void XMLAttribute::SetAttribute( unsigned v )
 {
     char buf[BUF_SIZE];
@@ -1333,14 +1312,6 @@ void XMLElement::SetText( double v )
 }
 
 
-void XMLElement::SetText( long long v )
-{
-    char buf[BUF_SIZE];
-    XMLUtil::ToStr( v, buf, BUF_SIZE );
-    SetText( buf );
-}
-
-
 void	XMLElement::SetBoolFirstChild( bool inBool )
 {
 	if( FirstChild() && FirstChild()->ToElement()
@@ -1381,19 +1352,6 @@ XMLError XMLElement::QueryIntText( int* ival ) const
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->ToText()->Value();
         if ( XMLUtil::ToInt( t, ival ) ) {
-            return XML_SUCCESS;
-        }
-        return XML_CAN_NOT_CONVERT_TEXT;
-    }
-    return XML_NO_TEXT_NODE;
-}
-
-
-XMLError XMLElement::QueryLongLongText( long long* ival ) const
-{
-    if ( FirstChild() && FirstChild()->ToText() ) {
-        const char* t = FirstChild()->ToText()->Value();
-        if ( XMLUtil::ToLongLong( t, ival ) ) {
             return XML_SUCCESS;
         }
         return XML_CAN_NOT_CONVERT_TEXT;
