@@ -581,7 +581,8 @@ XMLNode::XMLNode( XMLDocument* doc ) :
     _parent( 0 ),
     _firstChild( 0 ), _lastChild( 0 ),
     _prev( 0 ), _next( 0 ),
-    _memPool( 0 )
+    _memPool( 0 ),
+	_forceCompactMode( false )
 {
 }
 
@@ -1981,17 +1982,17 @@ void XMLPrinter::PushHeader( bool writeBOM, bool writeDec )
 }
 
 
-void XMLPrinter::OpenElement( const char* name )
+void XMLPrinter::OpenElement( const char* name, bool compactMode )
 {
     if ( _elementJustOpened ) {
         SealElement();
     }
     _stack.Push( name );
 
-    if ( _textDepth < 0 && !_firstElement && !_compactMode ) {
+    if ( _textDepth < 0 && !_firstElement && !compactMode ) {
         Print( "\n" );
     }
-    if ( !_compactMode ) {
+    if ( !compactMode ) {
         PrintSpace( _depth );
     }
 
@@ -2187,7 +2188,7 @@ bool XMLPrinter::VisitEnter( const XMLDocument& doc )
 
 bool XMLPrinter::VisitEnter( const XMLElement& element, const XMLAttribute* attribute )
 {
-    OpenElement( element.Name() );
+    OpenElement( element.Name(), _compactMode ? true : element.Parent()->GetForceCompactMode() );
     while ( attribute ) {
         PushAttribute( attribute->Name(), attribute->Value() );
         attribute = attribute->Next();

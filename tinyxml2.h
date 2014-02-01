@@ -821,6 +821,9 @@ public:
 
     // internal
     virtual char* ParseDeep( char*, StrPair* );
+	
+	bool	GetForceCompactMode() const		{ if( _forceCompactMode || !Parent() ) return _forceCompactMode; return Parent()->GetForceCompactMode(); };
+	void	SetForceCompactMode( bool b )	{ _forceCompactMode = b; };
 
 protected:
     XMLNode( XMLDocument* );
@@ -837,6 +840,8 @@ protected:
 
     XMLNode*		_prev;
     XMLNode*		_next;
+	
+	bool			_forceCompactMode;
 
 private:
     MemPool*		_memPool;
@@ -1509,7 +1514,7 @@ public:
     char* ParseDeep( char* p, StrPair* endTag );
     virtual XMLNode* ShallowClone( XMLDocument* document ) const;
     virtual bool ShallowEqual( const XMLNode* compare ) const;
-
+	
 private:
     XMLElement( XMLDocument* doc );
     virtual ~XMLElement();
@@ -2007,7 +2012,7 @@ public:
     /** If streaming, start writing an element.
         The element must be closed with CloseElement()
     */
-    void OpenElement( const char* name );
+    void OpenElement( const char* name, bool compactMode );
     /// If streaming, add an attribute to an open element.
     void PushAttribute( const char* name, const char* value );
     void PushAttribute( const char* name, int value );
