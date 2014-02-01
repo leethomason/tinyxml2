@@ -1315,13 +1315,15 @@ void XMLElement::SetText( double v )
 
 void	XMLElement::SetBoolFirstChild( bool inBool )
 {
-	if( FirstChild() && FirstChild()->ToElement()
-		&& (strcmp(FirstChild()->Value(),"true") == 0 || strcmp(FirstChild()->Value(),"false") == 0) ) {
-		FirstChild()->SetValue( inBool ? "true" : "false" );
+	XMLElement	*	theBoolElem = FirstChild() ? FirstChild()->ToElement() : NULL;
+	if( theBoolElem
+		&& (strcmp(theBoolElem->Value(),"true") == 0 || strcmp(theBoolElem->Value(),"false") == 0) ) {
+		theBoolElem->SetValue( inBool ? "true" : "false" );
 	}
 	else if( !FirstChild() ) {
-		XMLElement*	theText = GetDocument()->NewElement( inBool ? "true" : "false" );
-		InsertFirstChild( theText );
+		theBoolElem = GetDocument()->NewElement( inBool ? "true" : "false" );
+		InsertFirstChild( theBoolElem );
+		SetForceCompactMode(true);
 	}
 }
 
