@@ -1040,6 +1040,21 @@ int main( int argc, const char ** argv )
 	}
 
 	{
+		XMLDocument	doc0;
+		XMLElement*	root = doc0.NewElement("root");
+		doc0.InsertEndChild(root);
+		XMLElement*	cool = doc0.NewElement("cool");
+		cool->SetForceCompactMode(true);
+		root->InsertEndChild(cool);
+		XMLElement*	tag = doc0.NewElement("true");
+		cool->InsertEndChild(tag);
+		
+		XMLPrinter printer;
+    	doc0.Print( &printer );
+		XMLTest( "Selective text around single tag", "<root>\n    <cool><true/></cool>\n</root>\n", printer.CStr() );
+	}
+
+	{
 		// Make sure an attribute with a space in it succeeds.
 		static const char* xml0 = "<element attribute1= \"Test Attribute\"/>";
 		static const char* xml1 = "<element attribute1 =\"Test Attribute\"/>";

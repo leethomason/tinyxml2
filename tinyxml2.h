@@ -1974,7 +1974,7 @@ public:
     void PushAttribute( const char* name, bool value );
     void PushAttribute( const char* name, double value );
     /// If streaming, close the Element.
-    virtual void CloseElement();
+    virtual void CloseElement( bool compactMode );
 
     /// Add a text node.
     void PushText( const char* text, bool cdata=false );

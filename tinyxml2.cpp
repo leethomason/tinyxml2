@@ -2008,7 +2008,7 @@ void XMLPrinter::PushAttribute( const char* name, double v )
 }
 
 
-void XMLPrinter::CloseElement()
+void XMLPrinter::CloseElement( bool compactMode )
 {
     --_depth;
     const char* name = _stack.Pop();
@@ -2017,7 +2017,7 @@ void XMLPrinter::CloseElement()
         Print( "/>" );
     }
     else {
-        if ( _textDepth < 0 && !_compactMode) {
+        if ( _textDepth < 0 && !compactMode) {
             Print( "\n" );
             PrintSpace( _depth );
         }
@@ -2027,7 +2027,7 @@ void XMLPrinter::CloseElement()
     if ( _textDepth == _depth ) {
         _textDepth = -1;
     }
-    if ( _depth == 0 && !_compactMode) {
+    if ( _depth == 0 && !compactMode) {
         Print( "\n" );
     }
     _elementJustOpened = false;
@@ -2161,9 +2161,9 @@ bool XMLPrinter::VisitEnter( const XMLElement& element, const XMLAttribute* attr
 }
 
 
-bool XMLPrinter::VisitExit( const XMLElement& )
+bool XMLPrinter::VisitExit( const XMLElement& element )
 {
-    CloseElement();
+    CloseElement( _compactMode ? true : element.GetForceCompactMode() );
     return true;
 }
 
