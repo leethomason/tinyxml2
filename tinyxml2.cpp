@@ -580,7 +580,8 @@ XMLNode::XMLNode( XMLDocument* doc ) :
     _parent( 0 ),
     _firstChild( 0 ), _lastChild( 0 ),
     _prev( 0 ), _next( 0 ),
-    _memPool( 0 )
+    _memPool( 0 ),
+	_forceCompactMode( false )
 {
 }
 
@@ -1945,17 +1946,17 @@ void XMLPrinter::PushHeader( bool writeBOM, bool writeDec )
 }
 
 
-void XMLPrinter::OpenElement( const char* name )
+void XMLPrinter::OpenElement( const char* name, bool compactMode )
 {
     if ( _elementJustOpened ) {
         SealElement();
     }
     _stack.Push( name );
 
-    if ( _textDepth < 0 && !_firstElement && !_compactMode ) {
+    if ( _textDepth < 0 && !_firstElement && !compactMode ) {
         Print( "\n" );
     }
-    if ( !_compactMode ) {
+    if ( !compactMode ) {
         PrintSpace( _depth );
     }
 
@@ -2007,7 +2008,7 @@ void XMLPrinter::PushAttribute( const char* name, double v )
 }
 
 
-void XMLPrinter::CloseElement()
+void XMLPrinter::CloseElement( bool compactMode )
 {
     --_depth;
     const char* name = _stack.Pop();
@@ -2016,7 +2017,7 @@ void XMLPrinter::CloseElement()
         Print( "/>" );
     }
     else {
-        if ( _textDepth < 0 && !_compactMode) {
+        if ( _textDepth < 0 && !compactMode) {
             Print( "\n" );
             PrintSpace( _depth );
         }
@@ -2026,7 +2027,7 @@ void XMLPrinter::CloseElement()
     if ( _textDepth == _depth ) {
         _textDepth = -1;
     }
-    if ( _depth == 0 && !_compactMode) {
+    if ( _depth == 0 && !compactMode) {
         Print( "\n" );
     }
     _elementJustOpened = false;
@@ -2151,7 +2152,9 @@ bool XMLPrinter::VisitEnter( const XMLDocument& doc )
 
 bool XMLPrinter::VisitEnter( const XMLElement& element, const XMLAttribute* attribute )
 {
-    OpenElement( element.Name() );
+	const XMLElement*	parentElem = element.Parent()->ToElement();
+	bool		compactMode = parentElem ? CompactMode(*parentElem) : _compactMode;
+    OpenElement( element.Name(), compactMode );
     while ( attribute ) {
         PushAttribute( attribute->Name(), attribute->Value() );
         attribute = attribute->Next();
@@ -2160,9 +2163,9 @@ bool XMLPrinter::VisitEnter( const XMLElement& element, const XMLAttribute* attr
 }
 
 
-bool XMLPrinter::VisitExit( const XMLElement& )
+bool XMLPrinter::VisitExit( const XMLElement& element )
 {
-    CloseElement();
+    CloseElement( CompactMode(element) );
     return true;
 }
 

@@ -1012,6 +1012,47 @@ int main( int argc, const char ** argv )
 		ele->DeleteAttribute( "attrib3" );
 		XMLTest( "Attribute order (empty)", false, ele->FirstAttribute() ? true : false );
 	}
+	
+	{
+		XMLDocument	doc0;
+		XMLElement*	root = doc0.NewElement("root");
+		doc0.InsertEndChild(root);
+		XMLElement*	text = doc0.NewElement("text");
+		text->SetForceCompactMode(true);
+		root->InsertEndChild(text);
+		XMLText*	befText = doc0.NewText("Before ");
+		text->InsertEndChild(befText);
+		XMLElement*	tag = doc0.NewElement("tag");
+		text->InsertEndChild(tag);
+		XMLText*	tagText = doc0.NewText("Tag");
+		tag->InsertEndChild(tagText);
+		tag = doc0.NewElement("tagtwo");
+		tag->SetAttribute("two", "2");
+		text->InsertEndChild(tag);
+		tagText = doc0.NewText("TagTwo");
+		tag->InsertEndChild(tagText);
+		XMLText*	aftText = doc0.NewText(" After");
+		text->InsertEndChild(aftText);
+		
+		XMLPrinter printer;
+    	doc0.Print( &printer );
+		XMLTest( "Selective text wrapping", "<root>\n    <text>Before <tag>Tag</tag><tagtwo two=\"2\">TagTwo</tagtwo> After</text>\n</root>\n", printer.CStr() );
+	}
+
+	{
+		XMLDocument	doc0;
+		XMLElement*	root = doc0.NewElement("root");
+		doc0.InsertEndChild(root);
+		XMLElement*	cool = doc0.NewElement("cool");
+		cool->SetForceCompactMode(true);
+		root->InsertEndChild(cool);
+		XMLElement*	tag = doc0.NewElement("true");
+		cool->InsertEndChild(tag);
+		
+		XMLPrinter printer;
+    	doc0.Print( &printer );
+		XMLTest( "Selective text around single tag", "<root>\n    <cool><true/></cool>\n</root>\n", printer.CStr() );
+	}
 
 	{
 		// Make sure an attribute with a space in it succeeds.

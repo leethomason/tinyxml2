@@ -821,7 +821,7 @@ public:
 
     // internal
     virtual char* ParseDeep( char*, StrPair* );
-
+	
 protected:
     XMLNode( XMLDocument* );
     virtual ~XMLNode();
@@ -837,6 +837,8 @@ protected:
 
     XMLNode*		_prev;
     XMLNode*		_next;
+	
+	bool			_forceCompactMode;
 
 private:
     MemPool*		_memPool;
@@ -1463,7 +1465,7 @@ public:
     char* ParseDeep( char* p, StrPair* endTag );
     virtual XMLNode* ShallowClone( XMLDocument* document ) const;
     virtual bool ShallowEqual( const XMLNode* compare ) const;
-
+	
 private:
     XMLElement( XMLDocument* doc );
     virtual ~XMLElement();
@@ -1961,7 +1963,7 @@ public:
     /** If streaming, start writing an element.
         The element must be closed with CloseElement()
     */
-    void OpenElement( const char* name );
+    void OpenElement( const char* name, bool compactMode );
     /// If streaming, add an attribute to an open element.
     void PushAttribute( const char* name, const char* value );
     void PushAttribute( const char* name, int value );
@@ -1969,7 +1971,7 @@ public:
     void PushAttribute( const char* name, bool value );
     void PushAttribute( const char* name, double value );
     /// If streaming, close the Element.
-    virtual void CloseElement();
+    virtual void CloseElement( bool compactMode );
 
     /// Add a text node.
     void PushText( const char* text, bool cdata=false );
@@ -2028,6 +2030,8 @@ public:
     }
 
 protected:
+	virtual bool CompactMode( const XMLElement& elem )	{ return _compactMode; };
+
     void SealElement();
     bool _elementJustOpened;
     DynArray< const char*, 10 > _stack;
