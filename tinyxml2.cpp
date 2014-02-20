@@ -1323,7 +1323,6 @@ void	XMLElement::SetBoolFirstChild( bool inBool )
 	else if( !FirstChild() ) {
 		theBoolElem = GetDocument()->NewElement( inBool ? "true" : "false" );
 		InsertFirstChild( theBoolElem );
-		SetForceCompactMode(true);
 	}
 }
 
@@ -2190,7 +2189,9 @@ bool XMLPrinter::VisitEnter( const XMLDocument& doc )
 
 bool XMLPrinter::VisitEnter( const XMLElement& element, const XMLAttribute* attribute )
 {
-    OpenElement( element.Name(), _compactMode ? true : element.Parent()->GetForceCompactMode() );
+	const XMLElement*	parentElem = element.Parent()->ToElement();
+	bool		compactMode = parentElem ? CompactMode(*parentElem) : _compactMode;
+    OpenElement( element.Name(), compactMode );
     while ( attribute ) {
         PushAttribute( attribute->Name(), attribute->Value() );
         attribute = attribute->Next();
@@ -2201,7 +2202,7 @@ bool XMLPrinter::VisitEnter( const XMLElement& element, const XMLAttribute* attr
 
 bool XMLPrinter::VisitExit( const XMLElement& element )
 {
-    CloseElement( _compactMode ? true : element.GetForceCompactMode() );
+    CloseElement( CompactMode(element) );
     return true;
 }
 

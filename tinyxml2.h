@@ -822,9 +822,6 @@ public:
     // internal
     virtual char* ParseDeep( char*, StrPair* );
 	
-	bool	GetForceCompactMode() const		{ if( _forceCompactMode || !Parent() ) return _forceCompactMode; return Parent()->GetForceCompactMode(); };
-	void	SetForceCompactMode( bool b )	{ _forceCompactMode = b; };
-
 protected:
     XMLNode( XMLDocument* );
     virtual ~XMLNode();
@@ -2079,6 +2076,8 @@ public:
     }
 
 protected:
+	virtual bool CompactMode( const XMLElement& elem )	{ return _compactMode; };
+
     void SealElement();
     bool _elementJustOpened;
     DynArray< const char*, 10 > _stack;
