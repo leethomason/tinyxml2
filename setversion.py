@@ -33,8 +33,8 @@ major = input( "Major: " )
 minor = input( "Minor: " )
 build = input( "Build: " )
 
-print "Setting dox,tinyxml2.h"
-print "Version: " + `major` + "." + `minor` + "." + `build`
+print ("Setting dox,tinyxml2.h")
+print ("Version: " + major + "." + minor + "." + build)
 
 #### Write the tinyxml.h ####
 
@@ -45,16 +45,16 @@ def engineRule( line ):
 	matchBuild = "static const int TIXML2_PATCH_VERSION"
 
 	if line[0:len(matchMajor)] == matchMajor:
-		print "1)tinyxml2.h Major found"
-		return matchMajor + " = " + `major` + ";\n"
+		print( "1)tinyxml2.h Major found" )
+		return matchMajor + " = " + major + ";\n"
 
 	elif line[0:len(matchMinor)] == matchMinor:
-		print "2)tinyxml2.h Minor found"
-		return matchMinor + " = " + `minor` + ";\n"
+		print( "2)tinyxml2.h Minor found" )
+		return matchMinor + " = " + minor + ";\n"
 
 	elif line[0:len(matchBuild)] == matchBuild:
-		print "3)tinyxml2.h Build found"
-		return matchBuild + " = " + `build` + ";\n"
+		print( "3)tinyxml2.h Build found" )
+		return matchBuild + " = " + build + ";\n"
 
 	else:
 		return line;
@@ -69,8 +69,8 @@ def doxRule( line ):
 	match = "PROJECT_NUMBER"
 
 	if line[0:len( match )] == match:
-		print "dox project found"
-		return "PROJECT_NUMBER = " + `major` + "." + `minor` + "." + `build` + "\n"
+		print( "dox project found" )
+		return "PROJECT_NUMBER = " + major + "." + minor + "." + build + "\n"
 
 	else:
 		return line;
@@ -85,8 +85,8 @@ def cmakeRule1( line ):
 	matchVersion = "set(GENERIC_LIB_VERSION"
 
 	if line[0:len(matchVersion)] == matchVersion:
-		print "1)tinyxml2.h Major found"
-		return matchVersion + " \"" + `major` + "." + `minor` + "." + `build` + "\")" + "\n"
+		print( "1)tinyxml2.h Major found" )
+		return matchVersion + " \"" + major + "." + minor + "." + build + "\")" + "\n"
 
 	else:
 		return line;
@@ -98,8 +98,8 @@ def cmakeRule2( line ):
 	matchSoversion = "set(GENERIC_LIB_SOVERSION"
 
 	if line[0:len(matchSoversion)] == matchSoversion:
-		print "1)tinyxml2.h Major found"
-		return matchSoversion + " \"" + `major` + "\")" + "\n"
+		print( "1)tinyxml2.h Major found" )
+		return matchSoversion + " \"" + major + "\")" + "\n"
 
 	else:
 		return line;
