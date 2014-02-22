@@ -1702,12 +1702,7 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
 	const char* start = p;
     Clear();
 
-    if ( len == 0 ) {
-        SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
-        return _errorID;
-    }
-
-    if ( !p || !*p ) {
+    if ( len == 0 || !p || !*p ) {
         SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
         return _errorID;
     }
