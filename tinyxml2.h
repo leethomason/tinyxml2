@@ -116,9 +116,15 @@ inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
 #define TIXML_SSCANF   sscanf
 #endif
 
+/* Versioning, past 1.0.14:
+
+	A backwards-incompatible change or API change bumps the major version.
+	An API addition or a backwards-compatible change, bumps the minor version.
+	Simple bug fixes bump the build number.
+*/
 static const int TIXML2_MAJOR_VERSION = 1;
-static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 14;
+static const int TIXML2_MINOR_VERSION = 1;
+static const int TIXML2_PATCH_VERSION = 0;
 
 namespace tinyxml2
 {
@@ -1404,15 +1410,15 @@ public:
     	@endverbatim
     */
 	void SetText( const char* inText );
-    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
     void SetText( int value );
-    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
     void SetText( unsigned value );  
-    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
     void SetText( bool value );  
-    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
     void SetText( double value );  
-    /// Convenince method for setting text inside and element. See SetText() for important limitations.
+    /// Convenience method for setting text inside and element. See SetText() for important limitations.
     void SetText( float value );  
 
     /**
@@ -2028,21 +2034,25 @@ public:
     }
 
 protected:
-    void SealElement();
+	/** Prints out the space before an element. You may override to change
+	    the space and tabs used. A PrintSpace() override should call Print().
+	*/
+    virtual void PrintSpace( int depth );
+    void Print( const char* format, ... );
+
+	void SealElement();
     bool _elementJustOpened;
     DynArray< const char*, 10 > _stack;
 
 private:
-    void PrintSpace( int depth );
     void PrintString( const char*, bool restrictedEntitySet );	// prints out, after detecting entities.
-    void Print( const char* format, ... );
 
     bool _firstElement;
     FILE* _fp;
     int _depth;
     int _textDepth;
     bool _processEntities;
-    bool _compactMode;
+	bool _compactMode;
 
     enum {
         ENTITY_RANGE = 64,
