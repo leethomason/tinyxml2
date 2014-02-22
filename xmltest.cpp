@@ -617,6 +617,61 @@ int main( int argc, const char ** argv )
 	}
 
 
+	// --------SetText()-----------
+	{
+		const char* str = "<foo></foo>";
+		XMLDocument doc;
+		doc.Parse( str );
+		XMLElement* element = doc.RootElement();
+
+		element->SetText("darkness.");
+		XMLTest( "SetText() normal use (open/close).", "darkness.", element->GetText() );
+
+		element->SetText("blue flame.");
+		XMLTest( "SetText() replace.", "blue flame.", element->GetText() );
+
+		str = "<foo/>";
+		doc.Parse( str );
+		element = doc.RootElement();
+
+		element->SetText("The driver");
+		XMLTest( "SetText() normal use. (self-closing)", "The driver", element->GetText() );
+
+		element->SetText("<b>horses</b>");
+		XMLTest( "SetText() replace with tag-like text.", "<b>horses</b>", element->GetText() );
+		//doc.Print();
+
+		str = "<foo><bar>Text in nested element</bar></foo>";
+		doc.Parse( str );
+		element = doc.RootElement();
+		
+		element->SetText("wolves");
+		XMLTest( "SetText() prefix to nested non-text children.", "wolves", element->GetText() );
+
+		str = "<foo/>";
+		doc.Parse( str );
+		element = doc.RootElement();
+		
+		element->SetText( "str" );
+		XMLTest( "SetText types", "str", element->GetText() );
+
+		element->SetText( 1 );
+		XMLTest( "SetText types", "1", element->GetText() );
+
+		element->SetText( 1U );
+		XMLTest( "SetText types", "1", element->GetText() );
+
+		element->SetText( true );
+		XMLTest( "SetText types", "1", element->GetText() ); // TODO: should be 'true'?
+
+		element->SetText( 1.5f );
+		XMLTest( "SetText types", "1.5", element->GetText() );
+
+		element->SetText( 1.5 );
+		XMLTest( "SetText types", "1.5", element->GetText() );
+	}
+
+
 	// ---------- CDATA ---------------
 	{
 		const char* str =	"<xmlElement>"
@@ -1139,18 +1194,6 @@ int main( int argc, const char ** argv )
 		XMLTest( "Whitespace  all space", true, 0 == doc.FirstChildElement()->FirstChild() );
 	}
 
-#if 0		// the question being explored is what kind of print to use: 
-			// https://github.com/leethomason/tinyxml2/issues/63
-	{
-		const char* xml = "<element attrA='123456789.123456789' attrB='1.001e9'/>";
-		XMLDocument doc;
-		doc.Parse( xml );
-		doc.FirstChildElement()->SetAttribute( "attrA", 123456789.123456789 );
-		doc.FirstChildElement()->SetAttribute( "attrB", 1.001e9 );
-		doc.Print();
-	}
-#endif
-
 	{
 		// An assert should not fire.
 		const char* xml = "<element/>";
@@ -1240,38 +1283,84 @@ int main( int argc, const char ** argv )
 			"</root>";
 
 		XMLDocument doc;
-		doc.Parse( xml );
+		doc.Parse(xml);
 		XMLElement* subtree = doc.RootElement()->FirstChildElement("one")->FirstChildElement("subtree");
 		XMLElement* two = doc.RootElement()->FirstChildElement("two");
 		two->InsertFirstChild(subtree);
-		XMLPrinter printer1( 0, true );
-		doc.Accept( &printer1 );
-		XMLTest( "Move node from within <one> to <two>", xmlInsideTwo, printer1.CStr());
+		XMLPrinter printer1(0, true);
+		doc.Accept(&printer1);
+		XMLTest("Move node from within <one> to <two>", xmlInsideTwo, printer1.CStr());
 
-		doc.Parse( xml );
+		doc.Parse(xml);
 		subtree = doc.RootElement()->FirstChildElement("one")->FirstChildElement("subtree");
 		two = doc.RootElement()->FirstChildElement("two");
 		doc.RootElement()->InsertAfterChild(two, subtree);
-		XMLPrinter printer2( 0, true );
-		doc.Accept( &printer2 );
-		XMLTest( "Move node from within <one> after <two>", xmlAfterTwo, printer2.CStr(), false );
+		XMLPrinter printer2(0, true);
+		doc.Accept(&printer2);
+		XMLTest("Move node from within <one> after <two>", xmlAfterTwo, printer2.CStr(), false);
 
-		doc.Parse( xml );
+		doc.Parse(xml);
 		XMLNode* one = doc.RootElement()->FirstChildElement("one");
 		subtree = one->FirstChildElement("subtree");
 		doc.RootElement()->InsertAfterChild(one, subtree);
-		XMLPrinter printer3( 0, true );
-		doc.Accept( &printer3 );
-		XMLTest( "Move node from within <one> after <one>", xmlAfterOne, printer3.CStr(), false );
+		XMLPrinter printer3(0, true);
+		doc.Accept(&printer3);
+		XMLTest("Move node from within <one> after <one>", xmlAfterOne, printer3.CStr(), false);
 
-		doc.Parse( xml );
+		doc.Parse(xml);
 		subtree = doc.RootElement()->FirstChildElement("one")->FirstChildElement("subtree");
 		two = doc.RootElement()->FirstChildElement("two");
 		doc.RootElement()->InsertEndChild(subtree);
-		XMLPrinter printer4( 0, true );
-		doc.Accept( &printer4 );
-		XMLTest( "Move node from within <one> after <two>", xmlAfterTwo, printer4.CStr(), false );
+		XMLPrinter printer4(0, true);
+		doc.Accept(&printer4);
+		XMLTest("Move node from within <one> after <two>", xmlAfterTwo, printer4.CStr(), false);
 	}
+
+	{
+		const char* xml = "<svg width = \"128\" height = \"128\">"
+			"	<text> </text>"
+			"</svg>";
+		XMLDocument doc;
+		doc.Parse(xml);
+		doc.Print();
+	}
+
+#if 1
+		// the question being explored is what kind of print to use: 
+		// https://github.com/leethomason/tinyxml2/issues/63
+	{
+		//const char* xml = "<element attrA='123456789.123456789' attrB='1.001e9' attrC='1.0e-10' attrD='1001000000.000000' attrE='0.1234567890123456789'/>";
+		const char* xml = "<element/>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		doc.FirstChildElement()->SetAttribute( "attrA-f64", 123456789.123456789 );
+		doc.FirstChildElement()->SetAttribute( "attrB-f64", 1.001e9 );
+		doc.FirstChildElement()->SetAttribute( "attrC-f64", 1.0e9 );
+		doc.FirstChildElement()->SetAttribute( "attrC-f64", 1.0e20 );
+		doc.FirstChildElement()->SetAttribute( "attrD-f64", 1.0e-10 );
+		doc.FirstChildElement()->SetAttribute( "attrD-f64", 0.123456789 );
+
+		doc.FirstChildElement()->SetAttribute( "attrA-f32", 123456789.123456789f );
+		doc.FirstChildElement()->SetAttribute( "attrB-f32", 1.001e9f );
+		doc.FirstChildElement()->SetAttribute( "attrC-f32", 1.0e9f );
+		doc.FirstChildElement()->SetAttribute( "attrC-f32", 1.0e20f );
+		doc.FirstChildElement()->SetAttribute( "attrD-f32", 1.0e-10f );
+		doc.FirstChildElement()->SetAttribute( "attrD-f32", 0.123456789f );
+
+		doc.Print();
+
+		/* The result of this test is platform, compiler, and library version dependent. :("
+		XMLPrinter printer;
+		doc.Print( &printer );
+		XMLTest( "Float and double formatting.", 
+			"<element attrA-f64=\"123456789.12345679\" attrB-f64=\"1001000000\" attrC-f64=\"1e+20\" attrD-f64=\"0.123456789\" attrA-f32=\"1.2345679e+08\" attrB-f32=\"1.001e+09\" attrC-f32=\"1e+20\" attrD-f32=\"0.12345679\"/>\n",
+			printer.CStr(), 
+			true );
+		*/
+	}
+#endif
+
+
 
 	// ----------- Performance tracking --------------
 	{

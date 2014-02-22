@@ -51,11 +51,10 @@ What it doesn't do.
 
 TinyXML-2 doesn't parse or use DTDs (Document Type Definitions) or XSLs
 (eXtensible Stylesheet Language.) There are other parsers out there 
-that are much more fully
-featured. But they are also much bigger, take longer to set up in
-your project, have a higher learning curve, and often have a more
-restrictive license. If you are working with browsers or have more
-complete XML needs, TinyXML-2 is not the parser for you.
+that are much more fully featured. But they are also much bigger, 
+take longer to set up in your project, have a higher learning curve, 
+and often have a more restrictive license. If you are working with 
+browsers or have more complete XML needs, TinyXML-2 is not the parser for you.
 
 TinyXML-1 vs. TinyXML-2
 -----------------------
@@ -309,8 +308,9 @@ in shaping what is a very successful library. Extra thanks to Yves
 Berquin and Andrew Ellerton who were key contributors.
 
 TinyXML-2 grew from that effort. Lee Thomason is the original author
-of TinyXML-2 (and TinyXML-1) but hopefully TinyXML-2 will be improved
+of TinyXML-2 (and TinyXML-1) but TinyXML-2 has been and is being improved
 by many contributors.
 
-Thanks to John Mackay for the TinyXML-2 logo.
+Thanks to John Mackay at http://john.mackay.rosalilastudio.com for the TinyXML-2 logo!
+
 

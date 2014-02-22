@@ -10,7 +10,7 @@ include(GNUInstallDirs)
 ################################
 # set lib version here
 
-set(GENERIC_LIB_VERSION "1.0.12")
+set(GENERIC_LIB_VERSION "1.0.14")
 set(GENERIC_LIB_SOVERSION "1")
 
 
@@ -53,6 +53,7 @@ if(BUILD_STATIC_LIBS)
 endif(BUILD_STATIC_LIBS)
 add_library(tinyxml2 SHARED tinyxml2.cpp tinyxml2.h)
 set_target_properties(tinyxml2 PROPERTIES
+        COMPILE_DEFINITIONS "TINYXML2_EXPORT"
 	VERSION "${GENERIC_LIB_VERSION}"
 	SOVERSION "${GENERIC_LIB_SOVERSION}")
 
