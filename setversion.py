@@ -25,7 +25,6 @@ def fileProcess( name, lineFunction ):
 	filestream.write( output );
 	filestream.close()
 	
-	
 def echoInput( line ):
 	return line
 
