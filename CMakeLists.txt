@@ -10,8 +10,8 @@ include(GNUInstallDirs)
 ################################
 # set lib version here
 
-set(GENERIC_LIB_VERSION "1.1.0")
-set(GENERIC_LIB_SOVERSION "1")
+set(GENERIC_LIB_VERSION "2.0.0")
+set(GENERIC_LIB_SOVERSION "2")
 
 
 ################################
