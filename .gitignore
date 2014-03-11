@@ -3,6 +3,8 @@ build*
 Win32/
 x64/
 ipch/
+bin/
+libs/
 resources/out/
 tinyxml2/tinyxml2-cbp/bin/
 tinyxml2/tinyxml2-cbp/obj/
