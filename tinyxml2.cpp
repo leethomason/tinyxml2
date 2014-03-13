@@ -1728,6 +1728,34 @@ XMLError XMLDocument::LoadFile( const char* filename )
 }
 
 
+XMLError XMLDocument::LoadMemory(char* data, size_t size)
+{
+	if (data == NULL)
+	{
+		SetError(XML_ERROR_PARSING_UNKNOWN, 0, 0);
+		return _errorID;
+	}
+
+	if ( size <= 0) {
+        SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
+        return _errorID;
+    }
+
+	data[size] = 0;
+
+    const char* p = data;
+    p = XMLUtil::SkipWhiteSpace( p );
+    p = XMLUtil::ReadBOM( p, &_writeBOM );
+    if ( !p || !*p ) {
+        SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
+        return _errorID;
+    }
+
+    ParseDeep( data + (p-data), 0 );
+    return _errorID;
+}
+
+
 XMLError XMLDocument::LoadFile( FILE* fp )
 {
     Clear();
