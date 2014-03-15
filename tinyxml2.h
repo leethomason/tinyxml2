@@ -117,13 +117,10 @@ inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
 #endif
 
 /* Versioning, past 1.0.14:
-
-	A backwards-incompatible change or API change bumps the major version.
-	An API addition or a backwards-compatible change, bumps the minor version.
-	Simple bug fixes bump the build number.
+	http://semver.org/
 */
-static const int TIXML2_MAJOR_VERSION = 1;
-static const int TIXML2_MINOR_VERSION = 1;
+static const int TIXML2_MAJOR_VERSION = 2;
+static const int TIXML2_MINOR_VERSION = 0;
 static const int TIXML2_PATCH_VERSION = 0;
 
 namespace tinyxml2
@@ -1967,7 +1964,7 @@ public:
     /** If streaming, start writing an element.
         The element must be closed with CloseElement()
     */
-    void OpenElement( const char* name );
+    void OpenElement( const char* name, bool compactMode );
     /// If streaming, add an attribute to an open element.
     void PushAttribute( const char* name, const char* value );
     void PushAttribute( const char* name, int value );
@@ -1975,7 +1972,7 @@ public:
     void PushAttribute( const char* name, bool value );
     void PushAttribute( const char* name, double value );
     /// If streaming, close the Element.
-    virtual void CloseElement();
+    virtual void CloseElement( bool compactMode );
 
     /// Add a text node.
     void PushText( const char* text, bool cdata=false );
@@ -2034,6 +2031,8 @@ public:
     }
 
 protected:
+	virtual bool CompactMode( const XMLElement& )	{ return _compactMode; };
+
 	/** Prints out the space before an element. You may override to change
 	    the space and tabs used. A PrintSpace() override should call Print().
 	*/
