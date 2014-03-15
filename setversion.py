@@ -3,6 +3,7 @@
 
 import re
 import sys
+import optparse
 
 def fileProcess( name, lineFunction ):
 	filestream = open( name, 'r' )
@@ -29,9 +30,15 @@ def fileProcess( name, lineFunction ):
 def echoInput( line ):
 	return line
 
-major = input( "Major: " )
-minor = input( "Minor: " )
-build = input( "Build: " )
+parser = optparse.OptionParser( "usage: %prog major minor build" )
+(options, args) = parser.parse_args()
+if len(args) != 3:
+	parser.error( "incorrect number of arguments" );
+
+major = args[0]
+minor = args[1]
+build = args[2]
+versionStr = major + "." + minor + "." + build
 
 print "Setting dox,tinyxml2.h"
 print "Version: " + `major` + "." + `minor` + "." + `build`
@@ -105,3 +112,8 @@ def cmakeRule2( line ):
 		return line;
 
 fileProcess( "CMakeLists.txt", cmakeRule2 )
+
+print( "Release note:" )
+print( '1. Build. Ex: g++ -Wall -DDEBUG tinyxml2.cpp xmltest.cpp -o gccxmltest.exe' )
+print( '2. Commit.	git commit -am"setting the version to ` + versionStr + '" )
+print( '3. Tag. git tag ' + versionStr )
