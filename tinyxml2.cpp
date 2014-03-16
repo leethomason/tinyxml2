@@ -1855,7 +1855,7 @@ void XMLPrinter::Print( const char* format, ... )
         vfprintf( _fp, format, va );
     }
     else {
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
         int len = _vscprintf( format, va );
 #else
         int len = vsnprintf( 0, 0, format, va );
@@ -1863,8 +1863,12 @@ void XMLPrinter::Print( const char* format, ... )
         // Close out and re-start the va-args
         va_end( va );
         va_start( va, format );
-        char* p = _buffer.PushArr( len ) - 1;
-        vsnprintf( p, len+1, format, va );
+        char* p = _buffer.PushArr( len ) - 1;	// back up over the null terminator.
+#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
+		vsnprintf_s( p, len+1, _TRUNCATE, format, va );
+#else
+		vsnprintf( p, len+1, format, va );
+#endif
     }
     va_end( va );
 }
