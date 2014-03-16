@@ -1855,28 +1855,16 @@ void XMLPrinter::Print( const char* format, ... )
         vfprintf( _fp, format, va );
     }
     else {
-        // This seems brutally complex. Haven't figured out a better
-        // way on windows.
 #ifdef _MSC_VER
-        int len = -1;
-        int expand = 1000;
-        while ( len < 0 ) {
-            len = vsnprintf_s( _accumulator.Mem(), _accumulator.Capacity(), _TRUNCATE, format, va );
-            if ( len < 0 ) {
-                expand *= 3/2;
-                _accumulator.PushArr( expand );
-            }
-        }
-        char* p = _buffer.PushArr( len ) - 1;
-        memcpy( p, _accumulator.Mem(), len+1 );
+        int len = _vscprintf( format, va );
 #else
         int len = vsnprintf( 0, 0, format, va );
+#endif
         // Close out and re-start the va-args
         va_end( va );
         va_start( va, format );
         char* p = _buffer.PushArr( len ) - 1;
         vsnprintf( p, len+1, format, va );
-#endif
     }
     va_end( va );
 }
