@@ -33,6 +33,9 @@ distribution.
 #   include <string.h>
 #   include <stdarg.h>
 #else
+#if defined(__CYGWIN__)
+#undef __STRICT_ANSI__
+#endif
 #   include <cctype>
 #   include <climits>
 #   include <cstdio>
