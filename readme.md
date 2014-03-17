@@ -269,6 +269,14 @@ an XCode project, a Code::Blocks project, and a cmake CMakeLists.txt included to
 The top of tinyxml.h even has a simple g++ command line if you are are *nix and don't want 
 to use a build system.
 
+Versioning
+----------
+
+TinyXML-2 uses semantic versioning. http://semver.org/ Releases are now tagged in github.
+
+Note that the major version will (probably) change fairly rapidly. API changes are fairly
+common.
+
 Documentation
 -------------
 
