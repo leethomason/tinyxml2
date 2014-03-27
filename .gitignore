@@ -14,3 +14,8 @@ tinyxml2/tinyxml2-cbp/obj/
 *.user
 *.depend
 *.layout
+
+# temporary files
+*~
+*#
+.#*
