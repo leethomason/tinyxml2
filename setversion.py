@@ -117,3 +117,5 @@ print( '1. Build.   g++ -Wall -DDEBUG tinyxml2.cpp xmltest.cpp -o gccxmltest.exe
 print( '2. Commit.  git commit -am"setting the version to ' + versionStr + '"' )
 print( '3. Tag.     git tag ' + versionStr )
 print( '   OR       git tag -a ' + versionStr + ' -m <tag message>' )
+print( 'Remember to "git push" both code and tag.' )
+ 
