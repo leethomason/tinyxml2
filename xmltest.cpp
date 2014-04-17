@@ -1,5 +1,7 @@
 #if defined( _MSC_VER )
-	#define _CRT_SECURE_NO_WARNINGS		// This test file is not intended to be secure.
+	#if !defined( _CRT_SECURE_NO_WARNINGS )
+		#define _CRT_SECURE_NO_WARNINGS		// This test file is not intended to be secure.
+	#endif
 #endif
 
 #include "tinyxml2.h"
