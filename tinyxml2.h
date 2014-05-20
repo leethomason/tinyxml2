@@ -2031,7 +2031,7 @@ public:
     }
 
 protected:
-	virtual bool CompactMode( const XMLElement& )	{ return _compactMode; };
+	virtual bool CompactMode( const XMLElement& )	{ return _compactMode; }
 
 	/** Prints out the space before an element. You may override to change
 	    the space and tabs used. A PrintSpace() override should call Print().
