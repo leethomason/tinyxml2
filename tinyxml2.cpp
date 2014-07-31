@@ -1689,8 +1689,7 @@ XMLError XMLDocument::LoadFile( FILE* fp )
     Clear();
 
     fseek( fp, 0, SEEK_SET );
-    fgetc( fp );
-    if ( ferror( fp ) != 0 ) {
+    if ( fgetc( fp ) == EOF && ferror( fp ) != 0 ) {
         SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
     }
