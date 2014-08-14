@@ -1695,9 +1695,14 @@ XMLError XMLDocument::LoadFile( FILE* fp )
     }
 
     fseek( fp, 0, SEEK_END );
-    size_t size = ftell( fp );
+    const long filelength = ftell( fp );
     fseek( fp, 0, SEEK_SET );
+    if ( filelength == -1L ) {
+        SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
+        return _errorID;
+    }
 
+    const size_t size = filelength;
     if ( size == 0 ) {
         SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
         return _errorID;
