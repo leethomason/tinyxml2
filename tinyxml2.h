@@ -370,7 +370,7 @@ public:
             return;
         }
         --_currentAllocs;
-        Chunk* chunk = (Chunk*)mem;
+        Chunk* chunk = static_cast<Chunk*>( mem );
 #ifdef DEBUG
         memset( chunk, 0xfe, sizeof(Chunk) );
 #endif
