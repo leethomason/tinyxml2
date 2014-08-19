@@ -1662,19 +1662,25 @@ XMLUnknown* XMLDocument::NewUnknown( const char* str )
     return unk;
 }
 
+static FILE* callfopen( const char* filepath, const char* mode )
+{
+#if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
+    FILE* fp = 0;
+    errno_t err = fopen_s( &fp, filepath, mode );
+    if ( err ) {
+        return 0;
+    }
+#else
+    FILE* fp = fopen( filepath, mode );
+#endif
+    return fp;
+}
 
 XMLError XMLDocument::LoadFile( const char* filename )
 {
     Clear();
-    FILE* fp = 0;
-
-#if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
-    errno_t err = fopen_s(&fp, filename, "rb" );
-    if ( !fp || err) {
-#else
-    fp = fopen( filename, "rb" );
-    if ( !fp) {
-#endif
+    FILE* fp = callfopen( filename, "rb" );
+    if ( !fp ) {
         SetError( XML_ERROR_FILE_NOT_FOUND, filename, 0 );
         return _errorID;
     }
@@ -1732,14 +1738,8 @@ XMLError XMLDocument::LoadFile( FILE* fp )
 
 XMLError XMLDocument::SaveFile( const char* filename, bool compact )
 {
-    FILE* fp = 0;
-#if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
-    errno_t err = fopen_s(&fp, filename, "w" );
-    if ( !fp || err) {
-#else
-    fp = fopen( filename, "w" );
-    if ( !fp) {
-#endif
+    FILE* fp = callfopen( filename, "w" );
+    if ( !fp ) {
         SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0 );
         return _errorID;
     }
