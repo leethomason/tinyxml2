@@ -112,7 +112,7 @@ char* StrPair::ParseText( char* p, const char* endTag, int strFlags )
 {
     TIXMLASSERT( endTag && *endTag );
 
-    char* start = p;	// fixme: hides a member
+    char* start = p;
     char  endChar = *endTag;
     size_t length = strlen( endTag );
 
