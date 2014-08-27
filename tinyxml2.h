@@ -1819,19 +1819,19 @@ public:
     }
     /// Safe cast to XMLElement. This can return null.
     XMLElement* ToElement() 					{
-        return ( ( _node && _node->ToElement() ) ? _node->ToElement() : 0 );
+        return ( ( _node == 0 ) ? 0 : _node->ToElement() );
     }
     /// Safe cast to XMLText. This can return null.
     XMLText* ToText() 							{
-        return ( ( _node && _node->ToText() ) ? _node->ToText() : 0 );
+        return ( ( _node == 0 ) ? 0 : _node->ToText() );
     }
     /// Safe cast to XMLUnknown. This can return null.
     XMLUnknown* ToUnknown() 					{
-        return ( ( _node && _node->ToUnknown() ) ? _node->ToUnknown() : 0 );
+        return ( ( _node == 0 ) ? 0 : _node->ToUnknown() );
     }
     /// Safe cast to XMLDeclaration. This can return null.
     XMLDeclaration* ToDeclaration() 			{
-        return ( ( _node && _node->ToDeclaration() ) ? _node->ToDeclaration() : 0 );
+        return ( ( _node == 0 ) ? 0 : _node->ToDeclaration() );
     }
 
 private:
@@ -1891,16 +1891,16 @@ public:
         return _node;
     }
     const XMLElement* ToElement() const			{
-        return ( ( _node && _node->ToElement() ) ? _node->ToElement() : 0 );
+        return ( ( _node == 0 ) ? 0 : _node->ToElement() );
     }
     const XMLText* ToText() const				{
-        return ( ( _node && _node->ToText() ) ? _node->ToText() : 0 );
+        return ( ( _node == 0 ) ? 0 : _node->ToText() );
     }
     const XMLUnknown* ToUnknown() const			{
-        return ( ( _node && _node->ToUnknown() ) ? _node->ToUnknown() : 0 );
+        return ( ( _node == 0 ) ? 0 : _node->ToUnknown() );
     }
     const XMLDeclaration* ToDeclaration() const	{
-        return ( ( _node && _node->ToDeclaration() ) ? _node->ToDeclaration() : 0 );
+        return ( ( _node == 0 ) ? 0 : _node->ToDeclaration() );
     }
 
 private:
