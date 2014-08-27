@@ -2064,9 +2064,6 @@ private:
     bool _restrictedEntityFlag[ENTITY_RANGE];
 
     DynArray< char, 20 > _buffer;
-#ifdef _MSC_VER
-    DynArray< char, 20 > _accumulator;
-#endif
 };
 
 
