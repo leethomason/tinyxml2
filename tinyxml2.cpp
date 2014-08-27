@@ -112,7 +112,7 @@ char* StrPair::ParseText( char* p, const char* endTag, int strFlags )
 {
     TIXMLASSERT( endTag && *endTag );
 
-    char* start = p;	// fixme: hides a member
+    char* start = p;
     char  endChar = *endTag;
     size_t length = strlen( endTag );
 
@@ -216,13 +216,14 @@ const char* StrPair::GetStr()
                     //   &#20013; or &#x4e2d;
 
                     if ( *(p+1) == '#' ) {
-                        char buf[10] = { 0 };
-                        int len;
+                        const int buflen = 10;
+                        char buf[buflen] = { 0 };
+                        int len = 0;
                         p = const_cast<char*>( XMLUtil::GetCharacterRef( p, buf, &len ) );
-                        for( int i=0; i<len; ++i ) {
-                            *q++ = buf[i];
-                        }
-                        TIXMLASSERT( q <= p );
+                        TIXMLASSERT( 0 <= len && len <= buflen );
+                        TIXMLASSERT( q + len <= p );
+                        memcpy( q, buf, len );
+                        q += len;
                     }
                     else {
                         int i=0;
