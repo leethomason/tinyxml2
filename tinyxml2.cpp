@@ -773,10 +773,11 @@ const XMLElement* XMLNode::LastChildElement( const char* value ) const
 
 const XMLElement* XMLNode::NextSiblingElement( const char* value ) const
 {
-    for( XMLNode* element=this->_next; element; element = element->_next ) {
-        if (    element->ToElement()
-                && (!value || XMLUtil::StringEqual( value, element->Value() ))) {
-            return element->ToElement();
+    for( XMLNode* node=this->_next; node; node = node->_next ) {
+        const XMLElement* element = node->ToElement();
+        if ( element
+                && (!value || XMLUtil::StringEqual( value, node->Value() ))) {
+            return element;
         }
     }
     return 0;
@@ -785,10 +786,11 @@ const XMLElement* XMLNode::NextSiblingElement( const char* value ) const
 
 const XMLElement* XMLNode::PreviousSiblingElement( const char* value ) const
 {
-    for( XMLNode* element=_prev; element; element = element->_prev ) {
-        if (    element->ToElement()
-                && (!value || XMLUtil::StringEqual( value, element->Value() ))) {
-            return element->ToElement();
+    for( XMLNode* node=_prev; node; node = node->_prev ) {
+        const XMLElement* element = node->ToElement();
+        if ( element
+                && (!value || XMLUtil::StringEqual( value, node->Value() ))) {
+            return element;
         }
     }
     return 0;
@@ -833,8 +835,9 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
             break;
         }
 
+        XMLElement* ele = node->ToElement();
         // We read the end tag. Return it to the parent.
-        if ( node->ToElement() && node->ToElement()->ClosingType() == XMLElement::CLOSING ) {
+        if ( ele && ele->ClosingType() == XMLElement::CLOSING ) {
             if ( parentEnd ) {
                 *parentEnd = static_cast<XMLElement*>(node)->_value;
             }
@@ -845,7 +848,6 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
 
         // Handle an end tag returned to this level.
         // And handle a bunch of annoying errors.
-        XMLElement* ele = node->ToElement();
         if ( ele ) {
             if ( endTag.Empty() && ele->ClosingType() == XMLElement::OPEN ) {
                 _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
@@ -961,7 +963,8 @@ XMLNode* XMLComment::ShallowClone( XMLDocument* doc ) const
 
 bool XMLComment::ShallowEqual( const XMLNode* compare ) const
 {
-    return ( compare->ToComment() && XMLUtil::StringEqual( compare->ToComment()->Value(), Value() ));
+    const XMLComment* comment = compare->ToComment();
+    return ( comment && XMLUtil::StringEqual( comment->Value(), Value() ));
 }
 
 
@@ -1008,7 +1011,8 @@ XMLNode* XMLDeclaration::ShallowClone( XMLDocument* doc ) const
 
 bool XMLDeclaration::ShallowEqual( const XMLNode* compare ) const
 {
-    return ( compare->ToDeclaration() && XMLUtil::StringEqual( compare->ToDeclaration()->Value(), Value() ));
+    const XMLDeclaration* declaration = compare->ToDeclaration();
+    return ( declaration && XMLUtil::StringEqual( declaration->Value(), Value() ));
 }
 
 
@@ -1055,7 +1059,8 @@ XMLNode* XMLUnknown::ShallowClone( XMLDocument* doc ) const
 
 bool XMLUnknown::ShallowEqual( const XMLNode* compare ) const
 {
-    return ( compare->ToUnknown() && XMLUtil::StringEqual( compare->ToUnknown()->Value(), Value() ));
+    const XMLUnknown* unknown = compare->ToUnknown();
+    return ( unknown && XMLUtil::StringEqual( unknown->Value(), Value() ));
 }
 
 
