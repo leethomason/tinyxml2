@@ -847,6 +847,7 @@ protected:
 private:
     MemPool*		_memPool;
     void Unlink( XMLNode* child );
+    static void DeleteNode( XMLNode* node );
 };
 
 
@@ -1480,6 +1481,7 @@ private:
     XMLAttribute* FindOrCreateAttribute( const char* name );
     //void LinkAttribute( XMLAttribute* attrib );
     char* ParseAttributes( char* p );
+    static void DeleteAttribute( XMLAttribute* attribute );
 
     enum { BUF_SIZE = 200 };
     int _closingType;

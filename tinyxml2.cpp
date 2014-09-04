@@ -45,22 +45,6 @@ static const unsigned char TIXML_UTF_LEAD_0 = 0xefU;
 static const unsigned char TIXML_UTF_LEAD_1 = 0xbbU;
 static const unsigned char TIXML_UTF_LEAD_2 = 0xbfU;
 
-
-#define DELETE_NODE( node )	{			\
-        if ( node ) {						\
-            MemPool* pool = node->_memPool;	\
-            node->~XMLNode();				\
-            pool->Free( node );				\
-        }									\
-    }
-#define DELETE_ATTRIBUTE( attrib ) {		\
-        if ( attrib ) {							\
-            MemPool* pool = attrib->_memPool;	\
-            attrib->~XMLAttribute();			\
-            pool->Free( attrib );				\
-        }										\
-    }
-
 namespace tinyxml2
 {
 
@@ -618,7 +602,7 @@ void XMLNode::DeleteChildren()
         XMLNode* node = _firstChild;
         Unlink( node );
 
-        DELETE_NODE( node );
+        DeleteNode( node );
     }
     _firstChild = _lastChild = 0;
 }
@@ -646,7 +630,7 @@ void XMLNode::Unlink( XMLNode* child )
 void XMLNode::DeleteChild( XMLNode* node )
 {
     TIXMLASSERT( node->_parent == this );
-    DELETE_NODE( node );
+    DeleteNode( node );
 }
 
 
@@ -827,7 +811,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
         StrPair endTag;
         p = node->ParseDeep( p, &endTag );
         if ( !p ) {
-            DELETE_NODE( node );
+            DeleteNode( node );
             node = 0;
             if ( !_document->Error() ) {
                 _document->SetError( XML_ERROR_PARSING, 0, 0 );
@@ -842,7 +826,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
                 *parentEnd = static_cast<XMLElement*>(node)->_value;
             }
 			node->_memPool->SetTracked();	// created and then immediately deleted.
-            DELETE_NODE( node );
+            DeleteNode( node );
             return p;
         }
 
@@ -865,7 +849,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
             }
         }
         if ( p == 0 ) {
-            DELETE_NODE( node );
+            DeleteNode( node );
             node = 0;
         }
         if ( node ) {
@@ -873,6 +857,16 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
         }
     }
     return 0;
+}
+
+void XMLNode::DeleteNode( XMLNode* node )
+{
+    if ( node == 0 ) {
+        return;
+    }
+    MemPool* pool = node->_memPool;
+    node->~XMLNode();
+    pool->Free( node );
 }
 
 // --------- XMLText ---------- //
@@ -1216,7 +1210,7 @@ XMLElement::~XMLElement()
 {
     while( _rootAttribute ) {
         XMLAttribute* next = _rootAttribute->_next;
-        DELETE_ATTRIBUTE( _rootAttribute );
+        DeleteAttribute( _rootAttribute );
         _rootAttribute = next;
     }
 }
@@ -1423,7 +1417,7 @@ void XMLElement::DeleteAttribute( const char* name )
             else {
                 _rootAttribute = a->_next;
             }
-            DELETE_ATTRIBUTE( a );
+            DeleteAttribute( a );
             break;
         }
         prev = a;
@@ -1452,7 +1446,7 @@ char* XMLElement::ParseAttributes( char* p )
 
             p = attrib->ParseDeep( p, _document->ProcessEntities() );
             if ( !p || Attribute( attrib->Name() ) ) {
-                DELETE_ATTRIBUTE( attrib );
+                DeleteAttribute( attrib );
                 _document->SetError( XML_ERROR_PARSING_ATTRIBUTE, start, p );
                 return 0;
             }
@@ -1487,6 +1481,15 @@ char* XMLElement::ParseAttributes( char* p )
     return p;
 }
 
+void XMLElement::DeleteAttribute( XMLAttribute* attribute )
+{
+    if ( attribute == 0 ) {
+        return;
+    }
+    MemPool* pool = attribute->_memPool;
+    attribute->~XMLAttribute();
+    pool->Free( attribute );
+}
 
 //
 //	<ele></ele>
