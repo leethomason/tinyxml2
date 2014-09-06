@@ -1222,6 +1222,9 @@ int main( int argc, const char ** argv )
 		XMLDocument doc;
 		XMLError error = doc.LoadFile( "resources/empty.xml" );
 		XMLTest( "Loading an empty file", XML_ERROR_EMPTY_DOCUMENT, error );
+#if __cplusplus > 199711LL
+		XMLTest( "Loading an empty file and ErrorName as string", "XML_ERROR_EMPTY_DOCUMENT", XMLUtil::ToErrorName(error).c_str() );
+#endif
 	}
 
 	{
