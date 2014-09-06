@@ -39,6 +39,8 @@ distribution.
 #   include <cstdlib>
 #   include <cstring>
 #   include <cstdarg>
+#   include <vector>
+#   include <string>
 #endif
 
 /*
@@ -480,6 +482,46 @@ public:
     }
 };
 
+#define FOR_EACH(F) \
+    F(XML_SUCCESS)                         \
+    F(XML_NO_ATTRIBUTE)                    \
+    F(XML_WRONG_ATTRIBUTE_TYPE)            \
+    F(XML_ERROR_FILE_NOT_FOUND)            \
+    F(XML_ERROR_FILE_COULD_NOT_BE_OPENED)  \
+    F(XML_ERROR_FILE_READ_ERROR)           \
+    F(XML_ERROR_ELEMENT_MISMATCH)          \
+    F(XML_ERROR_PARSING_ELEMENT)           \
+    F(XML_ERROR_PARSING_ATTRIBUTE)         \
+    F(XML_ERROR_IDENTIFYING_TAG)           \
+    F(XML_ERROR_PARSING_TEXT)              \
+    F(XML_ERROR_PARSING_CDATA)             \
+    F(XML_ERROR_PARSING_COMMENT)           \
+    F(XML_ERROR_PARSING_DECLARATION)       \
+    F(XML_ERROR_PARSING_UNKNOWN)           \
+    F(XML_ERROR_EMPTY_DOCUMENT)            \
+    F(XML_ERROR_MISMATCHED_ELEMENT)        \
+    F(XML_ERROR_PARSING)                   \
+    F(XML_CAN_NOT_CONVERT_TEXT)            \
+    F(XML_NO_TEXT_NODE)                   
+
+#define FF(X) X,
+enum XMLError {
+    FOR_EACH(FF)
+    XML_ERROR_ID_NUM,
+    XML_NO_ERROR = 0
+};
+#undef FF
+
+#if __cplusplus > 199711LL
+#define FF(X) #X,
+const std::vector<std::string> ErrorNames = {
+    FOR_EACH(FF)
+    "OUT_OF_RANGE"
+};
+#undef FF
+#endif
+#undef FOR_EACH
+
 
 /*
 	Utility functionality.
@@ -557,6 +599,9 @@ public:
     static bool	ToBool( const char* str, bool* value );
     static bool	ToFloat( const char* str, float* value );
     static bool ToDouble( const char* str, double* value );
+    
+    // converts XMLError to strings
+    static std::string ToErrorName( const XMLError errorID );
 };
 
 
@@ -996,33 +1041,6 @@ protected:
     XMLUnknown& operator=( const XMLUnknown& );	// not supported
 };
 
-
-enum XMLError {
-    XML_NO_ERROR = 0,
-    XML_SUCCESS = 0,
-
-    XML_NO_ATTRIBUTE,
-    XML_WRONG_ATTRIBUTE_TYPE,
-
-    XML_ERROR_FILE_NOT_FOUND,
-    XML_ERROR_FILE_COULD_NOT_BE_OPENED,
-    XML_ERROR_FILE_READ_ERROR,
-    XML_ERROR_ELEMENT_MISMATCH,
-    XML_ERROR_PARSING_ELEMENT,
-    XML_ERROR_PARSING_ATTRIBUTE,
-    XML_ERROR_IDENTIFYING_TAG,
-    XML_ERROR_PARSING_TEXT,
-    XML_ERROR_PARSING_CDATA,
-    XML_ERROR_PARSING_COMMENT,
-    XML_ERROR_PARSING_DECLARATION,
-    XML_ERROR_PARSING_UNKNOWN,
-    XML_ERROR_EMPTY_DOCUMENT,
-    XML_ERROR_MISMATCHED_ELEMENT,
-    XML_ERROR_PARSING,
-
-    XML_CAN_NOT_CONVERT_TEXT,
-    XML_NO_TEXT_NODE
-};
 
 
 /** An attribute is a name-value pair. Elements have an arbitrary
