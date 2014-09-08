@@ -1,7 +1,6 @@
 all: xmltest
-xmltest: tinyxml2.o
+xmltest: xmltest.cpp tinyxml2.cpp tinyxml2.h
 test: clean xmltest
 	./xmltest
-tinyxml2:
 clean:
 	rm -f *.o xmltest
