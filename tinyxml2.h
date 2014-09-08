@@ -39,8 +39,6 @@ distribution.
 #   include <cstdlib>
 #   include <cstring>
 #   include <cstdarg>
-#   include <vector>
-#   include <string>
 #endif
 
 /*
@@ -512,14 +510,12 @@ enum XMLError {
 };
 #undef FF
 
-#if __cplusplus > 199711LL
 #define FF(X) #X,
-const std::vector<std::string> ErrorNames = {
+static const char *ErrorNames[] = {
     FOR_EACH(FF)
     "OUT_OF_RANGE"
 };
 #undef FF
-#endif
 #undef FOR_EACH
 
 
@@ -601,7 +597,7 @@ public:
     static bool ToDouble( const char* str, double* value );
     
     // converts XMLError to strings
-    static std::string ToErrorName( const XMLError errorID );
+    static const char* ToErrorName( const XMLError errorID );
 };
 
 

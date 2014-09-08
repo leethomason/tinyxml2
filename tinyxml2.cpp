@@ -476,13 +476,9 @@ bool XMLUtil::ToDouble( const char* str, double* value )
     return false;
 }
 
-std::string XMLUtil::ToErrorName( const XMLError errorID )
+const char* XMLUtil::ToErrorName( const XMLError errorID )
 {
-#if __cplusplus  > 199711LL
     return ErrorNames[errorID];
-#else
-    return std::string("Use C++11 or higher to use this function");
-#endif
 }
 
 char* XMLDocument::Identify( char* p, XMLNode** node )
