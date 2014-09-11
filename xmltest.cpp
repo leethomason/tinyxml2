@@ -1222,7 +1222,7 @@ int main( int argc, const char ** argv )
 		XMLDocument doc;
 		XMLError error = doc.LoadFile( "resources/empty.xml" );
 		XMLTest( "Loading an empty file", XML_ERROR_EMPTY_DOCUMENT, error );
-		XMLTest( "Loading an empty file and ErrorName as string", "XML_ERROR_EMPTY_DOCUMENT", XMLUtil::ToErrorName(error) );
+		XMLTest( "Loading an empty file and ErrorName as string", "XML_ERROR_EMPTY_DOCUMENT", doc.ErrorName() );
 	}
 
 	{

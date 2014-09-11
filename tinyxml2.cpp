@@ -476,10 +476,6 @@ bool XMLUtil::ToDouble( const char* str, double* value )
     return false;
 }
 
-const char* XMLUtil::ToErrorName( const XMLError errorID )
-{
-    return ErrorNames[errorID];
-}
 
 char* XMLDocument::Identify( char* p, XMLNode** node )
 {
@@ -1581,6 +1577,32 @@ bool XMLElement::Accept( XMLVisitor* visitor ) const
 
 
 // --------- XMLDocument ----------- //
+
+// Warning: List must match 'enum XMLError'
+const char* XMLDocument::_errorNames[XML_ERROR_COUNT] = {
+    "XML_SUCCESS",
+    "XML_NO_ATTRIBUTE",
+    "XML_WRONG_ATTRIBUTE_TYPE",
+    "XML_ERROR_FILE_NOT_FOUND",
+    "XML_ERROR_FILE_COULD_NOT_BE_OPENED",
+    "XML_ERROR_FILE_READ_ERROR",
+    "XML_ERROR_ELEMENT_MISMATCH",
+    "XML_ERROR_PARSING_ELEMENT",
+    "XML_ERROR_PARSING_ATTRIBUTE",
+    "XML_ERROR_IDENTIFYING_TAG",
+    "XML_ERROR_PARSING_TEXT",
+    "XML_ERROR_PARSING_CDATA",
+    "XML_ERROR_PARSING_COMMENT",
+    "XML_ERROR_PARSING_DECLARATION",
+    "XML_ERROR_PARSING_UNKNOWN",
+    "XML_ERROR_EMPTY_DOCUMENT",
+    "XML_ERROR_MISMATCHED_ELEMENT",
+    "XML_ERROR_PARSING",
+    "XML_CAN_NOT_CONVERT_TEXT",
+    "XML_NO_TEXT_NODE"
+};
+
+
 XMLDocument::XMLDocument( bool processEntities, Whitespace whitespace ) :
     XMLNode( 0 ),
     _writeBOM( false ),
@@ -1816,6 +1838,11 @@ void XMLDocument::SetError( XMLError error, const char* str1, const char* str2 )
     _errorStr2 = str2;
 }
 
+const char* XMLDocument::ErrorName() const
+{
+	TIXMLASSERT(_errorID >= 0 && _errorID < XML_ERROR_COUNT );
+	return _errorNames[_errorID];
+}
 
 void XMLDocument::PrintError() const
 {
@@ -1831,8 +1858,8 @@ void XMLDocument::PrintError() const
             TIXML_SNPRINTF( buf2, LEN, "%s", _errorStr2 );
         }
 
-        printf( "XMLDocument error id=%d str1=%s str2=%s\n",
-                _errorID, buf1, buf2 );
+        printf( "XMLDocument error id=%d '%s' str1=%s str2=%s\n",
+                _errorID, ErrorName(), buf1, buf2 );
     }
 }
 
