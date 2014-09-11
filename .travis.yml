@@ -1,0 +1,30 @@
+language: cpp
+compiler:
+- gcc
+before_install:
+- sudo apt-get update -qq
+install:
+- wget http://www.biicode.com/downloads/latest/ubuntu32
+- mv ubuntu32 bii-ubuntu32.deb
+- (! sudo dpkg -i bii-ubuntu32.deb ) && sudo apt-get -f install
+- rm bii-ubuntu32.deb
+- wget http://www.cmake.org/files/v3.0/cmake-3.0.1-Linux-i386.tar.gz
+- tar -xzf cmake-3.0.1-Linux-i386.tar.gz
+- sudo cp -fR cmake-3.0.1-Linux-i386/* /usr
+- rm -rf cmake-3.0.1-Linux-i386
+- rm cmake-3.0.1-Linux-i386.tar.gz
+script:
+- cmake --version
+- bii init biicode_project
+- mkdir -p ./biicode_project/blocks/david/tinyxml2
+- mv !(biicode_project) ./biicode_project/blocks/david/tinyxml2
+- cd biicode_project
+- bii find -um
+- bii cpp:build
+- ./bin/david_tinyxml2_xmltest
+after_success:
+- bii user david -p $BII_DAVID_PASSWORD
+- bii publish
+env:
+  global:
+    secure: ZNZJIDD4CRBt3LSGTiKNuycspV208n9Ie+TWxtX3tVZ6bCP+vhdasQpbtm95QO6NDpbArGRb8x0XMxWHm3xsskAgDwu3z8uOpGfTQ720PBXzuZ+UMxVa8bd2ULf7yZTwEROVpqGirTeCqmK+35wesriXixsjNFWns83UkFOVkrU=
