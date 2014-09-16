@@ -21,6 +21,7 @@ script:
 - cd biicode_project
 - bii find -um
 - bii cpp:build
+- cp -r blocks/david/tinyxml2/resources bin
 - ls ./bin/david_tinyxml2_xmltest
 after_success:
 - bii user david -p $BII_DAVID_PASSWORD

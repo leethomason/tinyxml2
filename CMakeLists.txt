@@ -12,17 +12,6 @@ if(BIICODE)
 	# Actually create targets: EXEcutables and libraries.
 	ADD_BIICODE_TARGETS()
 	TARGET_INCLUDE_DIRECTORIES(${BII_LIB_TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-	# Add custom target to copy all data
-	IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/resources")
-	set(TARGET_DATA_COPY DATA_COPY)
-	make_directory(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/)
-	add_custom_target(
-		${TARGET_DATA_COPY}
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/dream.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/empty.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/utf8test.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/utf8testverify.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/)
-
 else()
 	cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 	cmake_policy(VERSION 2.6)
@@ -55,7 +44,7 @@ else()
 		 	COMMAND ${CMAKE_COMMAND} -E echo "In source build")
 	else(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 		make_directory(${CMAKE_CURRENT_BINARY_DIR}/resources/)
-		add_custom_target(
+		add_add_custom_command_target(
 			${TARGET_DATA_COPY}
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/dream.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/empty.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
