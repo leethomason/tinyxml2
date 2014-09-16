@@ -1,4 +1,4 @@
-TinyXML-2
+TinyXML-2[![Build Status](https://travis-ci.org/davidsanfal/tinyxml2.svg?branch=master)](https://travis-ci.org/davidsanfal/tinyxml2)
 =========
 ![TinyXML-2 Logo](http://www.grinninglizard.com/tinyxml2/TinyXML2_small.png)
 
