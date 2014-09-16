@@ -21,7 +21,7 @@ script:
 - cd biicode_project
 - bii find -um
 - bii cpp:build
-- ls ./bin/david_tinyxml2_xmltest
+- ./bin/david_tinyxml2_xmltest
 after_success:
 - bii user david -p $BII_DAVID_PASSWORD
 - bii publish
