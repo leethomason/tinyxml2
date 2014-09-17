@@ -3,7 +3,7 @@ TinyXML-2[![Build Status](https://travis-ci.org/davidsanfal/tinyxml2.svg?branch=
 
 Adaptation of the original library for use with [Biicode](https://www.biicode.com).
 
-The [biicode block](https://www.biicode.com/david/david/tinyxml2/master) has been generated from the forked github repository: [link](https://github.com/davidsanfal/tinyxml2). It includes slight modifications added to the original repository in order to work properly with biicode. 
+The [biicode block](https://www.biicode.com/david/david/tinyxml2/master) has been generated from a [github repository](https://github.com/davidsanfal/tinyxml2). It includes slight modifications added to the original repository in order to work properly with biicode. 
 
 ![TinyXML-2 Logo](http://www.grinninglizard.com/tinyxml2/TinyXML2_small.png)
 
