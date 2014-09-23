@@ -504,7 +504,8 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 #pragma warning ( push )
 #pragma warning ( disable : 4127 )
 #endif
-    TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLUnknown ) );		// use same memory pool
+    TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLDtd ) );		      // use same memory pool
+    TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLUnknown ) );		  // use same memory pool
     TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLDeclaration ) );	// use same memory pool
 #if defined(_MSC_VER)
 #pragma warning (pop)
@@ -527,7 +528,7 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
         text->SetCData( true );
     }
     else if ( XMLUtil::StringEqual( p, dtdHeader, dtdHeaderLen ) ) {
-        returnNode = new (_commentPool.Alloc()) XMLUnknown( this );
+        returnNode = new (_commentPool.Alloc()) XMLDtd( this );
         returnNode->_memPool = &_commentPool;
         p += dtdHeaderLen;
     }
@@ -1012,6 +1013,65 @@ bool XMLDeclaration::ShallowEqual( const XMLNode* compare ) const
 
 
 bool XMLDeclaration::Accept( XMLVisitor* visitor ) const
+{
+    return visitor->Visit( *this );
+}
+
+// --------- XMLDtd ---------- //
+
+XMLDtd::XMLDtd( XMLDocument* doc ) : XMLNode( doc )
+{
+}
+
+
+XMLDtd::~XMLDtd()
+{
+}
+
+
+char* XMLDtd::ParseDeep( char* p, StrPair* )
+{
+    // Dtd parses as text.
+    char* start = p;
+
+    // Find closing '>', skipping over any local definition contained between '[' and ']'
+
+    while( *p && *p != '>' && *p != '[') ++p;
+    
+    if ( *p == '[' )
+    {
+      while( *p && *p != ']' ) ++p;
+      while( *p && *p != '>' ) ++p;
+    }
+
+    if ( *p != '>' ) {
+        _document->SetError( XML_ERROR_PARSING_UNKNOWN, start, 0 );
+    }
+
+    _value.Set(start, p, StrPair::NEEDS_NEWLINE_NORMALIZATION );
+    
+    return p+1;
+}
+
+
+XMLNode* XMLDtd::ShallowClone( XMLDocument* doc ) const
+{
+    if ( !doc ) {
+        doc = _document;
+    }
+    XMLDtd* text = doc->NewDtd( Value() );	// fixme: this will always allocate memory. Intern?
+    return text;
+}
+
+
+bool XMLDtd::ShallowEqual( const XMLNode* compare ) const
+{
+    const XMLDtd* unknown = compare->ToDtd();
+    return ( unknown && XMLUtil::StringEqual( unknown->Value(), Value() ));
+}
+
+
+bool XMLDtd::Accept( XMLVisitor* visitor ) const
 {
     return visitor->Visit( *this );
 }
@@ -1689,6 +1749,14 @@ XMLDeclaration* XMLDocument::NewDeclaration( const char* str )
 }
 
 
+XMLDtd* XMLDocument::NewDtd( const char* str )
+{
+    XMLDtd* dtd = new (_commentPool.Alloc()) XMLDtd( this );
+    dtd->_memPool = &_commentPool;
+    dtd->SetValue( str );
+    return dtd;
+}
+
 XMLUnknown* XMLDocument::NewUnknown( const char* str )
 {
     XMLUnknown* unk = new (_commentPool.Alloc()) XMLUnknown( this );
@@ -2233,6 +2301,12 @@ bool XMLPrinter::Visit( const XMLDeclaration& declaration )
     return true;
 }
 
+
+bool XMLPrinter::Visit( const XMLDtd& dtd )
+{
+    PushUnknown( dtd.Value() );
+    return true;
+}
 
 bool XMLPrinter::Visit( const XMLUnknown& unknown )
 {

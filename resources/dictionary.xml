@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE Dictionary [
+  <!-- Test of the ability to parse internally defined DTD -->
+  <!ELEMENT Dictionary    (Storage+)             >
+  <!ELEMENT Storage       (WordFile+, WordList?) >
+  <!ELEMENT Growth         EMPTY                 >
+  <!ELEMENT WordFile      (Growth?)              >
+  <!ELEMENT WordList      (Initialization?)      >
+  <!ELEMENT Initialization EMPTY                 >
+
+  <!ATTLIST Storage         name     CDATA                  #REQUIRED
+                            life     (permanent|temporary)  "permanent"
+                            tested   (true|false)           "true">
+
+  <!ATTLIST WordFile        name     CDATA                  #REQUIRED
+                            size     CDATA                  "500M"
+                            recyled  (true|false)           "true"
+                            tracking (on|off)               "off">
+
+  <!ATTLIST Growth          next     CDATA                  "500M"
+                            max      CDATA                  "unlimited">
+
+  <!ATTLIST WordList        method   (local|dictionary)     "local">
+
+  <!ATTLIST Initialization  method   (dynamic|static)       "dynamic"
+                            size     CDATA                  "1M" >
+
+]>
+
+<Dictionary>
+
+  <Storage name="APP_DATA" life="permanent" tested="true">
+    <WordFile name="/data15/local/task_list01.dict" size="250M" recyled="true" tracking="off">
+    </WordFile>
+    <WordFile name="/data15/local/task_list02.dict" size="250M" recyled="true" tracking="on">
+      <Growth next="500M" max="unlimited"/>
+    </WordFile>
+    <WordList method="local">
+      <Initialization method="dynamic"/>
+    </WordList>
+  </Storage>
+
+
+  <Storage name="APP_INDEX" life="permanent" tested="true">
+    <WordFile name="/data20/local/site_list01.dict" size="250M" recyled="true" tracking="off">
+    </WordFile>
+    <WordFile name="/data20/local/site_list02.dict" size="250M" recyled="true" tracking="on">
+      <Growth next="500M" max="unlimited"/>
+    </WordFile>
+    <WordList method="local">
+      <Initialization method="dynamic"/>
+    </WordList>
+  </Storage>
+
+
+  <Storage name="APP_TEMP" life="temporary" tested="false">
+    <WordFile name="/data23/local/user_words01.dict" size="500M" recyled="true" tracking="on">
+      <Growth next="500M" max="unlimited"/>
+    </WordFile>
+    <WordList method="local">
+      <Initialization method="static" size="1M"/>
+    </WordList>
+  </Storage>
+
+</Dictionary>
