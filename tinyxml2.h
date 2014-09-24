@@ -561,8 +561,8 @@ public:
         return false;
     }
     
-    inline static int IsUTF8Continuation( const char p ) {
-        return p & 0x80;
+    inline static bool IsUTF8Continuation( const char p ) {
+        return ( p & 0x80 ) != 0;
     }
 
     static const char* ReadBOM( const char* p, bool* hasBOM );
