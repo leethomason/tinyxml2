@@ -212,12 +212,13 @@ const char* StrPair::GetStr()
                     else {
                         int i=0;
                         for(; i<NUM_ENTITIES; ++i ) {
-                            if (    strncmp( p+1, entities[i].pattern, entities[i].length ) == 0
-                                    && *(p+entities[i].length+1) == ';' ) {
-                                // Found an entity convert;
-                                *q = entities[i].value;
+                            const Entity& entity = entities[i];
+                            if ( strncmp( p + 1, entity.pattern, entity.length ) == 0
+                                    && *( p + entity.length + 1 ) == ';' ) {
+                                // Found an entity - convert.
+                                *q = entity.value;
                                 ++q;
-                                p += entities[i].length + 2;
+                                p += entity.length + 2;
                                 break;
                             }
                         }
