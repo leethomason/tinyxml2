@@ -812,6 +812,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
         StrPair endTag;
         p = node->ParseDeep( p, &endTag );
         if ( !p ) {
+            node->_memPool->SetTracked();	// created and then immediately deleted.
             DeleteNode( node );
             node = 0;
             if ( !_document->Error() ) {
@@ -1519,7 +1520,13 @@ char* XMLElement::ParseDeep( char* p, StrPair* strPair )
     }
 
     p = ParseAttributes( p );
-    if ( !p || !*p || _closingType ) {
+    if ( _closingType != OPEN ) {
+        return p;
+    }
+    if ( !p || !*p ) {
+        if ( _closingType == OPEN ) {
+            return 0;
+        }
         return p;
     }
 
