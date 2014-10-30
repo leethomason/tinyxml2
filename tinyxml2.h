@@ -261,7 +261,7 @@ public:
         return _mem[i];
     }
 
-    const T& PeekTop() const                            {
+    const T& PeekTop() const            {
         TIXMLASSERT( _size > 0 );
         return _mem[ _size - 1];
     }
@@ -317,6 +317,7 @@ public:
     virtual void* Alloc() = 0;
     virtual void Free( void* ) = 0;
     virtual void SetTracked() = 0;
+    virtual void Clear() = 0;
 };
 
 
@@ -329,10 +330,20 @@ class MemPoolT : public MemPool
 public:
     MemPoolT() : _root(0), _currentAllocs(0), _nAllocs(0), _maxAllocs(0), _nUntracked(0)	{}
     ~MemPoolT() {
+        Clear();
+    }
+    
+    void Clear() {
         // Delete the blocks.
-        for( int i=0; i<_blockPtrs.Size(); ++i ) {
-            delete _blockPtrs[i];
+        while( !_blockPtrs.Empty()) {
+            Block* b  = _blockPtrs.Pop();
+            delete b;
         }
+        _root = 0;
+        _currentAllocs = 0;
+        _nAllocs = 0;
+        _maxAllocs = 0;
+        _nUntracked = 0;
     }
 
     virtual int ItemSize() const	{
@@ -365,6 +376,7 @@ public:
         _nUntracked++;
         return result;
     }
+    
     virtual void Free( void* mem ) {
         if ( !mem ) {
             return;

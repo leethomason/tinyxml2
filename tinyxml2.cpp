@@ -1623,24 +1623,7 @@ XMLDocument::XMLDocument( bool processEntities, Whitespace whitespace ) :
 
 XMLDocument::~XMLDocument()
 {
-    DeleteChildren();
-    delete [] _charBuffer;
-
-#if 0
-    _textPool.Trace( "text" );
-    _elementPool.Trace( "element" );
-    _commentPool.Trace( "comment" );
-    _attributePool.Trace( "attribute" );
-#endif
-
-#ifdef DEBUG
-	if ( Error() == false ) {
-		TIXMLASSERT( _elementPool.CurrentAllocs()   == _elementPool.Untracked() );
-		TIXMLASSERT( _attributePool.CurrentAllocs() == _attributePool.Untracked() );
-		TIXMLASSERT( _textPool.CurrentAllocs()      == _textPool.Untracked() );
-		TIXMLASSERT( _commentPool.CurrentAllocs()   == _commentPool.Untracked() );
-	}
-#endif
+    Clear();
 }
 
 
@@ -1654,6 +1637,22 @@ void XMLDocument::Clear()
 
     delete [] _charBuffer;
     _charBuffer = 0;
+
+#if 0
+    _textPool.Trace( "text" );
+    _elementPool.Trace( "element" );
+    _commentPool.Trace( "comment" );
+    _attributePool.Trace( "attribute" );
+#endif
+    
+#ifdef DEBUG
+    if ( Error() == false ) {
+        TIXMLASSERT( _elementPool.CurrentAllocs()   == _elementPool.Untracked() );
+        TIXMLASSERT( _attributePool.CurrentAllocs() == _attributePool.Untracked() );
+        TIXMLASSERT( _textPool.CurrentAllocs()      == _textPool.Untracked() );
+        TIXMLASSERT( _commentPool.CurrentAllocs()   == _commentPool.Untracked() );
+    }
+#endif
 }
 
 
@@ -1821,6 +1820,16 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
 
     ptrdiff_t delta = p - start;	// skip initial whitespace, BOM, etc.
     ParseDeep( _charBuffer+delta, 0 );
+    if (_errorID) {
+        // clean up now essentially dangling memory.
+        // and the parse fail can put objects in the
+        // pools that are dead and inaccessible.
+        DeleteChildren();
+        _elementPool.Clear();
+        _attributePool.Clear();
+        _textPool.Clear();
+        _commentPool.Clear();
+    }
     return _errorID;
 }
 

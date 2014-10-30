@@ -1363,7 +1363,22 @@ int main( int argc, const char ** argv )
 		*/
 	}
 #endif
-
+    
+    {
+        // Issue #184
+        // If it doesn't assert, it passes. Caused by objects
+        // getting created during parsing which are then
+        // inaccessible in the memory pools.
+        {
+            XMLDocument doc;
+            doc.Parse("<?xml version=\"1.0\" encoding=\"UTF-8\"?><test>");
+        }
+        {
+            XMLDocument doc;
+            doc.Parse("<?xml version=\"1.0\" encoding=\"UTF-8\"?><test>");
+            doc.Clear();
+        }
+    }
 
 
 	// ----------- Performance tracking --------------
