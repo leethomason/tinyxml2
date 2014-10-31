@@ -525,10 +525,8 @@ enum XMLError {
 class XMLUtil
 {
 public:
-    // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
-    // correct, but simple, and usually works.
     static const char* SkipWhiteSpace( const char* p )	{
-        while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<const unsigned char*>(p) ) ) {
+        while( IsWhiteSpace(*p) ) {
             ++p;
         }
         return p;
@@ -536,6 +534,9 @@ public:
     static char* SkipWhiteSpace( char* p )				{
         return const_cast<char*>( SkipWhiteSpace( const_cast<const char*>(p) ) );
     }
+
+    // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
+    // correct, but simple, and usually works.
     static bool IsWhiteSpace( char p )					{
         return !IsUTF8Continuation(p) && isspace( static_cast<unsigned char>(p) );
     }
