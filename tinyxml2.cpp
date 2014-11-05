@@ -813,7 +813,6 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
         p = node->ParseDeep( p, &endTag );
         if ( !p ) {
             DeleteNode( node );
-            node = 0;
             if ( !_document->Error() ) {
                 _document->SetError( XML_ERROR_PARSING, 0, 0 );
             }
@@ -821,43 +820,28 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
         }
 
         XMLElement* ele = node->ToElement();
-        // We read the end tag. Return it to the parent.
-        if ( ele && ele->ClosingType() == XMLElement::CLOSING ) {
-            if ( parentEnd ) {
-                *parentEnd = ele->_value;
+        if ( ele ) {
+            // We read the end tag. Return it to the parent.
+            if ( ele->ClosingType() == XMLElement::CLOSING ) {
+                if ( parentEnd ) {
+                    *parentEnd = ele->_value;
+                }
+                node->_memPool->SetTracked();	// created and then immediately deleted.
+                DeleteNode( node );
+                return p;
             }
-			node->_memPool->SetTracked();	// created and then immediately deleted.
-            DeleteNode( node );
-            return p;
+
+            // Handle an end tag returned to this level.
+            // And handle a bunch of annoying errors.
+            if ( endTag.Empty() == ( ele->ClosingType() == XMLElement::OPEN ) ||
+                    !endTag.Empty() && !XMLUtil::StringEqual( endTag.GetStr(), node->Value() ) ) {
+                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
+                DeleteNode( node );
+                break;
+            }
         }
 
-        // Handle an end tag returned to this level.
-        // And handle a bunch of annoying errors.
-        if ( ele ) {
-            bool mismatch = false;
-            if ( endTag.Empty() && ele->ClosingType() == XMLElement::OPEN ) {
-                mismatch = true;
-            }
-            else if ( !endTag.Empty() && ele->ClosingType() != XMLElement::OPEN ) {
-                mismatch = true;
-            }
-            else if ( !endTag.Empty() ) {
-                if ( !XMLUtil::StringEqual( endTag.GetStr(), node->Value() )) {
-                    mismatch = true;
-                }
-            }
-            if ( mismatch ) {
-                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
-                p = 0;
-            }
-        }
-        if ( p == 0 ) {
-            DeleteNode( node );
-            node = 0;
-        }
-        if ( node ) {
-            this->InsertEndChild( node );
-        }
+        this->InsertEndChild( node );
     }
     return 0;
 }
@@ -883,19 +867,18 @@ char* XMLText::ParseDeep( char* p, StrPair* )
         }
         return p;
     }
-    else {
-        int flags = _document->ProcessEntities() ? StrPair::TEXT_ELEMENT : StrPair::TEXT_ELEMENT_LEAVE_ENTITIES;
-        if ( _document->WhitespaceMode() == COLLAPSE_WHITESPACE ) {
-            flags |= StrPair::COLLAPSE_WHITESPACE;
-        }
 
-        p = _value.ParseText( p, "<", flags );
-        if ( !p ) {
-            _document->SetError( XML_ERROR_PARSING_TEXT, start, 0 );
-        }
-        if ( p && *p ) {
-            return p-1;
-        }
+    int flags = _document->ProcessEntities() ? StrPair::TEXT_ELEMENT : StrPair::TEXT_ELEMENT_LEAVE_ENTITIES;
+    if ( _document->WhitespaceMode() == COLLAPSE_WHITESPACE ) {
+        flags |= StrPair::COLLAPSE_WHITESPACE;
+    }
+
+    p = _value.ParseText( p, "<", flags );
+    if ( !p ) {
+        _document->SetError( XML_ERROR_PARSING_TEXT, start, 0 );
+    }
+    else if ( *p ) {
+        return p-1;
     }
     return 0;
 }
@@ -1089,21 +1072,19 @@ char* XMLAttribute::ParseDeep( char* p, bool processEntities )
 
     // Skip white space before =
     p = XMLUtil::SkipWhiteSpace( p );
-    if ( !p || *p != '=' ) {
+    if ( *p != '=' ) {
         return 0;
     }
 
-    ++p;	// move up to opening quote
-    p = XMLUtil::SkipWhiteSpace( p );
+    // move up to opening quote
+    p = XMLUtil::SkipWhiteSpace( p+1 );
     if ( *p != '\"' && *p != '\'' ) {
         return 0;
     }
 
     char endTag[2] = { *p, 0 };
-    ++p;	// move past opening quote
 
-    p = _value.ParseText( p, endTag, processEntities ? StrPair::ATTRIBUTE_VALUE : StrPair::ATTRIBUTE_VALUE_LEAVE_ENTITIES );
-    return p;
+    return _value.ParseText( p+1, endTag, processEntities ? StrPair::ATTRIBUTE_VALUE : StrPair::ATTRIBUTE_VALUE_LEAVE_ENTITIES );
 }
 
 
@@ -1523,8 +1504,7 @@ char* XMLElement::ParseDeep( char* p, StrPair* strPair )
         return p;
     }
 
-    p = XMLNode::ParseDeep( p, strPair );
-    return p;
+    return XMLNode::ParseDeep( p, strPair );
 }
 
 
