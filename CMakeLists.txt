@@ -53,10 +53,10 @@ set_target_properties(tinyxml2 PROPERTIES
 	VERSION "${GENERIC_LIB_VERSION}"
 	SOVERSION "${GENERIC_LIB_SOVERSION}")
 
-add_executable(test xmltest.cpp)
-add_dependencies(test tinyxml2)
-add_dependencies(test ${TARGET_DATA_COPY})
-target_link_libraries(test tinyxml2)
+add_executable(xmltest xmltest.cpp)
+add_dependencies(xmltest tinyxml2)
+add_dependencies(xmltest ${TARGET_DATA_COPY})
+target_link_libraries(xmltest tinyxml2)
 
 
 install(TARGETS tinyxml2
@@ -76,4 +76,4 @@ endforeach()
 configure_file(tinyxml2.pc.in tinyxml2.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
-#add_test(test ${SAMPLE_NAME} COMMAND $<TARGET_FILE:${SAMPLE_NAME}>)
+#add_test(xmltest ${SAMPLE_NAME} COMMAND $<TARGET_FILE:${SAMPLE_NAME}>)
