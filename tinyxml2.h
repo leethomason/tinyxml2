@@ -187,8 +187,6 @@ public:
     void TransferTo( StrPair& other );
 
 private:
-	void operator=(const StrPair& rhs);
-
     void Reset();
     void CollapseWhitespace();
 
