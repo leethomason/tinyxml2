@@ -279,6 +279,8 @@ int main( int argc, const char ** argv )
 {
 	#if defined( _MSC_VER ) && defined( DEBUG )
 		_CrtMemCheckpoint( &startMemState );
+		// Enable MS Visual C++ debug heap memory leaks dump on exit
+		_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 	#endif
 
 	#if defined(_MSC_VER) || defined(MINGW32) || defined(__MINGW32__)
@@ -1371,7 +1373,22 @@ int main( int argc, const char ** argv )
 		*/
 	}
 #endif
-
+    
+    {
+        // Issue #184
+        // If it doesn't assert, it passes. Caused by objects
+        // getting created during parsing which are then
+        // inaccessible in the memory pools.
+        {
+            XMLDocument doc;
+            doc.Parse("<?xml version=\"1.0\" encoding=\"UTF-8\"?><test>");
+        }
+        {
+            XMLDocument doc;
+            doc.Parse("<?xml version=\"1.0\" encoding=\"UTF-8\"?><test>");
+            doc.Clear();
+        }
+    }
 
 
 	// ----------- Performance tracking --------------

@@ -46,33 +46,24 @@ endif(MSVC)
 
 ################################
 # Add targets
-set(BUILD_STATIC_LIBS ON CACHE BOOL "Set to ON to build static libraries")
-if(BUILD_STATIC_LIBS)
-	add_library(tinyxml2static STATIC tinyxml2.cpp tinyxml2.h)
-	set_target_properties(tinyxml2static PROPERTIES OUTPUT_NAME tinyxml2)
-endif(BUILD_STATIC_LIBS)
-add_library(tinyxml2 SHARED tinyxml2.cpp tinyxml2.h)
+option(BUILD_SHARED_LIBS "build shared or static libraries" ON)
+add_library(tinyxml2 tinyxml2.cpp tinyxml2.h)
 set_target_properties(tinyxml2 PROPERTIES
         COMPILE_DEFINITIONS "TINYXML2_EXPORT"
 	VERSION "${GENERIC_LIB_VERSION}"
 	SOVERSION "${GENERIC_LIB_SOVERSION}")
 
-add_executable(test xmltest.cpp)
-add_dependencies(test tinyxml2)
-add_dependencies(test ${TARGET_DATA_COPY})
-target_link_libraries(test tinyxml2)
+add_executable(xmltest xmltest.cpp)
+add_dependencies(xmltest tinyxml2)
+add_dependencies(xmltest ${TARGET_DATA_COPY})
+target_link_libraries(xmltest tinyxml2)
 
 
-if(BUILD_STATIC_LIBS)
-	install(TARGETS tinyxml2 tinyxml2static
-		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-else(BUILD_STATIC_LIBS)
-	install(TARGETS tinyxml2
-		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-endif(BUILD_STATIC_LIBS)
+install(TARGETS tinyxml2
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
 install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 foreach(p LIB INCLUDE)
@@ -85,4 +76,4 @@ endforeach()
 configure_file(tinyxml2.pc.in tinyxml2.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
-#add_test(test ${SAMPLE_NAME} COMMAND $<TARGET_FILE:${SAMPLE_NAME}>)
+#add_test(xmltest ${SAMPLE_NAME} COMMAND $<TARGET_FILE:${SAMPLE_NAME}>)

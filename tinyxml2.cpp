@@ -212,12 +212,13 @@ const char* StrPair::GetStr()
                     else {
                         int i=0;
                         for(; i<NUM_ENTITIES; ++i ) {
-                            if (    strncmp( p+1, entities[i].pattern, entities[i].length ) == 0
-                                    && *(p+entities[i].length+1) == ';' ) {
-                                // Found an entity convert;
-                                *q = entities[i].value;
+                            const Entity& entity = entities[i];
+                            if ( strncmp( p + 1, entity.pattern, entity.length ) == 0
+                                    && *( p + entity.length + 1 ) == ';' ) {
+                                // Found an entity - convert.
+                                *q = entity.value;
                                 ++q;
-                                p += entities[i].length + 2;
+                                p += entity.length + 2;
                                 break;
                             }
                         }
@@ -1257,7 +1258,7 @@ const char* XMLElement::Attribute( const char* name, const char* value ) const
 const char* XMLElement::GetText() const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
-        return FirstChild()->ToText()->Value();
+        return FirstChild()->Value();
     }
     return 0;
 }
@@ -1317,7 +1318,7 @@ void XMLElement::SetText( double v )
 XMLError XMLElement::QueryIntText( int* ival ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
-        const char* t = FirstChild()->ToText()->Value();
+        const char* t = FirstChild()->Value();
         if ( XMLUtil::ToInt( t, ival ) ) {
             return XML_SUCCESS;
         }
@@ -1330,7 +1331,7 @@ XMLError XMLElement::QueryIntText( int* ival ) const
 XMLError XMLElement::QueryUnsignedText( unsigned* uval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
-        const char* t = FirstChild()->ToText()->Value();
+        const char* t = FirstChild()->Value();
         if ( XMLUtil::ToUnsigned( t, uval ) ) {
             return XML_SUCCESS;
         }
@@ -1343,7 +1344,7 @@ XMLError XMLElement::QueryUnsignedText( unsigned* uval ) const
 XMLError XMLElement::QueryBoolText( bool* bval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
-        const char* t = FirstChild()->ToText()->Value();
+        const char* t = FirstChild()->Value();
         if ( XMLUtil::ToBool( t, bval ) ) {
             return XML_SUCCESS;
         }
@@ -1356,7 +1357,7 @@ XMLError XMLElement::QueryBoolText( bool* bval ) const
 XMLError XMLElement::QueryDoubleText( double* dval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
-        const char* t = FirstChild()->ToText()->Value();
+        const char* t = FirstChild()->Value();
         if ( XMLUtil::ToDouble( t, dval ) ) {
             return XML_SUCCESS;
         }
@@ -1369,7 +1370,7 @@ XMLError XMLElement::QueryDoubleText( double* dval ) const
 XMLError XMLElement::QueryFloatText( float* fval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
-        const char* t = FirstChild()->ToText()->Value();
+        const char* t = FirstChild()->Value();
         if ( XMLUtil::ToFloat( t, fval ) ) {
             return XML_SUCCESS;
         }
@@ -1622,24 +1623,7 @@ XMLDocument::XMLDocument( bool processEntities, Whitespace whitespace ) :
 
 XMLDocument::~XMLDocument()
 {
-    DeleteChildren();
-    delete [] _charBuffer;
-
-#if 0
-    _textPool.Trace( "text" );
-    _elementPool.Trace( "element" );
-    _commentPool.Trace( "comment" );
-    _attributePool.Trace( "attribute" );
-#endif
-
-#ifdef DEBUG
-	if ( Error() == false ) {
-		TIXMLASSERT( _elementPool.CurrentAllocs()   == _elementPool.Untracked() );
-		TIXMLASSERT( _attributePool.CurrentAllocs() == _attributePool.Untracked() );
-		TIXMLASSERT( _textPool.CurrentAllocs()      == _textPool.Untracked() );
-		TIXMLASSERT( _commentPool.CurrentAllocs()   == _commentPool.Untracked() );
-	}
-#endif
+    Clear();
 }
 
 
@@ -1653,6 +1637,22 @@ void XMLDocument::Clear()
 
     delete [] _charBuffer;
     _charBuffer = 0;
+
+#if 0
+    _textPool.Trace( "text" );
+    _elementPool.Trace( "element" );
+    _commentPool.Trace( "comment" );
+    _attributePool.Trace( "attribute" );
+#endif
+    
+#ifdef DEBUG
+    if ( Error() == false ) {
+        TIXMLASSERT( _elementPool.CurrentAllocs()   == _elementPool.Untracked() );
+        TIXMLASSERT( _attributePool.CurrentAllocs() == _attributePool.Untracked() );
+        TIXMLASSERT( _textPool.CurrentAllocs()      == _textPool.Untracked() );
+        TIXMLASSERT( _commentPool.CurrentAllocs()   == _commentPool.Untracked() );
+    }
+#endif
 }
 
 
@@ -1820,6 +1820,16 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
 
     ptrdiff_t delta = p - start;	// skip initial whitespace, BOM, etc.
     ParseDeep( _charBuffer+delta, 0 );
+    if (_errorID) {
+        // clean up now essentially dangling memory.
+        // and the parse fail can put objects in the
+        // pools that are dead and inaccessible.
+        DeleteChildren();
+        _elementPool.Clear();
+        _attributePool.Clear();
+        _textPool.Clear();
+        _commentPool.Clear();
+    }
     return _errorID;
 }
 
@@ -1836,6 +1846,7 @@ void XMLDocument::Print( XMLPrinter* streamer ) const
 
 void XMLDocument::SetError( XMLError error, const char* str1, const char* str2 )
 {
+    TIXMLASSERT( error >= 0 && error < XML_ERROR_COUNT );
     _errorID = error;
     _errorStr1 = str1;
     _errorStr2 = str2;
@@ -1843,7 +1854,7 @@ void XMLDocument::SetError( XMLError error, const char* str1, const char* str2 )
 
 const char* XMLDocument::ErrorName() const
 {
-	TIXMLASSERT(_errorID >= 0 && _errorID < XML_ERROR_COUNT );
+	TIXMLASSERT( _errorID >= 0 && _errorID < XML_ERROR_COUNT );
 	return _errorNames[_errorID];
 }
 
