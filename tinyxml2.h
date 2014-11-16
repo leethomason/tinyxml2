@@ -496,7 +496,7 @@ public:
     }
 };
 
-// WARNING: must match XMLErrorNames[]
+// WARNING: must match XMLDocument::_errorNames[]
 enum XMLError {
     XML_SUCCESS = 0,
     XML_NO_ERROR = 0,
