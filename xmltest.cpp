@@ -1329,6 +1329,14 @@ int main( int argc, const char ** argv )
 		doc.Print();
 	}
 
+	{
+		// Test that it doesn't crash.
+		const char* xml = "<?xml version=\"1.0\"?><root><sample><field0><1</field0><field1>2</field1></sample></root>";
+		XMLDocument doc;
+		doc.Parse(xml);
+		doc.PrintError();
+	}
+
 #if 1
 		// the question being explored is what kind of print to use: 
 		// https://github.com/leethomason/tinyxml2/issues/63

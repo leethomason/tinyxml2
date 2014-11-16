@@ -186,6 +186,8 @@ public:
     char* ParseName( char* in );
 
 private:
+	void operator=(const StrPair& rhs);
+
     void Reset();
     void CollapseWhitespace();
 
