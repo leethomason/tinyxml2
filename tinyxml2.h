@@ -14,7 +14,6 @@ not claim that you wrote the original software. If you use this
 software in a product, an acknowledgment in the product documentation
 would be appreciated but is not required.
 
-
 2. Altered source versions must be plainly marked as such, and
 must not be misrepresented as being the original software.
 
@@ -185,6 +184,8 @@ public:
     char* ParseText( char* in, const char* endTag, int strFlags );
     char* ParseName( char* in );
 
+    void TransferTo( StrPair& other );
+
 private:
 	void operator=(const StrPair& rhs);
 
@@ -200,6 +201,9 @@ private:
     int     _flags;
     char*   _start;
     char*   _end;
+
+    StrPair( const StrPair& other );	// not supported
+    void operator=( StrPair& other );	// not supported, use TransferTo()
 };
 
 
@@ -263,7 +267,7 @@ public:
         return _mem[i];
     }
 
-    const T& PeekTop() const                            {
+    const T& PeekTop() const            {
         TIXMLASSERT( _size > 0 );
         return _mem[ _size - 1];
     }
@@ -319,6 +323,7 @@ public:
     virtual void* Alloc() = 0;
     virtual void Free( void* ) = 0;
     virtual void SetTracked() = 0;
+    virtual void Clear() = 0;
 };
 
 
@@ -331,10 +336,20 @@ class MemPoolT : public MemPool
 public:
     MemPoolT() : _root(0), _currentAllocs(0), _nAllocs(0), _maxAllocs(0), _nUntracked(0)	{}
     ~MemPoolT() {
+        Clear();
+    }
+    
+    void Clear() {
         // Delete the blocks.
-        for( int i=0; i<_blockPtrs.Size(); ++i ) {
-            delete _blockPtrs[i];
+        while( !_blockPtrs.Empty()) {
+            Block* b  = _blockPtrs.Pop();
+            delete b;
         }
+        _root = 0;
+        _currentAllocs = 0;
+        _nAllocs = 0;
+        _maxAllocs = 0;
+        _nUntracked = 0;
     }
 
     virtual int ItemSize() const	{
@@ -367,6 +382,7 @@ public:
         _nUntracked++;
         return result;
     }
+    
     virtual void Free( void* mem ) {
         if ( !mem ) {
             return;
@@ -516,10 +532,8 @@ enum XMLError {
 class XMLUtil
 {
 public:
-    // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
-    // correct, but simple, and usually works.
     static const char* SkipWhiteSpace( const char* p )	{
-        while( !IsUTF8Continuation(*p) && isspace( *reinterpret_cast<const unsigned char*>(p) ) ) {
+        while( IsWhiteSpace(*p) ) {
             ++p;
         }
         return p;
@@ -527,6 +541,9 @@ public:
     static char* SkipWhiteSpace( char* p )				{
         return const_cast<char*>( SkipWhiteSpace( const_cast<const char*>(p) ) );
     }
+
+    // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
+    // correct, but simple, and usually works.
     static bool IsWhiteSpace( char p )					{
         return !IsUTF8Continuation(p) && isspace( static_cast<unsigned char>(p) );
     }
