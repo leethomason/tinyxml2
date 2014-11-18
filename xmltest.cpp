@@ -296,12 +296,12 @@ int main( int argc, const char ** argv )
 
 	if ( argc > 1 ) {
 		XMLDocument* doc = new XMLDocument();
-		clock_t startTime = clock();
+		clock_t startTime = std::clock();
 		doc->LoadFile( argv[1] );
-		clock_t loadTime = clock();
+ 		clock_t loadTime = std::clock();
 		int errorID = doc->ErrorID();
 		delete doc; doc = 0;
-		clock_t deleteTime = clock();
+ 		clock_t deleteTime = std::clock();
 
 		printf( "Test file '%s' loaded. ErrorID=%d\n", argv[1], errorID );
 		if ( !errorID ) {
@@ -1403,7 +1403,7 @@ int main( int argc, const char ** argv )
 #if defined( _MSC_VER )
 		QueryPerformanceCounter( (LARGE_INTEGER*) &start );
 #else
-		clock_t cstart = clock();
+		clock_t cstart = std::clock();
 #endif
 		static const int COUNT = 10;
 		for( int i=0; i<COUNT; ++i ) {
@@ -1413,7 +1413,7 @@ int main( int argc, const char ** argv )
 #if defined( _MSC_VER )
 		QueryPerformanceCounter( (LARGE_INTEGER*) &end );
 #else
-		clock_t cend = clock();
+		clock_t cend = std::clock();
 #endif
 
 		delete [] mem;
