@@ -184,9 +184,9 @@ public:
     char* ParseText( char* in, const char* endTag, int strFlags );
     char* ParseName( char* in );
 
-private:
-	void operator=(const StrPair& rhs);
+    void TransferTo( StrPair* other );
 
+private:
     void Reset();
     void CollapseWhitespace();
 
@@ -199,6 +199,9 @@ private:
     int     _flags;
     char*   _start;
     char*   _end;
+
+    StrPair( const StrPair& other );	// not supported
+    void operator=( StrPair& other );	// not supported, use TransferTo()
 };
 
 
