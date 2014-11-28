@@ -1654,6 +1654,9 @@ void XMLDocument::Clear()
 {
     DeleteChildren();
 
+#ifdef DEBUG
+    const bool hadError = Error();
+#endif
     _errorID = XML_NO_ERROR;
     _errorStr1 = 0;
     _errorStr2 = 0;
@@ -1669,7 +1672,7 @@ void XMLDocument::Clear()
 #endif
     
 #ifdef DEBUG
-    if ( Error() == false ) {
+    if ( !hadError ) {
         TIXMLASSERT( _elementPool.CurrentAllocs()   == _elementPool.Untracked() );
         TIXMLASSERT( _attributePool.CurrentAllocs() == _attributePool.Untracked() );
         TIXMLASSERT( _textPool.CurrentAllocs()      == _textPool.Untracked() );
