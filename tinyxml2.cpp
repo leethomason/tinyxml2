@@ -70,23 +70,23 @@ StrPair::~StrPair()
 }
 
 
-void StrPair::TransferTo( StrPair& other )
+void StrPair::TransferTo( StrPair* other )
 {
-    if ( this == &other ) {
+    if ( this == other ) {
         return;
     }
     // This in effect implements the assignment operator by "moving"
     // ownership (as in auto_ptr).
 
-    TIXMLASSERT( other._flags == 0 );
-    TIXMLASSERT( other._start == 0 );
-    TIXMLASSERT( other._end == 0 );
+    TIXMLASSERT( other->_flags == 0 );
+    TIXMLASSERT( other->_start == 0 );
+    TIXMLASSERT( other->_end == 0 );
 
-    other.Reset();
+    other->Reset();
 
-    other._flags = _flags;
-    other._start = _start;
-    other._end = _end;
+    other->_flags = _flags;
+    other->_start = _start;
+    other->_end = _end;
 
     _flags = 0;
     _start = 0;
@@ -847,7 +847,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
         // We read the end tag. Return it to the parent.
         if ( ele && ele->ClosingType() == XMLElement::CLOSING ) {
             if ( parentEnd ) {
-                ele->_value.TransferTo( *parentEnd );
+                ele->_value.TransferTo( parentEnd );
             }
 			node->_memPool->SetTracked();	// created and then immediately deleted.
             DeleteNode( node );

@@ -184,7 +184,7 @@ public:
     char* ParseText( char* in, const char* endTag, int strFlags );
     char* ParseName( char* in );
 
-    void TransferTo( StrPair& other );
+    void TransferTo( StrPair* other );
 
 private:
     void Reset();
