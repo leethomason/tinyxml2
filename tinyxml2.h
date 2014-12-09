@@ -1666,6 +1666,8 @@ public:
     	It will be unlinked from the DOM.
     */
     void DeleteNode( XMLNode* node )	{
+        TIXMLASSERT( node );
+        TIXMLASSERT( node->_parent );
         node->_parent->DeleteChild( node );
     }
 
