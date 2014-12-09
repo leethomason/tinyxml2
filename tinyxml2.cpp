@@ -1835,7 +1835,7 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
 
     ptrdiff_t delta = p - start;	// skip initial whitespace, BOM, etc.
     ParseDeep( _charBuffer+delta, 0 );
-    if (_errorID) {
+    if ( Error() ) {
         // clean up now essentially dangling memory.
         // and the parse fail can put objects in the
         // pools that are dead and inaccessible.
@@ -1875,7 +1875,7 @@ const char* XMLDocument::ErrorName() const
 
 void XMLDocument::PrintError() const
 {
-    if ( _errorID ) {
+    if ( Error() ) {
         static const int LEN = 20;
         char buf1[LEN] = { 0 };
         char buf2[LEN] = { 0 };
