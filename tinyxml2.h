@@ -134,6 +134,7 @@ class XMLComment;
 class XMLText;
 class XMLDeclaration;
 class XMLUnknown;
+class XMLDtd;
 class XMLPrinter;
 
 /*
@@ -490,6 +491,10 @@ public:
     virtual bool Visit( const XMLComment& /*comment*/ )				{
         return true;
     }
+    /// Visit a DTD node.
+    virtual bool Visit( const XMLDtd& /*unknown*/ )				{
+        return true;
+    }
     /// Visit an unknown node.
     virtual bool Visit( const XMLUnknown& /*unknown*/ )				{
         return true;
@@ -661,6 +666,11 @@ public:
     virtual XMLDeclaration*	ToDeclaration()	{
         return 0;
     }
+    /// Safely cast to an DTD, or null.
+    virtual XMLDtd*		ToDtd()		{
+        return 0;
+    }
+
     /// Safely cast to an Unknown, or null.
     virtual XMLUnknown*		ToUnknown()		{
         return 0;
@@ -681,6 +691,10 @@ public:
     virtual const XMLDeclaration*	ToDeclaration() const	{
         return 0;
     }
+    virtual const XMLDtd*		ToDtd() const		{
+        return 0;
+    }
+
     virtual const XMLUnknown*		ToUnknown() const		{
         return 0;
     }
@@ -1006,12 +1020,41 @@ protected:
 };
 
 
+/** The <!DOCTYPE> structure can contain internal definition that
+  may contains other <!xxx ...> entities.  (Otherwise, these could
+  be handled as XMLUnknown nodes.) 
+	It will be written back to the XML, unchanged, when the file
+	is saved.
+*/
+
+class TINYXML2_LIB XMLDtd : public XMLNode
+{
+    friend class XMLDocument;
+public:
+    virtual XMLDtd*	ToDtd()					{
+        return this;
+    }
+    virtual const XMLDtd* ToDtd() const		{
+        return this;
+    }
+
+    virtual bool Accept( XMLVisitor* visitor ) const;
+
+    char* ParseDeep( char*, StrPair* endTag );
+    virtual XMLNode* ShallowClone( XMLDocument* document ) const;
+    virtual bool ShallowEqual( const XMLNode* compare ) const;
+
+protected:
+    XMLDtd( XMLDocument* doc );
+    virtual ~XMLDtd();
+    XMLDtd( const XMLDtd& );	// not supported
+    XMLDtd& operator=( const XMLDtd& );	// not supported
+};
+
 /** Any tag that TinyXML-2 doesn't recognize is saved as an
 	unknown. It is a tag of text, but should not be modified.
 	It will be written back to the XML, unchanged, when the file
 	is saved.
-
-	DTD tags get thrown into XMLUnknowns.
 */
 class TINYXML2_LIB XMLUnknown : public XMLNode
 {
@@ -1655,6 +1698,13 @@ public:
     */
     XMLDeclaration* NewDeclaration( const char* text=0 );
     /**
+    	Create a new DTD associated with
+    	this Document. The memory for the object
+    	is managed by the Document.
+    */
+    XMLDtd* NewDtd( const char* text );
+
+    /**
     	Create a new Unknown associated with
     	this Document. The memory for the object
     	is managed by the Document.
@@ -1849,6 +1899,10 @@ public:
     XMLText* ToText() 							{
         return ( ( _node == 0 ) ? 0 : _node->ToText() );
     }
+    /// Safe cast to XMLDtd. This can return null.
+    XMLDtd* ToDtd() 					{
+        return ( ( _node == 0 ) ? 0 : _node->ToDtd() );
+    }
     /// Safe cast to XMLUnknown. This can return null.
     XMLUnknown* ToUnknown() 					{
         return ( ( _node == 0 ) ? 0 : _node->ToUnknown() );
@@ -1919,6 +1973,9 @@ public:
     }
     const XMLText* ToText() const				{
         return ( ( _node == 0 ) ? 0 : _node->ToText() );
+    }
+    const XMLDtd* ToDtd() const			{
+        return ( ( _node == 0 ) ? 0 : _node->ToDtd() );
     }
     const XMLUnknown* ToUnknown() const			{
         return ( ( _node == 0 ) ? 0 : _node->ToUnknown() );
@@ -2031,6 +2088,7 @@ public:
     virtual bool Visit( const XMLText& text );
     virtual bool Visit( const XMLComment& comment );
     virtual bool Visit( const XMLDeclaration& declaration );
+    virtual bool Visit( const XMLDtd& dtd);
     virtual bool Visit( const XMLUnknown& unknown );
 
     /**

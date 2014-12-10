@@ -91,10 +91,11 @@ void NullLineEndings( char* p )
 }
 
 
-int example_1()
+int example_1(const char *xml_file)
 {
 	XMLDocument doc;
-	doc.LoadFile( "resources/dream.xml" );
+
+	doc.LoadFile( xml_file );
 
 	return doc.ErrorID();
 }
@@ -327,7 +328,8 @@ int main( int argc, const char ** argv )
 	}
 	fclose( fp );
 
-	XMLTest( "Example-1", 0, example_1() );
+	XMLTest( "Example-1", 0, example_1("resources/dream.xml") );
+	XMLTest( "Example-1", 0, example_1("resources/dictionary.xml") );
 	XMLTest( "Example-2", 0, example_2() );
 	XMLTest( "Example-3", 0, example_3() );
 	XMLTest( "Example-4", true, example_4() );
@@ -458,9 +460,9 @@ int main( int argc, const char ** argv )
 
 		XMLTest( "Dream", "xml version=\"1.0\"",
 						  doc.FirstChild()->ToDeclaration()->Value() );
-		XMLTest( "Dream", true, doc.FirstChild()->NextSibling()->ToUnknown() ? true : false );
+		XMLTest( "Dream", true, doc.FirstChild()->NextSibling()->ToDtd() ? true : false );
 		XMLTest( "Dream", "DOCTYPE PLAY SYSTEM \"play.dtd\"",
-						  doc.FirstChild()->NextSibling()->ToUnknown()->Value() );
+						  doc.FirstChild()->NextSibling()->ToDtd()->Value() );
 		XMLTest( "Dream", "And Robin shall restore amends.",
 						  doc.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
 		XMLTest( "Dream", "And Robin shall restore amends.",
@@ -470,13 +472,35 @@ int main( int argc, const char ** argv )
 		doc2.LoadFile( "resources/out/dreamout.xml" );
 		XMLTest( "Dream-out", "xml version=\"1.0\"",
 						  doc2.FirstChild()->ToDeclaration()->Value() );
-		XMLTest( "Dream-out", true, doc2.FirstChild()->NextSibling()->ToUnknown() ? true : false );
+		XMLTest( "Dream-out", true, doc2.FirstChild()->NextSibling()->ToDtd() ? true : false );
 		XMLTest( "Dream-out", "DOCTYPE PLAY SYSTEM \"play.dtd\"",
-						  doc2.FirstChild()->NextSibling()->ToUnknown()->Value() );
+						  doc2.FirstChild()->NextSibling()->ToDtd()->Value() );
 		XMLTest( "Dream-out", "And Robin shall restore amends.",
 						  doc2.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText() );
 
 		//gNewTotal = gNew - newStart;
+	}
+	{
+		// Test: Dictionary
+		XMLDocument doc;
+		doc.LoadFile( "resources/dictionary.xml" );
+
+		doc.SaveFile( "resources/out/dictionaryout.xml" );
+		doc.PrintError();
+
+		XMLTest( "Dictionary", "xml version=\"1.0\" encoding=\"UTF-8\"",
+						  doc.FirstChild()->ToDeclaration()->Value() );
+		XMLTest( "Dictionary", true, doc.FirstChild()->NextSibling()->ToDtd() ? true : false );
+    XMLTest( "Dictionary", "500M",
+             doc.LastChild()->LastChild()->FirstChild()->ToElement()->Attribute("size") );
+
+		XMLDocument doc2;
+		doc2.LoadFile( "resources/out/dictionaryout.xml" );
+		XMLTest( "Dictionary-out", "xml version=\"1.0\" encoding=\"UTF-8\"",
+						  doc2.FirstChild()->ToDeclaration()->Value() );
+		XMLTest( "Dictionary-out", true, doc2.FirstChild()->NextSibling()->ToDtd() ? true : false );
+    XMLTest( "Dictionary", "500M",
+             doc2.LastChild()->LastChild()->FirstChild()->ToElement()->Attribute("size") );
 	}
 
 
@@ -825,7 +849,7 @@ int main( int argc, const char ** argv )
 		doc.LoadFile( "resources/out/test7.xml" );
 		doc.Print();
 
-		const XMLUnknown* decl = doc.FirstChild()->NextSibling()->ToUnknown();
+		const XMLDtd* decl = doc.FirstChild()->NextSibling()->ToDtd();
 		XMLTest( "Correct value of unknown.", "DOCTYPE PLAY SYSTEM 'play.dtd'", decl->Value() );
 
 	}
