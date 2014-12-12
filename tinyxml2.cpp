@@ -669,6 +669,7 @@ void XMLNode::DeleteChild( XMLNode* node )
 
 XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 {
+    TIXMLASSERT( addThis );
     if ( addThis->_document != _document ) {
         TIXMLASSERT( false );
         return 0;
@@ -702,6 +703,7 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 
 XMLNode* XMLNode::InsertFirstChild( XMLNode* addThis )
 {
+    TIXMLASSERT( addThis );
     if ( addThis->_document != _document ) {
         TIXMLASSERT( false );
         return 0;
