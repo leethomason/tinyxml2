@@ -855,7 +855,6 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
         p = node->ParseDeep( p, &endTag );
         if ( !p ) {
             DeleteNode( node );
-            node = 0;
             if ( !_document->Error() ) {
                 _document->SetError( XML_ERROR_PARSING, 0, 0 );
             }
@@ -890,16 +889,11 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
             }
             if ( mismatch ) {
                 _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
-                p = 0;
+                DeleteNode( node );
+                break;
             }
         }
-        if ( p == 0 ) {
-            DeleteNode( node );
-            node = 0;
-        }
-        if ( node ) {
-            this->InsertEndChild( node );
-        }
+        InsertEndChild( node );
     }
     return 0;
 }
