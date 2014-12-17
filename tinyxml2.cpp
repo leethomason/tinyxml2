@@ -1967,9 +1967,9 @@ XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :
             _entityFlag[ (int)entities[i].value ] = true;
         }
     }
-    _restrictedEntityFlag['&'] = true;
-    _restrictedEntityFlag['<'] = true;
-    _restrictedEntityFlag['>'] = true;	// not required, but consistency is nice
+    _restrictedEntityFlag[(int)'&'] = true;
+    _restrictedEntityFlag[(int)'<'] = true;
+    _restrictedEntityFlag[(int)'>'] = true;	// not required, but consistency is nice
     _buffer.Push( 0 );
 }
 
