@@ -1765,6 +1765,24 @@ static FILE* callfopen( const char* filepath, const char* mode )
 #endif
     return fp;
 }
+    
+void XMLDocument::DeleteNode( XMLNode* node )	{
+    TIXMLASSERT( node );
+    TIXMLASSERT(node->_document == this );
+    if (node->_parent) {
+        node->_parent->DeleteChild( node );
+    }
+    else {
+        // Isn't in the tree.
+        // Use the parent delete.
+        // Also, we need to mark it tracked: we 'know'
+        // it was never used.
+        node->_memPool->SetTracked();
+        // Call the static XMLNode version:
+        XMLNode::DeleteNode(node);
+    }
+}
+
 
 XMLError XMLDocument::LoadFile( const char* filename )
 {
@@ -1949,9 +1967,9 @@ XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :
             _entityFlag[ (int)entities[i].value ] = true;
         }
     }
-    _restrictedEntityFlag[(int)'&'] = true;
-    _restrictedEntityFlag[(int)'<'] = true;
-    _restrictedEntityFlag[(int)'>'] = true;	// not required, but consistency is nice
+    _restrictedEntityFlag['&'] = true;
+    _restrictedEntityFlag['<'] = true;
+    _restrictedEntityFlag['>'] = true;	// not required, but consistency is nice
     _buffer.Push( 0 );
 }
 

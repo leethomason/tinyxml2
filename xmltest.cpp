@@ -1390,6 +1390,13 @@ int main( int argc, const char ** argv )
             doc.Clear();
         }
     }
+    
+    {
+        // If this doesn't assert in DEBUG, all is well.
+        tinyxml2::XMLDocument doc;
+        tinyxml2::XMLElement *pRoot = doc.NewElement("Root");
+        doc.DeleteNode(pRoot);
+    }
 
 
 	// ----------- Performance tracking --------------
