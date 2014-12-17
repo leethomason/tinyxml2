@@ -1967,6 +1967,8 @@ XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :
             _entityFlag[ (int)entities[i].value ] = true;
         }
     }
+    // Clang doesn't like indexing arrays with 'char'
+    // so cast to int. (Looks strange.)
     _restrictedEntityFlag[(int)'&'] = true;
     _restrictedEntityFlag[(int)'<'] = true;
     _restrictedEntityFlag[(int)'>'] = true;	// not required, but consistency is nice
