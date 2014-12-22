@@ -288,7 +288,9 @@ public:
 
 private:
     void EnsureCapacity( int cap ) {
+        TIXMLASSERT( cap > 0 );
         if ( cap > _allocated ) {
+            TIXMLASSERT( cap <= INT_MAX / 2 );
             int newAllocated = cap * 2;
             T* newMem = new T[newAllocated];
             memcpy( newMem, _mem, sizeof(T)*_size );	// warning: not using constructors, only works for PODs
