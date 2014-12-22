@@ -1398,6 +1398,10 @@ int main( int argc, const char ** argv )
         doc.DeleteNode(pRoot);
     }
 
+	{
+		// Should not assert in DEBUG
+		XMLPrinter printer;
+	}
 
 	// ----------- Performance tracking --------------
 	{
