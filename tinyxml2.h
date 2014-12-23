@@ -2068,7 +2068,7 @@ protected:
     virtual void PrintSpace( int depth );
     void Print( const char* format, ... );
 
-	void SealElement();
+    void SealElementIfJustOpened();
     bool _elementJustOpened;
     DynArray< const char*, 10 > _stack;
 
