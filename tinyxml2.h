@@ -562,10 +562,10 @@ public:
     }
 
     inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
-        int n = 0;
         if ( p == q ) {
             return true;
         }
+        int n = 0;
         while( *p && *q && *p == *q && n<nChar ) {
             ++p;
             ++q;
