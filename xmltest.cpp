@@ -863,10 +863,18 @@ int main( int argc, const char ** argv )
 
 	{
 		// Empty documents should return TIXML_XML_ERROR_PARSING_EMPTY, bug 1070717
-		const char* str = "    ";
+		const char* str = "";
 		XMLDocument doc;
 		doc.Parse( str );
 		XMLTest( "Empty document error", XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
+	}
+
+	{
+		// Documents with all whitespaces should return TIXML_XML_ERROR_PARSING_EMPTY, bug 1070717
+		const char* str = "    ";
+		XMLDocument doc;
+		doc.Parse( str );
+		XMLTest( "All whitespaces document error", XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
 	}
 
 	{
