@@ -1861,7 +1861,6 @@ XMLError XMLDocument::SaveFile( FILE* fp, bool compact )
 
 XMLError XMLDocument::Parse( const char* p, size_t len )
 {
-	const char* start = p;
     Clear();
 
     if ( len == 0 || !p || !*p ) {
@@ -1875,6 +1874,7 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
     memcpy( _charBuffer, p, len );
     _charBuffer[len] = 0;
 
+    const char* start = p;
     p = XMLUtil::SkipWhiteSpace( p );
     p = XMLUtil::ReadBOM( p, &_writeBOM );
     if ( !p || !*p ) {
@@ -2069,9 +2069,7 @@ void XMLPrinter::PushHeader( bool writeBOM, bool writeDec )
 
 void XMLPrinter::OpenElement( const char* name, bool compactMode )
 {
-    if ( _elementJustOpened ) {
-        SealElement();
-    }
+    SealElementIfJustOpened();
     _stack.Push( name );
 
     if ( _textDepth < 0 && !_firstElement && !compactMode ) {
@@ -2155,8 +2153,11 @@ void XMLPrinter::CloseElement( bool compactMode )
 }
 
 
-void XMLPrinter::SealElement()
+void XMLPrinter::SealElementIfJustOpened()
 {
+    if ( !_elementJustOpened ) {
+        return;
+    }
     _elementJustOpened = false;
     Print( ">" );
 }
@@ -2166,9 +2167,7 @@ void XMLPrinter::PushText( const char* text, bool cdata )
 {
     _textDepth = _depth-1;
 
-    if ( _elementJustOpened ) {
-        SealElement();
-    }
+    SealElementIfJustOpened();
     if ( cdata ) {
         Print( "<![CDATA[" );
         Print( "%s", text );
@@ -2221,9 +2220,7 @@ void XMLPrinter::PushText( double value )
 
 void XMLPrinter::PushComment( const char* comment )
 {
-    if ( _elementJustOpened ) {
-        SealElement();
-    }
+    SealElementIfJustOpened();
     if ( _textDepth < 0 && !_firstElement && !_compactMode) {
         Print( "\n" );
         PrintSpace( _depth );
@@ -2235,9 +2232,7 @@ void XMLPrinter::PushComment( const char* comment )
 
 void XMLPrinter::PushDeclaration( const char* value )
 {
-    if ( _elementJustOpened ) {
-        SealElement();
-    }
+    SealElementIfJustOpened();
     if ( _textDepth < 0 && !_firstElement && !_compactMode) {
         Print( "\n" );
         PrintSpace( _depth );
@@ -2249,9 +2244,7 @@ void XMLPrinter::PushDeclaration( const char* value )
 
 void XMLPrinter::PushUnknown( const char* value )
 {
-    if ( _elementJustOpened ) {
-        SealElement();
-    }
+    SealElementIfJustOpened();
     if ( _textDepth < 0 && !_firstElement && !_compactMode) {
         Print( "\n" );
         PrintSpace( _depth );

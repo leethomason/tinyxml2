@@ -563,10 +563,10 @@ public:
     }
 
     inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
-        int n = 0;
         if ( p == q ) {
             return true;
         }
+        int n = 0;
         while( *p && *q && *p == *q && n<nChar ) {
             ++p;
             ++q;
@@ -2069,7 +2069,7 @@ protected:
     virtual void PrintSpace( int depth );
     void Print( const char* format, ... );
 
-	void SealElement();
+    void SealElementIfJustOpened();
     bool _elementJustOpened;
     DynArray< const char*, 10 > _stack;
 
