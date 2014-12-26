@@ -862,19 +862,19 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
         }
 
         XMLElement* ele = node->ToElement();
-        // We read the end tag. Return it to the parent.
-        if ( ele && ele->ClosingType() == XMLElement::CLOSING ) {
-            if ( parentEnd ) {
-                ele->_value.TransferTo( parentEnd );
-            }
-			node->_memPool->SetTracked();	// created and then immediately deleted.
-            DeleteNode( node );
-            return p;
-        }
-
-        // Handle an end tag returned to this level.
-        // And handle a bunch of annoying errors.
         if ( ele ) {
+            // We read the end tag. Return it to the parent.
+            if ( ele->ClosingType() == XMLElement::CLOSING ) {
+                if ( parentEnd ) {
+                    ele->_value.TransferTo( parentEnd );
+                }
+                node->_memPool->SetTracked();   // created and then immediately deleted.
+                DeleteNode( node );
+                return p;
+            }
+
+            // Handle an end tag returned to this level.
+            // And handle a bunch of annoying errors.
             bool mismatch = false;
             if ( endTag.Empty() && ele->ClosingType() == XMLElement::OPEN ) {
                 mismatch = true;
