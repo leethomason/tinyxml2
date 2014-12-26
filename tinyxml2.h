@@ -533,10 +533,11 @@ class XMLUtil
 {
 public:
     static const char* SkipWhiteSpace( const char* p )	{
-		TIXMLASSERT(p);
+        TIXMLASSERT( p );
         while( IsWhiteSpace(*p) ) {
             ++p;
         }
+        TIXMLASSERT( p );
         return p;
     }
     static char* SkipWhiteSpace( char* p )				{
