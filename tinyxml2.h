@@ -533,6 +533,7 @@ class XMLUtil
 {
 public:
     static const char* SkipWhiteSpace( const char* p )	{
+		TIXMLASSERT(p);
         while( IsWhiteSpace(*p) ) {
             ++p;
         }
