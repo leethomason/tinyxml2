@@ -140,18 +140,18 @@ char* StrPair::ParseName( char* p )
     if ( !p || !(*p) ) {
         return 0;
     }
+    if ( !XMLUtil::IsNameStartChar( *p ) ) {
+        return 0;
+    }
 
     char* const start = p;
-
-    while( *p && ( p == start ? XMLUtil::IsNameStartChar( *p ) : XMLUtil::IsNameChar( *p ) )) {
+    ++p;
+    while ( *p && XMLUtil::IsNameChar( *p ) ) {
         ++p;
     }
 
-    if ( p > start ) {
-        Set( start, p, 0 );
-        return p;
-    }
-    return 0;
+    Set( start, p, 0 );
+    return p;
 }
 
 
