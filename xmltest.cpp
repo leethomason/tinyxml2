@@ -295,6 +295,10 @@ int main( int argc, const char ** argv )
 		mkdir( "resources/out/", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	#endif
 
+	{
+		TIXMLASSERT( true );
+	}
+
 	if ( argc > 1 ) {
 		XMLDocument* doc = new XMLDocument();
 		clock_t startTime = clock();
