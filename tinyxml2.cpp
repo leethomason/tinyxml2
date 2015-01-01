@@ -672,11 +672,7 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
         TIXMLASSERT( false );
         return 0;
     }
-
-	if (addThis->_parent)
-		addThis->_parent->Unlink( addThis );
-	else
-	   addThis->_memPool->SetTracked();
+    BeforeInsertChild( addThis );
 
     if ( _lastChild ) {
         TIXMLASSERT( _firstChild );
@@ -706,11 +702,7 @@ XMLNode* XMLNode::InsertFirstChild( XMLNode* addThis )
         TIXMLASSERT( false );
         return 0;
     }
-
-	if (addThis->_parent)
-		addThis->_parent->Unlink( addThis );
-	else
-	   addThis->_memPool->SetTracked();
+    BeforeInsertChild( addThis );
 
     if ( _firstChild ) {
         TIXMLASSERT( _lastChild );
@@ -753,10 +745,7 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
         // The last node or the only node.
         return InsertEndChild( addThis );
     }
-	if (addThis->_parent)
-		addThis->_parent->Unlink( addThis );
-	else
-	   addThis->_memPool->SetTracked();
+    BeforeInsertChild( addThis );
     addThis->_prev = afterThis;
     addThis->_next = afterThis->_next;
     afterThis->_next->_prev = addThis;
@@ -904,6 +893,17 @@ void XMLNode::DeleteNode( XMLNode* node )
     MemPool* pool = node->_memPool;
     node->~XMLNode();
     pool->Free( node );
+}
+
+void XMLNode::BeforeInsertChild( XMLNode* insertThis ) const
+{
+    TIXMLASSERT( insertThis );
+    TIXMLASSERT( insertThis->_document == _document );
+
+    if ( insertThis->_parent )
+        insertThis->_parent->Unlink( insertThis );
+    else
+        insertThis->_memPool->SetTracked();
 }
 
 // --------- XMLText ---------- //
