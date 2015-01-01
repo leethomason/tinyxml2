@@ -186,6 +186,8 @@ void StrPair::CollapseWhitespace()
 
 const char* StrPair::GetStr()
 {
+    TIXMLASSERT( _start );
+    TIXMLASSERT( _end );
     if ( _flags & NEEDS_FLUSH ) {
         *_end = 0;
         _flags ^= NEEDS_FLUSH;
@@ -267,6 +269,7 @@ const char* StrPair::GetStr()
         }
         _flags = (_flags & NEEDS_DELETE);
     }
+    TIXMLASSERT( _start );
     return _start;
 }
 
