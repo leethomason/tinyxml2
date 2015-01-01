@@ -1730,6 +1730,8 @@ private:
     MemPoolT< sizeof(XMLComment) >	 _commentPool;
 
 	static const char* _errorNames[XML_ERROR_COUNT];
+
+    void Parse();
 };
 
 
