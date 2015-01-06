@@ -1820,15 +1820,7 @@ XMLError XMLDocument::LoadFile( FILE* fp )
 
     _charBuffer[size] = 0;
 
-    const char* p = _charBuffer;
-    p = XMLUtil::SkipWhiteSpace( p );
-    p = XMLUtil::ReadBOM( p, &_writeBOM );
-    if ( !*p ) {
-        SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
-        return _errorID;
-    }
-
-    ParseDeep( _charBuffer + (p-_charBuffer), 0 );
+    Parse();
     return _errorID;
 }
 
@@ -1869,16 +1861,7 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
     memcpy( _charBuffer, p, len );
     _charBuffer[len] = 0;
 
-    const char* start = p;
-    p = XMLUtil::SkipWhiteSpace( p );
-    p = XMLUtil::ReadBOM( p, &_writeBOM );
-    if ( !*p ) {
-        SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
-        return _errorID;
-    }
-
-    ptrdiff_t delta = p - start;	// skip initial whitespace, BOM, etc.
-    ParseDeep( _charBuffer+delta, 0 );
+    Parse();
     if ( Error() ) {
         // clean up now essentially dangling memory.
         // and the parse fail can put objects in the
@@ -1936,6 +1919,19 @@ void XMLDocument::PrintError() const
     }
 }
 
+void XMLDocument::Parse()
+{
+    TIXMLASSERT( NoChildren() ); // Clear() must have been called previously
+    TIXMLASSERT( _charBuffer );
+    const char* p = _charBuffer;
+    p = XMLUtil::SkipWhiteSpace( p );
+    p = XMLUtil::ReadBOM( p, &_writeBOM );
+    if ( !*p ) {
+        SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
+        return;
+    }
+    ParseDeep( _charBuffer + (p-_charBuffer), 0 );
+}
 
 XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :
     _elementJustOpened( false ),
