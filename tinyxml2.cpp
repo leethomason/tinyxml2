@@ -675,7 +675,7 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
         TIXMLASSERT( false );
         return 0;
     }
-    BeforeInsertChild( addThis );
+    InsertChildPreamble( addThis );
 
     if ( _lastChild ) {
         TIXMLASSERT( _firstChild );
@@ -705,7 +705,7 @@ XMLNode* XMLNode::InsertFirstChild( XMLNode* addThis )
         TIXMLASSERT( false );
         return 0;
     }
-    BeforeInsertChild( addThis );
+    InsertChildPreamble( addThis );
 
     if ( _firstChild ) {
         TIXMLASSERT( _lastChild );
@@ -748,7 +748,7 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
         // The last node or the only node.
         return InsertEndChild( addThis );
     }
-    BeforeInsertChild( addThis );
+    InsertChildPreamble( addThis );
     addThis->_prev = afterThis;
     addThis->_next = afterThis->_next;
     afterThis->_next->_prev = addThis;
@@ -898,7 +898,7 @@ void XMLNode::DeleteNode( XMLNode* node )
     pool->Free( node );
 }
 
-void XMLNode::BeforeInsertChild( XMLNode* insertThis ) const
+void XMLNode::InsertChildPreamble( XMLNode* insertThis ) const
 {
     TIXMLASSERT( insertThis );
     TIXMLASSERT( insertThis->_document == _document );
@@ -1925,14 +1925,14 @@ void XMLDocument::Parse()
 {
     TIXMLASSERT( NoChildren() ); // Clear() must have been called previously
     TIXMLASSERT( _charBuffer );
-    const char* p = _charBuffer;
+    char* p = _charBuffer;
     p = XMLUtil::SkipWhiteSpace( p );
-    p = XMLUtil::ReadBOM( p, &_writeBOM );
+    p = (char*) XMLUtil::ReadBOM( p, &_writeBOM );
     if ( !*p ) {
         SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
         return;
     }
-    ParseDeep( _charBuffer + (p-_charBuffer), 0 );
+    ParseDeep(p, 0 );
 }
 
 XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :

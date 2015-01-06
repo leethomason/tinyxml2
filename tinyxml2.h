@@ -899,7 +899,7 @@ private:
     MemPool*		_memPool;
     void Unlink( XMLNode* child );
     static void DeleteNode( XMLNode* node );
-    void BeforeInsertChild( XMLNode* insertThis ) const;
+    void InsertChildPreamble( XMLNode* insertThis ) const;
 };
 
 
