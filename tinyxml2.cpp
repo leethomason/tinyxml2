@@ -1927,7 +1927,7 @@ void XMLDocument::Parse()
     TIXMLASSERT( _charBuffer );
     char* p = _charBuffer;
     p = XMLUtil::SkipWhiteSpace( p );
-    p = (char*) XMLUtil::ReadBOM( p, &_writeBOM );
+    p = const_cast<char*>( XMLUtil::ReadBOM( p, &_writeBOM ) );
     if ( !*p ) {
         SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
         return;
