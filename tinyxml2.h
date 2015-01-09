@@ -288,6 +288,9 @@ public:
     }
 
 private:
+    DynArray( const DynArray& ); // not supported
+    void operator=( const DynArray& ); // not supported
+
     void EnsureCapacity( int cap ) {
         TIXMLASSERT( cap > 0 );
         if ( cap > _allocated ) {
@@ -421,6 +424,9 @@ public:
     enum { COUNT = (4*1024)/SIZE }; // Some compilers do not accept to use COUNT in private part if COUNT is private
 
 private:
+    MemPoolT( const MemPoolT& ); // not supported
+    void operator=( const MemPoolT& ); // not supported
+
     union Chunk {
         Chunk*  next;
         char    mem[SIZE];
