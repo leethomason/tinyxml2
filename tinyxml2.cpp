@@ -931,7 +931,8 @@ char* XMLText::ParseDeep( char* p, StrPair* )
         p = _value.ParseText( p, "<", flags );
         if ( p && *p ) {
             return p-1;
-        } else if ( !p ) {
+        }
+        if ( !p ) {
             _document->SetError( XML_ERROR_PARSING_TEXT, start, 0 );
         }
     }
