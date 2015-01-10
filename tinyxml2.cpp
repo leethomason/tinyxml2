@@ -866,14 +866,16 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
             // Handle an end tag returned to this level.
             // And handle a bunch of annoying errors.
             bool mismatch = false;
-            if ( endTag.Empty() && ele->ClosingType() == XMLElement::OPEN ) {
-                mismatch = true;
+            if ( endTag.Empty() ) {
+                if ( ele->ClosingType() == XMLElement::OPEN ) {
+                    mismatch = true;
+                }
             }
-            else if ( !endTag.Empty() && ele->ClosingType() != XMLElement::OPEN ) {
-                mismatch = true;
-            }
-            else if ( !endTag.Empty() ) {
-                if ( !XMLUtil::StringEqual( endTag.GetStr(), node->Value() )) {
+            else {
+                if ( ele->ClosingType() != XMLElement::OPEN ) {
+                    mismatch = true;
+                }
+                else if ( !XMLUtil::StringEqual( endTag.GetStr(), node->Value() ) ) {
                     mismatch = true;
                 }
             }
