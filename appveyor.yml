@@ -23,7 +23,6 @@ before_build:
   - cmd: cd myproject
   - cmd: bii new david/tinyxml2
   - cmd: move ..\* blocks\david\tinyxml2\
-  - cmd: move ..\example blocks\david\tinyxml2\
 
 build_script:
   - cmd: bii cpp:build
