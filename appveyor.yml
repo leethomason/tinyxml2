@@ -33,5 +33,6 @@ build_script:
   - cmd: bii cpp:build
 
 test_script:
-  - cmd: ls bin\david_tinyxml2_contrib_html5-printer.exe
-  - cmd: ls bin\david_tinyxml2_xmltest.exe
+  - cmd: cd bin
+  - cmd: david_tinyxml2_contrib_html5-printer.exe
+  - cmd: david_tinyxml2_xmltest.exe
