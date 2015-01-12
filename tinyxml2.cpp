@@ -351,6 +351,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 
     if ( *(p+1) == '#' && *(p+2) ) {
         unsigned long ucs = 0;
+        TIXMLASSERT( sizeof( ucs ) >= 4 );
         ptrdiff_t delta = 0;
         unsigned mult = 1;
 
@@ -383,6 +384,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
                 else {
                     return 0;
                 }
+                TIXMLASSERT( mult <= UINT_MAX / 16 );
                 mult *= 16;
                 --q;
             }
@@ -410,6 +412,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
                 else {
                     return 0;
                 }
+                TIXMLASSERT( mult <= UINT_MAX / 10 );
                 mult *= 10;
                 --q;
             }
@@ -578,6 +581,7 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 
 bool XMLDocument::Accept( XMLVisitor* visitor ) const
 {
+    TIXMLASSERT( visitor );
     if ( visitor->VisitEnter( *this ) ) {
         for ( const XMLNode* node=FirstChild(); node; node=node->NextSibling() ) {
             if ( !node->Accept( visitor ) ) {
