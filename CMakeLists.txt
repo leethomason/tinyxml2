@@ -3,7 +3,7 @@
 # To learn more about the CMake use with biicode, visit http://docs.biicode.com/c++/building.html
 # Or check the examples below
 
-if(BIICODE)
+
 	include(${CMAKE_HOME_DIRECTORY}/biicode.cmake)
 	# Initializes block variables
 	INIT_BIICODE_BLOCK()
@@ -11,9 +11,9 @@ if(BIICODE)
 
 	# Actually create targets: EXEcutables and libraries.
 	ADD_BIICODE_TARGETS()
-	TARGET_INCLUDE_DIRECTORIES(${BII_LIB_TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+	#TARGET_INCLUDE_DIRECTORIES(${BII_LIB_TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-else()
+
 	cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 	cmake_policy(VERSION 2.6)
 
@@ -102,4 +102,4 @@ else()
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 	#add_test(test ${SAMPLE_NAME} COMMAND $<TARGET_FILE:${SAMPLE_NAME}>)
-endif()
+
