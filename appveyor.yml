@@ -28,8 +28,6 @@ before_build:
   - cmd: move ..\contrib blocks\david\tinyxml2\
   - cmd: move ..\resources blocks\david\tinyxml2\
   - cmd: move ..\tinyxml2 blocks\david\tinyxml2\
-  - cmd: move ..\tinyxml2\tinyxml2-cbp blocks\david\tinyxml2\
-  - cmd: move ..\tinyxml2\tinyxml2.xcodeproj blocks\david\tinyxml2\
 
 build_script:
   - cmd: bii cpp:build
@@ -37,8 +35,3 @@ build_script:
 test_script:
   - cmd: ls bin\david_tinyxml2_contrib_html5-printer.exe
   - cmd: ls bin\david_tinyxml2_xmltest.exe
-
-# to run your custom scripts instead of provider deployments
-deploy_script:
-  - cmd: bii user david -p %secured_passwd%
-  - cmd: bii publish || dir # Ignore output
