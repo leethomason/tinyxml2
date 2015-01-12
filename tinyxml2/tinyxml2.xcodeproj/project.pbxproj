@@ -96,6 +96,9 @@
 /* Begin PBXProject section */
 		037AE058151CCC5200E0F29F /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0610;
+			};
 			buildConfigurationList = 037AE05B151CCC5200E0F29F /* Build configuration list for PBXProject "tinyxml2" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -134,6 +137,8 @@
 			buildSettings = {
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)/Debug";
 				COPY_PHASE_STRIP = NO;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = DEBUG;
+				ONLY_ACTIVE_ARCH = YES;
 				SYMROOT = build;
 			};
 			name = Debug;
@@ -156,6 +161,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = xmltest;
 			};
@@ -171,6 +177,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				MACOSX_DEPLOYMENT_TARGET = "";
 				PREBINDING = NO;
 				PRODUCT_NAME = tinyxml2;
 				ZERO_LINK = NO;

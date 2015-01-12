@@ -23,6 +23,7 @@
 #endif
 
 using namespace tinyxml2;
+using namespace std;
 int gPass = 0;
 int gFail = 0;
 
@@ -279,6 +280,8 @@ int main( int argc, const char ** argv )
 {
 	#if defined( _MSC_VER ) && defined( DEBUG )
 		_CrtMemCheckpoint( &startMemState );
+		// Enable MS Visual C++ debug heap memory leaks dump on exit
+		_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 	#endif
 
 	#if defined(_MSC_VER) || defined(MINGW32) || defined(__MINGW32__)
@@ -292,14 +295,18 @@ int main( int argc, const char ** argv )
 		mkdir( "resources/out/", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	#endif
 
+	{
+		TIXMLASSERT( true );
+	}
+
 	if ( argc > 1 ) {
 		XMLDocument* doc = new XMLDocument();
 		clock_t startTime = clock();
 		doc->LoadFile( argv[1] );
-		clock_t loadTime = clock();
+ 		clock_t loadTime = clock();
 		int errorID = doc->ErrorID();
 		delete doc; doc = 0;
-		clock_t deleteTime = clock();
+ 		clock_t deleteTime = clock();
 
 		printf( "Test file '%s' loaded. ErrorID=%d\n", argv[1], errorID );
 		if ( !errorID ) {
@@ -860,10 +867,18 @@ int main( int argc, const char ** argv )
 
 	{
 		// Empty documents should return TIXML_XML_ERROR_PARSING_EMPTY, bug 1070717
-		const char* str = "    ";
+		const char* str = "";
 		XMLDocument doc;
 		doc.Parse( str );
 		XMLTest( "Empty document error", XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
+	}
+
+	{
+		// Documents with all whitespaces should return TIXML_XML_ERROR_PARSING_EMPTY, bug 1070717
+		const char* str = "    ";
+		XMLDocument doc;
+		doc.Parse( str );
+		XMLTest( "All whitespaces document error", XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
 	}
 
 	{
@@ -1222,6 +1237,8 @@ int main( int argc, const char ** argv )
 		XMLDocument doc;
 		XMLError error = doc.LoadFile( "resources/empty.xml" );
 		XMLTest( "Loading an empty file", XML_ERROR_EMPTY_DOCUMENT, error );
+		XMLTest( "Loading an empty file and ErrorName as string", "XML_ERROR_EMPTY_DOCUMENT", doc.ErrorName() );
+		doc.PrintError();
 	}
 
 	{
@@ -1327,6 +1344,14 @@ int main( int argc, const char ** argv )
 		doc.Print();
 	}
 
+	{
+		// Test that it doesn't crash.
+		const char* xml = "<?xml version=\"1.0\"?><root><sample><field0><1</field0><field1>2</field1></sample></root>";
+		XMLDocument doc;
+		doc.Parse(xml);
+		doc.PrintError();
+	}
+
 #if 1
 		// the question being explored is what kind of print to use: 
 		// https://github.com/leethomason/tinyxml2/issues/63
@@ -1361,8 +1386,34 @@ int main( int argc, const char ** argv )
 		*/
 	}
 #endif
+    
+    {
+        // Issue #184
+        // If it doesn't assert, it passes. Caused by objects
+        // getting created during parsing which are then
+        // inaccessible in the memory pools.
+        {
+            XMLDocument doc;
+            doc.Parse("<?xml version=\"1.0\" encoding=\"UTF-8\"?><test>");
+        }
+        {
+            XMLDocument doc;
+            doc.Parse("<?xml version=\"1.0\" encoding=\"UTF-8\"?><test>");
+            doc.Clear();
+        }
+    }
+    
+    {
+        // If this doesn't assert in DEBUG, all is well.
+        tinyxml2::XMLDocument doc;
+        tinyxml2::XMLElement *pRoot = doc.NewElement("Root");
+        doc.DeleteNode(pRoot);
+    }
 
-
+	{
+		// Should not assert in DEBUG
+		XMLPrinter printer;
+	}
 
 	// ----------- Performance tracking --------------
 	{
@@ -1415,12 +1466,10 @@ int main( int argc, const char ** argv )
 
 	#if defined( _MSC_VER ) &&  defined( DEBUG )
 		_CrtMemCheckpoint( &endMemState );
-		//_CrtMemDumpStatistics( &endMemState );
 
 		_CrtMemState diffMemState;
 		_CrtMemDifference( &diffMemState, &startMemState, &endMemState );
 		_CrtMemDumpStatistics( &diffMemState );
-		//printf( "new total=%d\n", gNewTotal );
 	#endif
 
 	printf ("\nPass %d, Fail %d\n", gPass, gFail);
