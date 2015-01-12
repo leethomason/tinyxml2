@@ -12,6 +12,7 @@ if(BIICODE)
 	# Actually create targets: EXEcutables and libraries.
 	ADD_BIICODE_TARGETS()
 	TARGET_INCLUDE_DIRECTORIES(${BII_LIB_TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
 else()
 	cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 	cmake_policy(VERSION 2.6)
@@ -44,7 +45,7 @@ else()
 		 	COMMAND ${CMAKE_COMMAND} -E echo "In source build")
 	else(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 		make_directory(${CMAKE_CURRENT_BINARY_DIR}/resources/)
-		add_add_custom_command_target(
+		add_custom_target(
 			${TARGET_DATA_COPY}
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/dream.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
 			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/empty.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
