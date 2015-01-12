@@ -353,7 +353,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
         unsigned long ucs = 0;
         ptrdiff_t delta = 0;
         unsigned mult = 1;
-        const char semicolon = ';';
+        static const char SEMICOLON = ';';
 
         if ( *(p+2) == 'x' ) {
             // Hexadecimal.
@@ -362,12 +362,12 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
             }
 
             const char* q = p+3;
-            q = strchr( q, semicolon );
+            q = strchr( q, SEMICOLON );
 
             if ( !q ) {
                 return 0;
             }
-            TIXMLASSERT( *q == semicolon );
+            TIXMLASSERT( *q == SEMICOLON );
 
             delta = q-p;
             --q;
@@ -396,12 +396,12 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
             }
 
             const char* q = p+2;
-            q = strchr( q, semicolon );
+            q = strchr( q, SEMICOLON );
 
             if ( !q ) {
                 return 0;
             }
-            TIXMLASSERT( *q == semicolon );
+            TIXMLASSERT( *q == SEMICOLON );
 
             delta = q-p;
             --q;
