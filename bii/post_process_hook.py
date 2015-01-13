@@ -11,4 +11,4 @@ try:
 	shutil.copytree(os.path.join(bii.block_folder, "resources"), os.path.join(bii.project_folder, "bin", "resources"))
 except Exception as e:
 	print e.message
-	print "Copy the resources folder into bon folder manually"
+	print "Copy the resources folder into the bin folder manually"
