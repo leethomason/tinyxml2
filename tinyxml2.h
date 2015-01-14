@@ -215,7 +215,7 @@ template <class T, int INIT>
 class DynArray
 {
 public:
-    DynArray< T, INIT >() {
+    DynArray() {
         _mem = _pool;
         _allocated = INIT;
         _size = 0;
@@ -232,11 +232,14 @@ public:
     }
 
     void Push( T t ) {
+        TIXMLASSERT( _size < INT_MAX );
         EnsureCapacity( _size+1 );
         _mem[_size++] = t;
     }
 
     T* PushArr( int count ) {
+        TIXMLASSERT( count >= 0 );
+        TIXMLASSERT( _size <= INT_MAX - count );
         EnsureCapacity( _size+count );
         T* ret = &_mem[_size];
         _size += count;
@@ -244,6 +247,7 @@ public:
     }
 
     T Pop() {
+        TIXMLASSERT( _size > 0 );
         return _mem[--_size];
     }
 
@@ -272,6 +276,7 @@ public:
     }
 
     int Size() const                    {
+        TIXMLASSERT( _size >= 0 );
         return _size;
     }
 

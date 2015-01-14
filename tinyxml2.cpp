@@ -351,8 +351,10 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 
     if ( *(p+1) == '#' && *(p+2) ) {
         unsigned long ucs = 0;
+        TIXMLASSERT( sizeof( ucs ) >= 4 );
         ptrdiff_t delta = 0;
         unsigned mult = 1;
+        static const char SEMICOLON = ';';
 
         if ( *(p+2) == 'x' ) {
             // Hexadecimal.
@@ -361,11 +363,12 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
             }
 
             const char* q = p+3;
-            q = strchr( q, ';' );
+            q = strchr( q, SEMICOLON );
 
-            if ( !q || !*q ) {
+            if ( !q ) {
                 return 0;
             }
+            TIXMLASSERT( *q == SEMICOLON );
 
             delta = q-p;
             --q;
@@ -383,6 +386,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
                 else {
                     return 0;
                 }
+                TIXMLASSERT( mult <= UINT_MAX / 16 );
                 mult *= 16;
                 --q;
             }
@@ -394,11 +398,12 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
             }
 
             const char* q = p+2;
-            q = strchr( q, ';' );
+            q = strchr( q, SEMICOLON );
 
-            if ( !q || !*q ) {
+            if ( !q ) {
                 return 0;
             }
+            TIXMLASSERT( *q == SEMICOLON );
 
             delta = q-p;
             --q;
@@ -410,6 +415,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
                 else {
                     return 0;
                 }
+                TIXMLASSERT( mult <= UINT_MAX / 10 );
                 mult *= 10;
                 --q;
             }
@@ -578,6 +584,7 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 
 bool XMLDocument::Accept( XMLVisitor* visitor ) const
 {
+    TIXMLASSERT( visitor );
     if ( visitor->VisitEnter( *this ) ) {
         for ( const XMLNode* node=FirstChild(); node; node=node->NextSibling() ) {
             if ( !node->Accept( visitor ) ) {
@@ -1990,6 +1997,7 @@ void XMLPrinter::Print( const char* format, ... )
         // Close out and re-start the va-args
         va_end( va );
         va_start( va, format );
+        TIXMLASSERT( _buffer.Size() > 0 && _buffer[_buffer.Size() - 1] == 0 );
         char* p = _buffer.PushArr( len ) - 1;   // back up over the null terminator.
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
         #if defined(WINCE)
