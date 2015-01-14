@@ -1997,6 +1997,7 @@ void XMLPrinter::Print( const char* format, ... )
         // Close out and re-start the va-args
         va_end( va );
         va_start( va, format );
+        TIXMLASSERT( _buffer.Size() > 0 && _buffer[_buffer.Size() - 1] == 0 );
         char* p = _buffer.PushArr( len ) - 1;	// back up over the null terminator.
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
 		#if defined(WINCE)
