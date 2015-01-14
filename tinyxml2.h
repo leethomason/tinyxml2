@@ -232,14 +232,14 @@ public:
     }
 
     void Push( T t ) {
-        TIXMLASSERT( _size < (size_t)(-1) );
+        TIXMLASSERT( _size < INT_MAX );
         EnsureCapacity( _size+1 );
         _mem[_size++] = t;
     }
 
     T* PushArr( int count ) {
         TIXMLASSERT( count >= 0 );
-        TIXMLASSERT( _size <= (size_t)(-1) - count );
+        TIXMLASSERT( _size <= INT_MAX - count );
         EnsureCapacity( _size+count );
         T* ret = &_mem[_size];
         _size += count;
