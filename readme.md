@@ -1,5 +1,16 @@
 TinyXML-2
 =========
+
+[![Build Status](https://travis-ci.org/davidsanfal/tinyxml2.svg?branch=master)](https://travis-ci.org/davidsanfal/tinyxml2)
+[![Build status](https://ci.appveyor.com/api/projects/status/24uqi09wcbo0839x?svg=true)](https://ci.appveyor.com/project/davidsanfal/tinyxml2)
+[![biicode block](https://img.shields.io/badge/biicode-published-brightgreen.svg)](https://www.biicode.com/david/tinyxml2)
+
+
+
+Adaptation of the original library for use with [Biicode](https://www.biicode.com).
+
+The [biicode block](https://www.biicode.com/david/david/tinyxml2/master) has been generated from a [github repository](https://github.com/davidsanfal/tinyxml2). It includes slight modifications added to the original repository in order to work properly with biicode. 
+
 ![TinyXML-2 Logo](http://www.grinninglizard.com/tinyxml2/TinyXML2_small.png)
 
 TinyXML-2 is a simple, small, efficient, C++ XML parser that can be 

@@ -1,0 +1,42 @@
+language: cpp
+compiler:
+- gcc
+before_install:
+# g++
+- if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
+- sudo apt-get update -qq
+install:
+# g++4.8.1
+- if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-4.8; fi
+- if [ "$CXX" == "g++" ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50; fi
+
+- wget http://www.biicode.com/downloads/latest/ubuntu64
+- mv ubuntu64 bii-ubuntu64.deb
+- sudo dpkg -i bii-ubuntu64.deb && sudo apt-get -f install
+- rm bii-ubuntu64.deb
+- wget https://s3.amazonaws.com/biibinaries/thirdparty/cmake-3.0.2-Linux-64.tar.gz
+- tar -xzf cmake-3.0.2-Linux-64.tar.gz
+- sudo cp -fR cmake-3.0.2-Linux-64/* /usr
+- rm -rf cmake-3.0.2-Linux-64
+- rm cmake-3.0.2-Linux-64.tar.gz
+
+#Configure cmake compiler
+- export TRAVIS_CXX=$CXX
+
+script:
+- cmake --version
+- bii init biicode_project
+- mkdir -p ./biicode_project/blocks/david/tinyxml2
+- mv !(biicode_project) ./biicode_project/blocks/david/tinyxml2
+- cd biicode_project
+- if [ "$CXX" == "clang++" ]; then export CXX="clang++" && bii cpp:build; fi
+- if [ "$CXX" == "g++" ];     then export CXX="g++"     && bii cpp:build; fi
+- cp -r blocks/david/tinyxml2/resources bin
+- cd bin
+- ./david_tinyxml2_xmltest
+after_success:
+- bii user david -p $BII_DAVID_PASSWORD
+- bii publish
+env:
+  global:
+    secure: ZNZJIDD4CRBt3LSGTiKNuycspV208n9Ie+TWxtX3tVZ6bCP+vhdasQpbtm95QO6NDpbArGRb8x0XMxWHm3xsskAgDwu3z8uOpGfTQ720PBXzuZ+UMxVa8bd2ULf7yZTwEROVpqGirTeCqmK+35wesriXixsjNFWns83UkFOVkrU=

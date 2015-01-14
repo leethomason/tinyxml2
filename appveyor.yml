@@ -1,0 +1,38 @@
+version: 1.0.{build}
+
+environment:
+  secured_passwd:
+    secure: WSSH66rINC41zVSqY0NsHw==
+
+install:
+  - ps: wget https://s3.amazonaws.com/biibinaries/thirdparty/cmake-3.0.2-win32-x86.zip -OutFile cmake.zip
+  - cmd: 7z x cmake.zip -o"C:\Program Files (x86)\" -y
+  - cmd: set PATH=%PATH:CMake 2.8\bin=%;C:\Program Files (x86)\cmake-3.0.2-win32-x86\bin
+  - cmd: cmake --version
+  - ps: wget https://s3.amazonaws.com/biibinaries/release/2.1.1/bii-win_2_1_1.exe -OutFile bii-win.exe
+  - cmd: bii-win.exe /VERYSILENT
+  - cmd: set PATH=%PATH%;C:\Program Files (x86)\BiiCode\bii
+  - cmd: bii -v
+  - ps: wget https://s3.amazonaws.com/biibinaries/thirdparty/MinGW.zip -OutFile mingw.zip
+  - cmd: 7z x mingw.zip -oC:\MinGW -y
+  - cmd: set PATH=%PATH:Git\bin=%;C:\MinGW\bin
+  - cmd: del bii-win.exe
+  - cmd: del cmake.zip
+
+before_build:
+  - cmd: bii init myproject
+  - cmd: cd myproject
+  - cmd: bii new david/tinyxml2
+  - cmd: move ..\* blocks\david\tinyxml2\
+  - cmd: move ..\bii blocks\david\tinyxml2\
+  - cmd: move ..\contrib blocks\david\tinyxml2\
+  - cmd: move ..\resources blocks\david\tinyxml2\
+  - cmd: move ..\tinyxml2 blocks\david\tinyxml2\
+
+build_script:
+  - cmd: bii cpp:build
+
+test_script:
+  - cmd: cd bin
+  - cmd: david_tinyxml2_contrib_html5-printer.exe
+  - cmd: david_tinyxml2_xmltest.exe

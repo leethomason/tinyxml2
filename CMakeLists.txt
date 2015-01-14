@@ -1,79 +1,103 @@
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-cmake_policy(VERSION 2.6)
+# This CMakeLists.txt file helps defining your block building and compiling
+# Include the main biicode macros and functions
+# To learn more about the CMake use with biicode, visit http://docs.biicode.com/c++/building.html
+# Or check the examples below
 
-project(tinyxml2)
-include(GNUInstallDirs)
-#enable_testing()
-
-#CMAKE_BUILD_TOOL
-
-################################
-# set lib version here
-
-set(GENERIC_LIB_VERSION "2.2.0")
-set(GENERIC_LIB_SOVERSION "2")
+IF(BIICODE)
+	# Initializes block variables
+	INIT_BIICODE_BLOCK()
 
 
-################################
-# Add common source 
+	# Actually create targets: EXEcutables and libraries.
+	ADD_BIICODE_TARGETS()
+ELSE()
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/.")
+	cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+	cmake_policy(VERSION 2.6)
 
-################################
-# Add custom target to copy all data
+	project(tinyxml2)
+	include(GNUInstallDirs)
+	#enable_testing()
 
-set(TARGET_DATA_COPY DATA_COPY)
-if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
-	add_custom_target(
-		${TARGET_DATA_COPY}
-	 	COMMAND ${CMAKE_COMMAND} -E echo "In source build")
-else(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
-	make_directory(${CMAKE_CURRENT_BINARY_DIR}/resources/)
-	add_custom_target(
-		${TARGET_DATA_COPY}
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/dream.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/empty.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/utf8test.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
-		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/utf8testverify.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/)
-endif(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+	#CMAKE_BUILD_TOOL
 
-################################
-# Add definitions
+	################################
+	# set lib version here
 
-if(MSVC)
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-endif(MSVC)
-
-################################
-# Add targets
-option(BUILD_SHARED_LIBS "build shared or static libraries" ON)
-add_library(tinyxml2 tinyxml2.cpp tinyxml2.h)
-set_target_properties(tinyxml2 PROPERTIES
-        COMPILE_DEFINITIONS "TINYXML2_EXPORT"
-	VERSION "${GENERIC_LIB_VERSION}"
-	SOVERSION "${GENERIC_LIB_SOVERSION}")
-
-add_executable(xmltest xmltest.cpp)
-add_dependencies(xmltest tinyxml2)
-add_dependencies(xmltest ${TARGET_DATA_COPY})
-target_link_libraries(xmltest tinyxml2)
+	set(GENERIC_LIB_VERSION "2.1.0")
+	set(GENERIC_LIB_SOVERSION "2")
 
 
-install(TARGETS tinyxml2
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+	################################
+	# Add common source 
 
-install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/.")
 
-foreach(p LIB INCLUDE)
-	set(var CMAKE_INSTALL_${p}DIR)
-	if(NOT IS_ABSOLUTE "${${var}}")
-		set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
-	endif()
-endforeach()
+	################################
+	# Add custom target to copy all data
 
-configure_file(tinyxml2.pc.in tinyxml2.pc @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+	set(TARGET_DATA_COPY DATA_COPY)
+	if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+		add_custom_target(
+			${TARGET_DATA_COPY}
+		 	COMMAND ${CMAKE_COMMAND} -E echo "In source build")
+	else(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+		make_directory(${CMAKE_CURRENT_BINARY_DIR}/resources/)
+		add_custom_target(
+			${TARGET_DATA_COPY}
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/dream.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/empty.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/utf8test.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/
+			COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/resources/utf8testverify.xml ${CMAKE_CURRENT_BINARY_DIR}/resources/)
+	endif(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 
-#add_test(xmltest ${SAMPLE_NAME} COMMAND $<TARGET_FILE:${SAMPLE_NAME}>)
+	################################
+	# Add definitions
+
+	if(MSVC)
+		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	endif(MSVC)
+
+	################################
+	# Add targets
+	set(BUILD_STATIC_LIBS ON CACHE BOOL "Set to ON to build static libraries")
+	if(BUILD_STATIC_LIBS)
+		add_library(tinyxml2static STATIC tinyxml2.cpp tinyxml2.h)
+		set_target_properties(tinyxml2static PROPERTIES OUTPUT_NAME tinyxml2)
+	endif(BUILD_STATIC_LIBS)
+	add_library(tinyxml2 SHARED tinyxml2.cpp tinyxml2.h)
+	set_target_properties(tinyxml2 PROPERTIES
+		COMPILE_DEFINITIONS "TINYXML2_EXPORT"
+		VERSION "${GENERIC_LIB_VERSION}"
+		SOVERSION "${GENERIC_LIB_SOVERSION}")
+
+	add_executable(test xmltest.cpp)
+	add_dependencies(test tinyxml2)
+	add_dependencies(test ${TARGET_DATA_COPY})
+	target_link_libraries(test tinyxml2)
+
+
+	if(BUILD_STATIC_LIBS)
+		install(TARGETS tinyxml2 tinyxml2static
+			RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+			LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+			ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+	else(BUILD_STATIC_LIBS)
+		install(TARGETS tinyxml2
+			RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+			LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+	endif(BUILD_STATIC_LIBS)
+	install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+	foreach(p LIB INCLUDE)
+		set(var CMAKE_INSTALL_${p}DIR)
+		if(NOT IS_ABSOLUTE "${${var}}")
+			set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
+		endif()
+	endforeach()
+
+	configure_file(tinyxml2.pc.in tinyxml2.pc @ONLY)
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+
+	#add_test(test ${SAMPLE_NAME} COMMAND $<TARGET_FILE:${SAMPLE_NAME}>)
+ENDIF()
