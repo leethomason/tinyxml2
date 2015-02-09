@@ -1168,6 +1168,7 @@ int main( int argc, const char ** argv )
     {
         XMLDocument doc;
         doc.LoadFile( "resources/dream.xml" );
+        XMLTest( "Document has something to Clear()", doc.NoChildren(), false );
         doc.Clear();
         XMLTest( "Document Clear()'s", doc.NoChildren(), true );
     }
