@@ -678,8 +678,10 @@ void XMLNode::DeleteChild( XMLNode* node )
 XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 {
     TIXMLASSERT( addThis );
-    if ( addThis->_document != _document ) {
-        TIXMLASSERT( false );
+	
+	bool isOtherDocument = ( addThis->_document != _document );
+	if (isOtherDocument) {
+		TIXMLASSERT( !isOtherDocument ); //assure it fails if it is a different document
         return 0;
     }
     InsertChildPreamble( addThis );
@@ -708,8 +710,10 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
 XMLNode* XMLNode::InsertFirstChild( XMLNode* addThis )
 {
     TIXMLASSERT( addThis );
-    if ( addThis->_document != _document ) {
-        TIXMLASSERT( false );
+
+	bool isOtherDocument = (addThis->_document != _document);
+	if (isOtherDocument) {
+		TIXMLASSERT(!isOtherDocument); //assure it fails if it is a different document
         return 0;
     }
     InsertChildPreamble( addThis );
@@ -739,15 +743,17 @@ XMLNode* XMLNode::InsertFirstChild( XMLNode* addThis )
 XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
 {
     TIXMLASSERT( addThis );
-    if ( addThis->_document != _document ) {
-        TIXMLASSERT( false );
+	bool isOtherDocument = ( addThis->_document != _document );
+	if (isOtherDocument) {
+		TIXMLASSERT(!isOtherDocument); //assure it fails if it is a different document
         return 0;
     }
 
     TIXMLASSERT( afterThis );
 
-    if ( afterThis->_parent != this ) {
-        TIXMLASSERT( false );
+	isOtherDocument = ( afterThis->_parent != this );
+	if (isOtherDocument) {
+		TIXMLASSERT(!isOtherDocument); //assure it fails here as well
         return 0;
     }
 
