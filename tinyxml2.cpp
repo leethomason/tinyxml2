@@ -520,6 +520,8 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
     char* const start = p;
     p = XMLUtil::SkipWhiteSpace( p );
     if( !*p ) {
+        *node = 0;
+        TIXMLASSERT( p );
         return p;
     }
 
@@ -848,6 +850,9 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
         XMLNode* node = 0;
 
         p = _document->Identify( p, &node );
+        if ( node == 0 ) {
+            break;
+        }
 
         StrPair endTag;
         p = node->ParseDeep( p, &endTag );
