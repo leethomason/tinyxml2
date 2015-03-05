@@ -844,6 +844,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
     // 'endTag' is the end tag for this node, it is returned by a call to a child.
     // 'parentEnd' is the end tag for the parent, which is filled in and returned.
 
+    p = XMLUtil::SkipWhiteSpace( p );
     while( p && *p ) {
         XMLNode* node = 0;
 
@@ -894,6 +895,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
             }
         }
         InsertEndChild( node );
+        p = XMLUtil::SkipWhiteSpace( p );
     }
     return 0;
 }
