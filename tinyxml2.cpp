@@ -228,11 +228,19 @@ const char* StrPair::GetStr()
                         const int buflen = 10;
                         char buf[buflen] = { 0 };
                         int len = 0;
-                        p = const_cast<char*>( XMLUtil::GetCharacterRef( p, buf, &len ) );
-                        TIXMLASSERT( 0 <= len && len <= buflen );
-                        TIXMLASSERT( q + len <= p );
-                        memcpy( q, buf, len );
-                        q += len;
+                        char* adjusted = const_cast<char*>( XMLUtil::GetCharacterRef( p, buf, &len ) );
+                        if ( adjusted == 0 ) {
+                            *q = *p;
+                            ++p;
+                            ++q;
+                        }
+                        else {
+                            TIXMLASSERT( 0 <= len && len <= buflen );
+                            TIXMLASSERT( q + len <= adjusted );
+                            p = adjusted;
+                            memcpy( q, buf, len );
+                            q += len;
+                        }
                     }
                     else {
                         int i=0;

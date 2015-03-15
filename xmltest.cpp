@@ -1416,6 +1416,16 @@ int main( int argc, const char ** argv )
 		XMLPrinter printer;
 	}
 
+	{
+		// Issue 291. Should not crash
+		const char* xml = "&#0</a>";
+		XMLDocument doc;
+		doc.Parse( xml );
+
+		XMLPrinter printer;
+		doc.Print( &printer );
+	}
+
 	// ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )
