@@ -374,7 +374,8 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
             --q;
 
             while ( *q != 'x' ) {
-                unsigned int digit;
+                unsigned int digit = 0;
+
                 if ( *q >= '0' && *q <= '9' ) {
                     digit = *q - '0';
                 }
@@ -388,6 +389,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
                     return 0;
                 }
                 TIXMLASSERT( digit == 0 || mult <= UINT_MAX / digit );
+				TIXMLASSERT( digit >= 0 && digit < 16);
                 const unsigned int digitScaled = mult * digit;
                 TIXMLASSERT( ucs <= ULONG_MAX - digitScaled );
                 ucs += digitScaled;
