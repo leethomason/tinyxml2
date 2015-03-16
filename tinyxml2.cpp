@@ -323,7 +323,7 @@ void XMLUtil::ConvertUTF32ToUTF8( unsigned long input, char* output, int* length
         *length = 4;
     }
     else {
-        *length = 0;    // This code won't covert this correctly anyway.
+        *length = 0;    // This code won't convert this correctly anyway.
         return;
     }
 
