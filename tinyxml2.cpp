@@ -323,7 +323,7 @@ void XMLUtil::ConvertUTF32ToUTF8( unsigned long input, char* output, int* length
         *length = 4;
     }
     else {
-        *length = 0;    // This code won't covert this correctly anyway.
+        *length = 0;    // This code won't convert this correctly anyway.
         return;
     }
 
@@ -397,8 +397,8 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
                 else {
                     return 0;
                 }
+                TIXMLASSERT( digit >= 0 && digit < 16);
                 TIXMLASSERT( digit == 0 || mult <= UINT_MAX / digit );
-				TIXMLASSERT( digit >= 0 && digit < 16);
                 const unsigned int digitScaled = mult * digit;
                 TIXMLASSERT( ucs <= ULONG_MAX - digitScaled );
                 ucs += digitScaled;
@@ -427,6 +427,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
             while ( *q != '#' ) {
                 if ( *q >= '0' && *q <= '9' ) {
                     const unsigned int digit = *q - '0';
+                    TIXMLASSERT( digit >= 0 && digit < 10);
                     TIXMLASSERT( digit == 0 || mult <= UINT_MAX / digit );
                     const unsigned int digitScaled = mult * digit;
                     TIXMLASSERT( ucs <= ULONG_MAX - digitScaled );
