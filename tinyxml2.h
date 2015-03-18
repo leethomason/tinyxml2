@@ -122,8 +122,8 @@ inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
 /* Versioning, past 1.0.14:
 	http://semver.org/
 */
-static const int TIXML2_MAJOR_VERSION = 2;
-static const int TIXML2_MINOR_VERSION = 3;
+static const int TIXML2_MAJOR_VERSION = 3;
+static const int TIXML2_MINOR_VERSION = 0;
 static const int TIXML2_PATCH_VERSION = 0;
 
 namespace tinyxml2
