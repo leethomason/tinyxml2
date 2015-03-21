@@ -65,7 +65,7 @@ public:
 protected:
     virtual void CloseElement () {
         if (_elementJustOpened && !isVoidElement (_stack.PeekTop())) {
-            SealElement();
+            SealElementIfJustOpened();
             }
         XMLPrinter::CloseElement();
     }
