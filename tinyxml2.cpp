@@ -2297,8 +2297,12 @@ bool XMLPrinter::VisitEnter( const XMLDocument& doc )
 
 bool XMLPrinter::VisitEnter( const XMLElement& element, const XMLAttribute* attribute )
 {
-	const XMLElement*	parentElem = element.Parent()->ToElement();
-	bool		compactMode = parentElem ? CompactMode(*parentElem) : _compactMode;
+    const XMLElement*	parentElem = NULL;
+    if (  element.Parent() )
+    {
+	parentElem = element.Parent()->ToElement();
+    }
+    bool		compactMode = parentElem ? CompactMode(*parentElem) : _compactMode;
     OpenElement( element.Name(), compactMode );
     while ( attribute ) {
         PushAttribute( attribute->Name(), attribute->Value() );
