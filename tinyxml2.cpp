@@ -1879,6 +1879,9 @@ XMLError XMLDocument::SaveFile( const char* filename, bool compact )
 
 XMLError XMLDocument::SaveFile( FILE* fp, bool compact )
 {
+    // Clear any error from the last save, otherwise it will get reported
+    // for *this* call.
+    SetError( XML_NO_ERROR, 0, 0 );
     XMLPrinter stream( fp, compact );
     Print( &stream );
     return _errorID;

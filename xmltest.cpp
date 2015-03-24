@@ -1425,6 +1425,15 @@ int main( int argc, const char ** argv )
 		XMLPrinter printer;
 		doc.Print( &printer );
 	}
+	{
+		// Issue 302. Clear errors from LoadFile/SaveFile
+		XMLDocument doc;
+		doc.SaveFile( "./no/such/path/pretty.xml" );
+		XMLTest( "Issue 302. Fail to save", doc.ErrorName(), "XML_ERROR_FILE_COULD_NOT_BE_OPENED" );
+		doc.SaveFile( "./resources/out/compact.xml", true );
+		XMLTest( "Issue 302. Subsequent success in saving", doc.ErrorName(), "XML_SUCCESS" );
+
+	}
 
 	// ----------- Performance tracking --------------
 	{
