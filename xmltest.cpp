@@ -1425,6 +1425,14 @@ int main( int argc, const char ** argv )
 		XMLPrinter printer;
 		doc.Print( &printer );
 	}
+	{
+		// Issue 299. Can print elements that are not linked in. 
+		// Will crash if issue not fixed.
+		XMLDocument doc;
+		XMLElement* newElement = doc.NewElement( "printme" );
+		XMLPrinter printer;
+		newElement->Accept( &printer );
+	}
 
 	// ----------- Performance tracking --------------
 	{
