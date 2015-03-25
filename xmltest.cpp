@@ -1434,6 +1434,17 @@ int main( int argc, const char ** argv )
 		newElement->Accept( &printer );
 	}
 
+	{
+		// If a document fails to load then subsequent
+		// successful loads should clear the error
+		XMLDocument doc;
+		doc.LoadFile( "resources/no-such-file.xml" );
+		XMLTest( "No such file - should fail", true, doc.Error() );
+
+		doc.LoadFile( "resources/dream.xml" );
+		XMLTest( "Error should be cleared", false, doc.Error() );
+	}
+
 	// ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )
