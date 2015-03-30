@@ -760,7 +760,7 @@ public:
     }
 
     XMLNode*		LastChild()								{
-        return const_cast<XMLNode*>(const_cast<const XMLNode*>(this)->LastChild() );
+        return _lastChild;
     }
 
     /** Get the last child element or optionally the last child
