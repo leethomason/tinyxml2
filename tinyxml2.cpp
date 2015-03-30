@@ -550,14 +550,14 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 	// These strings define the matching patters:
     static const char* xmlHeader		= { "<?" };
     static const char* commentHeader	= { "<!--" };
-    static const char* dtdHeader		= { "<!" };
     static const char* cdataHeader		= { "<![CDATA[" };
+    static const char* dtdHeader		= { "<!" };
     static const char* elementHeader	= { "<" };	// and a header for everything else; check last.
 
     static const int xmlHeaderLen		= 2;
     static const int commentHeaderLen	= 4;
-    static const int dtdHeaderLen		= 2;
     static const int cdataHeaderLen		= 9;
+    static const int dtdHeaderLen		= 2;
     static const int elementHeaderLen	= 1;
 
     TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLUnknown ) );		// use same memory pool
