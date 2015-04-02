@@ -2206,9 +2206,7 @@ void XMLPrinter::PushText( const char* text, bool cdata )
 
     SealElementIfJustOpened();
     if ( cdata ) {
-        Print( "<![CDATA[" );
-        Print( "%s", text );
-        Print( "]]>" );
+        Print( "<![CDATA[%s]]>", text );
     }
     else {
         PrintString( text, true );
