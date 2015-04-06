@@ -796,8 +796,8 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
 
 const XMLElement* XMLNode::FirstChildElement( const char* value ) const
 {
-    for( XMLNode* node=_firstChild; node; node=node->_next ) {
-        XMLElement* element = node->ToElement();
+    for( const XMLNode* node = _firstChild; node; node = node->_next ) {
+        const XMLElement* element = node->ToElement();
         if ( element ) {
             if ( !value || XMLUtil::StringEqual( element->Name(), value ) ) {
                 return element;
@@ -810,8 +810,8 @@ const XMLElement* XMLNode::FirstChildElement( const char* value ) const
 
 const XMLElement* XMLNode::LastChildElement( const char* value ) const
 {
-    for( XMLNode* node=_lastChild; node; node=node->_prev ) {
-        XMLElement* element = node->ToElement();
+    for( const XMLNode* node = _lastChild; node; node = node->_prev ) {
+        const XMLElement* element = node->ToElement();
         if ( element ) {
             if ( !value || XMLUtil::StringEqual( element->Name(), value ) ) {
                 return element;
@@ -824,7 +824,7 @@ const XMLElement* XMLNode::LastChildElement( const char* value ) const
 
 const XMLElement* XMLNode::NextSiblingElement( const char* value ) const
 {
-    for( XMLNode* node=this->_next; node; node = node->_next ) {
+    for( const XMLNode* node = _next; node; node = node->_next ) {
         const XMLElement* element = node->ToElement();
         if ( element
                 && (!value || XMLUtil::StringEqual( value, node->Value() ))) {
@@ -837,7 +837,7 @@ const XMLElement* XMLNode::NextSiblingElement( const char* value ) const
 
 const XMLElement* XMLNode::PreviousSiblingElement( const char* value ) const
 {
-    for( XMLNode* node=_prev; node; node = node->_prev ) {
+    for( const XMLNode* node = _prev; node; node = node->_prev ) {
         const XMLElement* element = node->ToElement();
         if ( element
                 && (!value || XMLUtil::StringEqual( value, node->Value() ))) {
