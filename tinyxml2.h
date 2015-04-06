@@ -887,12 +887,11 @@ public:
     */
     virtual bool Accept( XMLVisitor* visitor ) const = 0;
 
-    // internal
-    virtual char* ParseDeep( char*, StrPair* );
-
 protected:
     XMLNode( XMLDocument* );
     virtual ~XMLNode();
+
+    virtual char* ParseDeep( char*, StrPair* );
 
     XMLDocument*	_document;
     XMLNode*		_parent;
@@ -950,13 +949,14 @@ public:
         return _isCData;
     }
 
-    char* ParseDeep( char*, StrPair* endTag );
     virtual XMLNode* ShallowClone( XMLDocument* document ) const;
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
     XMLText( XMLDocument* doc )	: XMLNode( doc ), _isCData( false )	{}
     virtual ~XMLText()												{}
+
+    char* ParseDeep( char*, StrPair* endTag );
 
 private:
     bool _isCData;
@@ -980,13 +980,14 @@ public:
 
     virtual bool Accept( XMLVisitor* visitor ) const;
 
-    char* ParseDeep( char*, StrPair* endTag );
     virtual XMLNode* ShallowClone( XMLDocument* document ) const;
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
     XMLComment( XMLDocument* doc );
     virtual ~XMLComment();
+
+    char* ParseDeep( char*, StrPair* endTag );
 
 private:
     XMLComment( const XMLComment& );	// not supported
@@ -1018,13 +1019,14 @@ public:
 
     virtual bool Accept( XMLVisitor* visitor ) const;
 
-    char* ParseDeep( char*, StrPair* endTag );
     virtual XMLNode* ShallowClone( XMLDocument* document ) const;
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
     XMLDeclaration( XMLDocument* doc );
     virtual ~XMLDeclaration();
+
+    char* ParseDeep( char*, StrPair* endTag );
 
 private:
     XMLDeclaration( const XMLDeclaration& );	// not supported
@@ -1052,13 +1054,14 @@ public:
 
     virtual bool Accept( XMLVisitor* visitor ) const;
 
-    char* ParseDeep( char*, StrPair* endTag );
     virtual XMLNode* ShallowClone( XMLDocument* document ) const;
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
     XMLUnknown( XMLDocument* doc );
     virtual ~XMLUnknown();
+
+    char* ParseDeep( char*, StrPair* endTag );
 
 private:
     XMLUnknown( const XMLUnknown& );	// not supported
@@ -1509,9 +1512,11 @@ public:
     int ClosingType() const {
         return _closingType;
     }
-    char* ParseDeep( char* p, StrPair* endTag );
     virtual XMLNode* ShallowClone( XMLDocument* document ) const;
     virtual bool ShallowEqual( const XMLNode* compare ) const;
+
+protected:
+    char* ParseDeep( char* p, StrPair* endTag );
 
 private:
     XMLElement( XMLDocument* doc );
