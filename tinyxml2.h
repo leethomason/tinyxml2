@@ -211,13 +211,13 @@ private:
 	Has a small initial memory pool, so that low or no usage will not
 	cause a call to new/delete
 */
-template <class T, int INIT>
+template <class T, int INITIAL_SIZE>
 class DynArray
 {
 public:
     DynArray() {
         _mem = _pool;
-        _allocated = INIT;
+        _allocated = INITIAL_SIZE;
         _size = 0;
     }
 
@@ -312,7 +312,7 @@ private:
     }
 
     T*  _mem;
-    T   _pool[INIT];
+    T   _pool[INITIAL_SIZE];
     int _allocated;		// objects allocated
     int _size;			// number objects in use
 };
