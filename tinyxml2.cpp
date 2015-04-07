@@ -1956,8 +1956,9 @@ void XMLDocument::PrintError() const
             TIXML_SNPRINTF( buf2, LEN, "%s", _errorStr2 );
         }
 
+        TIXMLASSERT( INT_MIN <= _errorID && _errorID <= INT_MAX );
         printf( "XMLDocument error id=%d '%s' str1=%s str2=%s\n",
-                _errorID, ErrorName(), buf1, buf2 );
+                static_cast<int>( _errorID ), ErrorName(), buf1, buf2 );
     }
 }
 
