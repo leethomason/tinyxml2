@@ -1439,16 +1439,18 @@ int main( int argc, const char ** argv )
 	{
 		// Issue 302. Clear errors from LoadFile/SaveFile
 		XMLDocument doc;
+		XMLTest( "Issue 302. Should be no error initially", "XML_SUCCESS", doc.ErrorName() );
 		doc.SaveFile( "./no/such/path/pretty.xml" );
-		XMLTest( "Issue 302. Fail to save", doc.ErrorName(), "XML_ERROR_FILE_COULD_NOT_BE_OPENED" );
+		XMLTest( "Issue 302. Fail to save", "XML_ERROR_FILE_COULD_NOT_BE_OPENED", doc.ErrorName() );
 		doc.SaveFile( "./resources/out/compact.xml", true );
-		XMLTest( "Issue 302. Subsequent success in saving", doc.ErrorName(), "XML_SUCCESS" );
+		XMLTest( "Issue 302. Subsequent success in saving", "XML_SUCCESS", doc.ErrorName() );
 	}
 
 	{
 		// If a document fails to load then subsequent
 		// successful loads should clear the error
 		XMLDocument doc;
+		XMLTest( "Should be no error initially", false, doc.Error() );
 		doc.LoadFile( "resources/no-such-file.xml" );
 		XMLTest( "No such file - should fail", true, doc.Error() );
 
