@@ -1435,6 +1435,8 @@ int main( int argc, const char ** argv )
 		XMLElement* newElement = doc.NewElement( "printme" );
 		XMLPrinter printer;
 		newElement->Accept( &printer );
+		// Delete the node to avoid possible memory leak report in debug output
+		doc.DeleteNode( newElement );
 	}
 	{
 		// Issue 302. Clear errors from LoadFile/SaveFile
