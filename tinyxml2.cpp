@@ -2061,6 +2061,7 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
     if ( _processEntities ) {
         const bool* flag = restricted ? _restrictedEntityFlag : _entityFlag;
         while ( *q ) {
+            TIXMLASSERT( p <= q );
             // Remember, char is sometimes signed. (How many times has that bitten me?)
             if ( *q > 0 && *q < ENTITY_RANGE ) {
                 // Check for entities. If one is found, flush
@@ -2084,11 +2085,13 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
                 }
             }
             ++q;
+            TIXMLASSERT( p <= q );
         }
     }
     // Flush the remaining string. This will be the entire
     // string if an entity wasn't found.
-    if ( !_processEntities || (q-p > 0) ) {
+    TIXMLASSERT( p <= q );
+    if ( !_processEntities || ( p < q ) ) {
         Print( "%s", p );
     }
 }
