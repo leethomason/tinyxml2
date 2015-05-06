@@ -1846,6 +1846,12 @@ XMLError XMLDocument::LoadFile( FILE* fp )
         return _errorID;
     }
 
+    if ( filelength >= (size_t)-1 ) {
+        // Cannot handle files which won't fit in buffer together with null terminator
+        SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
+        return _errorID;
+    }
+
     const size_t size = filelength;
     if ( size == 0 ) {
         SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
