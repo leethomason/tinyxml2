@@ -1459,6 +1459,25 @@ int main( int argc, const char ** argv )
 		doc.LoadFile( "resources/dream.xml" );
 		XMLTest( "Error should be cleared", false, doc.Error() );
 	}
+	
+	{
+		// Check that declarations are parsed only as the FirstChild
+        	const char* xml0 =  	"<?xml version=\"1.0\" ?>"
+        				"   <!-- xml version=\"1.1\" -->"
+        				"<first />";
+        	const char* xml1 =  	"<?xml version=\"1.0\" ?>"
+        				"   <?xml version=\"1.1\" ?>"
+        				"<first />";
+        	const char* xml2 =  	"<first />"
+        				"<?xml version=\"1.0\" ?>";
+        	XMLDocument doc;
+        	doc.Parse(xml0);
+        	XMLTest("Test that the code changes do not affect normal parsing", doc.Error(), false);
+        	doc.Parse(xml1);
+        	XMLTest("Test that the second declaration throws an error", doc.Error(), true);
+        	doc.Parse(xml2);
+        	XMLTest("Test that declaration after a child throws an error", doc.Error(), true);
+	}
 
 	// ----------- Performance tracking --------------
 	{
