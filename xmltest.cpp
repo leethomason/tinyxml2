@@ -1460,7 +1460,21 @@ int main( int argc, const char ** argv )
 		XMLTest( "Error should be cleared", false, doc.Error() );
 	}
 
-	// ----------- Performance tracking --------------
+        {
+                // No matter - before or after successfully parsing a text -
+                // calling XMLDocument::Value() causes an assert in debug.
+                const char* validXml = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+                                       "<first />"
+                                       "<second />";
+                XMLDocument* doc = new XMLDocument();
+                const char* value;
+                XMLTest( "XMLDocument::Value() fires assert?", NULL, doc->Value() );
+                doc->Parse( validXml );
+                XMLTest( "XMLDocument::Value() fires assert?", NULL, doc->Value() );
+                delete doc;
+        }
+
+        // ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )
 		__int64 start, end, freq;
