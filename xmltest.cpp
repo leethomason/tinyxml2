@@ -30,7 +30,12 @@ int gFail = 0;
 
 bool XMLTest (const char* testString, const char* expected, const char* found, bool echo=true, bool extraNL=false )
 {
-	bool pass = !strcmp( expected, found );
+	bool pass;
+	if ( !expected && !found )
+		pass = true;
+	else if ( !expected || !found )
+		pass = false;
+	else pass = !strcmp( expected, found );
 	if ( pass )
 		printf ("[pass]");
 	else
