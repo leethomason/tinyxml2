@@ -645,6 +645,8 @@ XMLNode::~XMLNode()
 
 const char* XMLNode::Value() const 
 {
+    if ( this->ToDocument() )
+        return ( const char* )0;
     return _value.GetStr();
 }
 
