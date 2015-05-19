@@ -51,6 +51,8 @@ if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif(MSVC)
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+
 ################################
 # Add targets
 option(BUILD_SHARED_LIBS "build shared or static libraries" ON)
