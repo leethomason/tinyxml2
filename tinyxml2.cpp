@@ -1928,11 +1928,13 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
 
 void XMLDocument::Print( XMLPrinter* streamer ) const
 {
-    XMLPrinter stdStreamer( stdout );
-    if ( !streamer ) {
-        streamer = &stdStreamer;
+    if ( streamer ) {
+        Accept( streamer );
     }
-    Accept( streamer );
+    else {
+        XMLPrinter stdoutStreamer( stdout );
+        Accept( &stdoutStreamer );
+    }
 }
 
 
