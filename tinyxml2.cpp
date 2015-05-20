@@ -887,7 +887,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
             break;
         }
 
-        XMLElement* ele = node->ToDeclaration();
+        XMLDeclaration* decl = node->ToDeclaration();
         if ( decl ) {
                 // A declaration can only be the first child of a document.
                 // Set error, if document already has children.
