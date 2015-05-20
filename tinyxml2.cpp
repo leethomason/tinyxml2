@@ -243,8 +243,8 @@ const char* StrPair::GetStr()
                         }
                     }
                     else {
-                        int i=0;
-                        for(; i<NUM_ENTITIES; ++i ) {
+                        bool entityFound = false;
+                        for( int i = 0; i < NUM_ENTITIES; ++i ) {
                             const Entity& entity = entities[i];
                             if ( strncmp( p + 1, entity.pattern, entity.length ) == 0
                                     && *( p + entity.length + 1 ) == ';' ) {
@@ -252,10 +252,11 @@ const char* StrPair::GetStr()
                                 *q = entity.value;
                                 ++q;
                                 p += entity.length + 2;
+                                entityFound = true;
                                 break;
                             }
                         }
-                        if ( i == NUM_ENTITIES ) {
+                        if ( !entityFound ) {
                             // fixme: treat as error?
                             ++p;
                             ++q;
