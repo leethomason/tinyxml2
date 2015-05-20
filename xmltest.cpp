@@ -35,7 +35,8 @@ bool XMLTest (const char* testString, const char* expected, const char* found, b
 		pass = true;
 	else if ( !expected || !found )
 		pass = false;
-	else pass = !strcmp( expected, found );
+	else 
+		pass = !strcmp( expected, found );
 	if ( pass )
 		printf ("[pass]");
 	else
@@ -1472,7 +1473,6 @@ int main( int argc, const char ** argv )
                                        "<first />"
                                        "<second />";
                 XMLDocument* doc = new XMLDocument();
-                const char* value;
                 XMLTest( "XMLDocument::Value() fires assert?", NULL, doc->Value() );
                 doc->Parse( validXml );
                 XMLTest( "XMLDocument::Value() fires assert?", NULL, doc->Value() );
