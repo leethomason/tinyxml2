@@ -1474,9 +1474,9 @@ int main( int argc, const char ** argv )
                 doc.Parse(xml0);
                 XMLTest("Test that the code changes do not affect normal parsing", doc.Error(), false);
                 doc.Parse(xml1);
-                XMLTest("Test that the second declaration throws an error", doc.Error(), true);
+                XMLTest("Test that the second declaration throws an error", doc.ErrorID(), XML_ERROR_PARSING_DECLARATION);
                 doc.Parse(xml2);
-                XMLTest("Test that declaration after a child throws an error", doc.Error(), true);
+                XMLTest("Test that declaration after a child throws an error", doc.ErrorID(), XML_ERROR_PARSING_DECLARATION);
 	}
 
 	// ----------- Performance tracking --------------

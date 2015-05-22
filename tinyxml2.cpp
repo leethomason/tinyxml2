@@ -1857,7 +1857,7 @@ XMLError XMLDocument::LoadFile( FILE* fp )
         return _errorID;
     }
 
-    if ( filelength >= (size_t)-1 ) {
+    if ( (size_t)filelength >= (size_t)-1 ) {
         // Cannot handle files which won't fit in buffer together with null terminator
         SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
