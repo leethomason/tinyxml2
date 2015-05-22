@@ -30,7 +30,13 @@ int gFail = 0;
 
 bool XMLTest (const char* testString, const char* expected, const char* found, bool echo=true, bool extraNL=false )
 {
-	bool pass = !strcmp( expected, found );
+	bool pass;
+	if ( !expected && !found )
+		pass = true;
+	else if ( !expected || !found )
+		pass = false;
+	else 
+		pass = !strcmp( expected, found );
 	if ( pass )
 		printf ("[pass]");
 	else
@@ -1462,24 +1468,37 @@ int main( int argc, const char ** argv )
 
 	{
 		// Check that declarations are parsed only as the FirstChild
-                const char* xml0 = "<?xml version=\"1.0\" ?>"
-                                   "   <!-- xml version=\"1.1\" -->"
-                                   "<first />";
-                const char* xml1 = "<?xml version=\"1.0\" ?>"
-                                   "   <?xml version=\"1.1\" ?>"
-                                   "<first />";
-                const char* xml2 = "<first />"
-                                   "<?xml version=\"1.0\" ?>";
-                XMLDocument doc;
-                doc.Parse(xml0);
-                XMLTest("Test that the code changes do not affect normal parsing", doc.Error(), false);
-                doc.Parse(xml1);
-                XMLTest("Test that the second declaration throws an error", doc.ErrorID(), XML_ERROR_PARSING_DECLARATION);
-                doc.Parse(xml2);
-                XMLTest("Test that declaration after a child throws an error", doc.ErrorID(), XML_ERROR_PARSING_DECLARATION);
+	    const char* xml0 = "<?xml version=\"1.0\" ?>"
+	                       "   <!-- xml version=\"1.1\" -->"
+	                       "<first />";
+	    const char* xml1 = "<?xml version=\"1.0\" ?>"
+	                       "   <?xml version=\"1.1\" ?>"
+	                       "<first />";
+	    const char* xml2 = "<first />"
+	                       "<?xml version=\"1.0\" ?>";
+	    XMLDocument doc;
+	    doc.Parse(xml0);
+	    XMLTest("Test that the code changes do not affect normal parsing", doc.Error(), false);
+	    doc.Parse(xml1);
+	    XMLTest("Test that the second declaration throws an error", doc.ErrorID(), XML_ERROR_PARSING_DECLARATION);
+	    doc.Parse(xml2);
+	    XMLTest("Test that declaration after a child throws an error", doc.ErrorID(), XML_ERROR_PARSING_DECLARATION);
 	}
 
-	// ----------- Performance tracking --------------
+    {
+	    // No matter - before or after successfully parsing a text -
+	    // calling XMLDocument::Value() causes an assert in debug.
+	    const char* validXml = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+	                           "<first />"
+	                           "<second />";
+	    XMLDocument* doc = new XMLDocument();
+	    XMLTest( "XMLDocument::Value() returns null?", NULL, doc->Value() );
+	    doc->Parse( validXml );
+	    XMLTest( "XMLDocument::Value() returns null?", NULL, doc->Value() );
+	    delete doc;
+    }
+
+    // ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )
 		__int64 start, end, freq;
