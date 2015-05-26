@@ -1498,6 +1498,14 @@ int main( int argc, const char ** argv )
 	    delete doc;
     }
 
+	{
+		XMLDocument doc;
+		for( int i = 0; i < XML_ERROR_COUNT; i++ ) {
+			doc.SetError( (XMLError)i, 0, 0 );
+			doc.ErrorName();
+		}
+	}
+
     // ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )
