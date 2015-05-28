@@ -2102,11 +2102,17 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
                         Print( "%.*s", toPrint, p );
                         p += toPrint;
                     }
+                    bool entityPatternPrinted = false;
                     for( int i=0; i<NUM_ENTITIES; ++i ) {
                         if ( entities[i].value == *q ) {
                             Print( "&%s;", entities[i].pattern );
+                            entityPatternPrinted = true;
                             break;
                         }
+                    }
+                    if ( !entityPatternPrinted ) {
+                        // TIXMLASSERT( entityPatternPrinted ) causes gcc -Wunused-but-set-variable in release
+                        TIXMLASSERT( false );
                     }
                     ++p;
                 }
