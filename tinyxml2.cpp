@@ -2041,12 +2041,16 @@ void XMLPrinter::Print( const char* format, ... )
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
 		#if defined(WINCE)
 		int len = 512;
-		do {
+        for (;;) {
 		    len = len*2;
 		    char* str = new char[len]();
-			len = _vsnprintf(str, len, format, va);
+            const int required = _vsnprintf(str, len, format, va);
 			delete[] str;
-		}while (len < 0);
+            if ( required != -1 ) {
+                len = required;
+                break;
+            }
+        }
 		#else
         int len = _vscprintf( format, va );
 		#endif
