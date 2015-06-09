@@ -2038,7 +2038,7 @@ void XMLPrinter::Print( const char* format, ... )
         vfprintf( _fp, format, va );
     }
     else {
-#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
+#if defined(_MSC_VER)
 		#if defined(WINCE)
 		int len = 512;
         for (;;) {
@@ -2062,11 +2062,11 @@ void XMLPrinter::Print( const char* format, ... )
         va_start( va, format );
         TIXMLASSERT( _buffer.Size() > 0 && _buffer[_buffer.Size() - 1] == 0 );
         char* p = _buffer.PushArr( len ) - 1;	// back up over the null terminator.
-#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
-		#if defined(WINCE)
-		_vsnprintf( p, len+1, format, va );
+#if defined(_MSC_VER)
+        #if (_MSC_VER >= 1400 ) && !defined(WINCE)
+             vsnprintf_s( p, len+1, _TRUNCATE, format, va );
 		#else
-		vsnprintf_s( p, len+1, _TRUNCATE, format, va );
+            _vsnprintf( p, len+1, format, va );
 		#endif
 #else
 		vsnprintf( p, len+1, format, va );

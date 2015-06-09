@@ -109,7 +109,8 @@ inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
     return result;
 }
 #define TIXML_SSCANF   sscanf_s
-#elif defined WINCE
+#elif defined _MSC_VER
+// Microsoft Visual Studio 2003 and earlier OR WinCE
 #define TIXML_SNPRINTF _snprintf
 #define TIXML_SSCANF   sscanf
 #else
