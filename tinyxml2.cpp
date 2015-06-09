@@ -2038,39 +2038,13 @@ void XMLPrinter::Print( const char* format, ... )
         vfprintf( _fp, format, va );
     }
     else {
-#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
-		#if defined(WINCE)
-		int len = 512;
-        for (;;) {
-		    len = len*2;
-		    char* str = new char[len]();
-            const int required = _vsnprintf(str, len, format, va);
-			delete[] str;
-            if ( required != -1 ) {
-                len = required;
-                break;
-            }
-        }
-		#else
-        int len = _vscprintf( format, va );
-		#endif
-#else
-        int len = vsnprintf( 0, 0, format, va );
-#endif
+        int len = TIXML_VSCPRINTF( format, va );
         // Close out and re-start the va-args
         va_end( va );
         va_start( va, format );
         TIXMLASSERT( _buffer.Size() > 0 && _buffer[_buffer.Size() - 1] == 0 );
         char* p = _buffer.PushArr( len ) - 1;	// back up over the null terminator.
-#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
-		#if defined(WINCE)
-		_vsnprintf( p, len+1, format, va );
-		#else
-		vsnprintf_s( p, len+1, _TRUNCATE, format, va );
-		#endif
-#else
-		vsnprintf( p, len+1, format, va );
-#endif
+		TIXML_VSNPRINTF( p, len+1, format, va );
     }
     va_end( va );
 }
