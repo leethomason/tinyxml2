@@ -61,7 +61,7 @@ distribution.
 	#define TIXML_SNPRINTF	_snprintf
 	#define TIXML_VSNPRINTF _vsnprintf
 	#define TIXML_SSCANF	sscanf
-	#if (_MSC_VER == 1300 ) && (!defined WINCE)
+	#if (_MSC_VER < 1400 ) && (!defined WINCE)
 		// Microsoft Visual Studio 2003 and not WinCE.
 		#define TIXML_VSCPRINTF   _vscprintf // VS2003's C runtime has this, but VC6 C runtime or WinCE SDK doesn't have.
 	#else
