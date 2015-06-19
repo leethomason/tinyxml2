@@ -596,7 +596,7 @@ public:
         return false;
     }
     
-    inline static bool IsUTF8Continuation( const char p ) {
+    inline static bool IsUTF8Continuation( char p ) {
         return ( p & 0x80 ) != 0;
     }
 
