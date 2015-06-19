@@ -253,14 +253,17 @@ public:
     }
 
     int Capacity() const				{
+        TIXMLASSERT( _allocated >= INITIAL_SIZE );
         return _allocated;
     }
 
     const T* Mem() const				{
+        TIXMLASSERT( _mem );
         return _mem;
     }
 
     T* Mem()							{
+        TIXMLASSERT( _mem );
         return _mem;
     }
 
