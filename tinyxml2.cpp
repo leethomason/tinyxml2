@@ -31,7 +31,7 @@ distribution.
 #endif
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
-	// Microsoft visual studio, version 2005 and higher. Not WinCE.
+	// Microsoft Visual Studio, version 2005 and higher. Not WinCE.
 	/*int _snprintf_s(
 	   char *buffer,
 	   size_t sizeOfBuffer,
