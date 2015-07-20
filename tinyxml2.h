@@ -630,10 +630,12 @@ public:
 
     /// Get the XMLDocument that owns this XMLNode.
     const XMLDocument* GetDocument() const	{
+        TIXMLASSERT( _document );
         return _document;
     }
     /// Get the XMLDocument that owns this XMLNode.
     XMLDocument* GetDocument()				{
+        TIXMLASSERT( _document );
         return _document;
     }
 
@@ -1536,9 +1538,11 @@ public:
     ~XMLDocument();
 
     virtual XMLDocument* ToDocument()				{
+        TIXMLASSERT( this == _document );
         return this;
     }
     virtual const XMLDocument* ToDocument() const	{
+        TIXMLASSERT( this == _document );
         return this;
     }
 
