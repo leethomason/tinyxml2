@@ -2143,7 +2143,7 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
                     while ( p < q ) {
                         const size_t delta = q - p;
                         // %.*s accepts type int as "precision"
-                        const int toPrint = ( INT_MAX < delta ) ? INT_MAX : delta;
+                        const int toPrint = ( INT_MAX < delta ) ? INT_MAX : (int)delta;
                         Print( "%.*s", toPrint, p );
                         p += toPrint;
                     }
