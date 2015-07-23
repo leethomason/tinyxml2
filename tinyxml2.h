@@ -725,10 +725,10 @@ public:
     /** Get the first child element, or optionally the first child
         element with the specified name.
     */
-    const XMLElement* FirstChildElement( const char* value=0 ) const;
+    const XMLElement* FirstChildElement( const char* name = 0 ) const;
 
-    XMLElement* FirstChildElement( const char* value=0 )	{
-        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( value ));
+    XMLElement* FirstChildElement( const char* name = 0 )	{
+        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( name ));
     }
 
     /// Get the last child node, or null if none exists.
@@ -743,10 +743,10 @@ public:
     /** Get the last child element or optionally the last child
         element with the specified name.
     */
-    const XMLElement* LastChildElement( const char* value=0 ) const;
+    const XMLElement* LastChildElement( const char* name = 0 ) const;
 
-    XMLElement* LastChildElement( const char* value=0 )	{
-        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(value) );
+    XMLElement* LastChildElement( const char* name = 0 )	{
+        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(name) );
     }
 
     /// Get the previous (left) sibling node of this node.
@@ -759,10 +759,10 @@ public:
     }
 
     /// Get the previous (left) sibling element of this node, with an optionally supplied name.
-    const XMLElement*	PreviousSiblingElement( const char* value=0 ) const ;
+    const XMLElement*	PreviousSiblingElement( const char* name = 0 ) const ;
 
-    XMLElement*	PreviousSiblingElement( const char* value=0 ) {
-        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( value ) );
+    XMLElement*	PreviousSiblingElement( const char* name = 0 ) {
+        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( name ) );
     }
 
     /// Get the next (right) sibling node of this node.
@@ -775,10 +775,10 @@ public:
     }
 
     /// Get the next (right) sibling element of this node, with an optionally supplied name.
-    const XMLElement*	NextSiblingElement( const char* value=0 ) const;
+    const XMLElement*	NextSiblingElement( const char* name = 0 ) const;
 
-    XMLElement*	NextSiblingElement( const char* value=0 )	{
-        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement( value ) );
+    XMLElement*	NextSiblingElement( const char* name = 0 )	{
+        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement( name ) );
     }
 
     /**
@@ -1823,32 +1823,32 @@ public:
         return XMLHandle( _node ? _node->FirstChild() : 0 );
     }
     /// Get the first child element of this handle.
-    XMLHandle FirstChildElement( const char* value=0 )						{
-        return XMLHandle( _node ? _node->FirstChildElement( value ) : 0 );
+    XMLHandle FirstChildElement( const char* name = 0 )						{
+        return XMLHandle( _node ? _node->FirstChildElement( name ) : 0 );
     }
     /// Get the last child of this handle.
     XMLHandle LastChild()													{
         return XMLHandle( _node ? _node->LastChild() : 0 );
     }
     /// Get the last child element of this handle.
-    XMLHandle LastChildElement( const char* _value=0 )						{
-        return XMLHandle( _node ? _node->LastChildElement( _value ) : 0 );
+    XMLHandle LastChildElement( const char* name = 0 )						{
+        return XMLHandle( _node ? _node->LastChildElement( name ) : 0 );
     }
     /// Get the previous sibling of this handle.
     XMLHandle PreviousSibling()												{
         return XMLHandle( _node ? _node->PreviousSibling() : 0 );
     }
     /// Get the previous sibling element of this handle.
-    XMLHandle PreviousSiblingElement( const char* _value=0 )				{
-        return XMLHandle( _node ? _node->PreviousSiblingElement( _value ) : 0 );
+    XMLHandle PreviousSiblingElement( const char* name = 0 )				{
+        return XMLHandle( _node ? _node->PreviousSiblingElement( name ) : 0 );
     }
     /// Get the next sibling of this handle.
     XMLHandle NextSibling()													{
         return XMLHandle( _node ? _node->NextSibling() : 0 );
     }
     /// Get the next sibling element of this handle.
-    XMLHandle NextSiblingElement( const char* _value=0 )					{
-        return XMLHandle( _node ? _node->NextSiblingElement( _value ) : 0 );
+    XMLHandle NextSiblingElement( const char* name = 0 )					{
+        return XMLHandle( _node ? _node->NextSiblingElement( name ) : 0 );
     }
 
     /// Safe cast to XMLNode. This can return null.
@@ -1902,26 +1902,26 @@ public:
     const XMLConstHandle FirstChild() const											{
         return XMLConstHandle( _node ? _node->FirstChild() : 0 );
     }
-    const XMLConstHandle FirstChildElement( const char* value=0 ) const				{
-        return XMLConstHandle( _node ? _node->FirstChildElement( value ) : 0 );
+    const XMLConstHandle FirstChildElement( const char* name = 0 ) const				{
+        return XMLConstHandle( _node ? _node->FirstChildElement( name ) : 0 );
     }
     const XMLConstHandle LastChild()	const										{
         return XMLConstHandle( _node ? _node->LastChild() : 0 );
     }
-    const XMLConstHandle LastChildElement( const char* _value=0 ) const				{
-        return XMLConstHandle( _node ? _node->LastChildElement( _value ) : 0 );
+    const XMLConstHandle LastChildElement( const char* name = 0 ) const				{
+        return XMLConstHandle( _node ? _node->LastChildElement( name ) : 0 );
     }
     const XMLConstHandle PreviousSibling() const									{
         return XMLConstHandle( _node ? _node->PreviousSibling() : 0 );
     }
-    const XMLConstHandle PreviousSiblingElement( const char* _value=0 ) const		{
-        return XMLConstHandle( _node ? _node->PreviousSiblingElement( _value ) : 0 );
+    const XMLConstHandle PreviousSiblingElement( const char* name = 0 ) const		{
+        return XMLConstHandle( _node ? _node->PreviousSiblingElement( name ) : 0 );
     }
     const XMLConstHandle NextSibling() const										{
         return XMLConstHandle( _node ? _node->NextSibling() : 0 );
     }
-    const XMLConstHandle NextSiblingElement( const char* _value=0 ) const			{
-        return XMLConstHandle( _node ? _node->NextSiblingElement( _value ) : 0 );
+    const XMLConstHandle NextSiblingElement( const char* name = 0 ) const			{
+        return XMLConstHandle( _node ? _node->NextSiblingElement( name ) : 0 );
     }
 
 

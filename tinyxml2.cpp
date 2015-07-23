@@ -865,12 +865,12 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
 
 
 
-const XMLElement* XMLNode::FirstChildElement( const char* value ) const
+const XMLElement* XMLNode::FirstChildElement( const char* name ) const
 {
     for( const XMLNode* node = _firstChild; node; node = node->_next ) {
         const XMLElement* element = node->ToElement();
         if ( element ) {
-            if ( !value || XMLUtil::StringEqual( element->Name(), value ) ) {
+            if ( !name || XMLUtil::StringEqual( element->Name(), name ) ) {
                 return element;
             }
         }
@@ -879,12 +879,12 @@ const XMLElement* XMLNode::FirstChildElement( const char* value ) const
 }
 
 
-const XMLElement* XMLNode::LastChildElement( const char* value ) const
+const XMLElement* XMLNode::LastChildElement( const char* name ) const
 {
     for( const XMLNode* node = _lastChild; node; node = node->_prev ) {
         const XMLElement* element = node->ToElement();
         if ( element ) {
-            if ( !value || XMLUtil::StringEqual( element->Name(), value ) ) {
+            if ( !name || XMLUtil::StringEqual( element->Name(), name ) ) {
                 return element;
             }
         }
@@ -893,12 +893,12 @@ const XMLElement* XMLNode::LastChildElement( const char* value ) const
 }
 
 
-const XMLElement* XMLNode::NextSiblingElement( const char* value ) const
+const XMLElement* XMLNode::NextSiblingElement( const char* name ) const
 {
     for( const XMLNode* node = _next; node; node = node->_next ) {
         const XMLElement* element = node->ToElement();
         if ( element
-                && (!value || XMLUtil::StringEqual( value, node->Value() ))) {
+                && (!name || XMLUtil::StringEqual( name, element->Name() ))) {
             return element;
         }
     }
@@ -906,12 +906,12 @@ const XMLElement* XMLNode::NextSiblingElement( const char* value ) const
 }
 
 
-const XMLElement* XMLNode::PreviousSiblingElement( const char* value ) const
+const XMLElement* XMLNode::PreviousSiblingElement( const char* name ) const
 {
     for( const XMLNode* node = _prev; node; node = node->_prev ) {
         const XMLElement* element = node->ToElement();
         if ( element
-                && (!value || XMLUtil::StringEqual( value, node->Value() ))) {
+                && (!name || XMLUtil::StringEqual( name, element->Name() ))) {
             return element;
         }
     }
@@ -991,12 +991,12 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
                 if ( ele->ClosingType() != XMLElement::OPEN ) {
                     mismatch = true;
                 }
-                else if ( !XMLUtil::StringEqual( endTag.GetStr(), node->Value() ) ) {
+                else if ( !XMLUtil::StringEqual( endTag.GetStr(), ele->Name() ) ) {
                     mismatch = true;
                 }
             }
             if ( mismatch ) {
-                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
+                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, ele->Name(), 0 );
                 DeleteNode( node );
                 break;
             }
@@ -1696,7 +1696,7 @@ bool XMLElement::ShallowEqual( const XMLNode* compare ) const
 {
     TIXMLASSERT( compare );
     const XMLElement* other = compare->ToElement();
-    if ( other && XMLUtil::StringEqual( other->Value(), Value() )) {
+    if ( other && XMLUtil::StringEqual( other->Name(), Name() )) {
 
         const XMLAttribute* a=FirstAttribute();
         const XMLAttribute* b=other->FirstAttribute();
