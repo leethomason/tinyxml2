@@ -179,6 +179,7 @@ void StrPair::SetStr( const char* str, int flags )
 {
     Reset();
     size_t len = strlen( str );
+    TIXMLASSERT( _start == 0 );
     _start = new char[ len+1 ];
     memcpy( _start, str, len+1 );
     _end = _start + len;
@@ -1944,6 +1945,7 @@ XMLError XMLDocument::LoadFile( FILE* fp )
     }
 
     const size_t size = filelength;
+    TIXMLASSERT( _charBuffer == 0 );
     _charBuffer = new char[size+1];
     size_t read = fread( _charBuffer, 1, size, fp );
     if ( read != size ) {
@@ -1993,6 +1995,7 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
     if ( len == (size_t)(-1) ) {
         len = strlen( p );
     }
+    TIXMLASSERT( _charBuffer == 0 );
     _charBuffer = new char[ len+1 ];
     memcpy( _charBuffer, p, len );
     _charBuffer[len] = 0;
