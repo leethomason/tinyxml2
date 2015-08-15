@@ -41,7 +41,7 @@ distribution.
 	   const char *format [,
 		  argument] ...
 	);*/
-	inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
+	static inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
 	{
 		va_list va;
 		va_start( va, format );
@@ -50,7 +50,7 @@ distribution.
 		return result;
 	}
 
-	inline int TIXML_VSNPRINTF( char* buffer, size_t size, const char* format, va_list va )
+	static inline int TIXML_VSNPRINTF( char* buffer, size_t size, const char* format, va_list va )
 	{
 		int result = vsnprintf_s( buffer, size, _TRUNCATE, format, va );
 		return result;
@@ -68,7 +68,7 @@ distribution.
 		#define TIXML_VSCPRINTF   _vscprintf // VS2003's C runtime has this, but VC6 C runtime or WinCE SDK doesn't have.
 	#else
 		// Microsoft Visual Studio 2003 and earlier or WinCE.
-		inline int TIXML_VSCPRINTF( const char* format, va_list va )
+		static inline int TIXML_VSCPRINTF( const char* format, va_list va )
 		{
 			int len = 512;
 			for (;;) {
@@ -91,7 +91,7 @@ distribution.
 	//#warning( "Using sn* functions." )
 	#define TIXML_SNPRINTF	snprintf
 	#define TIXML_VSNPRINTF	vsnprintf
-	inline int TIXML_VSCPRINTF( const char* format, va_list va )
+	static inline int TIXML_VSCPRINTF( const char* format, va_list va )
 	{
 		int len = vsnprintf( 0, 0, format, va );
 		TIXMLASSERT( len >= 0 );
