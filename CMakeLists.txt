@@ -55,23 +55,53 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
 ################################
 # Add targets
-option(BUILD_SHARED_LIBS "build shared or static libraries" ON)
-add_library(tinyxml2 tinyxml2.cpp tinyxml2.h)
+# By Default shared libray is being built
+# To build static libs also - Do cmake. -DBUILD_STATIC_LIBS:BOOL=ON
+# User can choose not to build shared library by using cmake -BUILD_SHARED_LIBS:BOOL:OFF
+# To build only static libs use cmake. -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_STATIC_LIBS:BOOL=ON
+
+option(BUILD_SHARED_LIBS "build as shared library" ON)
+option(BUILD_STATIC_LIBS "build as static library" OFF)
+
+if(BUILD_SHARED_LIBS)
+add_library(tinyxml2 SHARED tinyxml2.cpp tinyxml2.h)
+
 set_target_properties(tinyxml2 PROPERTIES
         COMPILE_DEFINITIONS "TINYXML2_EXPORT"
 	VERSION "${GENERIC_LIB_VERSION}"
 	SOVERSION "${GENERIC_LIB_SOVERSION}")
 
-add_executable(xmltest xmltest.cpp)
-add_dependencies(xmltest tinyxml2)
-add_dependencies(xmltest ${TARGET_DATA_COPY})
-target_link_libraries(xmltest tinyxml2)
-
-
 install(TARGETS tinyxml2
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
+
+if(BUILD_STATIC_LIBS)
+add_library(tinyxml2_static STATIC tinyxml2.cpp tinyxml2.h)
+set_target_properties(tinyxml2_static PROPERTIES
+        COMPILE_DEFINITONS "TINYXML2_EXPORT"
+        VERSION "${GENERIC_LIB_VERSION}"
+        SOVERSION "${GENERIC_LIB_SOVERSION}")
+set_target_properties( tinyxml2_static PROPERTIES OUTPUT_NAME tinyxml2 )
+
+install(TARGETS tinyxml2_static
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
+
+add_executable(xmltest xmltest.cpp)
+if(BUILD_SHARED_LIBS)
+   add_dependencies(xmltest tinyxml2)
+   add_dependencies(xmltest ${TARGET_DATA_COPY})
+   target_link_libraries(xmltest tinyxml2)
+else(BUILD_STATIC_LIBS)
+   add_dependencies(xmltest tinyxml2_static)
+   add_dependencies(xmltest ${TARGET_DATA_COPY})
+   target_link_libraries(xmltest tinyxml2_static)
+endif()
+install(TARGETS DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
