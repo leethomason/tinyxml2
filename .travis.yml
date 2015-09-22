@@ -4,4 +4,4 @@ compiler:
 os: linux
 
 before_script: cmake . 
-script: make
+script: make && ./xmltest
