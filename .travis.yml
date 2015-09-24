@@ -1,0 +1,7 @@
+language: c++
+compiler: 
+  - g++
+os: linux
+
+before_script: cmake . 
+script: make && ./xmltest
