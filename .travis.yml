@@ -1,6 +1,7 @@
-language: c++
+language: cpp
 compiler: 
   - g++
+  - clang
 os: linux
 
 before_script: cmake . 
