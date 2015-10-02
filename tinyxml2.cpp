@@ -32,6 +32,10 @@ distribution.
 #   include <cstdarg>
 #endif
 
+#if defined(TIXML_LOCALE_IND)
+#   include <locale.h>
+#endif
+
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
 	// Microsoft Visual Studio, version 2005 and higher. Not WinCE.
 	/*int _snprintf_s(
@@ -45,20 +49,39 @@ distribution.
 	{
 		va_list va;
 		va_start( va, format );
-		int result = vsnprintf_s( buffer, size, _TRUNCATE, format, va );
+
+		#if defined(TIXML_LOCALE_IND)
+			_locale_t locale = _create_locale(LC_ALL, "C");
+			int result = _vsnprintf_s_l(buffer, size, _TRUNCATE, format, locale, va);
+			_free_locale(locale);
+		#else
+			int result = vsnprintf_s( buffer, size, _TRUNCATE, format, va );
+		#endif
+
 		va_end( va );
 		return result;
 	}
 
 	static inline int TIXML_VSNPRINTF( char* buffer, size_t size, const char* format, va_list va )
 	{
-		int result = vsnprintf_s( buffer, size, _TRUNCATE, format, va );
+		#if defined(TIXML_LOCALE_IND)
+			_locale_t locale = _create_locale(LC_ALL, "C");
+			int result = vsnprintf_s(buffer, size, _TRUNCATE, format, va);
+			_free_locale(locale);
+		#else
+			int result = vsnprintf_s(buffer, size, _TRUNCATE, format, va);
+		#endif
 		return result;
 	}
 
-	#define TIXML_VSCPRINTF	_vscprintf
-	#define TIXML_SSCANF	sscanf_s
-#elif defined _MSC_VER
+	#if defined(TIXML_LOCALE_IND)
+		#define TIXML_VSCPRINTF _vscprintf_l
+		#define TIXML_SSCANF _sscanf_s_l
+	#else
+		#define TIXML_VSCPRINTF _vscprintf
+		#define TIXML_SSCANF sscanf_s
+	#endif
+	#elif defined _MSC_VER
 	// Microsoft Visual Studio 2003 and earlier or WinCE
 	#define TIXML_SNPRINTF	_snprintf
 	#define TIXML_VSNPRINTF _vsnprintf
@@ -557,17 +580,33 @@ void XMLUtil::ToStr( double v, char* buffer, int bufferSize )
 
 bool XMLUtil::ToInt( const char* str, int* value )
 {
+#if defined(TIXML_LOCALE_IND)
+    _locale_t locale = _create_locale(LC_NUMERIC, "C");
+    if (TIXML_SSCANF(str, "%d", locale, value) == 1) {
+      return true;
+    }
+    _free_locale(locale);
+#else
     if ( TIXML_SSCANF( str, "%d", value ) == 1 ) {
         return true;
     }
+#endif
     return false;
 }
 
 bool XMLUtil::ToUnsigned( const char* str, unsigned *value )
 {
+#if defined(TIXML_LOCALE_IND)
+  _locale_t locale = _create_locale(LC_NUMERIC, "C");
+  if (TIXML_SSCANF(str, "%u", locale, value) == 1) {
+    return true;
+  }
+  _free_locale(locale);
+#else
     if ( TIXML_SSCANF( str, "%u", value ) == 1 ) {
         return true;
     }
+#endif
     return false;
 }
 
@@ -592,17 +631,33 @@ bool XMLUtil::ToBool( const char* str, bool* value )
 
 bool XMLUtil::ToFloat( const char* str, float* value )
 {
+#if defined(TIXML_LOCALE_IND)
+    _locale_t locale = _create_locale(LC_NUMERIC, "C");
+    if (TIXML_SSCANF(str, "%f", locale, value) == 1) {
+      return true;
+    }
+    _free_locale(locale);
+#else
     if ( TIXML_SSCANF( str, "%f", value ) == 1 ) {
         return true;
     }
+#endif
     return false;
 }
 
 bool XMLUtil::ToDouble( const char* str, double* value )
 {
+#if defined(TIXML_LOCALE_IND)
+    _locale_t locale = _create_locale(LC_NUMERIC, "C");
+    if (TIXML_SSCANF(str, "%lf", locale, value) == 1) {
+      return true;
+    }
+    _free_locale(locale);
+#else
     if ( TIXML_SSCANF( str, "%lf", value ) == 1 ) {
         return true;
     }
+#endif
     return false;
 }
 
@@ -2133,14 +2188,20 @@ void XMLPrinter::Print( const char* format, ... )
         vfprintf( _fp, format, va );
     }
     else {
+#if defined TIXML_LOCALE_IND
+        _locale_t locale = _create_locale(LC_ALL, "C");
+        const int len = TIXML_VSCPRINTF(format, locale, va);
+        _free_locale(locale);
+#else
         const int len = TIXML_VSCPRINTF( format, va );
+#endif
         // Close out and re-start the va-args
         va_end( va );
         TIXMLASSERT( len >= 0 );
         va_start( va, format );
         TIXMLASSERT( _buffer.Size() > 0 && _buffer[_buffer.Size() - 1] == 0 );
-        char* p = _buffer.PushArr( len ) - 1;	// back up over the null terminator.
-		TIXML_VSNPRINTF( p, len+1, format, va );
+        char* p = _buffer.PushArr(len) - 1;	// back up over the null terminator.
+        TIXML_VSNPRINTF(p, len + 1, format, va);
     }
     va_end( va );
 }
