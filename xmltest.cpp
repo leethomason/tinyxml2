@@ -16,6 +16,9 @@
 	#include <windows.h>
 	_CrtMemState startMemState;
 	_CrtMemState endMemState;
+	#if defined(TIXML_LOCALE_IND)
+		#include <locale.h>
+	#endif
 #elif defined(MINGW32) || defined(__MINGW32__)
     #include <io.h>  // mkdir
 #else
@@ -1497,6 +1500,43 @@ int main( int argc, const char ** argv )
 	    XMLTest( "XMLDocument::Value() returns null?", NULL, doc->Value() );
 	    delete doc;
     }
+
+
+		{
+			// if TIXML_LOCALE_IND is defined, the parsing must not depend of the locale of the process
+			//
+			// In order to pass this test	TIXML_LOCALE_IND must be defined at "test" and "tinyxml" projects
+			// as "Preprocessor definitions".
+			//
+			// If you want to check the failing, define TIXML_LOCALE_IND  only at "test" project, and leave
+			// "tinyxml" project without that definition.
+
+			#if defined(TIXML_LOCALE_IND)
+				setlocale(LC_ALL, "es-ES");
+
+				const char* validXml = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+					"<first att=\"12.3\"/>"
+					"<second>12.3</second>";
+
+				XMLDocument* doc = new XMLDocument();
+				doc->Parse(validXml);
+				XMLElement* firstElement = doc->FirstChildElement("first");
+				XMLElement* secondElement = doc->FirstChildElement("second");
+
+				double firstAttValue = 0.0;
+				double secondValue = 0.0;
+
+				firstElement->QueryDoubleAttribute("att", &firstAttValue);
+				secondElement->QueryDoubleText(&secondValue);
+
+				XMLTest<double>("Attribute returns 12.3?", 12.3, firstAttValue);
+				XMLTest<double>("Text value returns 12.3?", 12.3, secondValue);
+
+				setlocale(LC_ALL, "C");
+				delete doc;
+			#endif
+		}
+
 
 	{
 		XMLDocument doc;
