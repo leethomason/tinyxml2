@@ -1,8 +1,15 @@
 language: cpp
-compiler: 
+
+os:
+  - linux
+  - osx
+
+compiler:
   - g++
   - clang
-os: linux
 
-before_script: cmake . 
-script: make && ./xmltest
+before_script: cmake .
+
+script:
+  - make -j3
+  - ./xmltest
