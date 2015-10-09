@@ -76,7 +76,7 @@ distribution.
 #if defined(DEBUG)
 #   if defined(_MSC_VER)
 #       // "(void)0," is for suppressing C4127 warning in "assert(false)", "assert(true)" and the like
-#       define TIXMLASSERT( x )           if ( !((void)0,(x))) { __debugbreak(); } //if ( !(x)) WinDebugBreak()
+#       define TIXMLASSERT( x )           if ( !((void)0,(x))) { __debugbreak(); }
 #   elif defined (ANDROID_NDK)
 #       include <android/log.h>
 #       define TIXMLASSERT( x )           if ( !(x)) { __android_log_assert( "assert", "grinliz", "ASSERT in '%s' at %d.", __FILE__, __LINE__ ); }
@@ -84,8 +84,10 @@ distribution.
 #       include <assert.h>
 #       define TIXMLASSERT                assert
 #   endif
-#   else
-#       define TIXMLASSERT( x )           {}
+#   define TIXML_STATIC_ASSERT(x)         typedef char __STATIC_ASSERT__[( x )?1:-1]
+#else
+#   define TIXMLASSERT( x )               {}
+#   define TIXML_STATIC_ASSERT(x)         {}
 #endif
 
 
@@ -557,16 +559,7 @@ public:
         if ( p == q ) {
             return true;
         }
-        int n = 0;
-        while( *p && *q && *p == *q && n<nChar ) {
-            ++p;
-            ++q;
-            ++n;
-        }
-        if ( (n == nChar) || ( *p == 0 && *q == 0 ) ) {
-            return true;
-        }
-        return false;
+        return strncmp( p, q, nChar ) == 0;
     }
     
     inline static bool IsUTF8Continuation( char p ) {
