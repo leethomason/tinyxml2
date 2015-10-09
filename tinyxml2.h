@@ -84,10 +84,8 @@ distribution.
 #       include <assert.h>
 #       define TIXMLASSERT                assert
 #   endif
-#   define TIXML_STATIC_ASSERT(x)         typedef char __STATIC_ASSERT__[( x )?1:-1]
 #else
 #   define TIXMLASSERT( x )               {}
-#   define TIXML_STATIC_ASSERT(x)         {}
 #endif
 
 
