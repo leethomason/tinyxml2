@@ -572,6 +572,7 @@ public:
 
     // converts primitive types to strings
     static void ToStr( int v, char* buffer, int bufferSize );
+    static void ToStr( long long v, char* buffer, int bufferSize );
     static void ToStr( unsigned v, char* buffer, int bufferSize );
     static void ToStr( bool v, char* buffer, int bufferSize );
     static void ToStr( float v, char* buffer, int bufferSize );
@@ -579,6 +580,7 @@ public:
 
     // converts strings to primitive types
     static bool	ToInt( const char* str, int* value );
+    static bool	ToLongLong( const char* str, long long* value );
     static bool ToUnsigned( const char* str, unsigned* value );
     static bool	ToBool( const char* str, bool* value );
     static bool	ToFloat( const char* str, float* value );
@@ -1110,6 +1112,8 @@ public:
     /// Set the attribute to value.
     void SetAttribute( int value );
     /// Set the attribute to value.
+    void SetAttribute( long long value );
+    /// Set the attribute to value.
     void SetAttribute( unsigned value );
     /// Set the attribute to value.
     void SetAttribute( bool value );
@@ -1325,6 +1329,11 @@ public:
         a->SetAttribute( value );
     }
     /// Sets the named attribute to value.
+    void SetAttribute( const char* name, long long value )			{
+        XMLAttribute* a = FindOrCreateAttribute( name );
+        a->SetAttribute( value );
+    }
+    /// Sets the named attribute to value.
     void SetAttribute( const char* name, unsigned value )		{
         XMLAttribute* a = FindOrCreateAttribute( name );
         a->SetAttribute( value );
@@ -1387,6 +1396,18 @@ public:
     */
     const char* GetText() const;
 
+    /// Sets the text to the given long long.
+	void	SetText( long long inNum );
+	
+	/// Convenience for QueryLongLongText when you don't care if the text won't convert.
+	long long		LongLongText()
+	{
+		long long		i = 0;
+		QueryLongLongText( &i );
+		return i;
+	}
+
+	
     /** Convenience function for easy access to the text inside an element. Although easy
     	and concise, SetText() is limited compared to creating an XMLText child
     	and mutating it directly.
@@ -1460,6 +1481,8 @@ public:
 
     */
     XMLError QueryIntText( int* ival ) const;
+    /// See QueryIntText()
+    XMLError QueryLongLongText( long long* ival ) const;
     /// See QueryIntText()
     XMLError QueryUnsignedText( unsigned* uval ) const;
     /// See QueryIntText()
