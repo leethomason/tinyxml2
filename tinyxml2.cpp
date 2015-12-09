@@ -177,6 +177,7 @@ void StrPair::Reset()
 
 void StrPair::SetStr( const char* str, int flags )
 {
+    if ( 0 == str ) return;
     Reset();
     size_t len = strlen( str );
     TIXMLASSERT( _start == 0 );
@@ -258,8 +259,10 @@ void StrPair::CollapseWhitespace()
 
 const char* StrPair::GetStr()
 {
-    TIXMLASSERT( _start );
-    TIXMLASSERT( _end );
+	if ( 0 == _start || 0 == _end )
+		return 0;
+    //TIXMLASSERT( _start );
+    //TIXMLASSERT( _end );
     if ( _flags & NEEDS_FLUSH ) {
         *_end = 0;
         _flags ^= NEEDS_FLUSH;
@@ -330,6 +333,7 @@ const char* StrPair::GetStr()
                         }
                         if ( !entityFound ) {
                             // fixme: treat as error?
+                            //if just can't find ';', should treat as error.
                             ++p;
                             ++q;
                         }
@@ -636,41 +640,29 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
     TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLDeclaration ) );	// use same memory pool
     XMLNode* returnNode = 0;
     if ( XMLUtil::StringEqual( p, xmlHeader, xmlHeaderLen ) ) {
-        TIXMLASSERT( sizeof( XMLDeclaration ) == _commentPool.ItemSize() );
-        returnNode = new (_commentPool.Alloc()) XMLDeclaration( this );
-        returnNode->_memPool = &_commentPool;
+        returnNode = NewDeclaration( 0 );
         p += xmlHeaderLen;
     }
     else if ( XMLUtil::StringEqual( p, commentHeader, commentHeaderLen ) ) {
-        TIXMLASSERT( sizeof( XMLComment ) == _commentPool.ItemSize() );
-        returnNode = new (_commentPool.Alloc()) XMLComment( this );
-        returnNode->_memPool = &_commentPool;
+        returnNode = NewComment( 0 );
         p += commentHeaderLen;
     }
     else if ( XMLUtil::StringEqual( p, cdataHeader, cdataHeaderLen ) ) {
-        TIXMLASSERT( sizeof( XMLText ) == _textPool.ItemSize() );
-        XMLText* text = new (_textPool.Alloc()) XMLText( this );
+        XMLText* text = NewText( 0 );
+		text->SetCData( true );
         returnNode = text;
-        returnNode->_memPool = &_textPool;
         p += cdataHeaderLen;
-        text->SetCData( true );
     }
     else if ( XMLUtil::StringEqual( p, dtdHeader, dtdHeaderLen ) ) {
-        TIXMLASSERT( sizeof( XMLUnknown ) == _commentPool.ItemSize() );
-        returnNode = new (_commentPool.Alloc()) XMLUnknown( this );
-        returnNode->_memPool = &_commentPool;
+        returnNode = NewUnknown( 0 );
         p += dtdHeaderLen;
     }
     else if ( XMLUtil::StringEqual( p, elementHeader, elementHeaderLen ) ) {
-        TIXMLASSERT( sizeof( XMLElement ) == _elementPool.ItemSize() );
-        returnNode = new (_elementPool.Alloc()) XMLElement( this );
-        returnNode->_memPool = &_elementPool;
+        returnNode = NewElement( 0 );
         p += elementHeaderLen;
     }
     else {
-        TIXMLASSERT( sizeof( XMLText ) == _textPool.ItemSize() );
-        returnNode = new (_textPool.Alloc()) XMLText( this );
-        returnNode->_memPool = &_textPool;
+        returnNode = NewText( 0 );
         p = start;	// Back it up, all the text counts.
     }
 
@@ -1702,25 +1694,42 @@ bool XMLElement::ShallowEqual( const XMLNode* compare ) const
 {
     TIXMLASSERT( compare );
     const XMLElement* other = compare->ToElement();
-    if ( other && XMLUtil::StringEqual( other->Name(), Name() )) {
+	if (!other || !XMLUtil::StringEqual(other->Name(), Name()))
+		return false;
 
-        const XMLAttribute* a=FirstAttribute();
-        const XMLAttribute* b=other->FirstAttribute();
-
-        while ( a && b ) {
-            if ( !XMLUtil::StringEqual( a->Value(), b->Value() ) ) {
-                return false;
-            }
-            a = a->Next();
-            b = b->Next();
-        }
-        if ( a || b ) {
-            // different count
-            return false;
-        }
-        return true;
-    }
-    return false;
+	size_t lhsAttrNum = 0; 
+    const XMLAttribute* a;
+	for (a = FirstAttribute(); a; a = a->Next()) {
+		++lhsAttrNum;
+	}
+	size_t rhsAttrNum = 0;
+	const XMLAttribute* b;
+	for (b = other->FirstAttribute(); b; b = b->Next()) {
+		++rhsAttrNum;
+	}
+	if (lhsAttrNum != rhsAttrNum)
+		return false;
+    //the complexity of the comparison is O(M*N + M + N),
+    //considered that great number of attribute is not common,
+    //it is not very bad. But it can handle situation like
+    //@verbatim
+    //<employee name="Sam" weight="48" age="56"/>
+    //<employee name="Sam" age="56" weight="48">
+    //end@verbatim
+    //they should be the same element, shouldn't they?
+	for (a = FirstAttribute(); a; a = a->Next()) {
+		for (b = other->FirstAttribute(); b; b = b->Next()) {
+            //compare both name and it's value(literal)
+			if (XMLUtil::StringEqual(a->Name(), b->Name()) 
+				&& XMLUtil::StringEqual(a->Value(), b->Value())) {
+				break;
+			}
+		}
+		if (!b) {
+			return false;
+		}
+	}
+    return true;
 }
 
 

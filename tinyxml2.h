@@ -345,11 +345,6 @@ public:
             // Need a new block.
             Block* block = new Block();
             _blockPtrs.Push( block );
-
-            for( int i=0; i<COUNT-1; ++i ) {
-                block->chunk[i].next = &block->chunk[i+1];
-            }
-            block->chunk[COUNT-1].next = 0;
             _root = block->chunk;
         }
         void* result = _root;
@@ -409,8 +404,15 @@ private:
         char    mem[SIZE];
     };
     struct Block {
+		Block() {
+			for (int i = 0; i<COUNT - 1; ++i) {
+				chunk[i].next = &chunk[i + 1];
+			}
+			chunk[COUNT - 1].next = 0;
+		}
         Chunk chunk[COUNT];
     };
+
     DynArray< Block*, 10 > _blockPtrs;
     Chunk* _root;
 

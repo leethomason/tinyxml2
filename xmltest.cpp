@@ -145,7 +145,7 @@ int example_3()
 
 	XMLDocument doc;
 	doc.Parse( xml );
-
+	doc.Print(); fflush(stdout);
 	XMLElement* titleElement = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" );
 	const char* title = titleElement->GetText();
 	printf( "Name of play (1): %s\n", title );
@@ -304,6 +304,13 @@ int main( int argc, const char ** argv )
 	{
 		TIXMLASSERT( true );
 	}
+
+	//test by @wgtdkp
+	XMLDocument* doc = new XMLDocument();
+	XMLElement* sam = doc->NewElement(NULL);
+	doc->InsertFirstChild(sam);
+	doc->Print();
+	//return 0;
 
 	if ( argc > 1 ) {
 		XMLDocument* doc = new XMLDocument();
