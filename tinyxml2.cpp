@@ -776,6 +776,7 @@ void XMLNode::DeleteChild( XMLNode* node )
     TIXMLASSERT( node );
     TIXMLASSERT( node->_document == _document );
     TIXMLASSERT( node->_parent == this );
+    Unlink( node );
     DeleteNode( node );
 }
 
