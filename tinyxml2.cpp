@@ -523,6 +523,16 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 }
 
 
+void XMLUtil::ToStr( long long v, char* buffer, int bufferSize )
+{
+#ifdef WIN32
+    TIXML_SNPRINTF( buffer, bufferSize, "%I64d", v );
+#else
+	TIXML_SNPRINTF( buffer, bufferSize, "%lld", v );
+#endif
+}
+
+
 void XMLUtil::ToStr( int v, char* buffer, int bufferSize )
 {
     TIXML_SNPRINTF( buffer, bufferSize, "%d", v );
@@ -1331,6 +1341,14 @@ XMLError XMLAttribute::QueryDoubleValue( double* value ) const
 void XMLAttribute::SetAttribute( const char* v )
 {
     _value.SetStr( v );
+}
+
+
+void XMLAttribute::SetAttribute( long long v )
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( v, buf, BUF_SIZE );
+    _value.SetStr( buf );
 }
 
 
