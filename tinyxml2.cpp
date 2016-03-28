@@ -2430,10 +2430,36 @@ void XMLPrinter::Print( const char* format, ... )
 }
 
 
+void XMLPrinter::Write( const char* data, size_t size )
+{
+    if ( _fp ) {
+        fwrite ( data , sizeof(char), size, _fp);
+    }
+    else {
+        char* p = _buffer.PushArr( size ) - 1;   // back up over the null terminator.
+        memcpy( p, data, size );
+        p[size] = 0;
+    }
+}
+
+
+void XMLPrinter::Putc( char ch )
+{
+    if ( _fp ) {
+        fputc ( ch, _fp);
+    }
+    else {
+        char* p = _buffer.PushArr( sizeof(char) ) - 1;   // back up over the null terminator.
+        p[0] = ch;
+        p[1] = 0;
+    }
+}
+
+
 void XMLPrinter::PrintSpace( int depth )
 {
     for( int i=0; i<depth; ++i ) {
-        Print( "    " );
+        Write( "    " );
     }
 }
 
@@ -2455,15 +2481,16 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
                 if ( flag[(unsigned char)(*q)] ) {
                     while ( p < q ) {
                         const size_t delta = q - p;
-                        // %.*s accepts type int as "precision"
                         const int toPrint = ( INT_MAX < delta ) ? INT_MAX : (int)delta;
-                        Print( "%.*s", toPrint, p );
+                        Write( p, toPrint );
                         p += toPrint;
                     }
                     bool entityPatternPrinted = false;
                     for( int i=0; i<NUM_ENTITIES; ++i ) {
                         if ( entities[i].value == *q ) {
-                            Print( "&%s;", entities[i].pattern );
+                            Putc( '&' );
+                            Write( entities[i].pattern );
+                            Putc( ';' );
                             entityPatternPrinted = true;
                             break;
                         }
@@ -2483,7 +2510,7 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
     // string if an entity wasn't found.
     TIXMLASSERT( p <= q );
     if ( !_processEntities || ( p < q ) ) {
-        Print( "%s", p );
+        Write( p );
     }
 }
 
@@ -2492,7 +2519,7 @@ void XMLPrinter::PushHeader( bool writeBOM, bool writeDec )
 {
     if ( writeBOM ) {
         static const unsigned char bom[] = { TIXML_UTF_LEAD_0, TIXML_UTF_LEAD_1, TIXML_UTF_LEAD_2, 0 };
-        Print( "%s", bom );
+        Write( reinterpret_cast< const char* >( bom ) );
     }
     if ( writeDec ) {
         PushDeclaration( "xml version=\"1.0\"" );
@@ -2506,13 +2533,15 @@ void XMLPrinter::OpenElement( const char* name, bool compactMode )
     _stack.Push( name );
 
     if ( _textDepth < 0 && !_firstElement && !compactMode ) {
-        Print( "\n" );
+        Putc( '\n' );
     }
     if ( !compactMode ) {
         PrintSpace( _depth );
     }
 
-    Print( "<%s", name );
+    Write ( "<" );
+    Write ( name );
+
     _elementJustOpened = true;
     _firstElement = false;
     ++_depth;
@@ -2522,9 +2551,11 @@ void XMLPrinter::OpenElement( const char* name, bool compactMode )
 void XMLPrinter::PushAttribute( const char* name, const char* value )
 {
     TIXMLASSERT( _elementJustOpened );
-    Print( " %s=\"", name );
+    Write( " " );
+    Write( name );
+    Write( "=\"" );
     PrintString( value, false );
-    Print( "\"" );
+    Write( "\"" );
 }
 
 
@@ -2574,21 +2605,23 @@ void XMLPrinter::CloseElement( bool compactMode )
     const char* name = _stack.Pop();
 
     if ( _elementJustOpened ) {
-        Print( "/>" );
+        Write( "/>" );
     }
     else {
         if ( _textDepth < 0 && !compactMode) {
-            Print( "\n" );
+            Putc( '\n' );
             PrintSpace( _depth );
         }
-        Print( "</%s>", name );
+        Write ( "</" );
+        Write ( name );
+        Write ( ">" );
     }
 
     if ( _textDepth == _depth ) {
         _textDepth = -1;
     }
     if ( _depth == 0 && !compactMode) {
-        Print( "\n" );
+        Putc( '\n' );
     }
     _elementJustOpened = false;
 }
@@ -2600,7 +2633,7 @@ void XMLPrinter::SealElementIfJustOpened()
         return;
     }
     _elementJustOpened = false;
-    Print( ">" );
+    Putc( '>' );
 }
 
 
@@ -2610,7 +2643,9 @@ void XMLPrinter::PushText( const char* text, bool cdata )
 
     SealElementIfJustOpened();
     if ( cdata ) {
-        Print( "<![CDATA[%s]]>", text );
+        Write( "<![CDATA[" );
+        Write( text );
+        Write( "]]>" );
     }
     else {
         PrintString( text, true );
@@ -2668,11 +2703,14 @@ void XMLPrinter::PushComment( const char* comment )
 {
     SealElementIfJustOpened();
     if ( _textDepth < 0 && !_firstElement && !_compactMode) {
-        Print( "\n" );
+        Putc( '\n' );
         PrintSpace( _depth );
     }
     _firstElement = false;
-    Print( "<!--%s-->", comment );
+
+    Write( "<!--" );
+    Write( comment );
+    Write( "-->" );
 }
 
 
@@ -2680,11 +2718,14 @@ void XMLPrinter::PushDeclaration( const char* value )
 {
     SealElementIfJustOpened();
     if ( _textDepth < 0 && !_firstElement && !_compactMode) {
-        Print( "\n" );
+        Putc( '\n' );
         PrintSpace( _depth );
     }
     _firstElement = false;
-    Print( "<?%s?>", value );
+
+    Write( "<?" );
+    Write( value );
+    Write( "?>" );
 }
 
 
@@ -2692,11 +2733,14 @@ void XMLPrinter::PushUnknown( const char* value )
 {
     SealElementIfJustOpened();
     if ( _textDepth < 0 && !_firstElement && !_compactMode) {
-        Print( "\n" );
+        Putc( '\n' );
         PrintSpace( _depth );
     }
     _firstElement = false;
-    Print( "<!%s>", value );
+
+    Write( "<!" );
+    Write( value );
+    Write( ">" );
 }
 
 
