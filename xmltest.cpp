@@ -1510,36 +1510,36 @@ int main( int argc, const char ** argv )
 	{
 #if defined( _MSC_VER )
 		__int64 start, end, freq;
-		QueryPerformanceFrequency( (LARGE_INTEGER*) &freq );
+		QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
 #endif
 
-		FILE* fp  = fopen( "resources/dream.xml", "r" );
-		fseek( fp, 0, SEEK_END );
-		long size = ftell( fp );
-		fseek( fp, 0, SEEK_SET );
+		FILE* perfFP = fopen("resources/dream.xml", "r");
+		fseek(perfFP, 0, SEEK_END);
+		long size = ftell(fp);
+		fseek(perfFP, 0, SEEK_SET);
 
-		char* mem = new char[size+1];
-		fread( mem, size, 1, fp );
-		fclose( fp );
+		char* mem = new char[size + 1];
+		fread(mem, size, 1, perfFP);
+		fclose(perfFP);
 		mem[size] = 0;
 
 #if defined( _MSC_VER )
-		QueryPerformanceCounter( (LARGE_INTEGER*) &start );
+		QueryPerformanceCounter((LARGE_INTEGER*)&start);
 #else
 		clock_t cstart = clock();
 #endif
 		static const int COUNT = 10;
-		for( int i=0; i<COUNT; ++i ) {
+		for (int i = 0; i < COUNT; ++i) {
 			XMLDocument doc;
-			doc.Parse( mem );
+			doc.Parse(mem);
 		}
 #if defined( _MSC_VER )
-		QueryPerformanceCounter( (LARGE_INTEGER*) &end );
+		QueryPerformanceCounter((LARGE_INTEGER*)&end);
 #else
 		clock_t cend = clock();
 #endif
 
-		delete [] mem;
+		delete[] mem;
 
 		static const char* note =
 #ifdef DEBUG
@@ -1549,9 +1549,9 @@ int main( int argc, const char ** argv )
 #endif
 
 #if defined( _MSC_VER )
-		printf( "\nParsing %s of dream.xml: %.3f milli-seconds\n", note, 1000.0 * (double)(end-start) / ( (double)freq * (double)COUNT) );
+		printf("\nParsing %s of dream.xml: %.3f milli-seconds\n", note, 1000.0 * (double)(end - start) / ((double)freq * (double)COUNT));
 #else
-		printf( "\nParsing %s of dream.xml: %.3f milli-seconds\n", note, (double)(cend - cstart)/(double)COUNT );
+		printf("\nParsing %s of dream.xml: %.3f milli-seconds\n", note, (double)(cend - cstart) / (double)COUNT);
 #endif
 	}
 
