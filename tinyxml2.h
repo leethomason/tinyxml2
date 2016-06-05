@@ -30,7 +30,6 @@ distribution.
 #   include <stdio.h>
 #   include <stdlib.h>
 #   include <string.h>
-#	include <stdint.h>
 #	if defined(__PS3__)
 #		include <stddef.h>
 #	endif
@@ -40,8 +39,8 @@ distribution.
 #   include <cstdio>
 #   include <cstdlib>
 #   include <cstring>
-#	include <cstdint>
 #endif
+#include <stdint.h>
 
 /*
    TODO: intern strings instead of allocation.
