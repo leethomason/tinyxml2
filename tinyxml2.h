@@ -485,7 +485,6 @@ public:
 // WARNING: must match XMLDocument::_errorNames[]
 enum XMLError {
     XML_SUCCESS = 0,
-    XML_NO_ERROR = 0,
     XML_NO_ATTRIBUTE,
     XML_WRONG_ATTRIBUTE_TYPE,
     XML_ERROR_FILE_NOT_FOUND,
@@ -1673,7 +1672,7 @@ public:
 
     /// Return true if there was an error parsing the document.
     bool Error() const {
-        return _errorID != XML_NO_ERROR;
+        return _errorID != XML_SUCCESS;
     }
     /// Return the errorID.
     XMLError  ErrorID() const {

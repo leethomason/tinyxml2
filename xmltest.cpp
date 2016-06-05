@@ -513,13 +513,13 @@ int main( int argc, const char ** argv )
 		double dVal;
 
 		result = ele->QueryDoubleAttribute( "attr0", &dVal );
-		XMLTest( "Query attribute: int as double", result, (int)XML_NO_ERROR );
+		XMLTest( "Query attribute: int as double", result, (int)XML_SUCCESS);
 		XMLTest( "Query attribute: int as double", (int)dVal, 1 );
 		result = ele->QueryDoubleAttribute( "attr1", &dVal );
-		XMLTest( "Query attribute: double as double", result, (int)XML_NO_ERROR );
+		XMLTest( "Query attribute: double as double", result, (int)XML_SUCCESS);
 		XMLTest( "Query attribute: double as double", (int)dVal, 2 );
 		result = ele->QueryIntAttribute( "attr1", &iVal );
-		XMLTest( "Query attribute: double as int", result, (int)XML_NO_ERROR );
+		XMLTest( "Query attribute: double as int", result, (int)XML_SUCCESS);
 		XMLTest( "Query attribute: double as int", iVal, 2 );
 		result = ele->QueryIntAttribute( "attr2", &iVal );
 		XMLTest( "Query attribute: not a number", result, (int)XML_WRONG_ATTRIBUTE_TYPE );
@@ -1003,7 +1003,7 @@ int main( int argc, const char ** argv )
 	{
 		// This shouldn't crash.
 		XMLDocument doc;
-		if(XML_NO_ERROR != doc.LoadFile( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ))
+		if(XML_SUCCESS != doc.LoadFile( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ))
 		{
 			doc.PrintError();
 		}
@@ -1256,7 +1256,7 @@ int main( int argc, const char ** argv )
         static const char* xml_bom_preservation  = "\xef\xbb\xbf<element/>\n";
         {
 			XMLDocument doc;
-			XMLTest( "BOM preservation (parse)", XML_NO_ERROR, doc.Parse( xml_bom_preservation ), false );
+			XMLTest( "BOM preservation (parse)", XML_SUCCESS, doc.Parse( xml_bom_preservation ), false );
             XMLPrinter printer;
             doc.Print( &printer );
 
