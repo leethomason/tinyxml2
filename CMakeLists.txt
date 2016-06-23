@@ -22,7 +22,7 @@ set(GENERIC_LIB_SOVERSION "3")
 
 
 ################################
-# Add common source 
+# Add common source
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/.")
 
@@ -72,6 +72,10 @@ set_target_properties(tinyxml2 PROPERTIES
 	VERSION "${GENERIC_LIB_VERSION}"
 	SOVERSION "${GENERIC_LIB_SOVERSION}")
 
+if(DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
+    target_include_directories(tinyxml2 INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/.")
+endif()
+
 install(TARGETS tinyxml2
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -85,6 +89,10 @@ set_target_properties(tinyxml2_static PROPERTIES
         VERSION "${GENERIC_LIB_VERSION}"
         SOVERSION "${GENERIC_LIB_SOVERSION}")
 set_target_properties( tinyxml2_static PROPERTIES OUTPUT_NAME tinyxml2 )
+
+if(DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
+    target_include_directories(tinyxml2_static INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/.")
+endif()
 
 install(TARGETS tinyxml2_static
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
