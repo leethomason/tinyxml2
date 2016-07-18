@@ -426,7 +426,7 @@ int main( int argc, const char ** argv )
 		XMLTest( "Programmatic DOM", 2, doc->FirstChildElement()->LastChildElement( "sub" )->IntAttribute( "attrib" ) );
 		XMLTest( "Programmatic DOM", "& Text!",
 				 doc->FirstChildElement()->LastChildElement( "sub" )->FirstChild()->ToText()->Value() );
-		XMLTest("User data", 2, (int)comment->GetUserData());
+		XMLTest("User data", (void*)2 == comment->GetUserData(), true, false);
 
 		// And now deletion:
 		element->DeleteChild( sub[2] );
