@@ -416,6 +416,7 @@ int main( int argc, const char ** argv )
 		}
 		element->InsertEndChild( sub[2] );
 		XMLNode* comment = element->InsertFirstChild( doc->NewComment( "comment" ) );
+		comment->SetUserData((void*)2);
 		element->InsertAfterChild( comment, sub[0] );
 		element->InsertAfterChild( sub[0], sub[1] );
 		sub[2]->InsertFirstChild( doc->NewText( "& Text!" ));
@@ -425,6 +426,7 @@ int main( int argc, const char ** argv )
 		XMLTest( "Programmatic DOM", 2, doc->FirstChildElement()->LastChildElement( "sub" )->IntAttribute( "attrib" ) );
 		XMLTest( "Programmatic DOM", "& Text!",
 				 doc->FirstChildElement()->LastChildElement( "sub" )->FirstChild()->ToText()->Value() );
+		XMLTest("User data", 2, (int)comment->GetUserData());
 
 		// And now deletion:
 		element->DeleteChild( sub[2] );

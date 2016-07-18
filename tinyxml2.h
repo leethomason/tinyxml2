@@ -857,6 +857,20 @@ public:
     */
     virtual bool Accept( XMLVisitor* visitor ) const = 0;
 
+	/** 
+		Set user data into the XMLNode. TinyXML-2 in 
+		no way processes or interprets user data.
+		It is initially 0.
+	*/
+	void SetUserData(void* userData)	{ _userData = userData; }
+
+	/**
+		Get user data set into the XMLNode. TinyXML-2 in
+		no way processes or interprets user data.
+		It is initially 0.
+	*/
+	void* GetUserData() const			{ return _userData; }
+
 protected:
     XMLNode( XMLDocument* );
     virtual ~XMLNode();
@@ -872,6 +886,8 @@ protected:
 
     XMLNode*		_prev;
     XMLNode*		_next;
+
+	void*			_userData;
 
 private:
     MemPool*		_memPool;
