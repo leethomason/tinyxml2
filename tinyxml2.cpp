@@ -1987,10 +1987,12 @@ struct LongFitsIntoSizeTMinusOne {
 };
 
 template <>
-bool LongFitsIntoSizeTMinusOne<false>::Fits( unsigned long /*value*/ )
-{
-    return true;
-}
+struct LongFitsIntoSizeTMinusOne<false> {
+    static bool Fits( unsigned long )
+    {
+        return true;
+    }
+};
 
 XMLError XMLDocument::LoadFile( FILE* fp )
 {
