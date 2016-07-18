@@ -558,7 +558,8 @@ void XMLUtil::ToStr( double v, char* buffer, int bufferSize )
 
 void XMLUtil::ToStr(int64_t v, char* buffer, int bufferSize)
 {
-	TIXML_SNPRINTF(buffer, bufferSize, "%lld", v);
+	// horrible syntax trick to make the compiler happy about %lld
+	TIXML_SNPRINTF(buffer, bufferSize, "%lld", (long long)v);
 }
 
 
@@ -617,7 +618,9 @@ bool XMLUtil::ToDouble( const char* str, double* value )
 
 bool XMLUtil::ToInt64(const char* str, int64_t* value)
 {
-	if (TIXML_SSCANF(str, "%lld", value) == 1) {
+	long long v = 0;	// horrible syntax trick to make the compiler happy about %lld
+	if (TIXML_SSCANF(str, "%lld", &v) == 1) {
+		*value = (int64_t)v;
 		return true;
 	}
 	return false;
