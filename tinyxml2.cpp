@@ -143,7 +143,8 @@ StrPair::~StrPair()
 
 void StrPair::TransferTo( StrPair* other )
 {
-    if ( this == other ) {
+    if ( this == other ||
+    	other == nullptr) {
         return;
     }
     // This in effect implements the assignment operator by "moving"
