@@ -149,6 +149,7 @@ void StrPair::TransferTo( StrPair* other )
     // This in effect implements the assignment operator by "moving"
     // ownership (as in auto_ptr).
 
+    TIXMLASSERT( other != 0 );
     TIXMLASSERT( other->_flags == 0 );
     TIXMLASSERT( other->_start == 0 );
     TIXMLASSERT( other->_end == 0 );
