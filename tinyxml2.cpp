@@ -2398,6 +2398,13 @@ void XMLPrinter::PushText( const char* text, bool cdata )
     }
 }
 
+void XMLPrinter::PushText( int64_t value )
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( value, buf, BUF_SIZE );
+    PushText( buf, false );
+}
+
 void XMLPrinter::PushText( int value )
 {
     char buf[BUF_SIZE];
