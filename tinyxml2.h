@@ -315,7 +315,7 @@ public:
 /*
 	Template child class to create pools of the correct type.
 */
-template< int SIZE >
+template< int ITEM_SIZE >
 class MemPoolT : public MemPool
 {
 public:
@@ -338,7 +338,7 @@ public:
     }
 
     virtual int ItemSize() const	{
-        return SIZE;
+        return ITEM_SIZE;
     }
     int CurrentAllocs() const		{
         return _currentAllocs;
@@ -350,13 +350,15 @@ public:
             Block* block = new Block();
             _blockPtrs.Push( block );
 
-            for( int i=0; i<COUNT-1; ++i ) {
-                block->chunk[i].next = &block->chunk[i+1];
+            Item* blockItems = block->items;
+            for( int i = 0; i < ITEMS_PER_BLOCK - 1; ++i ) {
+                blockItems[i].next = &(blockItems[i + 1]);
             }
-            block->chunk[COUNT-1].next = 0;
-            _root = block->chunk;
+            blockItems[ITEMS_PER_BLOCK - 1].next = 0;
+            _root = blockItems;
         }
-        void* result = _root;
+        Item* const result = _root;
+        TIXMLASSERT( result != 0 );
         _root = _root->next;
 
         ++_currentAllocs;
@@ -373,16 +375,17 @@ public:
             return;
         }
         --_currentAllocs;
-        Chunk* chunk = static_cast<Chunk*>( mem );
+        Item* item = static_cast<Item*>( mem );
 #ifdef DEBUG
-        memset( chunk, 0xfe, sizeof(Chunk) );
+        memset( item, 0xfe, sizeof( *item ) );
 #endif
-        chunk->next = _root;
-        _root = chunk;
+        item->next = _root;
+        _root = item;
     }
     void Trace( const char* name ) {
         printf( "Mempool %s watermark=%d [%dk] current=%d size=%d nAlloc=%d blocks=%d\n",
-                name, _maxAllocs, _maxAllocs*SIZE/1024, _currentAllocs, SIZE, _nAllocs, _blockPtrs.Size() );
+                name, _maxAllocs, _maxAllocs * ITEM_SIZE / 1024, _currentAllocs,
+                ITEM_SIZE, _nAllocs, _blockPtrs.Size() );
     }
 
     void SetTracked() {
@@ -402,21 +405,23 @@ public:
 	//		16k:	5200
 	//		32k:	4300
 	//		64k:	4000	21000
-    enum { COUNT = (4*1024)/SIZE }; // Some compilers do not accept to use COUNT in private part if COUNT is private
+    // Declared public because some compilers do not accept to use ITEMS_PER_BLOCK
+    // in private part if ITEMS_PER_BLOCK is private
+    enum { ITEMS_PER_BLOCK = (4 * 1024) / ITEM_SIZE };
 
 private:
     MemPoolT( const MemPoolT& ); // not supported
     void operator=( const MemPoolT& ); // not supported
 
-    union Chunk {
-        Chunk*  next;
-        char    mem[SIZE];
+    union Item {
+        Item*   next;
+        char    itemData[ITEM_SIZE];
     };
     struct Block {
-        Chunk chunk[COUNT];
+        Item items[ITEMS_PER_BLOCK];
     };
     DynArray< Block*, 10 > _blockPtrs;
-    Chunk* _root;
+    Item* _root;
 
     int _currentAllocs;
     int _nAllocs;
