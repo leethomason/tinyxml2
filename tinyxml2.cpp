@@ -991,7 +991,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
                 // Set error, if document already has children.
                 if ( !_document->NoChildren() ) {
                         _document->SetError( XML_ERROR_PARSING_DECLARATION, decl->Value(), 0);
-                        DeleteNode( decl );
+                        DeleteNode( node );
                         break;
                 }
         }
