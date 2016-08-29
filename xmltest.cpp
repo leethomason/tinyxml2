@@ -451,7 +451,7 @@ int main( int argc, const char ** argv )
 		{
 			XMLPrinter streamer( 0, true );
 			doc->Print( &streamer );
-			XMLTest( "Compact mode", "<element><sub attrib=\"1\"/><sub/></element>", streamer.CStr(), false );
+			XMLTest( "Compact mode", "<element><sub attrib=\"true\"/><sub/></element>", streamer.CStr(), false );
 		}
 		doc->SaveFile( "./resources/out/pretty.xml" );
 		doc->SaveFile( "./resources/out/compact.xml", true );
@@ -679,7 +679,7 @@ int main( int argc, const char ** argv )
 		XMLTest( "SetText types", "1", element->GetText() );
 
 		element->SetText( true );
-		XMLTest( "SetText types", "1", element->GetText() ); // TODO: should be 'true'?
+		XMLTest( "SetText types", "true", element->GetText() );
 
 		element->SetText( 1.5f );
 		XMLTest( "SetText types", "1.5", element->GetText() );
