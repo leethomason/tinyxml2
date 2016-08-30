@@ -191,6 +191,7 @@ void StrPair::SetStr( const char* str, int flags )
 
 char* StrPair::ParseText( char* p, const char* endTag, int strFlags )
 {
+    TIXMLASSERT( p );
     TIXMLASSERT( endTag && *endTag );
 
     char* start = p;
@@ -204,6 +205,7 @@ char* StrPair::ParseText( char* p, const char* endTag, int strFlags )
             return p + length;
         }
         ++p;
+        TIXMLASSERT( p );
     }
     return 0;
 }
