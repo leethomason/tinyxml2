@@ -237,7 +237,7 @@ void StrPair::CollapseWhitespace()
     _start = XMLUtil::SkipWhiteSpace( _start );
 
     if ( *_start ) {
-        char* p = _start;	// the read pointer
+        const char* p = _start;	// the read pointer
         char* q = _start;	// the write pointer
 
         while( *p ) {
@@ -267,7 +267,7 @@ const char* StrPair::GetStr()
         _flags ^= NEEDS_FLUSH;
 
         if ( _flags ) {
-            char* p = _start;	// the read pointer
+            const char* p = _start;	// the read pointer
             char* q = _start;	// the write pointer
 
             while( p < _end ) {
