@@ -1829,8 +1829,6 @@ XMLDocument::XMLDocument( bool processEntities, Whitespace whitespace ) :
     _processEntities( processEntities ),
     _errorID(XML_SUCCESS),
     _whitespace( whitespace ),
-    _errorStr1( 0 ),
-    _errorStr2( 0 ),
     _charBuffer( 0 )
 {
     // avoid VC++ C4355 warning about 'this' in initializer list (C4355 is off by default in VS2012+)
@@ -1852,8 +1850,8 @@ void XMLDocument::Clear()
     const bool hadError = Error();
 #endif
     _errorID = XML_SUCCESS;
-    _errorStr1 = 0;
-    _errorStr2 = 0;
+	_errorStr1.Reset();
+	_errorStr2.Reset();
 
     delete [] _charBuffer;
     _charBuffer = 0;
@@ -2112,8 +2110,14 @@ void XMLDocument::SetError( XMLError error, const char* str1, const char* str2 )
 {
     TIXMLASSERT( error >= 0 && error < XML_ERROR_COUNT );
     _errorID = error;
-    _errorStr1 = str1;
-    _errorStr2 = str2;
+	
+	_errorStr1.Reset();
+	_errorStr2.Reset();
+
+	if (str1)
+		_errorStr1.SetStr(str1);
+	if (str2)
+		_errorStr2.SetStr(str2);
 }
 
 const char* XMLDocument::ErrorName() const
@@ -2131,11 +2135,11 @@ void XMLDocument::PrintError() const
         char buf1[LEN] = { 0 };
         char buf2[LEN] = { 0 };
 
-        if ( _errorStr1 ) {
-            TIXML_SNPRINTF( buf1, LEN, "%s", _errorStr1 );
+        if ( !_errorStr1.Empty() ) {
+            TIXML_SNPRINTF( buf1, LEN, "%s", _errorStr1.GetStr() );
         }
-        if ( _errorStr2 ) {
-            TIXML_SNPRINTF( buf2, LEN, "%s", _errorStr2 );
+        if ( !_errorStr2.Empty() ) {
+            TIXML_SNPRINTF( buf2, LEN, "%s", _errorStr2.GetStr() );
         }
 
         // Should check INT_MIN <= _errorID && _errorId <= INT_MAX, but that
