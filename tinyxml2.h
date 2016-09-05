@@ -369,8 +369,8 @@ public:
         if ( _currentAllocs > _maxAllocs ) {
             _maxAllocs = _currentAllocs;
         }
-        _nAllocs++;
-        _nUntracked++;
+        ++_nAllocs;
+        ++_nUntracked;
         return result;
     }
     
@@ -393,7 +393,7 @@ public:
     }
 
     void SetTracked() {
-        _nUntracked--;
+        --_nUntracked;
     }
 
     int Untracked() const {
