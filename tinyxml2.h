@@ -139,6 +139,8 @@ public:
     ~StrPair();
 
     void Set( char* start, char* end, int flags ) {
+        TIXMLASSERT( start );
+        TIXMLASSERT( end );
         Reset();
         _start  = start;
         _end    = end;
