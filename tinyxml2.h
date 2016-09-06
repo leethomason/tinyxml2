@@ -211,7 +211,8 @@ public:
     void Push( T t ) {
         TIXMLASSERT( _size < INT_MAX );
         EnsureCapacity( _size+1 );
-        _mem[_size++] = t;
+        _mem[_size] = t;
+        ++_size;
     }
 
     T* PushArr( int count ) {
@@ -225,7 +226,8 @@ public:
 
     T Pop() {
         TIXMLASSERT( _size > 0 );
-        return _mem[--_size];
+        --_size;
+        return _mem[_size];
     }
 
     void PopArr( int count ) {
