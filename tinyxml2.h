@@ -1231,41 +1231,41 @@ public:
     	returned if there is an error. For a method with error
     	checking, see QueryIntAttribute()
     */
-    int		 IntAttribute( const char* name ) const		{
-        int i=0;
+    int		 IntAttribute(const char* name, int defaultValue = 0) const		{
+        int i=defaultValue;
         QueryIntAttribute( name, &i );
         return i;
     }
 
     /// See IntAttribute()
-    unsigned UnsignedAttribute( const char* name ) const {
-        unsigned i=0;
+    unsigned UnsignedAttribute(const char* name , unsigned defaultValue = 0) const {
+        unsigned i=defaultValue;
         QueryUnsignedAttribute( name, &i );
         return i;
     }
 
 	/// See IntAttribute()
-	int64_t Int64Attribute(const char* name) const {
-		int64_t i = 0;
+	int64_t Int64Attribute(const char* name, int64_t defaultValue = 0) const {
+		int64_t i = defaultValue;
 		QueryInt64Attribute(name, &i);
 		return i;
 	}
 
 	/// See IntAttribute()
-    bool BoolAttribute( const char* name ) const	{
-        bool b=false;
+    bool BoolAttribute( const char* name, bool defaultValue = false ) const	{
+        bool b=defaultValue;
         QueryBoolAttribute( name, &b );
         return b;
     }
     /// See IntAttribute()
-    double DoubleAttribute( const char* name ) const	{
-        double d=0;
+    double DoubleAttribute( const char* name, double defaultValue=0 ) const	{
+        double d=defaultValue;
         QueryDoubleAttribute( name, &d );
         return d;
     }
     /// See IntAttribute()
-    float FloatAttribute( const char* name ) const	{
-        float f=0;
+    float FloatAttribute( const char* name, float defaultValue=0 ) const	{
+        float f=defaultValue;
         QueryFloatAttribute( name, &f );
         return f;
     }
@@ -1541,6 +1541,48 @@ public:
     XMLError QueryDoubleText( double* dval ) const;
     /// See QueryIntText()
     XMLError QueryFloatText( float* fval ) const;
+
+	int IntText(int defaultValue = 0) const
+	{
+		int i = defaultValue;
+		QueryIntText(&i);
+		return i;
+	}
+	/// See QueryIntText()
+	unsigned UnsignedText(unsigned defaultValue = 0) const
+	{
+		unsigned i = defaultValue;
+		QueryUnsignedText(&i);
+		return i;
+	}
+	/// See QueryIntText()
+	int64_t Int64Text(int64_t defaultValue = 0) const
+	{
+		int64_t i = defaultValue;
+		QueryInt64Text(&i);
+		return i;
+	}
+	/// See QueryIntText()
+	bool BoolText(bool defaultValue = false) const
+	{
+		bool b = defaultValue;
+		QueryBoolText(&b);
+		return b;
+	}
+	/// See QueryIntText()
+	double DoubleText(double defaultValue = 0) const
+	{
+		double d = defaultValue;
+		QueryDoubleText(&d);
+		return d;
+	}
+	/// See QueryIntText()
+	float FloatText(float defaultValue = 0) const
+	{
+		float f = defaultValue;
+		QueryFloatText(&f);
+		return f;
+	}
 
     // internal:
     enum {
