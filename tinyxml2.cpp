@@ -281,7 +281,8 @@ const char* StrPair::GetStr()
                     else {
                         ++p;
                     }
-                    *q++ = LF;
+                    *q = LF;
+                    ++q;
                 }
                 else if ( (_flags & NEEDS_NEWLINE_NORMALIZATION) && *p == LF ) {
                     if ( *(p+1) == CR ) {
@@ -290,7 +291,8 @@ const char* StrPair::GetStr()
                     else {
                         ++p;
                     }
-                    *q++ = LF;
+                    *q = LF;
+                    ++q;
                 }
                 else if ( (_flags & NEEDS_ENTITY_PROCESSING) && *p == '&' ) {
                     // Entities handled by tinyXML2:
