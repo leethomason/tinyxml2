@@ -149,6 +149,7 @@ void StrPair::TransferTo( StrPair* other )
     // This in effect implements the assignment operator by "moving"
     // ownership (as in auto_ptr).
 
+    TIXMLASSERT( other != 0 );
     TIXMLASSERT( other->_flags == 0 );
     TIXMLASSERT( other->_start == 0 );
     TIXMLASSERT( other->_end == 0 );
@@ -236,7 +237,7 @@ void StrPair::CollapseWhitespace()
     _start = XMLUtil::SkipWhiteSpace( _start );
 
     if ( *_start ) {
-        char* p = _start;	// the read pointer
+        const char* p = _start;	// the read pointer
         char* q = _start;	// the write pointer
 
         while( *p ) {
@@ -266,7 +267,7 @@ const char* StrPair::GetStr()
         _flags ^= NEEDS_FLUSH;
 
         if ( _flags ) {
-            char* p = _start;	// the read pointer
+            const char* p = _start;	// the read pointer
             char* q = _start;	// the write pointer
 
             while( p < _end ) {
@@ -280,7 +281,8 @@ const char* StrPair::GetStr()
                     else {
                         ++p;
                     }
-                    *q++ = LF;
+                    *q = LF;
+                    ++q;
                 }
                 else if ( (_flags & NEEDS_NEWLINE_NORMALIZATION) && *p == LF ) {
                     if ( *(p+1) == CR ) {
@@ -289,7 +291,8 @@ const char* StrPair::GetStr()
                     else {
                         ++p;
                     }
-                    *q++ = LF;
+                    *q = LF;
+                    ++q;
                 }
                 else if ( (_flags & NEEDS_ENTITY_PROCESSING) && *p == '&' ) {
                     // Entities handled by tinyXML2:
@@ -537,7 +540,7 @@ void XMLUtil::ToStr( unsigned v, char* buffer, int bufferSize )
 
 void XMLUtil::ToStr( bool v, char* buffer, int bufferSize )
 {
-    TIXML_SNPRINTF( buffer, bufferSize, "%d", v ? 1 : 0 );
+    TIXML_SNPRINTF( buffer, bufferSize, "%s", v ? "true" : "false" );
 }
 
 /*
@@ -553,6 +556,13 @@ void XMLUtil::ToStr( float v, char* buffer, int bufferSize )
 void XMLUtil::ToStr( double v, char* buffer, int bufferSize )
 {
     TIXML_SNPRINTF( buffer, bufferSize, "%.17g", v );
+}
+
+
+void XMLUtil::ToStr(int64_t v, char* buffer, int bufferSize)
+{
+	// horrible syntax trick to make the compiler happy about %lld
+	TIXML_SNPRINTF(buffer, bufferSize, "%lld", (long long)v);
 }
 
 
@@ -599,12 +609,24 @@ bool XMLUtil::ToFloat( const char* str, float* value )
     return false;
 }
 
+
 bool XMLUtil::ToDouble( const char* str, double* value )
 {
     if ( TIXML_SSCANF( str, "%lf", value ) == 1 ) {
         return true;
     }
     return false;
+}
+
+
+bool XMLUtil::ToInt64(const char* str, int64_t* value)
+{
+	long long v = 0;	// horrible syntax trick to make the compiler happy about %lld
+	if (TIXML_SSCANF(str, "%lld", &v) == 1) {
+		*value = (int64_t)v;
+		return true;
+	}
+	return false;
 }
 
 
@@ -703,6 +725,7 @@ XMLNode::XMLNode( XMLDocument* doc ) :
     _parent( 0 ),
     _firstChild( 0 ), _lastChild( 0 ),
     _prev( 0 ), _next( 0 ),
+	_userData( 0 ),
     _memPool( 0 )
 {
 }
@@ -718,7 +741,7 @@ XMLNode::~XMLNode()
 
 const char* XMLNode::Value() const 
 {
-    // Catch an edge case: XMLDocuments don't have a a Value. Carefully return nullptr.
+    // Edge case: XMLDocuments don't have a Value. Return null.
     if ( this->ToDocument() )
         return 0;
     return _value.GetStr();
@@ -739,11 +762,7 @@ void XMLNode::DeleteChildren()
 {
     while( _firstChild ) {
         TIXMLASSERT( _lastChild );
-        TIXMLASSERT( _firstChild->_document == _document );
-        XMLNode* node = _firstChild;
-        Unlink( node );
-
-        DeleteNode( node );
+        DeleteChild( _firstChild );
     }
     _firstChild = _lastChild = 0;
 }
@@ -970,7 +989,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
                 // Set error, if document already has children.
                 if ( !_document->NoChildren() ) {
                         _document->SetError( XML_ERROR_PARSING_DECLARATION, decl->Value(), 0);
-                        DeleteNode( decl );
+                        DeleteNode( node );
                         break;
                 }
         }
@@ -1301,6 +1320,15 @@ XMLError XMLAttribute::QueryUnsignedValue( unsigned int* value ) const
 }
 
 
+XMLError XMLAttribute::QueryInt64Value(int64_t* value) const
+{
+	if (XMLUtil::ToInt64(Value(), value)) {
+		return XML_SUCCESS;
+	}
+	return XML_WRONG_ATTRIBUTE_TYPE;
+}
+
+
 XMLError XMLAttribute::QueryBoolValue( bool* value ) const
 {
     if ( XMLUtil::ToBool( Value(), value )) {
@@ -1348,6 +1376,15 @@ void XMLAttribute::SetAttribute( unsigned v )
     XMLUtil::ToStr( v, buf, BUF_SIZE );
     _value.SetStr( buf );
 }
+
+
+void XMLAttribute::SetAttribute(int64_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	_value.SetStr(buf);
+}
+
 
 
 void XMLAttribute::SetAttribute( bool v )
@@ -1450,7 +1487,15 @@ void XMLElement::SetText( unsigned v )
 }
 
 
-void XMLElement::SetText( bool v ) 
+void XMLElement::SetText(int64_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	SetText(buf);
+}
+
+
+void XMLElement::SetText( bool v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
@@ -1497,6 +1542,19 @@ XMLError XMLElement::QueryUnsignedText( unsigned* uval ) const
         return XML_CAN_NOT_CONVERT_TEXT;
     }
     return XML_NO_TEXT_NODE;
+}
+
+
+XMLError XMLElement::QueryInt64Text(int64_t* ival) const
+{
+	if (FirstChild() && FirstChild()->ToText()) {
+		const char* t = FirstChild()->Value();
+		if (XMLUtil::ToInt64(t, ival)) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_NODE;
 }
 
 
@@ -1773,8 +1831,6 @@ XMLDocument::XMLDocument( bool processEntities, Whitespace whitespace ) :
     _processEntities( processEntities ),
     _errorID(XML_SUCCESS),
     _whitespace( whitespace ),
-    _errorStr1( 0 ),
-    _errorStr2( 0 ),
     _charBuffer( 0 )
 {
     // avoid VC++ C4355 warning about 'this' in initializer list (C4355 is off by default in VS2012+)
@@ -1796,8 +1852,8 @@ void XMLDocument::Clear()
     const bool hadError = Error();
 #endif
     _errorID = XML_SUCCESS;
-    _errorStr1 = 0;
-    _errorStr2 = 0;
+	_errorStr1.Reset();
+	_errorStr2.Reset();
 
     delete [] _charBuffer;
     _charBuffer = 0;
@@ -1932,10 +1988,12 @@ struct LongFitsIntoSizeTMinusOne {
 };
 
 template <>
-bool LongFitsIntoSizeTMinusOne<false>::Fits( unsigned long /*value*/ )
-{
-    return true;
-}
+struct LongFitsIntoSizeTMinusOne<false> {
+    static bool Fits( unsigned long )
+    {
+        return true;
+    }
+};
 
 XMLError XMLDocument::LoadFile( FILE* fp )
 {
@@ -2054,8 +2112,14 @@ void XMLDocument::SetError( XMLError error, const char* str1, const char* str2 )
 {
     TIXMLASSERT( error >= 0 && error < XML_ERROR_COUNT );
     _errorID = error;
-    _errorStr1 = str1;
-    _errorStr2 = str2;
+	
+	_errorStr1.Reset();
+	_errorStr2.Reset();
+
+	if (str1)
+		_errorStr1.SetStr(str1);
+	if (str2)
+		_errorStr2.SetStr(str2);
 }
 
 const char* XMLDocument::ErrorName() const
@@ -2073,11 +2137,11 @@ void XMLDocument::PrintError() const
         char buf1[LEN] = { 0 };
         char buf2[LEN] = { 0 };
 
-        if ( _errorStr1 ) {
-            TIXML_SNPRINTF( buf1, LEN, "%s", _errorStr1 );
+        if ( !_errorStr1.Empty() ) {
+            TIXML_SNPRINTF( buf1, LEN, "%s", _errorStr1.GetStr() );
         }
-        if ( _errorStr2 ) {
-            TIXML_SNPRINTF( buf2, LEN, "%s", _errorStr2 );
+        if ( !_errorStr2.Empty() ) {
+            TIXML_SNPRINTF( buf2, LEN, "%s", _errorStr2.GetStr() );
         }
 
         // Should check INT_MIN <= _errorID && _errorId <= INT_MAX, but that
@@ -2263,6 +2327,14 @@ void XMLPrinter::PushAttribute( const char* name, unsigned v )
 }
 
 
+void XMLPrinter::PushAttribute(const char* name, int64_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	PushAttribute(name, buf);
+}
+
+
 void XMLPrinter::PushAttribute( const char* name, bool v )
 {
     char buf[BUF_SIZE];
@@ -2326,6 +2398,13 @@ void XMLPrinter::PushText( const char* text, bool cdata )
     else {
         PrintString( text, true );
     }
+}
+
+void XMLPrinter::PushText( int64_t value )
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( value, buf, BUF_SIZE );
+    PushText( buf, false );
 }
 
 void XMLPrinter::PushText( int value )

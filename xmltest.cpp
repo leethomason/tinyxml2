@@ -416,6 +416,7 @@ int main( int argc, const char ** argv )
 		}
 		element->InsertEndChild( sub[2] );
 		XMLNode* comment = element->InsertFirstChild( doc->NewComment( "comment" ) );
+		comment->SetUserData((void*)2);
 		element->InsertAfterChild( comment, sub[0] );
 		element->InsertAfterChild( sub[0], sub[1] );
 		sub[2]->InsertFirstChild( doc->NewText( "& Text!" ));
@@ -425,6 +426,7 @@ int main( int argc, const char ** argv )
 		XMLTest( "Programmatic DOM", 2, doc->FirstChildElement()->LastChildElement( "sub" )->IntAttribute( "attrib" ) );
 		XMLTest( "Programmatic DOM", "& Text!",
 				 doc->FirstChildElement()->LastChildElement( "sub" )->FirstChild()->ToText()->Value() );
+		XMLTest("User data", (void*)2 == comment->GetUserData(), true, false);
 
 		// And now deletion:
 		element->DeleteChild( sub[2] );
@@ -449,7 +451,7 @@ int main( int argc, const char ** argv )
 		{
 			XMLPrinter streamer( 0, true );
 			doc->Print( &streamer );
-			XMLTest( "Compact mode", "<element><sub attrib=\"1\"/><sub/></element>", streamer.CStr(), false );
+			XMLTest( "Compact mode", "<element><sub attrib=\"true\"/><sub/></element>", streamer.CStr(), false );
 		}
 		doc->SaveFile( "./resources/out/pretty.xml" );
 		doc->SaveFile( "./resources/out/compact.xml", true );
@@ -677,13 +679,114 @@ int main( int argc, const char ** argv )
 		XMLTest( "SetText types", "1", element->GetText() );
 
 		element->SetText( true );
-		XMLTest( "SetText types", "1", element->GetText() ); // TODO: should be 'true'?
+		XMLTest( "SetText types", "true", element->GetText() );
 
 		element->SetText( 1.5f );
 		XMLTest( "SetText types", "1.5", element->GetText() );
 
 		element->SetText( 1.5 );
 		XMLTest( "SetText types", "1.5", element->GetText() );
+	}
+
+	// ---------- Attributes ---------
+	{
+		static const int64_t BIG = -123456789012345678;
+		XMLDocument doc;
+		XMLElement* element = doc.NewElement("element");
+		doc.InsertFirstChild(element);
+
+		{
+			element->SetAttribute("attrib", int(-100));
+			int v = 0;
+			element->QueryIntAttribute("attrib", &v);
+			XMLTest("Attribute: int", -100, v, true);
+			element->QueryAttribute("attrib", &v);
+			XMLTest("Attribute: int", -100, v, true);
+		}
+		{
+			element->SetAttribute("attrib", unsigned(100));
+			unsigned v = 0;
+			element->QueryUnsignedAttribute("attrib", &v);
+			XMLTest("Attribute: unsigned", unsigned(100), v, true);
+			element->QueryAttribute("attrib", &v);
+			XMLTest("Attribute: unsigned", unsigned(100), v, true);
+		}
+		{
+			element->SetAttribute("attrib", BIG);
+			int64_t v = 0;
+			element->QueryInt64Attribute("attrib", &v);
+			XMLTest("Attribute: int64_t", BIG, v, true);
+			element->QueryAttribute("attrib", &v);
+			XMLTest("Attribute: int64_t", BIG, v, true);
+		}
+		{
+			element->SetAttribute("attrib", true);
+			bool v = false;
+			element->QueryBoolAttribute("attrib", &v);
+			XMLTest("Attribute: bool", true, v, true);
+			element->QueryAttribute("attrib", &v);
+			XMLTest("Attribute: bool", true, v, true);
+		}
+		{
+			element->SetAttribute("attrib", 100.0);
+			double v = 0;
+			element->QueryDoubleAttribute("attrib", &v);
+			XMLTest("Attribute: double", 100.0, v, true);
+			element->QueryAttribute("attrib", &v);
+			XMLTest("Attribute: double", 100.0, v, true);
+		}
+		{
+			element->SetAttribute("attrib", 100.0f);
+			float v = 0;
+			element->QueryFloatAttribute("attrib", &v);
+			XMLTest("Attribute: float", 100.0f, v, true);
+			element->QueryAttribute("attrib", &v);
+			XMLTest("Attribute: float", 100.0f, v, true);
+		}
+		{
+			element->SetText(BIG);
+			int64_t v = 0;
+			element->QueryInt64Text(&v);
+			XMLTest("Element: int64_t", BIG, v, true);
+		}
+	}
+
+	// ---------- XMLPrinter stream mode ------
+	{
+		{
+			FILE* printerfp = fopen("resources/printer.xml", "w");
+			XMLPrinter printer(printerfp);
+			printer.OpenElement("foo");
+			printer.PushAttribute("attrib-text", "text");
+			printer.PushAttribute("attrib-int", int(1));
+			printer.PushAttribute("attrib-unsigned", unsigned(2));
+			printer.PushAttribute("attrib-int64", int64_t(3));
+			printer.PushAttribute("attrib-bool", true);
+			printer.PushAttribute("attrib-double", 4.0);
+			printer.CloseElement();
+			fclose(printerfp);
+		}
+		{
+			XMLDocument doc;
+			doc.LoadFile("resources/printer.xml");
+			XMLTest("XMLPrinter Stream mode: load", doc.ErrorID(), XML_SUCCESS, true);
+
+			const XMLDocument& cdoc = doc;
+
+			const XMLAttribute* attrib = cdoc.FirstChildElement("foo")->FindAttribute("attrib-text");
+			XMLTest("attrib-text", "text", attrib->Value(), true);
+			attrib = cdoc.FirstChildElement("foo")->FindAttribute("attrib-int");
+			XMLTest("attrib-int", int(1), attrib->IntValue(), true);
+			attrib = cdoc.FirstChildElement("foo")->FindAttribute("attrib-unsigned");
+			XMLTest("attrib-unsigned", unsigned(2), attrib->UnsignedValue(), true);
+			attrib = cdoc.FirstChildElement("foo")->FindAttribute("attrib-int64");
+			XMLTest("attrib-int64", int64_t(3), attrib->Int64Value(), true);
+			attrib = cdoc.FirstChildElement("foo")->FindAttribute("attrib-bool");
+			XMLTest("attrib-bool", true, attrib->BoolValue(), true);
+			attrib = cdoc.FirstChildElement("foo")->FindAttribute("attrib-double");
+			XMLTest("attrib-double", 4.0, attrib->DoubleValue(), true);
+		}
+
 	}
 
 
