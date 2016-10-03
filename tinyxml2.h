@@ -570,6 +570,9 @@ public:
         if ( p == q ) {
             return true;
         }
+        TIXMLASSERT( p );
+        TIXMLASSERT( q );
+        TIXMLASSERT( nChar >= 0 );
         return strncmp( p, q, nChar ) == 0;
     }
     
