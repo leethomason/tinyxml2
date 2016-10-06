@@ -111,7 +111,7 @@ by the Document. When the Document is deleted, so are all the nodes it contains.
 
 Microsoft has an excellent article on white space: http://msdn.microsoft.com/en-us/library/ms256097.aspx
 
-By default, TinyXML-2 preserves white space in a (hopefully) sane way that is almost complient with the
+By default, TinyXML-2 preserves white space in a (hopefully) sane way that is almost compliant with the
 spec. (TinyXML-1 used a completely different model, much more similar to 'collapse', below.)
 
 As a first step, all newlines / carriage-returns / line-feeds are normalized to a
