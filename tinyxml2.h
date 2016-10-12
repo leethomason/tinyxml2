@@ -211,7 +211,8 @@ public:
     void Push( T t ) {
         TIXMLASSERT( _size < INT_MAX );
         EnsureCapacity( _size+1 );
-        _mem[_size++] = t;
+        _mem[_size] = t;
+        ++_size;
     }
 
     T* PushArr( int count ) {
@@ -225,7 +226,8 @@ public:
 
     T Pop() {
         TIXMLASSERT( _size > 0 );
-        return _mem[--_size];
+        --_size;
+        return _mem[_size];
     }
 
     void PopArr( int count ) {
@@ -568,6 +570,9 @@ public:
         if ( p == q ) {
             return true;
         }
+        TIXMLASSERT( p );
+        TIXMLASSERT( q );
+        TIXMLASSERT( nChar >= 0 );
         return strncmp( p, q, nChar ) == 0;
     }
     
@@ -1127,7 +1132,7 @@ public:
     }
 
     /** QueryIntValue interprets the attribute as an integer, and returns the value
-    	in the provided parameter. The function will return XML_NO_ERROR on success,
+    	in the provided parameter. The function will return XML_SUCCESS on success,
     	and XML_WRONG_ATTRIBUTE_TYPE if the conversion is not successful.
     */
     XMLError QueryIntValue( int* value ) const;
@@ -1244,7 +1249,7 @@ public:
 	float FloatAttribute(const char* name, float defaultValue = 0) const;
 
     /** Given an attribute name, QueryIntAttribute() returns
-    	XML_NO_ERROR, XML_WRONG_ATTRIBUTE_TYPE if the conversion
+    	XML_SUCCESS, XML_WRONG_ATTRIBUTE_TYPE if the conversion
     	can't be performed, or XML_NO_ATTRIBUTE if the attribute
     	doesn't exist. If successful, the result of the conversion
     	will be written to 'value'. If not successful, nothing will
@@ -1309,7 +1314,7 @@ public:
 
 	
     /** Given an attribute name, QueryAttribute() returns
-    	XML_NO_ERROR, XML_WRONG_ATTRIBUTE_TYPE if the conversion
+    	XML_SUCCESS, XML_WRONG_ATTRIBUTE_TYPE if the conversion
     	can't be performed, or XML_NO_ATTRIBUTE if the attribute
     	doesn't exist. It is overloaded for the primitive types,
 		and is a generally more convenient replacement of
@@ -1596,7 +1601,7 @@ public:
 
     /**
     	Parse an XML file from a character string.
-    	Returns XML_NO_ERROR (0) on success, or
+    	Returns XML_SUCCESS (0) on success, or
     	an errorID.
 
     	You may optionally pass in the 'nBytes', which is
@@ -1608,7 +1613,7 @@ public:
 
     /**
     	Load an XML file from disk.
-    	Returns XML_NO_ERROR (0) on success, or
+    	Returns XML_SUCCESS (0) on success, or
     	an errorID.
     */
     XMLError LoadFile( const char* filename );
@@ -1621,14 +1626,14 @@ public:
         not text in order for TinyXML-2 to correctly
         do newline normalization.
 
-    	Returns XML_NO_ERROR (0) on success, or
+    	Returns XML_SUCCESS (0) on success, or
     	an errorID.
     */
     XMLError LoadFile( FILE* );
 
     /**
     	Save the XML file to disk.
-    	Returns XML_NO_ERROR (0) on success, or
+    	Returns XML_SUCCESS (0) on success, or
     	an errorID.
     */
     XMLError SaveFile( const char* filename, bool compact = false );
@@ -1637,7 +1642,7 @@ public:
     	Save the XML file to disk. You are responsible
     	for providing and closing the FILE*.
 
-    	Returns XML_NO_ERROR (0) on success, or
+    	Returns XML_SUCCESS (0) on success, or
     	an errorID.
     */
     XMLError SaveFile( FILE* fp, bool compact = false );

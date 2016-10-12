@@ -191,6 +191,7 @@ void StrPair::SetStr( const char* str, int flags )
 
 char* StrPair::ParseText( char* p, const char* endTag, int strFlags )
 {
+    TIXMLASSERT( p );
     TIXMLASSERT( endTag && *endTag );
 
     char* start = p;
@@ -204,6 +205,7 @@ char* StrPair::ParseText( char* p, const char* endTag, int strFlags )
             return p + length;
         }
         ++p;
+        TIXMLASSERT( p );
     }
     return 0;
 }
@@ -281,7 +283,8 @@ const char* StrPair::GetStr()
                     else {
                         ++p;
                     }
-                    *q++ = LF;
+                    *q = LF;
+                    ++q;
                 }
                 else if ( (_flags & NEEDS_NEWLINE_NORMALIZATION) && *p == LF ) {
                     if ( *(p+1) == CR ) {
@@ -290,7 +293,8 @@ const char* StrPair::GetStr()
                     else {
                         ++p;
                     }
-                    *q++ = LF;
+                    *q = LF;
+                    ++q;
                 }
                 else if ( (_flags & NEEDS_ENTITY_PROCESSING) && *p == '&' ) {
                     // Entities handled by tinyXML2:
@@ -2261,7 +2265,8 @@ XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :
     }
     for( int i=0; i<NUM_ENTITIES; ++i ) {
         const char entityValue = entities[i].value;
-        TIXMLASSERT( 0 <= entityValue && entityValue < ENTITY_RANGE );
+        // cast to explicit signed because char may be unsigned (on PowerPC)
+        TIXMLASSERT( 0 <= static_cast<signed char>(entityValue) && entityValue < ENTITY_RANGE );
         _entityFlag[ (unsigned char)entityValue ] = true;
     }
     _restrictedEntityFlag[(unsigned char)'&'] = true;
