@@ -908,6 +908,7 @@ private:
     void Unlink( XMLNode* child );
     static void DeleteNode( XMLNode* node );
     void InsertChildPreamble( XMLNode* insertThis ) const;
+    const XMLElement* ToElementWithName( const char* name ) const;
 
     XMLNode( const XMLNode& );	// not supported
     XMLNode& operator=( const XMLNode& );	// not supported
