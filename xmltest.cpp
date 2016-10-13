@@ -1618,7 +1618,7 @@ int main( int argc, const char ** argv )
 
 		FILE* perfFP = fopen("resources/dream.xml", "r");
 		fseek(perfFP, 0, SEEK_END);
-		long size = ftell(fp);
+		long size = ftell(perfFP);
 		fseek(perfFP, 0, SEEK_SET);
 
 		char* mem = new char[size + 1];
