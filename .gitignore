@@ -5,6 +5,8 @@ ipch/
 resources/out/
 tinyxml2/tinyxml2-cbp/bin/
 tinyxml2/tinyxml2-cbp/obj/
+tinyxml2/bin/
+tinyxml2/temp/
 *.sdf
 *.suo
 *.opensdf
@@ -12,3 +14,5 @@ tinyxml2/tinyxml2-cbp/obj/
 *.depend
 *.layout
 *.o
+*.vc.db
+*.vc.opendb
