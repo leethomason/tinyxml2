@@ -1233,9 +1233,10 @@ public:
     const char* Attribute( const char* name, const char* value=0 ) const;
 
     /** Given an attribute name, IntAttribute() returns the value
-    	of the attribute interpreted as an integer. 0 will be
-    	returned if there is an error. For a method with error
-    	checking, see QueryIntAttribute()
+    	of the attribute interpreted as an integer. The default
+        value will be returned if the attribute isn't present,
+        or if there is an error. (For a method with error
+    	checking, see QueryIntAttribute()).
     */
 	int IntAttribute(const char* name, int defaultValue = 0) const;
     /// See IntAttribute()
