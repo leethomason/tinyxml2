@@ -1570,22 +1570,31 @@ int main( int argc, const char ** argv )
 	}
 
 	{
-		// Check that declarations are parsed only as the FirstChild
+		// Check that declarations are allowed only at beginning of document
 	    const char* xml0 = "<?xml version=\"1.0\" ?>"
 	                       "   <!-- xml version=\"1.1\" -->"
 	                       "<first />";
 	    const char* xml1 = "<?xml version=\"1.0\" ?>"
-	                       "   <?xml version=\"1.1\" ?>"
+	                       "<?xml-stylesheet type=\"text/xsl\" href=\"Anything.xsl\"?>"
 	                       "<first />";
 	    const char* xml2 = "<first />"
 	                       "<?xml version=\"1.0\" ?>";
+	    const char* xml3 = "<first></first>"
+	                       "<?xml version=\"1.0\" ?>";
+
+	    const char* xml4 = "<first><?xml version=\"1.0\" ?></first>";
+
 	    XMLDocument doc;
 	    doc.Parse(xml0);
 	    XMLTest("Test that the code changes do not affect normal parsing", doc.Error(), false);
 	    doc.Parse(xml1);
-	    XMLTest("Test that the second declaration throws an error", doc.ErrorID(), XML_ERROR_PARSING_DECLARATION);
+	    XMLTest("Test that the second declaration is allowed", doc.Error(), false);
 	    doc.Parse(xml2);
-	    XMLTest("Test that declaration after a child throws an error", doc.ErrorID(), XML_ERROR_PARSING_DECLARATION);
+	    XMLTest("Test that declaration after a child is not allowed", doc.ErrorID(), XML_ERROR_PARSING_DECLARATION);
+	    doc.Parse(xml3);
+	    XMLTest("Test that declaration after a child is not allowed", doc.ErrorID(), XML_ERROR_PARSING_DECLARATION);
+	    doc.Parse(xml4);
+	    XMLTest("Test that declaration inside a child is not allowed", doc.ErrorID(), XML_ERROR_PARSING_DECLARATION);
 	}
 
     {
