@@ -982,11 +982,9 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
 
         XMLDeclaration* decl = node->ToDeclaration();
         if ( decl ) {
-            bool wellLocated = true;
             // Declarations are only allowed at document level
-            if ( !ToDocument() ) {
-                wellLocated = false;
-            } else {
+            bool wellLocated = ToDocument() ? true : false;
+            if ( wellLocated ) {
                 // Multiple declarations are allowed but all declarations
                 // must occur before anything else
                 for ( const XMLNode* existingNode = _document->FirstChild(); existingNode; existingNode = existingNode->NextSibling() ) {
