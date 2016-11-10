@@ -965,6 +965,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
         XMLNode* node = 0;
 
         p = _document->Identify( p, &node );
+        TIXMLASSERT( p );
         if ( node == 0 ) {
             break;
         }
