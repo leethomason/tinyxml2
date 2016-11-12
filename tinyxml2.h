@@ -72,8 +72,6 @@ distribution.
 #   else
 #       define TINYXML2_LIB
 #   endif
-#elif __GNUC__ >= 4
-#   define TINYXML2_LIB __attribute__((visibility("default")))
 #else
 #   define TINYXML2_LIB
 #endif
@@ -321,7 +319,7 @@ public:
 /*
 	Template child class to create pools of the correct type.
 */
-template< int ITEM_SIZE >
+template< int SIZE >
 class MemPoolT : public MemPool
 {
 public:
@@ -344,7 +342,7 @@ public:
     }
 
     virtual int ItemSize() const	{
-        return ITEM_SIZE;
+        return SIZE;
     }
     int CurrentAllocs() const		{
         return _currentAllocs;
@@ -356,15 +354,13 @@ public:
             Block* block = new Block();
             _blockPtrs.Push( block );
 
-            Item* blockItems = block->items;
-            for( int i = 0; i < ITEMS_PER_BLOCK - 1; ++i ) {
-                blockItems[i].next = &(blockItems[i + 1]);
+            for( int i=0; i<COUNT-1; ++i ) {
+                block->chunk[i].next = &block->chunk[i+1];
             }
-            blockItems[ITEMS_PER_BLOCK - 1].next = 0;
-            _root = blockItems;
+            block->chunk[COUNT-1].next = 0;
+            _root = block->chunk;
         }
-        Item* const result = _root;
-        TIXMLASSERT( result != 0 );
+        void* result = _root;
         _root = _root->next;
 
         ++_currentAllocs;
@@ -381,17 +377,16 @@ public:
             return;
         }
         --_currentAllocs;
-        Item* item = static_cast<Item*>( mem );
+        Chunk* chunk = static_cast<Chunk*>( mem );
 #ifdef DEBUG
-        memset( item, 0xfe, sizeof( *item ) );
+        memset( chunk, 0xfe, sizeof(Chunk) );
 #endif
-        item->next = _root;
-        _root = item;
+        chunk->next = _root;
+        _root = chunk;
     }
     void Trace( const char* name ) {
         printf( "Mempool %s watermark=%d [%dk] current=%d size=%d nAlloc=%d blocks=%d\n",
-                name, _maxAllocs, _maxAllocs * ITEM_SIZE / 1024, _currentAllocs,
-                ITEM_SIZE, _nAllocs, _blockPtrs.Size() );
+                name, _maxAllocs, _maxAllocs*SIZE/1024, _currentAllocs, SIZE, _nAllocs, _blockPtrs.Size() );
     }
 
     void SetTracked() {
@@ -411,23 +406,21 @@ public:
 	//		16k:	5200
 	//		32k:	4300
 	//		64k:	4000	21000
-    // Declared public because some compilers do not accept to use ITEMS_PER_BLOCK
-    // in private part if ITEMS_PER_BLOCK is private
-    enum { ITEMS_PER_BLOCK = (4 * 1024) / ITEM_SIZE };
+    enum { COUNT = (4*1024)/SIZE }; // Some compilers do not accept to use COUNT in private part if COUNT is private
 
 private:
     MemPoolT( const MemPoolT& ); // not supported
     void operator=( const MemPoolT& ); // not supported
 
-    union Item {
-        Item*   next;
-        char    itemData[ITEM_SIZE];
+    union Chunk {
+        Chunk*  next;
+        char    mem[SIZE];
     };
     struct Block {
-        Item items[ITEMS_PER_BLOCK];
+        Chunk chunk[COUNT];
     };
     DynArray< Block*, 10 > _blockPtrs;
-    Item* _root;
+    Chunk* _root;
 
     int _currentAllocs;
     int _nAllocs;
@@ -593,6 +586,9 @@ public:
     static void ToStr( float v, char* buffer, int bufferSize );
     static void ToStr( double v, char* buffer, int bufferSize );
 	static void ToStr(int64_t v, char* buffer, int bufferSize);
+	static void ToStr(uint8_t v, char* buffer, int bufferSize);
+	static void ToStr(uint16_t v, char* buffer, int bufferSize);
+	static void ToStr(uint64_t v, char* buffer, int bufferSize);
 
     // converts strings to primitive types
     static bool	ToInt( const char* str, int* value );
@@ -601,6 +597,9 @@ public:
     static bool	ToFloat( const char* str, float* value );
     static bool ToDouble( const char* str, double* value );
 	static bool ToInt64(const char* str, int64_t* value);
+	static bool ToUInt8(const char* str, uint8_t* value);
+	static bool ToUInt16(const char* str, uint16_t* value);
+	static bool ToUInt64(const char* str, uint64_t* value);
 };
 
 
@@ -1107,6 +1106,24 @@ public:
 		return i;
 	}
 
+	uint8_t UInt8Value() const {
+		uint8_t i = 0;
+		QueryUInt8Value(&i);
+		return i;
+	}
+
+	uint16_t UInt16Value() const {
+		uint16_t i = 0;
+		QueryUInt16Value(&i);
+		return i;
+	}
+
+	uint64_t UInt64Value() const {
+		uint64_t i = 0;
+		QueryUInt64Value(&i);
+		return i;
+	}
+
     /// Query as an unsigned integer. See IntValue()
     unsigned UnsignedValue() const			{
         unsigned i=0;
@@ -1142,6 +1159,12 @@ public:
 	/// See QueryIntValue
 	XMLError QueryInt64Value(int64_t* value) const;
 	/// See QueryIntValue
+	XMLError QueryUInt8Value(uint8_t* value) const;
+	/// See QueryIntValue
+	XMLError QueryUInt16Value(uint16_t* value) const;
+	/// See QueryIntValue
+	XMLError QueryUInt64Value(uint64_t* value) const;
+	/// See QueryIntValue
     XMLError QueryBoolValue( bool* value ) const;
     /// See QueryIntValue
     XMLError QueryDoubleValue( double* value ) const;
@@ -1156,6 +1179,12 @@ public:
     void SetAttribute( unsigned value );
 	/// Set the attribute to value.
 	void SetAttribute(int64_t value);
+	/// Set the attribute to value.
+	void SetAttribute(uint8_t value);
+	/// Set the attribute to value.
+	void SetAttribute(uint16_t value);
+	/// Set the attribute to value.
+	void SetAttribute(uint64_t value);
 	/// Set the attribute to value.
     void SetAttribute( bool value );
     /// Set the attribute to value.
@@ -1258,6 +1287,27 @@ public:
 	}
 
 	/// See IntAttribute()
+	uint8_t UInt8Attribute(const char* name) const {
+		uint8_t i = 0;
+		QueryUInt8Attribute(name, &i);
+		return i;
+	}
+
+	/// See IntAttribute()
+	uint16_t UInt16Attribute(const char* name) const {
+		uint16_t i = 0;
+		QueryUInt16Attribute(name, &i);
+		return i;
+	}
+
+	/// See IntAttribute()
+	uint64_t UInt64Attribute(const char* name) const {
+		uint64_t i = 0;
+		QueryUInt64Attribute(name, &i);
+		return i;
+	}
+
+	/// See IntAttribute()
     bool BoolAttribute( const char* name ) const	{
         bool b=false;
         QueryBoolAttribute( name, &b );
@@ -1316,6 +1366,33 @@ public:
 	}
 
 	/// See QueryIntAttribute()
+	XMLError QueryUInt8Attribute(const char* name, uint8_t* value) const {
+		const XMLAttribute* a = FindAttribute(name);
+		if (!a) {
+			return XML_NO_ATTRIBUTE;
+		}
+		return a->QueryUInt8Value(value);
+	}
+
+	/// See QueryIntAttribute()
+	XMLError QueryUInt16Attribute(const char* name, uint16_t* value) const {
+		const XMLAttribute* a = FindAttribute(name);
+		if (!a) {
+			return XML_NO_ATTRIBUTE;
+		}
+		return a->QueryUInt16Value(value);
+	}
+
+	/// See QueryIntAttribute()
+	XMLError QueryUInt64Attribute(const char* name, uint64_t* value) const {
+		const XMLAttribute* a = FindAttribute(name);
+		if (!a) {
+			return XML_NO_ATTRIBUTE;
+		}
+		return a->QueryUInt64Value(value);
+	}
+
+	/// See QueryIntAttribute()
     XMLError QueryBoolAttribute( const char* name, bool* value ) const				{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
@@ -1338,6 +1415,17 @@ public:
             return XML_NO_ATTRIBUTE;
         }
         return a->QueryFloatValue( value );
+    }
+    
+    XMLError QueryStringAttribute( const char* name, const char** value ) const			{
+        const XMLAttribute* a = FindAttribute( name );
+        if ( !a || !value) {
+            return XML_NO_ATTRIBUTE;
+        }
+        
+        *value = a->Value();
+        
+        return XML_SUCCESS;
     }
 
 	
@@ -1370,6 +1458,18 @@ public:
 		return QueryInt64Attribute(name, value);
 	}
 
+	int QueryAttribute(const char* name, uint8_t* value) const {
+		return QueryUInt8Attribute(name, value);
+	}
+
+	int QueryAttribute(const char* name, uint16_t* value) const {
+		return QueryUInt16Attribute(name, value);
+	}
+
+	int QueryAttribute(const char* name, uint64_t* value) const {
+		return QueryUInt64Attribute(name, value);
+	}
+
 	int QueryAttribute( const char* name, bool* value ) const {
 		return QueryBoolAttribute( name, value );
 	}
@@ -1380,6 +1480,10 @@ public:
 
 	int QueryAttribute( const char* name, float* value ) const {
 		return QueryFloatAttribute( name, value );
+	}
+
+	int QueryAttribute( const char* name, const char** value ) const {
+		return QueryStringAttribute( name, value );
 	}
 
 	/// Sets the named attribute to value.
@@ -1400,6 +1504,24 @@ public:
 
 	/// Sets the named attribute to value.
 	void SetAttribute(const char* name, int64_t value) {
+		XMLAttribute* a = FindOrCreateAttribute(name);
+		a->SetAttribute(value);
+	}
+
+	/// Sets the named attribute to value.
+	void SetAttribute(const char* name, uint8_t value) {
+		XMLAttribute* a = FindOrCreateAttribute(name);
+		a->SetAttribute(value);
+	}
+
+	/// Sets the named attribute to value.
+	void SetAttribute(const char* name, uint16_t value) {
+		XMLAttribute* a = FindOrCreateAttribute(name);
+		a->SetAttribute(value);
+	}
+
+	/// Sets the named attribute to value.
+	void SetAttribute(const char* name, uint64_t value) {
 		XMLAttribute* a = FindOrCreateAttribute(name);
 		a->SetAttribute(value);
 	}
@@ -1502,7 +1624,13 @@ public:
     /// Convenience method for setting text inside an element. See SetText() for important limitations.
     void SetText( unsigned value );  
 	/// Convenience method for setting text inside an element. See SetText() for important limitations.
-	void SetText(int64_t value);
+	void SetText(int64_t value);   
+	/// Convenience method for setting text inside an element. See SetText() for important limitations.
+	void SetText(uint8_t value); 
+	/// Convenience method for setting text inside an element. See SetText() for important limitations.
+	void SetText(uint16_t value); 
+	/// Convenience method for setting text inside an element. See SetText() for important limitations.
+	void SetText(uint64_t value);
 	/// Convenience method for setting text inside an element. See SetText() for important limitations.
     void SetText( bool value );  
     /// Convenience method for setting text inside an element. See SetText() for important limitations.
@@ -1541,6 +1669,12 @@ public:
     XMLError QueryUnsignedText( unsigned* uval ) const;
 	/// See QueryIntText()
 	XMLError QueryInt64Text(int64_t* uval) const;
+	/// See QueryIntText()
+	XMLError QueryUInt8Text(uint8_t* uval) const;
+	/// See QueryIntText()
+	XMLError QueryUInt16Text(uint16_t* uval) const;
+	/// See QueryIntText()
+	XMLError QueryUInt64Text(uint64_t* uval) const;
 	/// See QueryIntText()
     XMLError QueryBoolText( bool* bval ) const;
     /// See QueryIntText()
@@ -2079,6 +2213,9 @@ public:
     void PushAttribute( const char* name, int value );
     void PushAttribute( const char* name, unsigned value );
 	void PushAttribute(const char* name, int64_t value);
+	void PushAttribute(const char* name, uint8_t value);
+	void PushAttribute(const char* name, uint16_t value);
+	void PushAttribute(const char* name, uint64_t value);
 	void PushAttribute( const char* name, bool value );
     void PushAttribute( const char* name, double value );
     /// If streaming, close the Element.
@@ -2092,6 +2229,12 @@ public:
     void PushText( unsigned value );
 	/// Add a text node from an unsigned.
 	void PushText(int64_t value);
+	/// Add a text node from an unsigned.
+	void PushText(uint8_t value);
+	/// Add a text node from an unsigned.
+	void PushText(uint16_t value);
+	/// Add a text node from an unsigned.
+	void PushText(uint64_t value);
 	/// Add a text node from a bool.
     void PushText( bool value );
     /// Add a text node from a float.

@@ -149,7 +149,6 @@ void StrPair::TransferTo( StrPair* other )
     // This in effect implements the assignment operator by "moving"
     // ownership (as in auto_ptr).
 
-    TIXMLASSERT( other != 0 );
     TIXMLASSERT( other->_flags == 0 );
     TIXMLASSERT( other->_start == 0 );
     TIXMLASSERT( other->_end == 0 );
@@ -568,6 +567,27 @@ void XMLUtil::ToStr(int64_t v, char* buffer, int bufferSize)
 }
 
 
+void XMLUtil::ToStr(uint8_t v, char* buffer, int bufferSize)
+{
+	// horrible syntax trick to make the compiler happy about %lld
+	TIXML_SNPRINTF(buffer, bufferSize, "%hhu", (uint8_t)v);
+}
+
+
+void XMLUtil::ToStr(uint16_t v, char* buffer, int bufferSize)
+{
+	// horrible syntax trick to make the compiler happy about %lld
+	TIXML_SNPRINTF(buffer, bufferSize, "%hu", (uint16_t)v);
+}
+
+
+void XMLUtil::ToStr(uint64_t v, char* buffer, int bufferSize)
+{
+	// horrible syntax trick to make the compiler happy about %lld
+	TIXML_SNPRINTF(buffer, bufferSize, "%llu", (uint64_t)v);
+}
+
+
 bool XMLUtil::ToInt( const char* str, int* value )
 {
     if ( TIXML_SSCANF( str, "%d", value ) == 1 ) {
@@ -626,6 +646,39 @@ bool XMLUtil::ToInt64(const char* str, int64_t* value)
 	long long v = 0;	// horrible syntax trick to make the compiler happy about %lld
 	if (TIXML_SSCANF(str, "%lld", &v) == 1) {
 		*value = (int64_t)v;
+		return true;
+	}
+	return false;
+}
+
+
+bool XMLUtil::ToUInt8(const char* str, uint8_t* value)
+{
+	unsigned char v = 0;	
+	if (TIXML_SSCANF(str, "%hhu", &v) == 1) {
+		*value = (uint8_t)v;
+		return true;
+	}
+	return false;
+}
+
+
+bool XMLUtil::ToUInt16(const char* str, uint16_t* value)
+{
+	unsigned short int v = 0;	
+	if (TIXML_SSCANF(str, "%hu", &v) == 1) {
+		*value = (uint16_t)v;
+		return true;
+	}
+	return false;
+}
+
+
+bool XMLUtil::ToUInt64(const char* str, uint64_t* value)
+{
+	unsigned long long v = 0;
+	if (TIXML_SSCANF(str, "%llu", &v) == 1) {
+		*value = (uint64_t)v;
 		return true;
 	}
 	return false;
@@ -743,7 +796,7 @@ XMLNode::~XMLNode()
 
 const char* XMLNode::Value() const 
 {
-    // Edge case: XMLDocuments don't have a Value. Return null.
+    // Catch an edge case: XMLDocuments don't have a a Value. Carefully return nullptr.
     if ( this->ToDocument() )
         return 0;
     return _value.GetStr();
@@ -986,7 +1039,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
                 // Set error, if document already has children.
                 if ( !_document->NoChildren() ) {
                         _document->SetError( XML_ERROR_PARSING_DECLARATION, decl->Value(), 0);
-                        DeleteNode( node );
+                        DeleteNode( decl );
                         break;
                 }
         }
@@ -1341,6 +1394,33 @@ XMLError XMLAttribute::QueryInt64Value(int64_t* value) const
 }
 
 
+XMLError XMLAttribute::QueryUInt8Value(uint8_t* value) const
+{
+	if (XMLUtil::ToUInt8(Value(), value)) {
+		return XML_SUCCESS;
+	}
+	return XML_WRONG_ATTRIBUTE_TYPE;
+}
+
+
+XMLError XMLAttribute::QueryUInt16Value(uint16_t* value) const
+{
+	if (XMLUtil::ToUInt16(Value(), value)) {
+		return XML_SUCCESS;
+	}
+	return XML_WRONG_ATTRIBUTE_TYPE;
+}
+
+
+XMLError XMLAttribute::QueryUInt64Value(uint64_t* value) const
+{
+	if (XMLUtil::ToUInt64(Value(), value)) {
+		return XML_SUCCESS;
+	}
+	return XML_WRONG_ATTRIBUTE_TYPE;
+}
+
+
 XMLError XMLAttribute::QueryBoolValue( bool* value ) const
 {
     if ( XMLUtil::ToBool( Value(), value )) {
@@ -1391,6 +1471,30 @@ void XMLAttribute::SetAttribute( unsigned v )
 
 
 void XMLAttribute::SetAttribute(int64_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	_value.SetStr(buf);
+}
+
+
+void XMLAttribute::SetAttribute(uint8_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	_value.SetStr(buf);
+}
+
+
+void XMLAttribute::SetAttribute(uint16_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	_value.SetStr(buf);
+}
+
+
+void XMLAttribute::SetAttribute(uint64_t v)
 {
 	char buf[BUF_SIZE];
 	XMLUtil::ToStr(v, buf, BUF_SIZE);
@@ -1507,6 +1611,30 @@ void XMLElement::SetText(int64_t v)
 }
 
 
+void XMLElement::SetText(uint8_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	SetText(buf);
+}
+
+
+void XMLElement::SetText(uint16_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	SetText(buf);
+}
+
+
+void XMLElement::SetText(uint64_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	SetText(buf);
+}
+
+
 void XMLElement::SetText( bool v )
 {
     char buf[BUF_SIZE];
@@ -1562,6 +1690,45 @@ XMLError XMLElement::QueryInt64Text(int64_t* ival) const
 	if (FirstChild() && FirstChild()->ToText()) {
 		const char* t = FirstChild()->Value();
 		if (XMLUtil::ToInt64(t, ival)) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_NODE;
+}
+
+
+XMLError XMLElement::QueryUInt8Text(uint8_t* ival) const
+{
+	if (FirstChild() && FirstChild()->ToText()) {
+		const char* t = FirstChild()->Value();
+		if (XMLUtil::ToUInt8(t, ival)) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_NODE;
+}
+
+
+XMLError XMLElement::QueryUInt16Text(uint16_t* ival) const
+{
+	if (FirstChild() && FirstChild()->ToText()) {
+		const char* t = FirstChild()->Value();
+		if (XMLUtil::ToUInt16(t, ival)) {
+			return XML_SUCCESS;
+		}
+		return XML_CAN_NOT_CONVERT_TEXT;
+	}
+	return XML_NO_TEXT_NODE;
+}
+
+
+XMLError XMLElement::QueryUInt64Text(uint64_t* ival) const
+{
+	if (FirstChild() && FirstChild()->ToText()) {
+		const char* t = FirstChild()->Value();
+		if (XMLUtil::ToUInt64(t, ival)) {
 			return XML_SUCCESS;
 		}
 		return XML_CAN_NOT_CONVERT_TEXT;
@@ -2347,6 +2514,30 @@ void XMLPrinter::PushAttribute(const char* name, int64_t v)
 }
 
 
+void XMLPrinter::PushAttribute(const char* name, uint8_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	PushAttribute(name, buf);
+}
+
+
+void XMLPrinter::PushAttribute(const char* name, uint16_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	PushAttribute(name, buf);
+}
+
+
+void XMLPrinter::PushAttribute(const char* name, uint64_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	PushAttribute(name, buf);
+}
+
+
 void XMLPrinter::PushAttribute( const char* name, bool v )
 {
     char buf[BUF_SIZE];
@@ -2412,13 +2603,6 @@ void XMLPrinter::PushText( const char* text, bool cdata )
     }
 }
 
-void XMLPrinter::PushText( int64_t value )
-{
-    char buf[BUF_SIZE];
-    XMLUtil::ToStr( value, buf, BUF_SIZE );
-    PushText( buf, false );
-}
-
 void XMLPrinter::PushText( int value )
 {
     char buf[BUF_SIZE];
@@ -2452,6 +2636,38 @@ void XMLPrinter::PushText( float value )
 
 
 void XMLPrinter::PushText( double value )
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( value, buf, BUF_SIZE );
+    PushText( buf, false );
+}
+
+
+void XMLPrinter::PushText( int64_t value )
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( value, buf, BUF_SIZE );
+    PushText( buf, false );
+}
+
+
+void XMLPrinter::PushText( uint8_t value )
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( value, buf, BUF_SIZE );
+    PushText( buf, false );
+}
+
+
+void XMLPrinter::PushText( uint16_t value )
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr( value, buf, BUF_SIZE );
+    PushText( buf, false );
+}
+
+
+void XMLPrinter::PushText( uint64_t value )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( value, buf, BUF_SIZE );
