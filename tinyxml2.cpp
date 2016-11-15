@@ -1472,6 +1472,47 @@ const char* XMLElement::Attribute( const char* name, const char* value ) const
     return 0;
 }
 
+int XMLElement::IntAttribute(const char* name, int defaultValue) const 
+{
+	int i = defaultValue;
+	QueryIntAttribute(name, &i);
+	return i;
+}
+
+unsigned XMLElement::UnsignedAttribute(const char* name, unsigned defaultValue) const 
+{
+	unsigned i = defaultValue;
+	QueryUnsignedAttribute(name, &i);
+	return i;
+}
+
+int64_t XMLElement::Int64Attribute(const char* name, int64_t defaultValue) const 
+{
+	int64_t i = defaultValue;
+	QueryInt64Attribute(name, &i);
+	return i;
+}
+
+bool XMLElement::BoolAttribute(const char* name, bool defaultValue) const 
+{
+	bool b = defaultValue;
+	QueryBoolAttribute(name, &b);
+	return b;
+}
+
+double XMLElement::DoubleAttribute(const char* name, double defaultValue) const 
+{
+	double d = defaultValue;
+	QueryDoubleAttribute(name, &d);
+	return d;
+}
+
+float XMLElement::FloatAttribute(const char* name, float defaultValue) const 
+{
+	float f = defaultValue;
+	QueryFloatAttribute(name, &f);
+	return f;
+}
 
 const char* XMLElement::GetText() const
 {
@@ -1618,6 +1659,47 @@ XMLError XMLElement::QueryFloatText( float* fval ) const
     return XML_NO_TEXT_NODE;
 }
 
+int XMLElement::IntText(int defaultValue) const
+{
+	int i = defaultValue;
+	QueryIntText(&i);
+	return i;
+}
+
+unsigned XMLElement::UnsignedText(unsigned defaultValue) const
+{
+	unsigned i = defaultValue;
+	QueryUnsignedText(&i);
+	return i;
+}
+
+int64_t XMLElement::Int64Text(int64_t defaultValue) const
+{
+	int64_t i = defaultValue;
+	QueryInt64Text(&i);
+	return i;
+}
+
+bool XMLElement::BoolText(bool defaultValue) const
+{
+	bool b = defaultValue;
+	QueryBoolText(&b);
+	return b;
+}
+
+double XMLElement::DoubleText(double defaultValue) const
+{
+	double d = defaultValue;
+	QueryDoubleText(&d);
+	return d;
+}
+
+float XMLElement::FloatText(float defaultValue) const
+{
+	float f = defaultValue;
+	QueryFloatText(&f);
+	return f;
+}
 
 
 XMLAttribute* XMLElement::FindOrCreateAttribute( const char* name )

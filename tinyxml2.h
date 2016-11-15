@@ -1233,48 +1233,22 @@ public:
     const char* Attribute( const char* name, const char* value=0 ) const;
 
     /** Given an attribute name, IntAttribute() returns the value
-    	of the attribute interpreted as an integer. 0 will be
-    	returned if there is an error. For a method with error
-    	checking, see QueryIntAttribute()
+    	of the attribute interpreted as an integer. The default
+        value will be returned if the attribute isn't present,
+        or if there is an error. (For a method with error
+    	checking, see QueryIntAttribute()).
     */
-    int		 IntAttribute( const char* name ) const		{
-        int i=0;
-        QueryIntAttribute( name, &i );
-        return i;
-    }
-
+	int IntAttribute(const char* name, int defaultValue = 0) const;
     /// See IntAttribute()
-    unsigned UnsignedAttribute( const char* name ) const {
-        unsigned i=0;
-        QueryUnsignedAttribute( name, &i );
-        return i;
-    }
-
+	unsigned UnsignedAttribute(const char* name, unsigned defaultValue = 0) const;
 	/// See IntAttribute()
-	int64_t Int64Attribute(const char* name) const {
-		int64_t i = 0;
-		QueryInt64Attribute(name, &i);
-		return i;
-	}
-
+	int64_t Int64Attribute(const char* name, int64_t defaultValue = 0) const;
 	/// See IntAttribute()
-    bool BoolAttribute( const char* name ) const	{
-        bool b=false;
-        QueryBoolAttribute( name, &b );
-        return b;
-    }
+	bool BoolAttribute(const char* name, bool defaultValue = false) const;
     /// See IntAttribute()
-    double DoubleAttribute( const char* name ) const	{
-        double d=0;
-        QueryDoubleAttribute( name, &d );
-        return d;
-    }
+	double DoubleAttribute(const char* name, double defaultValue = 0) const;
     /// See IntAttribute()
-    float FloatAttribute( const char* name ) const	{
-        float f=0;
-        QueryFloatAttribute( name, &f );
-        return f;
-    }
+	float FloatAttribute(const char* name, float defaultValue = 0) const;
 
     /** Given an attribute name, QueryIntAttribute() returns
     	XML_SUCCESS, XML_WRONG_ATTRIBUTE_TYPE if the conversion
@@ -1547,6 +1521,19 @@ public:
     XMLError QueryDoubleText( double* dval ) const;
     /// See QueryIntText()
     XMLError QueryFloatText( float* fval ) const;
+
+	int IntText(int defaultValue = 0) const;
+
+	/// See QueryIntText()
+	unsigned UnsignedText(unsigned defaultValue = 0) const;
+	/// See QueryIntText()
+	int64_t Int64Text(int64_t defaultValue = 0) const;
+	/// See QueryIntText()
+	bool BoolText(bool defaultValue = false) const;
+	/// See QueryIntText()
+	double DoubleText(double defaultValue = 0) const;
+	/// See QueryIntText()
+	float FloatText(float defaultValue = 0) const;
 
     // internal:
     enum {

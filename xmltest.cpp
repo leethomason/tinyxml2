@@ -436,10 +436,12 @@ int main( int argc, const char ** argv )
 		element->LastChildElement()->DeleteAttribute( "attrib" );
 
 		XMLTest( "Programmatic DOM", true, doc->FirstChildElement()->FirstChildElement()->BoolAttribute( "attrib" ) );
-		int value = 10;
-		int result = doc->FirstChildElement()->LastChildElement()->QueryIntAttribute( "attrib", &value );
+		int value1 = 10;
+		int value2 = doc->FirstChildElement()->LastChildElement()->IntAttribute( "attrib", 10 );
+		int result = doc->FirstChildElement()->LastChildElement()->QueryIntAttribute( "attrib", &value1 );
 		XMLTest( "Programmatic DOM", result, (int)XML_NO_ATTRIBUTE );
-		XMLTest( "Programmatic DOM", value, 10 );
+		XMLTest( "Programmatic DOM", value1, 10 );
+		XMLTest( "Programmatic DOM", value2, 10 );
 
 		doc->Print();
 
@@ -517,16 +519,24 @@ int main( int argc, const char ** argv )
 		result = ele->QueryDoubleAttribute( "attr0", &dVal );
 		XMLTest( "Query attribute: int as double", result, (int)XML_SUCCESS);
 		XMLTest( "Query attribute: int as double", (int)dVal, 1 );
+		XMLTest( "Query attribute: int as double", (int)ele->DoubleAttribute("attr0"), 1);
+
 		result = ele->QueryDoubleAttribute( "attr1", &dVal );
 		XMLTest( "Query attribute: double as double", result, (int)XML_SUCCESS);
-		XMLTest( "Query attribute: double as double", (int)dVal, 2 );
+		XMLTest( "Query attribute: double as double", dVal, 2.0 );
+		XMLTest( "Query attribute: double as double", ele->DoubleAttribute("attr1"), 2.0 );
+
 		result = ele->QueryIntAttribute( "attr1", &iVal );
 		XMLTest( "Query attribute: double as int", result, (int)XML_SUCCESS);
 		XMLTest( "Query attribute: double as int", iVal, 2 );
+
 		result = ele->QueryIntAttribute( "attr2", &iVal );
 		XMLTest( "Query attribute: not a number", result, (int)XML_WRONG_ATTRIBUTE_TYPE );
+		XMLTest( "Query attribute: not a number", ele->DoubleAttribute("attr2", 4.0), 4.0 );
+
 		result = ele->QueryIntAttribute( "bar", &iVal );
 		XMLTest( "Query attribute: does not exist", result, (int)XML_NO_ATTRIBUTE );
+		XMLTest( "Query attribute: does not exist", ele->BoolAttribute("bar", true), true );
 	}
 
 	{
@@ -557,6 +567,8 @@ int main( int argc, const char ** argv )
 		XMLTest( "Attribute round trip. double.", -1, (int)dVal );
 		XMLTest( "Alternate query", true, iVal == iVal2 );
 		XMLTest( "Alternate query", true, dVal == dVal2 );
+		XMLTest( "Alternate query", true, iVal == ele->IntAttribute("int") );
+		XMLTest( "Alternate query", true, dVal == ele->DoubleAttribute("double") );		
 	}
 
 	{
@@ -702,6 +714,7 @@ int main( int argc, const char ** argv )
 			XMLTest("Attribute: int", -100, v, true);
 			element->QueryAttribute("attrib", &v);
 			XMLTest("Attribute: int", -100, v, true);
+			XMLTest("Attribute: int", -100, element->IntAttribute("attrib"), true);
 		}
 		{
 			element->SetAttribute("attrib", unsigned(100));
@@ -710,6 +723,7 @@ int main( int argc, const char ** argv )
 			XMLTest("Attribute: unsigned", unsigned(100), v, true);
 			element->QueryAttribute("attrib", &v);
 			XMLTest("Attribute: unsigned", unsigned(100), v, true);
+			XMLTest("Attribute: unsigned", unsigned(100), element->UnsignedAttribute("attrib"), true);
 		}
 		{
 			element->SetAttribute("attrib", BIG);
@@ -718,6 +732,7 @@ int main( int argc, const char ** argv )
 			XMLTest("Attribute: int64_t", BIG, v, true);
 			element->QueryAttribute("attrib", &v);
 			XMLTest("Attribute: int64_t", BIG, v, true);
+			XMLTest("Attribute: int64_t", BIG, element->Int64Attribute("attrib"), true);
 		}
 		{
 			element->SetAttribute("attrib", true);
@@ -726,6 +741,7 @@ int main( int argc, const char ** argv )
 			XMLTest("Attribute: bool", true, v, true);
 			element->QueryAttribute("attrib", &v);
 			XMLTest("Attribute: bool", true, v, true);
+			XMLTest("Attribute: bool", true, element->BoolAttribute("attrib"), true);
 		}
 		{
 			element->SetAttribute("attrib", 100.0);
@@ -734,6 +750,7 @@ int main( int argc, const char ** argv )
 			XMLTest("Attribute: double", 100.0, v, true);
 			element->QueryAttribute("attrib", &v);
 			XMLTest("Attribute: double", 100.0, v, true);
+			XMLTest("Attribute: double", 100.0, element->DoubleAttribute("attrib"), true);
 		}
 		{
 			element->SetAttribute("attrib", 100.0f);
@@ -742,6 +759,7 @@ int main( int argc, const char ** argv )
 			XMLTest("Attribute: float", 100.0f, v, true);
 			element->QueryAttribute("attrib", &v);
 			XMLTest("Attribute: float", 100.0f, v, true);
+			XMLTest("Attribute: float", 100.0f, element->FloatAttribute("attrib"), true);
 		}
 		{
 			element->SetText(BIG);
