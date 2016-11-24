@@ -1634,6 +1634,13 @@ public:
     XMLError LoadFile( FILE* );
 
     /**
+     	Load an XML file from memory.
+    	Returns XML_NO_ERROR (0) on success, or
+    	an errorID.
+     */
+    XMLError LoadMemory(char* data, size_t size);
+
+    /**
     	Save the XML file to disk.
     	Returns XML_SUCCESS (0) on success, or
     	an errorID.
