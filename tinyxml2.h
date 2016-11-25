@@ -1740,6 +1740,10 @@ public:
 
     void SetError( XMLError error, const char* str1, const char* str2 );
 
+    void ClearError() {
+        SetError(XML_SUCCESS, 0, 0);
+    }
+
     /// Return true if there was an error parsing the document.
     bool Error() const {
         return _errorID != XML_SUCCESS;
