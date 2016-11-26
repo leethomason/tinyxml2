@@ -160,7 +160,7 @@ public:
 
     void SetStr( const char* str, int flags=0 );
 
-    char* ParseText( char* in, const char* endTag, int strFlags );
+    char* ParseText( char* in, const char* endTag, int strFlags, int& curLineNum );
     char* ParseName( char* in );
 
     void TransferTo( StrPair* other );
@@ -530,16 +530,19 @@ enum XMLError {
 class XMLUtil
 {
 public:
-    static const char* SkipWhiteSpace( const char* p )	{
+    static const char* SkipWhiteSpace( const char* p, int& curLineNum )	{
         TIXMLASSERT( p );
         while( IsWhiteSpace(*p) ) {
+            if (*p == '\n') {
+                ++curLineNum;
+            }
             ++p;
         }
         TIXMLASSERT( p );
         return p;
     }
-    static char* SkipWhiteSpace( char* p )				{
-        return const_cast<char*>( SkipWhiteSpace( const_cast<const char*>(p) ) );
+    static char* SkipWhiteSpace( char* p, int& curLineNum )				{
+        return const_cast<char*>( SkipWhiteSpace( const_cast<const char*>(p), curLineNum ) );
     }
 
     // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
@@ -705,6 +708,9 @@ public:
     	@sa Value()
     */
     void SetValue( const char* val, bool staticMem=false );
+
+    /// Gets the line number the node is in, if the document was parsed from a file.
+    int GetParseLineNum() const { return _parseLineNum; }
 
     /// Get the parent of this node on the DOM.
     const XMLNode*	Parent() const			{
@@ -889,11 +895,12 @@ protected:
     XMLNode( XMLDocument* );
     virtual ~XMLNode();
 
-    virtual char* ParseDeep( char*, StrPair* );
+    virtual char* ParseDeep( char*, StrPair*, int& );
 
     XMLDocument*	_document;
     XMLNode*		_parent;
     mutable StrPair	_value;
+    int             _parseLineNum;
 
     XMLNode*		_firstChild;
     XMLNode*		_lastChild;
@@ -956,7 +963,7 @@ protected:
     XMLText( XMLDocument* doc )	: XMLNode( doc ), _isCData( false )	{}
     virtual ~XMLText()												{}
 
-    char* ParseDeep( char*, StrPair* endTag );
+    char* ParseDeep( char*, StrPair* endTag, int& curLineNum );
 
 private:
     bool _isCData;
@@ -987,7 +994,7 @@ protected:
     XMLComment( XMLDocument* doc );
     virtual ~XMLComment();
 
-    char* ParseDeep( char*, StrPair* endTag );
+    char* ParseDeep( char*, StrPair* endTag, int& curLineNum);
 
 private:
     XMLComment( const XMLComment& );	// not supported
@@ -1026,7 +1033,7 @@ protected:
     XMLDeclaration( XMLDocument* doc );
     virtual ~XMLDeclaration();
 
-    char* ParseDeep( char*, StrPair* endTag );
+    char* ParseDeep( char*, StrPair* endTag, int& curLineNum );
 
 private:
     XMLDeclaration( const XMLDeclaration& );	// not supported
@@ -1061,7 +1068,7 @@ protected:
     XMLUnknown( XMLDocument* doc );
     virtual ~XMLUnknown();
 
-    char* ParseDeep( char*, StrPair* endTag );
+    char* ParseDeep( char*, StrPair* endTag, int& curLineNum );
 
 private:
     XMLUnknown( const XMLUnknown& );	// not supported
@@ -1085,6 +1092,9 @@ public:
 
     /// The value of the attribute.
     const char* Value() const;
+
+    /// Gets the line number the attribute is in, if the document was parsed from a file.
+    int GetParseLineNum() const { return _parseLineNum; }
 
     /// The next attribute in the list.
     const XMLAttribute* Next() const {
@@ -1173,10 +1183,11 @@ private:
     void operator=( const XMLAttribute& );	// not supported
     void SetName( const char* name );
 
-    char* ParseDeep( char* p, bool processEntities );
+    char* ParseDeep( char* p, bool processEntities, int& curLineNum );
 
     mutable StrPair _name;
     mutable StrPair _value;
+    int             _parseLineNum;
     XMLAttribute*   _next;
     MemPool*        _memPool;
 };
@@ -1548,7 +1559,7 @@ public:
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
-    char* ParseDeep( char* p, StrPair* endTag );
+    char* ParseDeep( char* p, StrPair* endTag, int& curLineNum );
 
 private:
     XMLElement( XMLDocument* doc );
@@ -1561,7 +1572,7 @@ private:
     }
     XMLAttribute* FindOrCreateAttribute( const char* name );
     //void LinkAttribute( XMLAttribute* attrib );
-    char* ParseAttributes( char* p );
+    char* ParseAttributes( char* p, int& curLineNum );
     static void DeleteAttribute( XMLAttribute* attribute );
 
     enum { BUF_SIZE = 200 };
@@ -1738,7 +1749,7 @@ public:
     */
     void DeleteNode( XMLNode* node );
 
-    void SetError( XMLError error, const char* str1, const char* str2 );
+    void SetError( XMLError error, const char* str1, const char* str2, int lineNum );
 
     /// Return true if there was an error parsing the document.
     bool Error() const {
@@ -1758,6 +1769,11 @@ public:
     /// Return a possibly helpful secondary diagnostic location or string.
     const char* GetErrorStr2() const {
         return _errorStr2.GetStr();
+    }
+    /// Return the line where the error occured, or zero if unknown.
+    int GetErrorLineNum() const
+    {
+        return _errorLineNum;
     }
     /// If there is an error, print it to stdout.
     void PrintError() const;
@@ -1785,7 +1801,9 @@ private:
     Whitespace  _whitespace;
     mutable StrPair		_errorStr1;
     mutable StrPair		_errorStr2;
+    int                 _errorLineNum;
     char*       _charBuffer;
+    int         _parseCurLineNum;
 
     MemPoolT< sizeof(XMLElement) >	 _elementPool;
     MemPoolT< sizeof(XMLAttribute) > _attributePool;

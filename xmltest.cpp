@@ -1640,10 +1640,135 @@ int main( int argc, const char ** argv )
 	{
 		XMLDocument doc;
 		for( int i = 0; i < XML_ERROR_COUNT; i++ ) {
-			doc.SetError( (XMLError)i, 0, 0 );
+			doc.SetError( (XMLError)i, 0, 0, 0 );
 			doc.ErrorName();
 		}
 	}
+
+    // ----------- Line Number Tracking --------------
+    {
+        struct Functor: XMLVisitor
+        {
+            void TestParseError(const char *testString, const char *docStr, XMLError expected_error, int expectedLine)
+            {
+                XMLDocument doc;
+                XMLError err = doc.Parse(docStr);
+
+                XMLTest(testString, true, doc.Error());
+                XMLTest(testString, expected_error, err);
+                XMLTest(testString, expectedLine, doc.GetErrorLineNum());
+            };
+
+            void TestStringLines(const char *testString, const char *docStr, const char *expectedLines)
+            {
+                XMLDocument doc;
+                doc.Parse(docStr);
+                XMLTest(testString, false, doc.Error());
+                TestDocLines(testString, doc, expectedLines);
+            }
+
+            void TestFileLines(const char *testString, const char *file_name, const char *expectedLines)
+            {
+                XMLDocument doc;
+                doc.LoadFile(file_name);
+                XMLTest(testString, false, doc.Error());
+                TestDocLines(testString, doc, expectedLines);
+            }
+
+        private:
+            DynArray<char, 10> str;
+
+            void Push(char type, int lineNum)
+            {
+                str.Push(type);
+                str.Push(char('0' + (lineNum / 10)));
+                str.Push(char('0' + (lineNum % 10)));
+            }
+
+            bool VisitEnter(const XMLDocument& doc)
+            {
+                Push('D', doc.GetParseLineNum());
+                return true;
+            }
+            bool VisitEnter(const XMLElement& element, const XMLAttribute* firstAttribute)
+            {
+                Push('E', element.GetParseLineNum());
+                for (const XMLAttribute *attr = firstAttribute; attr != 0; attr = attr->Next())
+                    Push('A', attr->GetParseLineNum());
+                return true;
+            }
+            bool Visit(const XMLDeclaration& declaration)
+            {
+                Push('L', declaration.GetParseLineNum());
+                return true;
+            }
+            bool Visit(const XMLText& text)
+            {
+                Push('T', text.GetParseLineNum());
+                return true;
+            }
+            bool Visit(const XMLComment& comment)
+            {
+                Push('C', comment.GetParseLineNum());
+                return true;
+            }
+            bool Visit(const XMLUnknown& unknown)
+            {
+                Push('U', unknown.GetParseLineNum());
+                return true;
+            }
+
+            void TestDocLines(const char *testString, XMLDocument &doc, const char *expectedLines)
+            {
+                str.Clear();
+                doc.Accept(this);
+                str.Push(0);
+                XMLTest(testString, expectedLines, str.Mem());
+            }
+        } T;
+
+        T.TestParseError("ErrorLine-Parsing", "\n<root>\n foo \n<unclosed/>", XML_ERROR_PARSING, 2);
+        T.TestParseError("ErrorLine-Declaration", "<root>\n<?xml version=\"1.0\"?>", XML_ERROR_PARSING_DECLARATION, 2);
+        T.TestParseError("ErrorLine-Mismatch", "\n<root>\n</mismatch>", XML_ERROR_MISMATCHED_ELEMENT, 2);
+        T.TestParseError("ErrorLine-CData", "\n<root><![CDATA[ \n foo bar \n", XML_ERROR_PARSING_CDATA, 2);
+        T.TestParseError("ErrorLine-Text", "\n<root>\n foo bar \n", XML_ERROR_PARSING_TEXT, 3);
+        T.TestParseError("ErrorLine-Comment", "\n<root>\n<!-- >\n", XML_ERROR_PARSING_COMMENT, 3);
+        T.TestParseError("ErrorLine-Declaration", "\n<root>\n<? >\n", XML_ERROR_PARSING_DECLARATION, 3);
+        T.TestParseError("ErrorLine-Unknown", "\n<root>\n<! \n", XML_ERROR_PARSING_UNKNOWN, 3);
+        T.TestParseError("ErrorLine-Element", "\n<root>\n<unclosed \n", XML_ERROR_PARSING_ELEMENT, 3);
+        T.TestParseError("ErrorLine-Attribute", "\n<root>\n<unclosed \n att\n", XML_ERROR_PARSING_ATTRIBUTE, 4);
+        T.TestParseError("ErrorLine-ElementClose", "\n<root>\n<unclosed \n/unexpected", XML_ERROR_PARSING_ELEMENT, 3);
+
+        T.TestStringLines(
+            "LineNumbers-String",
+            "<?xml version=\"1.0\"?>\n"
+                "<root a='b' \n"
+                "c='d'> d <blah/>  \n"
+                "newline in text \n"
+                "and second <zxcv/><![CDATA[\n"
+                " cdata test ]]><!-- comment -->\n"
+                "<! unknown></root>",
+            "D01L01E02A02A03T03E03T04E05T05C06U07");
+
+        T.TestStringLines(
+            "LineNumbers-CRLF",
+            "\r\n"
+            "<?xml version=\"1.0\"?>\n"
+            "<root>\r\n"
+            "\n"
+            "text contining new line \n"
+            " and also containing crlf \r\n"
+            "<sub><![CDATA[\n"
+            "cdata containing new line \n"
+            " and also containing cflr\r\n"
+            "]]></sub><sub2/></root>",
+            "D01L02E03T05E07T07E10");
+
+        T.TestFileLines(
+            "LineNumbers-File",
+            "resources/utf8test.xml",
+            "D01L01E02E03A03A03T03E04A04A04T04E05A05A05T05E06A06A06T06E07A07A07T07E08A08A08T08E09T09E10T10");
+    }
 
     // ----------- Performance tracking --------------
 	{
