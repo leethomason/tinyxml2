@@ -1960,9 +1960,7 @@ void XMLDocument::Clear()
 #ifdef DEBUG
     const bool hadError = Error();
 #endif
-    _errorID = XML_SUCCESS;
-	_errorStr1.Reset();
-	_errorStr2.Reset();
+    ClearError();
 
     delete [] _charBuffer;
     _charBuffer = 0;
@@ -2167,7 +2165,7 @@ XMLError XMLDocument::SaveFile( FILE* fp, bool compact )
 {
     // Clear any error from the last save, otherwise it will get reported
     // for *this* call.
-	SetError(XML_SUCCESS, 0, 0);
+    ClearError();
     XMLPrinter stream( fp, compact );
     Print( &stream );
     return _errorID;
