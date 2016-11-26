@@ -63,6 +63,15 @@ bool XMLTest (const char* testString, const char* expected, const char* found, b
 	return pass;
 }
 
+bool XMLTest(const char* testString, XMLError expected, XMLError found, bool echo = true, bool extraNL = false)
+{
+    return XMLTest(testString, XMLDocument::ErrorName(expected), XMLDocument::ErrorName(found), echo, extraNL);
+}
+
+bool XMLTest(const char* testString, bool expected, bool found, bool echo = true, bool extraNL = false)
+{
+    return XMLTest(testString, expected ? "true" : "false", found ? "true" : "false", echo, extraNL);
+}
 
 template< class T > bool XMLTest( const char* testString, T expected, T found, bool echo=true )
 {

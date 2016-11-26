@@ -1749,6 +1749,7 @@ public:
         return _errorID;
     }
 	const char* ErrorName() const;
+    static const char* ErrorName(XMLError errorID);
 
     /// Return a possibly helpful diagnostic location or string.
     const char* GetErrorStr1() const {

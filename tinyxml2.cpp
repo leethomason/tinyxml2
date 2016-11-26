@@ -2226,12 +2226,17 @@ void XMLDocument::SetError( XMLError error, const char* str1, const char* str2 )
 		_errorStr2.SetStr(str2);
 }
 
-const char* XMLDocument::ErrorName() const
+const char* XMLDocument::ErrorName(XMLError errorID)
 {
-	TIXMLASSERT( _errorID >= 0 && _errorID < XML_ERROR_COUNT );
-    const char* errorName = _errorNames[_errorID];
+	TIXMLASSERT( errorID >= 0 && errorID < XML_ERROR_COUNT );
+    const char* errorName = _errorNames[errorID];
     TIXMLASSERT( errorName && errorName[0] );
     return errorName;
+}
+
+const char* XMLDocument::ErrorName() const
+{
+    return ErrorName(_errorID);
 }
 
 void XMLDocument::PrintError() const
