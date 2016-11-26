@@ -1563,6 +1563,7 @@ private:
     //void LinkAttribute( XMLAttribute* attrib );
     char* ParseAttributes( char* p );
     static void DeleteAttribute( XMLAttribute* attribute );
+    XMLAttribute* CreateAttribute();
 
     enum { BUF_SIZE = 200 };
     int _closingType;
