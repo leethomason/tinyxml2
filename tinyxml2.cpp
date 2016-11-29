@@ -1728,9 +1728,8 @@ XMLAttribute* XMLElement::FindOrCreateAttribute( const char* name )
         }
     }
     if ( !attrib ) {
-        TIXMLASSERT( sizeof( XMLAttribute ) == _document->_attributePool.ItemSize() );
-        attrib = new (_document->_attributePool.Alloc() ) XMLAttribute();
-        attrib->_memPool = &_document->_attributePool;
+        attrib = CreateAttribute();
+        TIXMLASSERT( attrib );
         if ( last ) {
             last->_next = attrib;
         }
@@ -1738,7 +1737,6 @@ XMLAttribute* XMLElement::FindOrCreateAttribute( const char* name )
             _rootAttribute = attrib;
         }
         attrib->SetName( name );
-        attrib->_memPool->SetTracked(); // always created and linked.
     }
     return attrib;
 }
@@ -1778,11 +1776,9 @@ char* XMLElement::ParseAttributes( char* p, int& curLineNum )
 
         // attribute.
         if (XMLUtil::IsNameStartChar( *p ) ) {
-            TIXMLASSERT( sizeof( XMLAttribute ) == _document->_attributePool.ItemSize() );
-            XMLAttribute* attrib = new (_document->_attributePool.Alloc() ) XMLAttribute();
+            XMLAttribute* attrib = CreateAttribute();
+            TIXMLASSERT( attrib );
             attrib->_parseLineNum = _document->_parseCurLineNum;
-            attrib->_memPool = &_document->_attributePool;
-			attrib->_memPool->SetTracked();
 
             int attrLineNum = attrib->_parseLineNum;
 
@@ -1831,6 +1827,15 @@ void XMLElement::DeleteAttribute( XMLAttribute* attribute )
     MemPool* pool = attribute->_memPool;
     attribute->~XMLAttribute();
     pool->Free( attribute );
+}
+
+XMLAttribute* XMLElement::CreateAttribute()
+{
+    TIXMLASSERT( sizeof( XMLAttribute ) == _document->_attributePool.ItemSize() );
+    XMLAttribute* attrib = new (_document->_attributePool.Alloc() ) XMLAttribute();
+    attrib->_memPool = &_document->_attributePool;
+    attrib->_memPool->SetTracked();
+    return attrib;
 }
 
 //
@@ -1972,10 +1977,7 @@ void XMLDocument::Clear()
 #ifdef DEBUG
     const bool hadError = Error();
 #endif
-    _errorID = XML_SUCCESS;
-	_errorStr1.Reset();
-	_errorStr2.Reset();
-    _errorLineNum = 0;
+    ClearError();
 
     delete [] _charBuffer;
     _charBuffer = 0;
@@ -2180,7 +2182,7 @@ XMLError XMLDocument::SaveFile( FILE* fp, bool compact )
 {
     // Clear any error from the last save, otherwise it will get reported
     // for *this* call.
-	SetError(XML_SUCCESS, 0, 0, 0);
+    ClearError();
     XMLPrinter stream( fp, compact );
     Print( &stream );
     return _errorID;
