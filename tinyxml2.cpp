@@ -238,7 +238,7 @@ void StrPair::CollapseWhitespace()
     // Adjusting _start would cause undefined behavior on delete[]
     TIXMLASSERT( ( _flags & NEEDS_DELETE ) == 0 );
     // Trim leading space.
-    int unusedLineNum(0);
+    int unusedLineNum = 0;
     _start = XMLUtil::SkipWhiteSpace( _start, &unusedLineNum );
 
     if ( *_start ) {
