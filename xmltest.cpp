@@ -1687,34 +1687,34 @@ int main( int argc, const char ** argv )
 
             bool VisitEnter(const XMLDocument& doc)
             {
-                Push('D', doc.GetParseLineNum());
+                Push('D', doc.GetLineNum());
                 return true;
             }
             bool VisitEnter(const XMLElement& element, const XMLAttribute* firstAttribute)
             {
-                Push('E', element.GetParseLineNum());
+                Push('E', element.GetLineNum());
                 for (const XMLAttribute *attr = firstAttribute; attr != 0; attr = attr->Next())
-                    Push('A', attr->GetParseLineNum());
+                    Push('A', attr->GetLineNum());
                 return true;
             }
             bool Visit(const XMLDeclaration& declaration)
             {
-                Push('L', declaration.GetParseLineNum());
+                Push('L', declaration.GetLineNum());
                 return true;
             }
             bool Visit(const XMLText& text)
             {
-                Push('T', text.GetParseLineNum());
+                Push('T', text.GetLineNum());
                 return true;
             }
             bool Visit(const XMLComment& comment)
             {
-                Push('C', comment.GetParseLineNum());
+                Push('C', comment.GetLineNum());
                 return true;
             }
             bool Visit(const XMLUnknown& unknown)
             {
-                Push('U', unknown.GetParseLineNum());
+                Push('U', unknown.GetLineNum());
                 return true;
             }
 

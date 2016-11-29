@@ -710,7 +710,7 @@ public:
     void SetValue( const char* val, bool staticMem=false );
 
     /// Gets the line number the node is in, if the document was parsed from a file.
-    int GetParseLineNum() const { return _parseLineNum; }
+    int GetLineNum() const { return _parseLineNum; }
 
     /// Get the parent of this node on the DOM.
     const XMLNode*	Parent() const			{
@@ -1094,7 +1094,7 @@ public:
     const char* Value() const;
 
     /// Gets the line number the attribute is in, if the document was parsed from a file.
-    int GetParseLineNum() const { return _parseLineNum; }
+    int GetLineNum() const { return _parseLineNum; }
 
     /// The next attribute in the list.
     const XMLAttribute* Next() const {
