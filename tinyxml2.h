@@ -160,7 +160,7 @@ public:
 
     void SetStr( const char* str, int flags=0 );
 
-    char* ParseText( char* in, const char* endTag, int strFlags, int& curLineNum );
+    char* ParseText( char* in, const char* endTag, int strFlags, int* curLineNumPtr );
     char* ParseName( char* in );
 
     void TransferTo( StrPair* other );
@@ -530,19 +530,19 @@ enum XMLError {
 class XMLUtil
 {
 public:
-    static const char* SkipWhiteSpace( const char* p, int& curLineNum )	{
+    static const char* SkipWhiteSpace( const char* p, int* curLineNumPtr )	{
         TIXMLASSERT( p );
         while( IsWhiteSpace(*p) ) {
             if (*p == '\n') {
-                ++curLineNum;
+                ++(*curLineNumPtr);
             }
             ++p;
         }
         TIXMLASSERT( p );
         return p;
     }
-    static char* SkipWhiteSpace( char* p, int& curLineNum )				{
-        return const_cast<char*>( SkipWhiteSpace( const_cast<const char*>(p), curLineNum ) );
+    static char* SkipWhiteSpace( char* p, int* curLineNumPtr )				{
+        return const_cast<char*>( SkipWhiteSpace( const_cast<const char*>(p), curLineNumPtr ) );
     }
 
     // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
@@ -895,7 +895,7 @@ protected:
     XMLNode( XMLDocument* );
     virtual ~XMLNode();
 
-    virtual char* ParseDeep( char*, StrPair*, int& );
+    virtual char* ParseDeep( char*, StrPair*, int* );
 
     XMLDocument*	_document;
     XMLNode*		_parent;
@@ -963,7 +963,7 @@ protected:
     XMLText( XMLDocument* doc )	: XMLNode( doc ), _isCData( false )	{}
     virtual ~XMLText()												{}
 
-    char* ParseDeep( char*, StrPair* endTag, int& curLineNum );
+    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr );
 
 private:
     bool _isCData;
@@ -994,7 +994,7 @@ protected:
     XMLComment( XMLDocument* doc );
     virtual ~XMLComment();
 
-    char* ParseDeep( char*, StrPair* endTag, int& curLineNum);
+    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr);
 
 private:
     XMLComment( const XMLComment& );	// not supported
@@ -1033,7 +1033,7 @@ protected:
     XMLDeclaration( XMLDocument* doc );
     virtual ~XMLDeclaration();
 
-    char* ParseDeep( char*, StrPair* endTag, int& curLineNum );
+    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr );
 
 private:
     XMLDeclaration( const XMLDeclaration& );	// not supported
@@ -1068,7 +1068,7 @@ protected:
     XMLUnknown( XMLDocument* doc );
     virtual ~XMLUnknown();
 
-    char* ParseDeep( char*, StrPair* endTag, int& curLineNum );
+    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr );
 
 private:
     XMLUnknown( const XMLUnknown& );	// not supported
@@ -1183,7 +1183,7 @@ private:
     void operator=( const XMLAttribute& );	// not supported
     void SetName( const char* name );
 
-    char* ParseDeep( char* p, bool processEntities, int& curLineNum );
+    char* ParseDeep( char* p, bool processEntities, int* curLineNumPtr );
 
     mutable StrPair _name;
     mutable StrPair _value;
@@ -1559,7 +1559,7 @@ public:
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
-    char* ParseDeep( char* p, StrPair* endTag, int& curLineNum );
+    char* ParseDeep( char* p, StrPair* endTag, int* curLineNumPtr );
 
 private:
     XMLElement( XMLDocument* doc );
@@ -1572,7 +1572,7 @@ private:
     }
     XMLAttribute* FindOrCreateAttribute( const char* name );
     //void LinkAttribute( XMLAttribute* attrib );
-    char* ParseAttributes( char* p, int& curLineNum );
+    char* ParseAttributes( char* p, int* curLineNumPtr );
     static void DeleteAttribute( XMLAttribute* attribute );
     XMLAttribute* CreateAttribute();
 

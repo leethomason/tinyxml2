@@ -189,7 +189,7 @@ void StrPair::SetStr( const char* str, int flags )
 }
 
 
-char* StrPair::ParseText( char* p, const char* endTag, int strFlags, int& curLineNum )
+char* StrPair::ParseText( char* p, const char* endTag, int strFlags, int* curLineNumPtr )
 {
     TIXMLASSERT( p );
     TIXMLASSERT( endTag && *endTag );
@@ -204,7 +204,7 @@ char* StrPair::ParseText( char* p, const char* endTag, int strFlags, int& curLin
             Set( start, p, strFlags );
             return p + length;
         } else if (*p == '\n') {
-            ++curLineNum;
+            ++(*curLineNumPtr);
         }
         ++p;
         TIXMLASSERT( p );
@@ -239,7 +239,7 @@ void StrPair::CollapseWhitespace()
     TIXMLASSERT( ( _flags & NEEDS_DELETE ) == 0 );
     // Trim leading space.
     int unusedLineNum(0);
-    _start = XMLUtil::SkipWhiteSpace( _start, unusedLineNum );
+    _start = XMLUtil::SkipWhiteSpace( _start, &unusedLineNum );
 
     if ( *_start ) {
         const char* p = _start;	// the read pointer
@@ -247,7 +247,7 @@ void StrPair::CollapseWhitespace()
 
         while( *p ) {
             if ( XMLUtil::IsWhiteSpace( *p )) {
-                p = XMLUtil::SkipWhiteSpace( p, unusedLineNum );
+                p = XMLUtil::SkipWhiteSpace( p, &unusedLineNum );
                 if ( *p == 0 ) {
                     break;    // don't write to q; this trims the trailing space.
                 }
@@ -641,7 +641,7 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
     TIXMLASSERT( p );
     char* const start = p;
     int const startLine = _parseCurLineNum;
-    p = XMLUtil::SkipWhiteSpace( p, _parseCurLineNum );
+    p = XMLUtil::SkipWhiteSpace( p, &_parseCurLineNum );
     if( !*p ) {
         *node = 0;
         TIXMLASSERT( p );
@@ -954,7 +954,7 @@ const XMLElement* XMLNode::PreviousSiblingElement( const char* name ) const
 }
 
 
-char* XMLNode::ParseDeep( char* p, StrPair* parentEnd, int& curLineNum )
+char* XMLNode::ParseDeep( char* p, StrPair* parentEnd, int* curLineNumPtr )
 {
     // This is a recursive method, but thinking about it "at the current level"
     // it is a pretty simple flat list:
@@ -985,7 +985,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd, int& curLineNum )
         int nodeLineNum = node->_parseLineNum;
 
         StrPair endTag;
-        p = node->ParseDeep( p, &endTag, curLineNum );
+        p = node->ParseDeep( p, &endTag, curLineNumPtr );
         if ( !p ) {
             DeleteNode( node );
             if ( !_document->Error() ) {
@@ -1091,11 +1091,11 @@ const XMLElement* XMLNode::ToElementWithName( const char* name ) const
 }
 
 // --------- XMLText ---------- //
-char* XMLText::ParseDeep( char* p, StrPair*, int& curLineNum )
+char* XMLText::ParseDeep( char* p, StrPair*, int* curLineNumPtr )
 {
     const char* start = p;
     if ( this->CData() ) {
-        p = _value.ParseText( p, "]]>", StrPair::NEEDS_NEWLINE_NORMALIZATION, curLineNum );
+        p = _value.ParseText( p, "]]>", StrPair::NEEDS_NEWLINE_NORMALIZATION, curLineNumPtr );
         if ( !p ) {
             _document->SetError( XML_ERROR_PARSING_CDATA, start, 0, _parseLineNum );
         }
@@ -1107,7 +1107,7 @@ char* XMLText::ParseDeep( char* p, StrPair*, int& curLineNum )
             flags |= StrPair::NEEDS_WHITESPACE_COLLAPSING;
         }
 
-        p = _value.ParseText( p, "<", flags, curLineNum );
+        p = _value.ParseText( p, "<", flags, curLineNumPtr );
         if ( p && *p ) {
             return p-1;
         }
@@ -1156,11 +1156,11 @@ XMLComment::~XMLComment()
 }
 
 
-char* XMLComment::ParseDeep( char* p, StrPair*, int& curLineNum )
+char* XMLComment::ParseDeep( char* p, StrPair*, int* curLineNumPtr )
 {
     // Comment parses as text.
     const char* start = p;
-    p = _value.ParseText( p, "-->", StrPair::COMMENT, curLineNum );
+    p = _value.ParseText( p, "-->", StrPair::COMMENT, curLineNumPtr );
     if ( p == 0 ) {
         _document->SetError( XML_ERROR_PARSING_COMMENT, start, 0, _parseLineNum );
     }
@@ -1206,11 +1206,11 @@ XMLDeclaration::~XMLDeclaration()
 }
 
 
-char* XMLDeclaration::ParseDeep( char* p, StrPair*, int& curLineNum )
+char* XMLDeclaration::ParseDeep( char* p, StrPair*, int* curLineNumPtr )
 {
     // Declaration parses as text.
     const char* start = p;
-    p = _value.ParseText( p, "?>", StrPair::NEEDS_NEWLINE_NORMALIZATION, curLineNum );
+    p = _value.ParseText( p, "?>", StrPair::NEEDS_NEWLINE_NORMALIZATION, curLineNumPtr );
     if ( p == 0 ) {
         _document->SetError( XML_ERROR_PARSING_DECLARATION, start, 0, _parseLineNum );
     }
@@ -1255,12 +1255,12 @@ XMLUnknown::~XMLUnknown()
 }
 
 
-char* XMLUnknown::ParseDeep( char* p, StrPair*, int& curLineNum )
+char* XMLUnknown::ParseDeep( char* p, StrPair*, int* curLineNumPtr )
 {
     // Unknown parses as text.
     const char* start = p;
 
-    p = _value.ParseText( p, ">", StrPair::NEEDS_NEWLINE_NORMALIZATION, curLineNum );
+    p = _value.ParseText( p, ">", StrPair::NEEDS_NEWLINE_NORMALIZATION, curLineNumPtr );
     if ( !p ) {
         _document->SetError( XML_ERROR_PARSING_UNKNOWN, start, 0, _parseLineNum );
     }
@@ -1304,7 +1304,7 @@ const char* XMLAttribute::Value() const
     return _value.GetStr();
 }
 
-char* XMLAttribute::ParseDeep( char* p, bool processEntities, int& curLineNum )
+char* XMLAttribute::ParseDeep( char* p, bool processEntities, int* curLineNumPtr )
 {
     // Parse using the name rules: bug fix, was using ParseText before
     p = _name.ParseName( p );
@@ -1313,13 +1313,13 @@ char* XMLAttribute::ParseDeep( char* p, bool processEntities, int& curLineNum )
     }
 
     // Skip white space before =
-    p = XMLUtil::SkipWhiteSpace( p, curLineNum );
+    p = XMLUtil::SkipWhiteSpace( p, curLineNumPtr );
     if ( *p != '=' ) {
         return 0;
     }
 
     ++p;	// move up to opening quote
-    p = XMLUtil::SkipWhiteSpace( p, curLineNum );
+    p = XMLUtil::SkipWhiteSpace( p, curLineNumPtr );
     if ( *p != '\"' && *p != '\'' ) {
         return 0;
     }
@@ -1327,7 +1327,7 @@ char* XMLAttribute::ParseDeep( char* p, bool processEntities, int& curLineNum )
     char endTag[2] = { *p, 0 };
     ++p;	// move past opening quote
 
-    p = _value.ParseText( p, endTag, processEntities ? StrPair::ATTRIBUTE_VALUE : StrPair::ATTRIBUTE_VALUE_LEAVE_ENTITIES, curLineNum );
+    p = _value.ParseText( p, endTag, processEntities ? StrPair::ATTRIBUTE_VALUE : StrPair::ATTRIBUTE_VALUE_LEAVE_ENTITIES, curLineNumPtr );
     return p;
 }
 
@@ -1761,14 +1761,14 @@ void XMLElement::DeleteAttribute( const char* name )
 }
 
 
-char* XMLElement::ParseAttributes( char* p, int& curLineNum )
+char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
 {
     const char* start = p;
     XMLAttribute* prevAttribute = 0;
 
     // Read the attributes.
     while( p ) {
-        p = XMLUtil::SkipWhiteSpace( p, curLineNum );
+        p = XMLUtil::SkipWhiteSpace( p, curLineNumPtr );
         if ( !(*p) ) {
             _document->SetError( XML_ERROR_PARSING_ELEMENT, start, Name(), _parseLineNum );
             return 0;
@@ -1782,7 +1782,7 @@ char* XMLElement::ParseAttributes( char* p, int& curLineNum )
 
             int attrLineNum = attrib->_parseLineNum;
 
-            p = attrib->ParseDeep( p, _document->ProcessEntities(), curLineNum );
+            p = attrib->ParseDeep( p, _document->ProcessEntities(), curLineNumPtr );
             if ( !p || Attribute( attrib->Name() ) ) {
                 DeleteAttribute( attrib );
                 _document->SetError( XML_ERROR_PARSING_ATTRIBUTE, start, p, attrLineNum );
@@ -1842,10 +1842,10 @@ XMLAttribute* XMLElement::CreateAttribute()
 //	<ele></ele>
 //	<ele>foo<b>bar</b></ele>
 //
-char* XMLElement::ParseDeep( char* p, StrPair* strPair, int& curLineNum )
+char* XMLElement::ParseDeep( char* p, StrPair* strPair, int* curLineNumPtr )
 {
     // Read the element name.
-    p = XMLUtil::SkipWhiteSpace( p, curLineNum );
+    p = XMLUtil::SkipWhiteSpace( p, curLineNumPtr );
 
     // The closing element is the </element> form. It is
     // parsed just like a regular element then deleted from
@@ -1860,12 +1860,12 @@ char* XMLElement::ParseDeep( char* p, StrPair* strPair, int& curLineNum )
         return 0;
     }
 
-    p = ParseAttributes( p, curLineNum );
+    p = ParseAttributes( p, curLineNumPtr );
     if ( !p || !*p || _closingType ) {
         return p;
     }
 
-    p = XMLNode::ParseDeep( p, strPair, curLineNum );
+    p = XMLNode::ParseDeep( p, strPair, curLineNumPtr );
     return p;
 }
 
@@ -2289,13 +2289,13 @@ void XMLDocument::Parse()
     _parseCurLineNum = 1;
     _parseLineNum = 1;
     char* p = _charBuffer;
-    p = XMLUtil::SkipWhiteSpace( p, _parseCurLineNum );
+    p = XMLUtil::SkipWhiteSpace( p, &_parseCurLineNum );
     p = const_cast<char*>( XMLUtil::ReadBOM( p, &_writeBOM ) );
     if ( !*p ) {
         SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0, 0 );
         return;
     }
-    ParseDeep(p, 0, _parseCurLineNum );
+    ParseDeep(p, 0, &_parseCurLineNum );
 }
 
 XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :
