@@ -982,14 +982,14 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd, int* curLineNumPtr )
             break;
         }
 
-        int nodeLineNum = node->_parseLineNum;
+        int initialLineNum = node->_parseLineNum;
 
         StrPair endTag;
         p = node->ParseDeep( p, &endTag, curLineNumPtr );
         if ( !p ) {
             DeleteNode( node );
             if ( !_document->Error() ) {
-                _document->SetError( XML_ERROR_PARSING, 0, 0, nodeLineNum );
+                _document->SetError( XML_ERROR_PARSING, 0, 0, initialLineNum);
             }
             break;
         }
@@ -1009,7 +1009,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd, int* curLineNumPtr )
                 }
             }
             if ( !wellLocated ) {
-                _document->SetError( XML_ERROR_PARSING_DECLARATION, decl->Value(), 0, nodeLineNum );
+                _document->SetError( XML_ERROR_PARSING_DECLARATION, decl->Value(), 0, initialLineNum);
                 DeleteNode( node );
                 break;
             }
@@ -1044,7 +1044,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd, int* curLineNumPtr )
                 }
             }
             if ( mismatch ) {
-                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, ele->Name(), 0, nodeLineNum );
+                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, ele->Name(), 0, initialLineNum);
                 DeleteNode( node );
                 break;
             }
