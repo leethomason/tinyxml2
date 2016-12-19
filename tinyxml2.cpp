@@ -1717,9 +1717,11 @@ XMLAttribute* XMLElement::FindOrCreateAttribute( const char* name )
         attrib = CreateAttribute();
         TIXMLASSERT( attrib );
         if ( last ) {
+            TIXMLASSERT( last->_next == 0 );
             last->_next = attrib;
         }
         else {
+            TIXMLASSERT( _rootAttribute == 0 );
             _rootAttribute = attrib;
         }
         attrib->SetName( name );
@@ -1777,9 +1779,11 @@ char* XMLElement::ParseAttributes( char* p )
             // avoids re-scanning the attribute list. Preferring performance for
             // now, may reconsider in the future.
             if ( prevAttribute ) {
+                TIXMLASSERT( prevAttribute->_next == 0 );
                 prevAttribute->_next = attrib;
             }
             else {
+                TIXMLASSERT( _rootAttribute == 0 );
                 _rootAttribute = attrib;
             }
             prevAttribute = attrib;
