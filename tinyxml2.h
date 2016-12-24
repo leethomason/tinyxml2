@@ -160,7 +160,7 @@ public:
 
     void SetStr( const char* str, int flags=0 );
 
-    char* ParseText( char* in, const char* endTag, int strFlags );
+    char* ParseText( char* in, const char* endTag, int strFlags, int* curLineNumPtr );
     char* ParseName( char* in );
 
     void TransferTo( StrPair* other );
@@ -530,16 +530,20 @@ enum XMLError {
 class XMLUtil
 {
 public:
-    static const char* SkipWhiteSpace( const char* p )	{
+    static const char* SkipWhiteSpace( const char* p, int* curLineNumPtr )	{
         TIXMLASSERT( p );
+
         while( IsWhiteSpace(*p) ) {
+            if (curLineNumPtr && *p == '\n') {
+                ++(*curLineNumPtr);
+            }
             ++p;
         }
         TIXMLASSERT( p );
         return p;
     }
-    static char* SkipWhiteSpace( char* p )				{
-        return const_cast<char*>( SkipWhiteSpace( const_cast<const char*>(p) ) );
+    static char* SkipWhiteSpace( char* p, int* curLineNumPtr )				{
+        return const_cast<char*>( SkipWhiteSpace( const_cast<const char*>(p), curLineNumPtr ) );
     }
 
     // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
@@ -705,6 +709,9 @@ public:
     	@sa Value()
     */
     void SetValue( const char* val, bool staticMem=false );
+
+    /// Gets the line number the node is in, if the document was parsed from a file.
+    int GetLineNum() const { return _parseLineNum; }
 
     /// Get the parent of this node on the DOM.
     const XMLNode*	Parent() const			{
@@ -889,11 +896,12 @@ protected:
     XMLNode( XMLDocument* );
     virtual ~XMLNode();
 
-    virtual char* ParseDeep( char*, StrPair* );
+    virtual char* ParseDeep( char*, StrPair*, int* );
 
     XMLDocument*	_document;
     XMLNode*		_parent;
     mutable StrPair	_value;
+    int             _parseLineNum;
 
     XMLNode*		_firstChild;
     XMLNode*		_lastChild;
@@ -956,7 +964,7 @@ protected:
     XMLText( XMLDocument* doc )	: XMLNode( doc ), _isCData( false )	{}
     virtual ~XMLText()												{}
 
-    char* ParseDeep( char*, StrPair* endTag );
+    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr );
 
 private:
     bool _isCData;
@@ -987,7 +995,7 @@ protected:
     XMLComment( XMLDocument* doc );
     virtual ~XMLComment();
 
-    char* ParseDeep( char*, StrPair* endTag );
+    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr);
 
 private:
     XMLComment( const XMLComment& );	// not supported
@@ -1026,7 +1034,7 @@ protected:
     XMLDeclaration( XMLDocument* doc );
     virtual ~XMLDeclaration();
 
-    char* ParseDeep( char*, StrPair* endTag );
+    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr );
 
 private:
     XMLDeclaration( const XMLDeclaration& );	// not supported
@@ -1061,7 +1069,7 @@ protected:
     XMLUnknown( XMLDocument* doc );
     virtual ~XMLUnknown();
 
-    char* ParseDeep( char*, StrPair* endTag );
+    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr );
 
 private:
     XMLUnknown( const XMLUnknown& );	// not supported
@@ -1085,6 +1093,9 @@ public:
 
     /// The value of the attribute.
     const char* Value() const;
+
+    /// Gets the line number the attribute is in, if the document was parsed from a file.
+    int GetLineNum() const { return _parseLineNum; }
 
     /// The next attribute in the list.
     const XMLAttribute* Next() const {
@@ -1173,10 +1184,11 @@ private:
     void operator=( const XMLAttribute& );	// not supported
     void SetName( const char* name );
 
-    char* ParseDeep( char* p, bool processEntities );
+    char* ParseDeep( char* p, bool processEntities, int* curLineNumPtr );
 
     mutable StrPair _name;
     mutable StrPair _value;
+    int             _parseLineNum;
     XMLAttribute*   _next;
     MemPool*        _memPool;
 };
@@ -1548,7 +1560,7 @@ public:
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
-    char* ParseDeep( char* p, StrPair* endTag );
+    char* ParseDeep( char* p, StrPair* endTag, int* curLineNumPtr );
 
 private:
     XMLElement( XMLDocument* doc );
@@ -1561,7 +1573,7 @@ private:
     }
     XMLAttribute* FindOrCreateAttribute( const char* name );
     //void LinkAttribute( XMLAttribute* attrib );
-    char* ParseAttributes( char* p );
+    char* ParseAttributes( char* p, int* curLineNumPtr );
     static void DeleteAttribute( XMLAttribute* attribute );
     XMLAttribute* CreateAttribute();
 
@@ -1739,10 +1751,10 @@ public:
     */
     void DeleteNode( XMLNode* node );
 
-    void SetError( XMLError error, const char* str1, const char* str2 );
+    void SetError( XMLError error, const char* str1, const char* str2, int lineNum );
 
     void ClearError() {
-        SetError(XML_SUCCESS, 0, 0);
+        SetError(XML_SUCCESS, 0, 0, 0);
     }
 
     /// Return true if there was an error parsing the document.
@@ -1754,6 +1766,7 @@ public:
         return _errorID;
     }
 	const char* ErrorName() const;
+    static const char* ErrorIDToName(XMLError errorID);
 
     /// Return a possibly helpful diagnostic location or string.
     const char* GetErrorStr1() const {
@@ -1762,6 +1775,11 @@ public:
     /// Return a possibly helpful secondary diagnostic location or string.
     const char* GetErrorStr2() const {
         return _errorStr2.GetStr();
+    }
+    /// Return the line where the error occured, or zero if unknown.
+    int GetErrorLineNum() const
+    {
+        return _errorLineNum;
     }
     /// If there is an error, print it to stdout.
     void PrintError() const;
@@ -1783,13 +1801,15 @@ private:
     XMLDocument( const XMLDocument& );	// not supported
     void operator=( const XMLDocument& );	// not supported
 
-    bool        _writeBOM;
-    bool        _processEntities;
-    XMLError    _errorID;
-    Whitespace  _whitespace;
-    mutable StrPair		_errorStr1;
-    mutable StrPair		_errorStr2;
-    char*       _charBuffer;
+    bool			_writeBOM;
+    bool			_processEntities;
+    XMLError		_errorID;
+    Whitespace		_whitespace;
+    mutable StrPair	_errorStr1;
+    mutable StrPair	_errorStr2;
+    int             _errorLineNum;
+    char*			_charBuffer;
+    int				_parseCurLineNum;
 
     MemPoolT< sizeof(XMLElement) >	 _elementPool;
     MemPoolT< sizeof(XMLAttribute) > _attributePool;

@@ -88,9 +88,8 @@ Advantages of TinyXML-2
 
 Advantages of TinyXML-1
 
-1.  Can report the location of parsing errors.
-2.  Support for some C++ STL conventions: streams and strings
-3.  Very mature and well debugged code base.
+1.  Support for some C++ STL conventions: streams and strings
+2.  Very mature and well debugged code base.
 
 Features
 --------
@@ -156,6 +155,15 @@ However, you may also use COLLAPSE_WHITESPACE, which will:
 
 Note that (currently) there is a performance impact for using COLLAPSE_WHITESPACE.
 It essentially causes the XML to be parsed twice.
+
+#### Error Reporting
+
+TinyXML-2 reports the line number of any errors in an XML document that
+cannot be parsed correctly. In addition, all nodes (elements, declarations,
+text, comments etc.) and attributes have a line number recorded as they are parsed.
+This allows an application that performs additional validation of the parsed
+XML document (e.g. application-implemented DTD validation) to report
+line number information in it's errors.
 
 ### Entities
 
