@@ -193,6 +193,7 @@ char* StrPair::ParseText( char* p, const char* endTag, int strFlags, int* curLin
 {
     TIXMLASSERT( p );
     TIXMLASSERT( endTag && *endTag );
+	TIXMLASSERT(curLineNumPtr);
 
     char* start = p;
     char  endChar = *endTag;
@@ -238,8 +239,7 @@ void StrPair::CollapseWhitespace()
     // Adjusting _start would cause undefined behavior on delete[]
     TIXMLASSERT( ( _flags & NEEDS_DELETE ) == 0 );
     // Trim leading space.
-    int unusedLineNum = 0;
-    _start = XMLUtil::SkipWhiteSpace( _start, &unusedLineNum );
+    _start = XMLUtil::SkipWhiteSpace( _start, 0 );
 
     if ( *_start ) {
         const char* p = _start;	// the read pointer
@@ -247,7 +247,7 @@ void StrPair::CollapseWhitespace()
 
         while( *p ) {
             if ( XMLUtil::IsWhiteSpace( *p )) {
-                p = XMLUtil::SkipWhiteSpace( p, &unusedLineNum );
+                p = XMLUtil::SkipWhiteSpace( p, 0 );
                 if ( *p == 0 ) {
                     break;    // don't write to q; this trims the trailing space.
                 }
@@ -2247,7 +2247,7 @@ void XMLDocument::SetError( XMLError error, const char* str1, const char* str2, 
 		_errorStr2.SetStr(str2);
 }
 
-const char* XMLDocument::ErrorName(XMLError errorID)
+/*static*/ const char* XMLDocument::ErrorIDToName(XMLError errorID)
 {
 	TIXMLASSERT( errorID >= 0 && errorID < XML_ERROR_COUNT );
     const char* errorName = _errorNames[errorID];
@@ -2257,7 +2257,7 @@ const char* XMLDocument::ErrorName(XMLError errorID)
 
 const char* XMLDocument::ErrorName() const
 {
-    return ErrorName(_errorID);
+    return ErrorIDToName(_errorID);
 }
 
 void XMLDocument::PrintError() const

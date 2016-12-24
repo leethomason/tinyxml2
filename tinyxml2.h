@@ -532,8 +532,9 @@ class XMLUtil
 public:
     static const char* SkipWhiteSpace( const char* p, int* curLineNumPtr )	{
         TIXMLASSERT( p );
+
         while( IsWhiteSpace(*p) ) {
-            if (*p == '\n') {
+            if (curLineNumPtr && *p == '\n') {
                 ++(*curLineNumPtr);
             }
             ++p;
@@ -1765,7 +1766,7 @@ public:
         return _errorID;
     }
 	const char* ErrorName() const;
-    static const char* ErrorName(XMLError errorID);
+    static const char* ErrorIDToName(XMLError errorID);
 
     /// Return a possibly helpful diagnostic location or string.
     const char* GetErrorStr1() const {
@@ -1800,15 +1801,15 @@ private:
     XMLDocument( const XMLDocument& );	// not supported
     void operator=( const XMLDocument& );	// not supported
 
-    bool        _writeBOM;
-    bool        _processEntities;
-    XMLError    _errorID;
-    Whitespace  _whitespace;
-    mutable StrPair		_errorStr1;
-    mutable StrPair		_errorStr2;
-    int                 _errorLineNum;
-    char*       _charBuffer;
-    int         _parseCurLineNum;
+    bool			_writeBOM;
+    bool			_processEntities;
+    XMLError		_errorID;
+    Whitespace		_whitespace;
+    mutable StrPair	_errorStr1;
+    mutable StrPair	_errorStr2;
+    int             _errorLineNum;
+    char*			_charBuffer;
+    int				_parseCurLineNum;
 
     MemPoolT< sizeof(XMLElement) >	 _elementPool;
     MemPoolT< sizeof(XMLAttribute) > _attributePool;
