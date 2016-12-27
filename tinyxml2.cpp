@@ -368,22 +368,22 @@ const char* StrPair::GetStr()
 
 // --------- XMLUtil ----------- //
 
-char* XMLUtil::writeBoolTrue  = "true";
-char* XMLUtil::writeBoolFalse = "false";
+const char* XMLUtil::writeBoolTrue  = "true";
+const char* XMLUtil::writeBoolFalse = "false";
 
 void XMLUtil::SetBool(const char* writeTrue, const char* writeFalse)
 {
 	static const char* defTrue = "true";
 	static const char* defFalse = "false";
 	if (writeTrue)
-		writeBoolTrue = (char*) writeTrue;
+		writeBoolTrue = writeTrue;
 	else
-		writeBoolTrue = (char*) defTrue;
+		writeBoolTrue = defTrue;
 
 	if (writeFalse)
-		writeBoolFalse = (char*) writeFalse;
+		writeBoolFalse = writeFalse;
 	else
-		writeBoolFalse = (char*) defFalse;
+		writeBoolFalse = defFalse;
 }
 
 

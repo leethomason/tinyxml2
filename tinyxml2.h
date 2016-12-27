@@ -616,8 +616,8 @@ public:
 	static void SetBool(const char* writeTrue, const char* writeFalse);
 
 private:
-	static char* writeBoolTrue;
-	static char* writeBoolFalse;
+	static const char* writeBoolTrue;
+	static const char* writeBoolFalse;
 };
 
 
