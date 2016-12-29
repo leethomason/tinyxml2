@@ -757,12 +757,12 @@ int main( int argc, const char ** argv )
 			const char* result = element->Attribute("attrib");
 			XMLTest("Bool true is 'true'", "true", result);
 
-			XMLUtil::SetBool("1", "0");
+			XMLUtil::SetBoolSerialization("1", "0");
 			element->SetAttribute("attrib", true);
 			result = element->Attribute("attrib");
 			XMLTest("Bool true is '1'", "1", result);
 
-			XMLUtil::SetBool(0, 0);
+			XMLUtil::SetBoolSerialization(0, 0);
 		}
 		{
 			element->SetAttribute("attrib", 100.0);

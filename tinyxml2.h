@@ -606,14 +606,12 @@ public:
     static bool ToDouble( const char* str, double* value );
 	static bool ToInt64(const char* str, int64_t* value);
 
-	// Default to "true" and "false". If you
-	// need different values, can assign them. (For instance
-	// if you need "true" to be "1".)
+	// Changes what is serialized for a boolean value.
+	// Default to "true" and "false". Shouldn't be changed
+	// unless you have a special testing or compatibility need.
 	// Be careful: static, global, & not thread safe.
 	// Be sure to set static const memory as parameters.
-	// Shouldn't be set unless you have a special reason 
-	// such as back-compatibility or testing.
-	static void SetBool(const char* writeTrue, const char* writeFalse);
+	static void SetBoolSerialization(const char* writeTrue, const char* writeFalse);
 
 private:
 	static const char* writeBoolTrue;

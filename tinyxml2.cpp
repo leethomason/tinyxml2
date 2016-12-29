@@ -371,19 +371,13 @@ const char* StrPair::GetStr()
 const char* XMLUtil::writeBoolTrue  = "true";
 const char* XMLUtil::writeBoolFalse = "false";
 
-void XMLUtil::SetBool(const char* writeTrue, const char* writeFalse)
+void XMLUtil::SetBoolSerialization(const char* writeTrue, const char* writeFalse)
 {
-	static const char* defTrue = "true";
+	static const char* defTrue  = "true";
 	static const char* defFalse = "false";
-	if (writeTrue)
-		writeBoolTrue = writeTrue;
-	else
-		writeBoolTrue = defTrue;
 
-	if (writeFalse)
-		writeBoolFalse = writeFalse;
-	else
-		writeBoolFalse = defFalse;
+	writeBoolTrue = (writeTrue) ? writeTrue : defTrue;
+	writeBoolFalse = (writeFalse) ? writeFalse : defFalse;
 }
 
 
