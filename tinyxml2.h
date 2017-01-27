@@ -1177,7 +1177,7 @@ public:
 private:
     enum { BUF_SIZE = 200 };
 
-    XMLAttribute() : _next( 0 ), _memPool( 0 ) {}
+    XMLAttribute() : _parseLineNum( 0 ), _next( 0 ), _memPool( 0 ) {}
     virtual ~XMLAttribute()	{}
 
     XMLAttribute( const XMLAttribute& );	// not supported
