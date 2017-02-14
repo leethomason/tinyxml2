@@ -116,7 +116,6 @@ else(BUILD_STATIC_LIBS)
    add_dependencies(xmltest ${TARGET_DATA_COPY})
    target_link_libraries(xmltest tinyxml2_static)
 endif()
-install(TARGETS DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
