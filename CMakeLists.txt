@@ -61,7 +61,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 # Add targets
 # By Default shared libray is being built
 # To build static libs also - Do cmake . -DBUILD_STATIC_LIBS:BOOL=ON
-# User can choose not to build shared library by using cmake -BUILD_SHARED_LIBS:BOOL:OFF
+# User can choose not to build shared library by using cmake -DBUILD_SHARED_LIBS:BOOL=OFF
 # To build only static libs use cmake . -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_STATIC_LIBS:BOOL=ON
 
 option(BUILD_SHARED_LIBS "build as shared library" ON)
