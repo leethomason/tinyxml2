@@ -527,7 +527,7 @@ enum XMLError {
 /*
 	Utility functionality.
 */
-class XMLUtil
+class TINYXML2_LIB XMLUtil
 {
 public:
     static const char* SkipWhiteSpace( const char* p, int* curLineNumPtr )	{
@@ -605,6 +605,17 @@ public:
     static bool	ToFloat( const char* str, float* value );
     static bool ToDouble( const char* str, double* value );
 	static bool ToInt64(const char* str, int64_t* value);
+
+	// Changes what is serialized for a boolean value.
+	// Default to "true" and "false". Shouldn't be changed
+	// unless you have a special testing or compatibility need.
+	// Be careful: static, global, & not thread safe.
+	// Be sure to set static const memory as parameters.
+	static void SetBoolSerialization(const char* writeTrue, const char* writeFalse);
+
+private:
+	static const char* writeBoolTrue;
+	static const char* writeBoolFalse;
 };
 
 

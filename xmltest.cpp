@@ -753,6 +753,18 @@ int main( int argc, const char ** argv )
 			XMLTest("Attribute: bool", true, element->BoolAttribute("attrib"), true);
 		}
 		{
+			element->SetAttribute("attrib", true);
+			const char* result = element->Attribute("attrib");
+			XMLTest("Bool true is 'true'", "true", result);
+
+			XMLUtil::SetBoolSerialization("1", "0");
+			element->SetAttribute("attrib", true);
+			result = element->Attribute("attrib");
+			XMLTest("Bool true is '1'", "1", result);
+
+			XMLUtil::SetBoolSerialization(0, 0);
+		}
+		{
 			element->SetAttribute("attrib", 100.0);
 			double v = 0;
 			element->QueryDoubleAttribute("attrib", &v);

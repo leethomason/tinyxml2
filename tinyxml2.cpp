@@ -368,6 +368,19 @@ const char* StrPair::GetStr()
 
 // --------- XMLUtil ----------- //
 
+const char* XMLUtil::writeBoolTrue  = "true";
+const char* XMLUtil::writeBoolFalse = "false";
+
+void XMLUtil::SetBoolSerialization(const char* writeTrue, const char* writeFalse)
+{
+	static const char* defTrue  = "true";
+	static const char* defFalse = "false";
+
+	writeBoolTrue = (writeTrue) ? writeTrue : defTrue;
+	writeBoolFalse = (writeFalse) ? writeFalse : defFalse;
+}
+
+
 const char* XMLUtil::ReadBOM( const char* p, bool* bom )
 {
     TIXMLASSERT( p );
@@ -545,7 +558,7 @@ void XMLUtil::ToStr( unsigned v, char* buffer, int bufferSize )
 
 void XMLUtil::ToStr( bool v, char* buffer, int bufferSize )
 {
-    TIXML_SNPRINTF( buffer, bufferSize, "%s", v ? "true" : "false" );
+    TIXML_SNPRINTF( buffer, bufferSize, "%s", v ? writeBoolTrue : writeBoolFalse);
 }
 
 /*
