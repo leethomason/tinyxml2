@@ -96,9 +96,11 @@ else(BUILD_STATIC_LIBS)
    target_link_libraries(xmltest tinyxml2_static)
 endif()
 
-# Copy test resources
+# Copy test resources and create test output directory
 add_custom_command(TARGET xmltest POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources ${CMAKE_BINARY_DIR}/resources
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/resources/out
+  COMMENT "Configuring xmltest resources directory: ${CMAKE_BINARY_DIR}/resources"
 )
 
 install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
