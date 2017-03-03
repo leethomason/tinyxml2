@@ -1838,6 +1838,7 @@ XMLAttribute* XMLElement::CreateAttribute()
 {
     TIXMLASSERT( sizeof( XMLAttribute ) == _document->_attributePool.ItemSize() );
     XMLAttribute* attrib = new (_document->_attributePool.Alloc() ) XMLAttribute();
+    TIXMLASSERT( attrib );
     attrib->_memPool = &_document->_attributePool;
     attrib->_memPool->SetTracked();
     return attrib;
