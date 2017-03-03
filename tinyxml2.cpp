@@ -1956,12 +1956,12 @@ const char* XMLDocument::_errorNames[XML_ERROR_COUNT] = {
 };
 
 
-XMLDocument::XMLDocument( bool processEntities, Whitespace whitespace ) :
+XMLDocument::XMLDocument( bool processEntities, Whitespace whitespaceMode ) :
     XMLNode( 0 ),
     _writeBOM( false ),
     _processEntities( processEntities ),
     _errorID(XML_SUCCESS),
-    _whitespace( whitespace ),
+    _whitespaceMode( whitespaceMode ),
     _errorLineNum( 0 ),
     _charBuffer( 0 ),
     _parseCurLineNum( 0 )
