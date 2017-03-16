@@ -1507,6 +1507,11 @@ public:
     /// Convenience method for setting text inside an element. See SetText() for important limitations.
     void SetText( float value );  
 
+    /// Adds a sub-element equivalent to the given boolean.
+	void	SetBoolFirstChild( bool inBool );
+	
+	bool	BoolFirstChild();
+	
     /**
     	Convenience method to query the value of a child text node. This is probably best
     	shown by example. Given you have a document is this form:
