@@ -1449,7 +1449,7 @@ void XMLAttribute::SetAttribute( float v )
 
 // --------- XMLElement ---------- //
 XMLElement::XMLElement( XMLDocument* doc ) : XMLNode( doc ),
-    _closingType( 0 ),
+    _closingType( OPEN ),
     _rootAttribute( 0 )
 {
 }
@@ -1868,7 +1868,7 @@ char* XMLElement::ParseDeep( char* p, StrPair* strPair, int* curLineNumPtr )
     }
 
     p = ParseAttributes( p, curLineNumPtr );
-    if ( !p || !*p || _closingType ) {
+    if ( !p || !*p || _closingType != OPEN ) {
         return p;
     }
 

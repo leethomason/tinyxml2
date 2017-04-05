@@ -1559,12 +1559,12 @@ public:
 	float FloatText(float defaultValue = 0) const;
 
     // internal:
-    enum {
+    enum ElementClosingType {
         OPEN,		// <foo>
         CLOSED,		// <foo/>
         CLOSING		// </foo>
     };
-    int ClosingType() const {
+    ElementClosingType ClosingType() const {
         return _closingType;
     }
     virtual XMLNode* ShallowClone( XMLDocument* document ) const;
@@ -1589,7 +1589,7 @@ private:
     XMLAttribute* CreateAttribute();
 
     enum { BUF_SIZE = 200 };
-    int _closingType;
+    ElementClosingType _closingType;
     // The attribute list is ordered; there is no 'lastAttribute'
     // because the list needs to be scanned for dupes before adding
     // a new attribute.
