@@ -955,7 +955,7 @@ const XMLElement* XMLNode::PreviousSiblingElement( const char* name ) const
 }
 
 
-char* XMLNode::ParseDeep( char* p, StrPair* parentEnd, int* curLineNumPtr )
+char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
 {
     // This is a recursive method, but thinking about it "at the current level"
     // it is a pretty simple flat list:
@@ -1020,8 +1020,8 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd, int* curLineNumPtr )
         if ( ele ) {
             // We read the end tag. Return it to the parent.
             if ( ele->ClosingType() == XMLElement::CLOSING ) {
-                if ( parentEnd ) {
-                    ele->_value.TransferTo( parentEnd );
+                if ( parentEndTag ) {
+                    ele->_value.TransferTo( parentEndTag );
                 }
                 node->_memPool->SetTracked();   // created and then immediately deleted.
                 DeleteNode( node );
@@ -1849,7 +1849,7 @@ XMLAttribute* XMLElement::CreateAttribute()
 //	<ele></ele>
 //	<ele>foo<b>bar</b></ele>
 //
-char* XMLElement::ParseDeep( char* p, StrPair* strPair, int* curLineNumPtr )
+char* XMLElement::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
 {
     // Read the element name.
     p = XMLUtil::SkipWhiteSpace( p, curLineNumPtr );
@@ -1872,7 +1872,7 @@ char* XMLElement::ParseDeep( char* p, StrPair* strPair, int* curLineNumPtr )
         return p;
     }
 
-    p = XMLNode::ParseDeep( p, strPair, curLineNumPtr );
+    p = XMLNode::ParseDeep( p, parentEndTag, curLineNumPtr );
     return p;
 }
 
