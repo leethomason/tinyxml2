@@ -907,7 +907,7 @@ protected:
     XMLNode( XMLDocument* );
     virtual ~XMLNode();
 
-    virtual char* ParseDeep( char*, StrPair*, int* );
+    virtual char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr);
 
     XMLDocument*	_document;
     XMLNode*		_parent;
@@ -975,7 +975,7 @@ protected:
     XMLText( XMLDocument* doc )	: XMLNode( doc ), _isCData( false )	{}
     virtual ~XMLText()												{}
 
-    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr );
+    char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
 
 private:
     bool _isCData;
@@ -1006,7 +1006,7 @@ protected:
     XMLComment( XMLDocument* doc );
     virtual ~XMLComment();
 
-    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr);
+    char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr);
 
 private:
     XMLComment( const XMLComment& );	// not supported
@@ -1045,7 +1045,7 @@ protected:
     XMLDeclaration( XMLDocument* doc );
     virtual ~XMLDeclaration();
 
-    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr );
+    char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
 
 private:
     XMLDeclaration( const XMLDeclaration& );	// not supported
@@ -1080,7 +1080,7 @@ protected:
     XMLUnknown( XMLDocument* doc );
     virtual ~XMLUnknown();
 
-    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr );
+    char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
 
 private:
     XMLUnknown( const XMLUnknown& );	// not supported
@@ -1571,7 +1571,7 @@ public:
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
-    char* ParseDeep( char* p, StrPair* endTag, int* curLineNumPtr );
+    char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
 
 private:
     XMLElement( XMLDocument* doc );
