@@ -1972,6 +1972,33 @@ XMLDocument::XMLDocument( bool processEntities, Whitespace whitespaceMode ) :
     _document = this;
 }
 
+XMLDocument::XMLDocument( const XMLDocument& src) :
+	XMLNode( 0 ),
+	_writeBOM( false ),
+	_processEntities( true ),
+	_errorID(XML_SUCCESS),
+	_whitespaceMode( PRESERVE_WHITESPACE ),
+	_errorLineNum( 0 ),
+	_charBuffer( 0 ),
+	_parseCurLineNum( 0 )
+{
+	// avoid VC++ C4355 warning about 'this' in initializer list (C4355 is off by default in VS2012+)
+	_document = this;
+	operator=(src);
+}
+
+XMLDocument& XMLDocument::operator=( const XMLDocument& src)
+{
+	if (this != &src)
+	{
+		 Clear();
+		 XMLPrinter printer;
+		 src.Print(&printer);
+		 if (printer.CStrSize())
+			Parse(printer.CStr(), printer.CStrSize());
+	}
+	return *this;
+}
 
 XMLDocument::~XMLDocument()
 {
@@ -2215,6 +2242,7 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
         _textPool.Clear();
         _commentPool.Clear();
     }
+
     return _errorID;
 }
 
@@ -2488,7 +2516,7 @@ void XMLPrinter::CloseElement( bool compactMode )
     const char* name = _stack.Pop();
 
     if ( _elementJustOpened ) {
-        Print( "/>" );
+        Print( " />" );
     }
     else {
         if ( _textDepth < 0 && !compactMode) {
