@@ -1992,6 +1992,8 @@ XMLDocument& XMLDocument::operator=( const XMLDocument& src)
 	if (this != &src)
 	{
 		 Clear();
+		_processEntities = src._processEntities;
+	     _whitespaceMode = src._whitespaceMode;
 		 XMLPrinter printer;
 		 src.Print(&printer);
 		 if (printer.CStrSize())
