@@ -30,25 +30,6 @@ set(GENERIC_LIB_SOVERSION "4")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/.")
 
 ################################
-# Add custom target to copy all data
-
-set(TARGET_DATA_COPY DATA_COPY)
-set(DATA_COPY_FILES)
-if(NOT ${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
-	foreach(data dream.xml empty.xml utf8test.xml utf8testverify.xml)
-		set(DATA_COPY_SRC  ${CMAKE_CURRENT_SOURCE_DIR}/resources/${data})
-		set(DATA_COPY_DEST ${CMAKE_CURRENT_BINARY_DIR}/resources/${data})
-		add_custom_command(
-			OUTPUT ${DATA_COPY_DEST}
-			COMMAND ${CMAKE_COMMAND}
-			ARGS -E copy ${DATA_COPY_SRC} ${DATA_COPY_DEST}
-			DEPENDS ${DATA_COPY_SRC})
-		list(APPEND DATA_COPY_FILES ${DATA_COPY_DEST})
-	endforeach(data)
-endif(NOT ${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
-add_custom_target(${TARGET_DATA_COPY} DEPENDS ${DATA_COPY_FILES})
-
-################################
 # Add definitions
 
 if(MSVC)
@@ -109,14 +90,18 @@ endif()
 add_executable(xmltest xmltest.cpp)
 if(BUILD_SHARED_LIBS)
    add_dependencies(xmltest tinyxml2)
-   add_dependencies(xmltest ${TARGET_DATA_COPY})
    target_link_libraries(xmltest tinyxml2)
 else(BUILD_STATIC_LIBS)
    add_dependencies(xmltest tinyxml2_static)
-   add_dependencies(xmltest ${TARGET_DATA_COPY})
    target_link_libraries(xmltest tinyxml2_static)
 endif()
-install(TARGETS DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+# Copy test resources and create test output directory
+add_custom_command(TARGET xmltest POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources $<TARGET_FILE_DIR:xmltest>/resources
+  COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:xmltest>/resources/out
+  COMMENT "Configuring xmltest resources directory: ${CMAKE_BINARY_DIR}/resources"
+)
 
 install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
