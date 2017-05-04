@@ -51,6 +51,9 @@ option(BUILD_STATIC_LIBS "build as static library" OFF)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
+# to distinguish between debug and release lib
+set(CMAKE_DEBUG_POSTFIX "d")
+
 if(BUILD_SHARED_LIBS)
 add_library(tinyxml2 SHARED tinyxml2.cpp tinyxml2.h)
 
