@@ -527,7 +527,7 @@ enum XMLError {
 /*
 	Utility functionality.
 */
-class XMLUtil
+class TINYXML2_LIB XMLUtil
 {
 public:
     static const char* SkipWhiteSpace( const char* p, int* curLineNumPtr )	{
@@ -605,6 +605,17 @@ public:
     static bool	ToFloat( const char* str, float* value );
     static bool ToDouble( const char* str, double* value );
 	static bool ToInt64(const char* str, int64_t* value);
+
+	// Changes what is serialized for a boolean value.
+	// Default to "true" and "false". Shouldn't be changed
+	// unless you have a special testing or compatibility need.
+	// Be careful: static, global, & not thread safe.
+	// Be sure to set static const memory as parameters.
+	static void SetBoolSerialization(const char* writeTrue, const char* writeFalse);
+
+private:
+	static const char* writeBoolTrue;
+	static const char* writeBoolFalse;
 };
 
 
@@ -896,7 +907,7 @@ protected:
     XMLNode( XMLDocument* );
     virtual ~XMLNode();
 
-    virtual char* ParseDeep( char*, StrPair*, int* );
+    virtual char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr);
 
     XMLDocument*	_document;
     XMLNode*		_parent;
@@ -964,7 +975,7 @@ protected:
     XMLText( XMLDocument* doc )	: XMLNode( doc ), _isCData( false )	{}
     virtual ~XMLText()												{}
 
-    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr );
+    char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
 
 private:
     bool _isCData;
@@ -995,7 +1006,7 @@ protected:
     XMLComment( XMLDocument* doc );
     virtual ~XMLComment();
 
-    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr);
+    char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr);
 
 private:
     XMLComment( const XMLComment& );	// not supported
@@ -1034,7 +1045,7 @@ protected:
     XMLDeclaration( XMLDocument* doc );
     virtual ~XMLDeclaration();
 
-    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr );
+    char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
 
 private:
     XMLDeclaration( const XMLDeclaration& );	// not supported
@@ -1069,7 +1080,7 @@ protected:
     XMLUnknown( XMLDocument* doc );
     virtual ~XMLUnknown();
 
-    char* ParseDeep( char*, StrPair* endTag, int* curLineNumPtr );
+    char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
 
 private:
     XMLUnknown( const XMLUnknown& );	// not supported
@@ -1548,19 +1559,19 @@ public:
 	float FloatText(float defaultValue = 0) const;
 
     // internal:
-    enum {
+    enum ElementClosingType {
         OPEN,		// <foo>
         CLOSED,		// <foo/>
         CLOSING		// </foo>
     };
-    int ClosingType() const {
+    ElementClosingType ClosingType() const {
         return _closingType;
     }
     virtual XMLNode* ShallowClone( XMLDocument* document ) const;
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
-    char* ParseDeep( char* p, StrPair* endTag, int* curLineNumPtr );
+    char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
 
 private:
     XMLElement( XMLDocument* doc );
@@ -1578,7 +1589,7 @@ private:
     XMLAttribute* CreateAttribute();
 
     enum { BUF_SIZE = 200 };
-    int _closingType;
+    ElementClosingType _closingType;
     // The attribute list is ordered; there is no 'lastAttribute'
     // because the list needs to be scanned for dupes before adding
     // a new attribute.
@@ -1602,7 +1613,7 @@ class TINYXML2_LIB XMLDocument : public XMLNode
     friend class XMLElement;
 public:
     /// constructor
-    XMLDocument( bool processEntities = true, Whitespace = PRESERVE_WHITESPACE );
+    XMLDocument( bool processEntities = true, Whitespace whitespaceMode = PRESERVE_WHITESPACE );
     ~XMLDocument();
 
     virtual XMLDocument* ToDocument()				{
@@ -1666,7 +1677,7 @@ public:
         return _processEntities;
     }
     Whitespace WhitespaceMode() const	{
-        return _whitespace;
+        return _whitespaceMode;
     }
 
     /**
@@ -1804,7 +1815,7 @@ private:
     bool			_writeBOM;
     bool			_processEntities;
     XMLError		_errorID;
-    Whitespace		_whitespace;
+    Whitespace		_whitespaceMode;
     mutable StrPair	_errorStr1;
     mutable StrPair	_errorStr2;
     int             _errorLineNum;
@@ -1819,8 +1830,21 @@ private:
 	static const char* _errorNames[XML_ERROR_COUNT];
 
     void Parse();
+
+    template<class NodeType, int PoolElementSize>
+    NodeType* CreateUnlinkedNode( MemPoolT<PoolElementSize>& pool );
 };
 
+template<class NodeType, int PoolElementSize>
+inline NodeType* XMLDocument::CreateUnlinkedNode( MemPoolT<PoolElementSize>& pool )
+{
+    TIXMLASSERT( sizeof( NodeType ) == PoolElementSize );
+    TIXMLASSERT( sizeof( NodeType ) == pool.ItemSize() );
+    NodeType* returnNode = new (pool.Alloc()) NodeType( this );
+    TIXMLASSERT( returnNode );
+    returnNode->_memPool = &pool;
+    return returnNode;
+}
 
 /**
 	A XMLHandle is a class that wraps a node pointer with null checks; this is
