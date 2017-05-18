@@ -2,6 +2,6 @@ before_build:
   - cmake .
 
 build_script:
-  - msbuild tinyxml2.sln /m /p:Configuration=Release /t:ALL_BUILD
+  - msbuild tinyxml2.sln /consoleloggerparameters:Verbosity=diagnostic /m /p:Configuration=Release /t:Build
   - cd Release
   - xmltest.exe
