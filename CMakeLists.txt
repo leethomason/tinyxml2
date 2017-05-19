@@ -44,9 +44,12 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 # To build static libs also - Do cmake . -DBUILD_STATIC_LIBS:BOOL=ON
 # User can choose not to build shared library by using cmake -DBUILD_SHARED_LIBS:BOOL=OFF
 # To build only static libs use cmake . -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_STATIC_LIBS:BOOL=ON
+# To build the tests, use cmake . -DBUILD_TESTS:BOOL=ON
+# To disable the building of the tests, use cmake . -DBUILD_TESTS:BOOL=OFF
 
 option(BUILD_SHARED_LIBS "build as shared library" ON)
 option(BUILD_STATIC_LIBS "build as static library" OFF)
+option(BUILD_TESTS "build xmltest" ON)
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
@@ -90,21 +93,23 @@ install(TARGETS tinyxml2_static
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
-add_executable(xmltest xmltest.cpp)
-if(BUILD_SHARED_LIBS)
-   add_dependencies(xmltest tinyxml2)
-   target_link_libraries(xmltest tinyxml2)
-else(BUILD_STATIC_LIBS)
-   add_dependencies(xmltest tinyxml2_static)
-   target_link_libraries(xmltest tinyxml2_static)
-endif()
+if(BUILD_TESTS)
+  add_executable(xmltest xmltest.cpp)
+  if(BUILD_SHARED_LIBS)
+    add_dependencies(xmltest tinyxml2)
+    target_link_libraries(xmltest tinyxml2)
+  else(BUILD_STATIC_LIBS)
+    add_dependencies(xmltest tinyxml2_static)
+    target_link_libraries(xmltest tinyxml2_static)
+  endif()
 
-# Copy test resources and create test output directory
-add_custom_command(TARGET xmltest POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources $<TARGET_FILE_DIR:xmltest>/resources
-  COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:xmltest>/resources/out
-  COMMENT "Configuring xmltest resources directory: ${CMAKE_BINARY_DIR}/resources"
-)
+  # Copy test resources and create test output directory
+  add_custom_command(TARGET xmltest POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources $<TARGET_FILE_DIR:xmltest>/resources
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:xmltest>/resources/out
+    COMMENT "Configuring xmltest resources directory: ${CMAKE_BINARY_DIR}/resources"
+  )
+endif()
 
 install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
@@ -117,8 +122,6 @@ endforeach()
 
 configure_file(tinyxml2.pc.in tinyxml2.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-
-#add_test(xmltest ${SAMPLE_NAME} COMMAND $<TARGET_FILE:${SAMPLE_NAME}>)
 
 # uninstall target
 configure_file(
