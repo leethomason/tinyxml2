@@ -1617,6 +1617,10 @@ public:
     XMLDocument( bool processEntities = true, Whitespace whitespaceMode = PRESERVE_WHITESPACE );
     ~XMLDocument();
 
+	XMLDocument( const XMLDocument& );
+
+	XMLDocument&  operator=( const XMLDocument& );
+
     virtual XMLDocument* ToDocument()				{
         TIXMLASSERT( this == _document );
         return this;
@@ -1810,9 +1814,6 @@ public:
     }
 
 private:
-    XMLDocument( const XMLDocument& );	// not supported
-    void operator=( const XMLDocument& );	// not supported
-
     bool			_writeBOM;
     bool			_processEntities;
     XMLError		_errorID;
@@ -2212,7 +2213,6 @@ private:
 
     DynArray< char, 20 > _buffer;
 };
-
 
 }	// tinyxml2
 
