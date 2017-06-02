@@ -1802,9 +1802,9 @@ public:
     void Clear();
 
 	/**
-		Copies this document to a target.
+		Copies this document to a target document.
 		The target will be completely cleared before the copy.
-		If you want to copy a sub-tree, see DeepClone.
+		If you want to copy a sub-tree, see XMLNode::DeepClone().
 
 		NOTE: that the 'target' must be non-null and not
 		the source document.
