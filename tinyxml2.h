@@ -264,6 +264,12 @@ public:
         return _allocated;
     }
 
+	void SwapRemove(int i) {
+		TIXMLASSERT(i < _size);
+		_mem[i] = _mem[_size - 1];
+		--_size;
+	}
+
     const T* Mem() const				{
         TIXMLASSERT( _mem );
         return _mem;
@@ -926,8 +932,8 @@ protected:
 
 private:
     MemPool*		_memPool;
-	XMLNode*		_nextUnlinked;
-	XMLNode*		_prevUnlinked;
+	//XMLNode*		_nextUnlinked;
+	//XMLNode*		_prevUnlinked;
 
     void Unlink( XMLNode* child );
     static void DeleteNode( XMLNode* node );
@@ -1829,7 +1835,8 @@ private:
     int             _errorLineNum;
     char*			_charBuffer;
     int				_parseCurLineNum;
-	XMLNode*		_unlinkedNodeRoot;
+	//XMLNode*		_unlinkedNodeRoot;
+	DynArray<XMLNode*, 10> _unlinked;
 
     MemPoolT< sizeof(XMLElement) >	 _elementPool;
     MemPoolT< sizeof(XMLAttribute) > _attributePool;
@@ -1853,12 +1860,15 @@ inline NodeType* XMLDocument::CreateUnlinkedNode( MemPoolT<PoolElementSize>& poo
     TIXMLASSERT( returnNode );
     returnNode->_memPool = &pool;
 
+	/*
 	returnNode->_nextUnlinked = _unlinkedNodeRoot;
 	if (_unlinkedNodeRoot)
 		_unlinkedNodeRoot->_prevUnlinked = returnNode;
 	returnNode->_prevUnlinked = 0;
 	returnNode->_nextUnlinked = _unlinkedNodeRoot;
 	_unlinkedNodeRoot = returnNode;
+	*/
+	_unlinked.Push(returnNode);
     return returnNode;
 }
 
