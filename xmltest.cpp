@@ -635,7 +635,7 @@ int main( int argc, const char ** argv )
 		doc.Parse( str );
 		element = doc.RootElement();
 
-		XMLTest( "GetText() contained element.", element->GetText() == 0, true );
+		XMLTest( "GetText() contained element.", !strcmp(element->GetText(), ""), true );
 	}
 
 
