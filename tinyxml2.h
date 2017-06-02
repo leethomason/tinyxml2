@@ -374,7 +374,7 @@ public:
         }
         ++_nAllocs;
         ++_nUntracked;
-        return result->itemData;
+        return result;
     }
     
     virtual void Free( void* mem ) {
@@ -384,7 +384,7 @@ public:
         --_currentAllocs;
         Item* item = static_cast<Item*>( mem );
 #ifdef DEBUG
-        memset( item, 0xfe, sizeof(Item));
+        memset( item, 0xfe, sizeof(*item));
 #endif
         item->next = _root;
         _root = item;
@@ -926,6 +926,7 @@ protected:
 
 private:
     MemPool*		_memPool;
+	XMLNode*		_nextUnlinked;
 
     void Unlink( XMLNode* child );
     static void DeleteNode( XMLNode* node );
@@ -1805,7 +1806,7 @@ public:
     char* Identify( char* p, XMLNode** node );
 
 	// internal
-	void Track(XMLNode*);
+	void MarkInUse(XMLNode*);
 
 	virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const	{
         return 0;
@@ -1851,10 +1852,7 @@ inline NodeType* XMLDocument::CreateUnlinkedNode( MemPoolT<PoolElementSize>& poo
     TIXMLASSERT( returnNode );
     returnNode->_memPool = &pool;
 
-	returnNode->_next = _unlinkedNodeRoot;
-	returnNode->_prev = 0;
-	if (_unlinkedNodeRoot)
-		_unlinkedNodeRoot->_prev = returnNode;
+	returnNode->_nextUnlinked = _unlinkedNodeRoot;
 	_unlinkedNodeRoot = returnNode;
     return returnNode;
 }

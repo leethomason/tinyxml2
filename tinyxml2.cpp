@@ -741,7 +741,8 @@ XMLNode::XMLNode( XMLDocument* doc ) :
     _firstChild( 0 ), _lastChild( 0 ),
     _prev( 0 ), _next( 0 ),
 	_userData( 0 ),
-    _memPool( 0 )
+    _memPool( 0 ),
+	_nextUnlinked( 0 )
 {
 }
 
@@ -788,6 +789,7 @@ void XMLNode::Unlink( XMLNode* child )
     TIXMLASSERT( child );
     TIXMLASSERT( child->_document == _document );
     TIXMLASSERT( child->_parent == this );
+
     if ( child == _firstChild ) {
         _firstChild = _firstChild->_next;
     }
@@ -802,6 +804,8 @@ void XMLNode::Unlink( XMLNode* child )
         child->_next->_prev = child->_prev;
     }
 	child->_parent = 0;
+	child->_next = 0;
+	child->_prev = 0;
 }
 
 
@@ -811,6 +815,9 @@ void XMLNode::DeleteChild( XMLNode* node )
     TIXMLASSERT( node->_document == _document );
     TIXMLASSERT( node->_parent == this );
     Unlink( node );
+	TIXMLASSERT(node->_prev == 0);
+	TIXMLASSERT(node->_next == 0);
+	TIXMLASSERT(node->_parent == 0);
     DeleteNode( node );
 }
 
@@ -1055,11 +1062,16 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
     return 0;
 }
 
-void XMLNode::DeleteNode( XMLNode* node )
+/*static*/ void XMLNode::DeleteNode( XMLNode* node )
 {
     if ( node == 0 ) {
         return;
     }
+	TIXMLASSERT(node->_document);
+	if (!node->ToDocument()) {
+		node->_document->MarkInUse(node);
+	}
+
     MemPool* pool = node->_memPool;
     node->~XMLNode();
     pool->Free( node );
@@ -1074,7 +1086,7 @@ void XMLNode::InsertChildPreamble( XMLNode* insertThis ) const
 		insertThis->_parent->Unlink(insertThis);
 	}
 	else {
-		insertThis->_document->Track(insertThis);
+		insertThis->_document->MarkInUse(insertThis);
 		insertThis->_memPool->SetTracked();
 	}
 }
@@ -1983,30 +1995,31 @@ XMLDocument::~XMLDocument()
 }
 
 
-void XMLDocument::Track(XMLNode* insertThis)
+void XMLDocument::MarkInUse(XMLNode* insertThis)
 {
-	TIXMLASSERT(insertThis->_next || insertThis->_prev || (insertThis == _unlinkedNodeRoot));
+	TIXMLASSERT(insertThis->_parent == 0);
 
-	if (_unlinkedNodeRoot == insertThis) {
-		TIXMLASSERT(_unlinkedNodeRoot->_prev == 0);
-		_unlinkedNodeRoot = insertThis->_next;
+	XMLNode* prev = 0;
+	for (XMLNode* node = _unlinkedNodeRoot; node; prev = node, node = node->_nextUnlinked) {
+		if (node == insertThis) {
+			if (prev)
+				prev->_nextUnlinked = node->_nextUnlinked;
+			else
+				_unlinkedNodeRoot = node->_nextUnlinked;
+			node->_nextUnlinked = 0;
+			return;
+		}
 	}
-	if (insertThis->_prev)
-		insertThis->_prev->_next = insertThis->_next;
-	if (insertThis->_next)
-		insertThis->_next->_prev = insertThis->_prev;
-	insertThis->_prev = 0;
-	insertThis->_next = 0;
 }
 
 void XMLDocument::Clear()
 {
     DeleteChildren();
-	/*while (_unlinkedNodeRoot) {
-		XMLNode* next = _unlinkedNodeRoot->_next;
-		DeleteNode(next);
+	while (_unlinkedNodeRoot) {
+		XMLNode* next = _unlinkedNodeRoot->_nextUnlinked;
+		DeleteNode(_unlinkedNodeRoot);
 		_unlinkedNodeRoot = next;
-	}*/
+	}
 
 #ifdef DEBUG
     const bool hadError = Error();

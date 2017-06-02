@@ -1642,9 +1642,16 @@ int main( int argc, const char ** argv )
 	}
 
 	{
+		// Oh those memory leaks.
+		// Only way to see these is in the (Windows) allocator tracking.
 		{
 			XMLDocument doc;
-			doc.NewElement("This is a potential memory leak. You should not see it in the memory tracker.");
+			doc.NewElement("LEAK 1");
+		}
+		{
+			XMLDocument doc;
+			XMLElement* ele = doc.NewElement("LEAK 2");
+			doc.DeleteNode(ele);
 		}
 	}
 
