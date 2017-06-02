@@ -374,7 +374,7 @@ public:
         }
         ++_nAllocs;
         ++_nUntracked;
-        return result;
+        return result->itemData;
     }
     
     virtual void Free( void* mem ) {
@@ -384,11 +384,12 @@ public:
         --_currentAllocs;
         Item* item = static_cast<Item*>( mem );
 #ifdef DEBUG
-        memset( item, 0xfe, sizeof( *item ) );
+        memset( item, 0xfe, sizeof(Item));
 #endif
         item->next = _root;
         _root = item;
     }
+
     void Trace( const char* name ) {
         printf( "Mempool %s watermark=%d [%dk] current=%d size=%d nAlloc=%d blocks=%d\n",
                 name, _maxAllocs, _maxAllocs * ITEM_SIZE / 1024, _currentAllocs,
@@ -925,6 +926,7 @@ protected:
 
 private:
     MemPool*		_memPool;
+
     void Unlink( XMLNode* child );
     static void DeleteNode( XMLNode* node );
     void InsertChildPreamble( XMLNode* insertThis ) const;
@@ -1802,7 +1804,10 @@ public:
     // internal
     char* Identify( char* p, XMLNode** node );
 
-    virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const	{
+	// internal
+	void Track(XMLNode*);
+
+	virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const	{
         return 0;
     }
     virtual bool ShallowEqual( const XMLNode* /*compare*/ ) const	{
@@ -1822,6 +1827,7 @@ private:
     int             _errorLineNum;
     char*			_charBuffer;
     int				_parseCurLineNum;
+	XMLNode*		_unlinkedNodeRoot;
 
     MemPoolT< sizeof(XMLElement) >	 _elementPool;
     MemPoolT< sizeof(XMLAttribute) > _attributePool;
@@ -1844,6 +1850,12 @@ inline NodeType* XMLDocument::CreateUnlinkedNode( MemPoolT<PoolElementSize>& poo
     NodeType* returnNode = new (pool.Alloc()) NodeType( this );
     TIXMLASSERT( returnNode );
     returnNode->_memPool = &pool;
+
+	returnNode->_next = _unlinkedNodeRoot;
+	returnNode->_prev = 0;
+	if (_unlinkedNodeRoot)
+		_unlinkedNodeRoot->_prev = returnNode;
+	_unlinkedNodeRoot = returnNode;
     return returnNode;
 }
 

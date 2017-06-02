@@ -1070,10 +1070,13 @@ void XMLNode::InsertChildPreamble( XMLNode* insertThis ) const
     TIXMLASSERT( insertThis );
     TIXMLASSERT( insertThis->_document == _document );
 
-    if ( insertThis->_parent )
-        insertThis->_parent->Unlink( insertThis );
-    else
-        insertThis->_memPool->SetTracked();
+	if (insertThis->_parent) {
+		insertThis->_parent->Unlink(insertThis);
+	}
+	else {
+		insertThis->_document->Track(insertThis);
+		insertThis->_memPool->SetTracked();
+	}
 }
 
 const XMLElement* XMLNode::ToElementWithName( const char* name ) const
@@ -1966,7 +1969,8 @@ XMLDocument::XMLDocument( bool processEntities, Whitespace whitespaceMode ) :
     _whitespaceMode( whitespaceMode ),
     _errorLineNum( 0 ),
     _charBuffer( 0 ),
-    _parseCurLineNum( 0 )
+    _parseCurLineNum( 0 ),
+	_unlinkedNodeRoot(0)
 {
     // avoid VC++ C4355 warning about 'this' in initializer list (C4355 is off by default in VS2012+)
     _document = this;
@@ -1979,9 +1983,30 @@ XMLDocument::~XMLDocument()
 }
 
 
+void XMLDocument::Track(XMLNode* insertThis)
+{
+	TIXMLASSERT(insertThis->_next || insertThis->_prev || (insertThis == _unlinkedNodeRoot));
+
+	if (_unlinkedNodeRoot == insertThis) {
+		TIXMLASSERT(_unlinkedNodeRoot->_prev == 0);
+		_unlinkedNodeRoot = insertThis->_next;
+	}
+	if (insertThis->_prev)
+		insertThis->_prev->_next = insertThis->_next;
+	if (insertThis->_next)
+		insertThis->_next->_prev = insertThis->_prev;
+	insertThis->_prev = 0;
+	insertThis->_next = 0;
+}
+
 void XMLDocument::Clear()
 {
     DeleteChildren();
+	/*while (_unlinkedNodeRoot) {
+		XMLNode* next = _unlinkedNodeRoot->_next;
+		DeleteNode(next);
+		_unlinkedNodeRoot = next;
+	}*/
 
 #ifdef DEBUG
     const bool hadError = Error();

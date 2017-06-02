@@ -1641,6 +1641,13 @@ int main( int argc, const char ** argv )
 		}
 	}
 
+	{
+		{
+			XMLDocument doc;
+			doc.NewElement("This is a potential memory leak. You should not see it in the memory tracker.");
+		}
+	}
+
     // ----------- Line Number Tracking --------------
     {
         struct TestUtil: XMLVisitor
