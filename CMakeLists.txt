@@ -30,25 +30,6 @@ set(GENERIC_LIB_SOVERSION "4")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/.")
 
 ################################
-# Add custom target to copy all data
-
-set(TARGET_DATA_COPY DATA_COPY)
-set(DATA_COPY_FILES)
-if(NOT ${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
-	foreach(data dream.xml empty.xml utf8test.xml utf8testverify.xml)
-		set(DATA_COPY_SRC  ${CMAKE_CURRENT_SOURCE_DIR}/resources/${data})
-		set(DATA_COPY_DEST ${CMAKE_CURRENT_BINARY_DIR}/resources/${data})
-		add_custom_command(
-			OUTPUT ${DATA_COPY_DEST}
-			COMMAND ${CMAKE_COMMAND}
-			ARGS -E copy ${DATA_COPY_SRC} ${DATA_COPY_DEST}
-			DEPENDS ${DATA_COPY_SRC})
-		list(APPEND DATA_COPY_FILES ${DATA_COPY_DEST})
-	endforeach(data)
-endif(NOT ${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
-add_custom_target(${TARGET_DATA_COPY} DEPENDS ${DATA_COPY_FILES})
-
-################################
 # Add definitions
 
 if(MSVC)
@@ -61,14 +42,20 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 # Add targets
 # By Default shared libray is being built
 # To build static libs also - Do cmake . -DBUILD_STATIC_LIBS:BOOL=ON
-# User can choose not to build shared library by using cmake -BUILD_SHARED_LIBS:BOOL:OFF
+# User can choose not to build shared library by using cmake -DBUILD_SHARED_LIBS:BOOL=OFF
 # To build only static libs use cmake . -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_STATIC_LIBS:BOOL=ON
+# To build the tests, use cmake . -DBUILD_TESTS:BOOL=ON
+# To disable the building of the tests, use cmake . -DBUILD_TESTS:BOOL=OFF
 
 option(BUILD_SHARED_LIBS "build as shared library" ON)
 option(BUILD_STATIC_LIBS "build as static library" OFF)
+option(BUILD_TESTS "build xmltest" ON)
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+
+# to distinguish between debug and release lib
+set(CMAKE_DEBUG_POSTFIX "d")
 
 if(BUILD_SHARED_LIBS)
 add_library(tinyxml2 SHARED tinyxml2.cpp tinyxml2.h)
@@ -106,17 +93,23 @@ install(TARGETS tinyxml2_static
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
-add_executable(xmltest xmltest.cpp)
-if(BUILD_SHARED_LIBS)
-   add_dependencies(xmltest tinyxml2)
-   add_dependencies(xmltest ${TARGET_DATA_COPY})
-   target_link_libraries(xmltest tinyxml2)
-else(BUILD_STATIC_LIBS)
-   add_dependencies(xmltest tinyxml2_static)
-   add_dependencies(xmltest ${TARGET_DATA_COPY})
-   target_link_libraries(xmltest tinyxml2_static)
+if(BUILD_TESTS)
+  add_executable(xmltest xmltest.cpp)
+  if(BUILD_SHARED_LIBS)
+    add_dependencies(xmltest tinyxml2)
+    target_link_libraries(xmltest tinyxml2)
+  else(BUILD_STATIC_LIBS)
+    add_dependencies(xmltest tinyxml2_static)
+    target_link_libraries(xmltest tinyxml2_static)
+  endif()
+
+  # Copy test resources and create test output directory
+  add_custom_command(TARGET xmltest POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources $<TARGET_FILE_DIR:xmltest>/resources
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:xmltest>/resources/out
+    COMMENT "Configuring xmltest resources directory: ${CMAKE_BINARY_DIR}/resources"
+  )
 endif()
-install(TARGETS DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
@@ -129,8 +122,6 @@ endforeach()
 
 configure_file(tinyxml2.pc.in tinyxml2.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-
-#add_test(xmltest ${SAMPLE_NAME} COMMAND $<TARGET_FILE:${SAMPLE_NAME}>)
 
 # uninstall target
 configure_file(
