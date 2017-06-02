@@ -1984,7 +1984,6 @@ XMLDocument::XMLDocument( bool processEntities, Whitespace whitespaceMode ) :
     _errorLineNum( 0 ),
     _charBuffer( 0 ),
     _parseCurLineNum( 0 )
-//	_unlinkedNodeRoot(0)
 {
     // avoid VC++ C4355 warning about 'this' in initializer list (C4355 is off by default in VS2012+)
     _document = this;
@@ -2006,28 +2005,11 @@ void XMLDocument::MarkInUse(XMLNode* node)
 			break;
 		}
 	}
-/*
-	if (_unlinkedNodeRoot == node)
-		_unlinkedNodeRoot = node->_nextUnlinked;
-	if (node->_prevUnlinked)
-		node->_prevUnlinked->_nextUnlinked = node->_nextUnlinked;
-	if (node->_nextUnlinked)
-		node->_nextUnlinked->_prevUnlinked = node->_prevUnlinked;
-	node->_prevUnlinked = 0;
-	node->_nextUnlinked = 0;
-*/
 }
 
 void XMLDocument::Clear()
 {
     DeleteChildren();
-	/*
-	while (_unlinkedNodeRoot) {
-		XMLNode* next = _unlinkedNodeRoot->_nextUnlinked;
-		DeleteNode(_unlinkedNodeRoot);
-		_unlinkedNodeRoot = next;
-	}
-	*/
 	for (int i = 0; i < _unlinked.Size(); ++i) {
 		DeleteNode(_unlinked[i]);
 	}

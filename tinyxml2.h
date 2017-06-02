@@ -932,8 +932,6 @@ protected:
 
 private:
     MemPool*		_memPool;
-	//XMLNode*		_nextUnlinked;
-	//XMLNode*		_prevUnlinked;
 
     void Unlink( XMLNode* child );
     static void DeleteNode( XMLNode* node );
@@ -1835,7 +1833,12 @@ private:
     int             _errorLineNum;
     char*			_charBuffer;
     int				_parseCurLineNum;
-	//XMLNode*		_unlinkedNodeRoot;
+	// Memory tracking does add some overhead.
+	// However, the code assumes that you don't
+	// have a bunch of unlinked nodes around.
+	// Therefore it takes less memory to track
+	// in the document vs. a linked list in the XMLNode,
+	// and the performance is the same.
 	DynArray<XMLNode*, 10> _unlinked;
 
     MemPoolT< sizeof(XMLElement) >	 _elementPool;
@@ -1860,14 +1863,6 @@ inline NodeType* XMLDocument::CreateUnlinkedNode( MemPoolT<PoolElementSize>& poo
     TIXMLASSERT( returnNode );
     returnNode->_memPool = &pool;
 
-	/*
-	returnNode->_nextUnlinked = _unlinkedNodeRoot;
-	if (_unlinkedNodeRoot)
-		_unlinkedNodeRoot->_prevUnlinked = returnNode;
-	returnNode->_prevUnlinked = 0;
-	returnNode->_nextUnlinked = _unlinkedNodeRoot;
-	_unlinkedNodeRoot = returnNode;
-	*/
 	_unlinked.Push(returnNode);
     return returnNode;
 }
