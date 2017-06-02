@@ -742,7 +742,8 @@ XMLNode::XMLNode( XMLDocument* doc ) :
     _prev( 0 ), _next( 0 ),
 	_userData( 0 ),
     _memPool( 0 ),
-	_nextUnlinked( 0 )
+	_nextUnlinked( 0 ),
+	_prevUnlinked( 0 )
 {
 }
 
@@ -1995,21 +1996,18 @@ XMLDocument::~XMLDocument()
 }
 
 
-void XMLDocument::MarkInUse(XMLNode* insertThis)
+void XMLDocument::MarkInUse(XMLNode* node)
 {
-	TIXMLASSERT(insertThis->_parent == 0);
+	TIXMLASSERT(node->_parent == 0);
 
-	XMLNode* prev = 0;
-	for (XMLNode* node = _unlinkedNodeRoot; node; prev = node, node = node->_nextUnlinked) {
-		if (node == insertThis) {
-			if (prev)
-				prev->_nextUnlinked = node->_nextUnlinked;
-			else
-				_unlinkedNodeRoot = node->_nextUnlinked;
-			node->_nextUnlinked = 0;
-			return;
-		}
-	}
+	if (_unlinkedNodeRoot == node)
+		_unlinkedNodeRoot = node->_nextUnlinked;
+	if (node->_prevUnlinked)
+		node->_prevUnlinked->_nextUnlinked = node->_nextUnlinked;
+	if (node->_nextUnlinked)
+		node->_nextUnlinked->_prevUnlinked = node->_prevUnlinked;
+	node->_prevUnlinked = 0;
+	node->_nextUnlinked = 0;
 }
 
 void XMLDocument::Clear()

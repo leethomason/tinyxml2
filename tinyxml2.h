@@ -927,6 +927,7 @@ protected:
 private:
     MemPool*		_memPool;
 	XMLNode*		_nextUnlinked;
+	XMLNode*		_prevUnlinked;
 
     void Unlink( XMLNode* child );
     static void DeleteNode( XMLNode* node );
@@ -1852,6 +1853,10 @@ inline NodeType* XMLDocument::CreateUnlinkedNode( MemPoolT<PoolElementSize>& poo
     TIXMLASSERT( returnNode );
     returnNode->_memPool = &pool;
 
+	returnNode->_nextUnlinked = _unlinkedNodeRoot;
+	if (_unlinkedNodeRoot)
+		_unlinkedNodeRoot->_prevUnlinked = returnNode;
+	returnNode->_prevUnlinked = 0;
 	returnNode->_nextUnlinked = _unlinkedNodeRoot;
 	_unlinkedNodeRoot = returnNode;
     return returnNode;
