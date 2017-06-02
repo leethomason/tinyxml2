@@ -14,6 +14,7 @@
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 	_CrtMemState startMemState;
+	_CrtMemState endMemState;
 #endif
 
 using namespace tinyxml2;

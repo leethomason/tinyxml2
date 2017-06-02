@@ -2177,6 +2177,7 @@ public:
     void ClearBuffer() {
         _buffer.Clear();
         _buffer.Push(0);
+		_firstElement = true;
     }
 
 protected:
