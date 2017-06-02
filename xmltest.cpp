@@ -1131,6 +1131,86 @@ int main( int argc, const char ** argv )
 	}
 
 	{
+		// Deep Cloning of root element.
+		XMLDocument doc2;
+		XMLPrinter printer1;
+		{
+			// Make sure doc1 is deleted before we test doc2
+			const char* xml =
+				"<root>"
+				"    <child1 foo='bar'/>"
+				"    <!-- comment thing -->"
+				"    <child2 val='1'>Text</child2>"
+				"</root>";
+			XMLDocument doc;
+			doc.Parse(xml);
+
+			doc.Print(&printer1);
+			XMLNode* root = doc.RootElement()->DeepClone(&doc2);
+			doc2.InsertFirstChild(root);
+		}
+		XMLPrinter printer2;
+		doc2.Print(&printer2);
+
+		XMLTest("Deep clone of element.", printer1.CStr(), printer2.CStr(), true);
+	}
+
+	{
+		// Deep Cloning of sub element.
+		XMLDocument doc2;
+		XMLPrinter printer1;
+		{
+			// Make sure doc1 is deleted before we test doc2
+			const char* xml =
+				"<?xml version ='1.0'?>"
+				"<root>"
+				"    <child1 foo='bar'/>"
+				"    <!-- comment thing -->"
+				"    <child2 val='1'>Text</child2>"
+				"</root>";
+			XMLDocument doc;
+			doc.Parse(xml);
+
+			const XMLElement* subElement = doc.FirstChildElement("root")->FirstChildElement("child2");
+			subElement->Accept(&printer1);
+
+			XMLNode* clonedSubElement = subElement->DeepClone(&doc2);
+			doc2.InsertFirstChild(clonedSubElement);
+		}
+		XMLPrinter printer2;
+		doc2.Print(&printer2);
+
+		XMLTest("Deep clone of sub-element.", printer1.CStr(), printer2.CStr(), true);
+	}
+
+	{
+		// Deep cloning of document.
+		XMLDocument doc2;
+		XMLPrinter printer1;
+		{
+			// Make sure doc1 is deleted before we test doc2
+			const char* xml =
+				"<?xml version ='1.0'?>"
+				"<!-- Top level comment. -->"
+				"<root>"
+				"    <child1 foo='bar'/>"
+				"    <!-- comment thing -->"
+				"    <child2 val='1'>Text</child2>"
+				"</root>";
+			XMLDocument doc;
+			doc.Parse(xml);
+			doc.Print(&printer1);
+
+			doc.DeepCopy(&doc2);
+		}
+		XMLPrinter printer2;
+		doc2.Print(&printer2);
+
+		XMLTest("DeepCopy of document.", printer1.CStr(), printer2.CStr(), true);
+	}
+
+
+ 	{
 		// This shouldn't crash.
 		XMLDocument doc;
 		if(XML_SUCCESS != doc.LoadFile( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ))
