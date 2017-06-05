@@ -264,6 +264,12 @@ public:
         return _allocated;
     }
 
+	void SwapRemove(int i) {
+		TIXMLASSERT(i < _size);
+		_mem[i] = _mem[_size - 1];
+		--_size;
+	}
+
     const T* Mem() const				{
         TIXMLASSERT( _mem );
         return _mem;
@@ -384,11 +390,12 @@ public:
         --_currentAllocs;
         Item* item = static_cast<Item*>( mem );
 #ifdef DEBUG
-        memset( item, 0xfe, sizeof( *item ) );
+        memset( item, 0xfe, sizeof(*item));
 #endif
         item->next = _root;
         _root = item;
     }
+
     void Trace( const char* name ) {
         printf( "Mempool %s watermark=%d [%dk] current=%d size=%d nAlloc=%d blocks=%d\n",
                 name, _maxAllocs, _maxAllocs * ITEM_SIZE / 1024, _currentAllocs,
@@ -925,6 +932,7 @@ protected:
 
 private:
     MemPool*		_memPool;
+
     void Unlink( XMLNode* child );
     static void DeleteNode( XMLNode* node );
     void InsertChildPreamble( XMLNode* insertThis ) const;
@@ -1802,7 +1810,10 @@ public:
     // internal
     char* Identify( char* p, XMLNode** node );
 
-    virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const	{
+	// internal
+	void MarkInUse(XMLNode*);
+
+	virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const	{
         return 0;
     }
     virtual bool ShallowEqual( const XMLNode* /*compare*/ ) const	{
@@ -1822,6 +1833,13 @@ private:
     int             _errorLineNum;
     char*			_charBuffer;
     int				_parseCurLineNum;
+	// Memory tracking does add some overhead.
+	// However, the code assumes that you don't
+	// have a bunch of unlinked nodes around.
+	// Therefore it takes less memory to track
+	// in the document vs. a linked list in the XMLNode,
+	// and the performance is the same.
+	DynArray<XMLNode*, 10> _unlinked;
 
     MemPoolT< sizeof(XMLElement) >	 _elementPool;
     MemPoolT< sizeof(XMLAttribute) > _attributePool;
@@ -1844,6 +1862,8 @@ inline NodeType* XMLDocument::CreateUnlinkedNode( MemPoolT<PoolElementSize>& poo
     NodeType* returnNode = new (pool.Alloc()) NodeType( this );
     TIXMLASSERT( returnNode );
     returnNode->_memPool = &pool;
+
+	_unlinked.Push(returnNode);
     return returnNode;
 }
 
