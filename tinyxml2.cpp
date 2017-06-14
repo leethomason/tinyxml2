@@ -2052,7 +2052,9 @@ void XMLDocument::Clear()
 void XMLDocument::DeepCopy(XMLDocument* target)
 {
 	TIXMLASSERT(target);
-	TIXMLASSERT(target != this);
+    if (target == this) {
+        return; // technically success - a no-op.
+    }
 
 	target->Clear();
 	for (const XMLNode* node = this->FirstChild(); node; node = node->NextSibling()) {
