@@ -23,18 +23,8 @@ include(GNUInstallDirs)
 set(GENERIC_LIB_VERSION "4.0.1")
 set(GENERIC_LIB_SOVERSION "4")
 
-
-################################
-# Add common source
-
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/.")
-
 ################################
 # Add definitions
-
-if(MSVC)
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-endif(MSVC)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
@@ -65,11 +55,29 @@ set_target_properties(tinyxml2 PROPERTIES
 	VERSION "${GENERIC_LIB_VERSION}"
 	SOVERSION "${GENERIC_LIB_SOVERSION}")
 
+
 if(DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-    target_include_directories(tinyxml2 INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/.")
+    target_include_directories(tinyxml2 PUBLIC 
+                          $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
+
+    if(MSVC)
+      target_compile_definitions(tinyxml2 PUBLIC -D_CRT_SECURE_NO_WARNINGS)
+    endif(MSVC)
+else()
+    include_directories(${PROJECT_SOURCE_DIR})
+
+    if(MSVC)
+      add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    endif(MSVC)
 endif()
 
+# export targets for find_package config mode
+export(TARGETS tinyxml2
+      FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
+
 install(TARGETS tinyxml2
+        EXPORT ${CMAKE_PROJECT_NAME}Targets
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -83,11 +91,30 @@ set_target_properties(tinyxml2_static PROPERTIES
         SOVERSION "${GENERIC_LIB_SOVERSION}")
 set_target_properties( tinyxml2_static PROPERTIES OUTPUT_NAME tinyxml2 )
 
+target_compile_definitions(tinyxml2 PUBLIC -D_CRT_SECURE_NO_WARNINGS)
+
 if(DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-    target_include_directories(tinyxml2_static INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/.")
+    target_include_directories(tinyxml2_static PUBLIC 
+                          $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
+
+    if(MSVC)
+      target_compile_definitions(tinyxml2 PUBLIC -D_CRT_SECURE_NO_WARNINGS)
+    endif(MSVC)
+else()
+    include_directories(${PROJECT_SOURCE_DIR})
+
+    if(MSVC)
+      add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    endif(MSVC)
 endif()
 
+# export targets for find_package config mode
+export(TARGETS tinyxml2_static
+      FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
+
 install(TARGETS tinyxml2_static
+        EXPORT ${CMAKE_PROJECT_NAME}Targets
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
@@ -131,3 +158,14 @@ configure_file(
 
 add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
+file(WRITE
+    ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
+    "include(\${CMAKE_CURRENT_LIST_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)\n")
+
+install(FILES
+        ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
+        DESTINATION lib/cmake/${CMAKE_PROJECT_NAME})
+
+install(EXPORT ${CMAKE_PROJECT_NAME}Targets
+        DESTINATION lib/cmake/${CMAKE_PROJECT_NAME})
