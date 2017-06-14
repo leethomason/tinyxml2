@@ -1642,8 +1642,23 @@ int main( int argc, const char ** argv )
 	}
 
 	{
-		// Oh those memory leaks.
-		// Only way to see these is in the (Windows) allocator tracking.
+		// Evil memory leaks. 
+		// If an XMLElement (etc) is allocated via NewElement() (etc.)
+		// and NOT added to the XMLDocument, what happens?
+		//
+		// Previously (buggy):
+		//		The memory would be free'd when the XMLDocument is
+		//      destructed. But the destructor wasn't called, so that
+		//      memory allocated by the XMLElement would not be free'd.
+		//      In practice this meant strings allocated by the XMLElement
+		//      would leak. An edge case, but annoying.
+		// Now:
+		//      The destructor is called. But the list of unlinked nodes
+		//      has to be tracked. This has a minor performance impact
+		//   	that can become significant if you have a lot. (But why
+		//      would you do that?)
+		// The only way to see this bug is in a leak tracker. This
+		// is compiled in by default on Windows Debug.
 		{
 			XMLDocument doc;
 			doc.NewElement("LEAK 1");

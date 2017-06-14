@@ -265,6 +265,7 @@ public:
     }
 
 	void SwapRemove(int i) {
+        TIXMLASSERT(i >= 0);
 		TIXMLASSERT(i < _size);
 		_mem[i] = _mem[_size - 1];
 		--_size;

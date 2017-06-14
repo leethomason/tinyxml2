@@ -797,13 +797,13 @@ void XMLNode::Unlink( XMLNode* child )
 
     if ( child->_prev ) {
         child->_prev->_next = child->_next;
+        child->_prev = 0;
     }
     if ( child->_next ) {
         child->_next->_prev = child->_prev;
+        child->_next = 0;
     }
 	child->_parent = 0;
-	child->_next = 0;
-	child->_prev = 0;
 }
 
 
