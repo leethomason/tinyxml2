@@ -292,6 +292,10 @@ int main( int argc, const char ** argv )
 		_CrtMemCheckpoint( &startMemState );
 		// Enable MS Visual C++ debug heap memory leaks dump on exit
 		_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+		{
+			int leaksOnStart = _CrtDumpMemoryLeaks();
+			XMLTest( "No leaks on start?", FALSE, leaksOnStart );
+		}
 	#endif
 
 	{
@@ -1854,6 +1858,11 @@ int main( int argc, const char ** argv )
 		_CrtMemState diffMemState;
 		_CrtMemDifference( &diffMemState, &startMemState, &endMemState );
 		_CrtMemDumpStatistics( &diffMemState );
+
+		{
+			int leaksBeforeExit = _CrtDumpMemoryLeaks();
+			XMLTest( "No leaks before exit?", FALSE, leaksBeforeExit );
+		}
 	#endif
 
 	printf ("\nPass %d, Fail %d\n", gPass, gFail);
