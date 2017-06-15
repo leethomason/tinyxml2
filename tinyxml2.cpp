@@ -1994,6 +1994,7 @@ XMLDocument::~XMLDocument()
 
 void XMLDocument::MarkInUse(XMLNode* node)
 {
+	TIXMLASSERT(node);
 	TIXMLASSERT(node->_parent == 0);
 
 	for (int i = 0; i < _unlinked.Size(); ++i) {
