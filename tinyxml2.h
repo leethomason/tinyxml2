@@ -53,7 +53,7 @@ distribution.
         AStyle.exe --style=1tbs --indent-switches --break-closing-brackets --indent-preprocessor tinyxml2.cpp tinyxml2.h
 */
 
-#if defined( _DEBUG ) || defined( DEBUG ) || defined (__DEBUG__)
+#if defined( _DEBUG ) || defined (__DEBUG__)
 #   ifndef DEBUG
 #       define DEBUG
 #   endif
@@ -864,6 +864,21 @@ public:
     	Note: if called on a XMLDocument, this will return null.
     */
     virtual XMLNode* ShallowClone( XMLDocument* document ) const = 0;
+
+	/**
+		Make a copy of this node and all its children.
+
+		If the 'document' is null, then the nodes will
+		be allocated in the current document. If document 
+        is specified, the memory will be allocated is the 
+        specified XMLDocument.
+
+		NOTE: This is probably not the correct tool to 
+		copy a document, since XMLDocuments can have multiple
+		top level XMLNodes. You probably want to use
+        XMLDocument::DeepCopy()
+	*/
+	XMLNode* DeepClone( XMLDocument* document ) const;
 
     /**
     	Test if 2 nodes are the same, but don't test children.
@@ -1806,7 +1821,16 @@ public:
     /// Clear the document, resetting it to the initial state.
     void Clear();
 
-    // internal
+	/**
+		Copies this document to a target document.
+		The target will be completely cleared before the copy.
+		If you want to copy a sub-tree, see XMLNode::DeepClone().
+
+		NOTE: that the 'target' must be non-null.
+	*/
+	void DeepCopy(XMLDocument* target);
+
+	// internal
     char* Identify( char* p, XMLNode** node );
 
 	// internal

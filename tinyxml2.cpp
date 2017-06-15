@@ -772,6 +772,18 @@ void XMLNode::SetValue( const char* str, bool staticMem )
     }
 }
 
+XMLNode* XMLNode::DeepClone(XMLDocument* document) const
+{
+	XMLNode* clone = this->ShallowClone(document);
+	if (!clone) return 0;
+
+	for (const XMLNode* child = this->FirstChild(); child; child = child->NextSibling()) {
+		XMLNode* childClone = child->DeepClone(document);
+		TIXMLASSERT(childClone);
+		clone->InsertEndChild(childClone);
+	}
+	return clone;
+}
 
 void XMLNode::DeleteChildren()
 {
@@ -2037,6 +2049,19 @@ void XMLDocument::Clear()
 #endif
 }
 
+
+void XMLDocument::DeepCopy(XMLDocument* target)
+{
+	TIXMLASSERT(target);
+    if (target == this) {
+        return; // technically success - a no-op.
+    }
+
+	target->Clear();
+	for (const XMLNode* node = this->FirstChild(); node; node = node->NextSibling()) {
+		target->InsertEndChild(node->DeepClone(target));
+	}
+}
 
 XMLElement* XMLDocument::NewElement( const char* name )
 {
