@@ -1754,6 +1754,52 @@ int main( int argc, const char ** argv )
 		}
 	}
 
+	{
+		// Crashing reported via email.
+		const char* xml =
+			"<playlist id='playlist1'>"
+				"<property name='track_name'>voice</property>"
+				"<property name='audio_track'>1</property>"
+				"<entry out = '604' producer = '4_playlist1' in = '0' />"
+				"<blank length = '1' />"
+				"<entry out = '1625' producer = '3_playlist' in = '0' />"
+				"<blank length = '2' />"
+				"<entry out = '946' producer = '2_playlist1' in = '0' />"
+				"<blank length = '1' />"
+				"<entry out = '128' producer = '1_playlist1' in = '0' />"
+			"</playlist>";
+			
+		// It's not a good idea to delete elements as you walk the
+		// list. I'm not sure this technically should work; but it's
+		// an interesting test case.
+		XMLDocument doc;
+		XMLError err = doc.Parse(xml);
+		XMLElement* playlist = doc.FirstChildElement("playlist");
+
+		XMLTest("Crash bug parsing", err, XMLError::XML_SUCCESS);
+		XMLTest("Crash bug parsing", true, playlist != 0);
+
+		tinyxml2::XMLElement* entry = playlist->FirstChildElement("entry");
+		XMLTest("Crash bug parsing", true, entry != 0);
+		while (entry) {
+			tinyxml2::XMLElement* todelete = entry;
+			entry = entry->NextSiblingElement("entry");
+			playlist->DeleteChild(todelete);
+		};
+		tinyxml2::XMLElement* blank = playlist->FirstChildElement("blank");
+		while (blank) {
+			tinyxml2::XMLElement* todelete = blank;
+			blank = blank->NextSiblingElement("blank");
+			playlist->DeleteChild(todelete);
+		};
+
+		tinyxml2::XMLPrinter printer;
+		playlist->Accept(&printer);
+		printf("%s\n", printer.CStr());
+
+		// No test; it only need to not crash.
+	}
+
     // ----------- Line Number Tracking --------------
     {
         struct TestUtil: XMLVisitor
