@@ -868,8 +868,8 @@ public:
 	/**
 		Make a copy of this node and all its children.
 
-		If the 'document' is null, then the nodes will
-		be allocated in the current document. If document 
+		If the 'target' is null, then the nodes will
+		be allocated in the current document. If 'target' 
         is specified, the memory will be allocated is the 
         specified XMLDocument.
 
@@ -878,7 +878,7 @@ public:
 		top level XMLNodes. You probably want to use
         XMLDocument::DeepCopy()
 	*/
-	XMLNode* DeepClone( XMLDocument* document ) const;
+	XMLNode* DeepClone( XMLDocument* target ) const;
 
     /**
     	Test if 2 nodes are the same, but don't test children.
