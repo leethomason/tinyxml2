@@ -1774,9 +1774,9 @@ int main( int argc, const char ** argv )
 		// an interesting test case.
 		XMLDocument doc;
 		XMLError err = doc.Parse(xml);
-		XMLElement* playlist = doc.FirstChildElement("playlist");
-
 		XMLTest("Crash bug parsing", err, XML_SUCCESS);
+
+		XMLElement* playlist = doc.FirstChildElement("playlist");
 		XMLTest("Crash bug parsing", true, playlist != 0);
 
 		tinyxml2::XMLElement* entry = playlist->FirstChildElement("entry");
