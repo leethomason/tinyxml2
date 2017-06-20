@@ -91,7 +91,7 @@ set_target_properties(tinyxml2_static PROPERTIES
         SOVERSION "${GENERIC_LIB_SOVERSION}")
 set_target_properties( tinyxml2_static PROPERTIES OUTPUT_NAME tinyxml2 )
 
-target_compile_definitions(tinyxml2 PUBLIC -D_CRT_SECURE_NO_WARNINGS)
+target_compile_definitions(tinyxml2_static PUBLIC -D_CRT_SECURE_NO_WARNINGS)
 
 if(DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
     target_include_directories(tinyxml2_static PUBLIC 
@@ -99,7 +99,7 @@ if(DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
 
     if(MSVC)
-      target_compile_definitions(tinyxml2 PUBLIC -D_CRT_SECURE_NO_WARNINGS)
+      target_compile_definitions(tinyxml2_static PUBLIC -D_CRT_SECURE_NO_WARNINGS)
     endif(MSVC)
 else()
     include_directories(${PROJECT_SOURCE_DIR})
