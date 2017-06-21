@@ -12,4 +12,4 @@ before_script: cmake .
 
 script:
   - make -j3
-  - ./xmltest
+  - make test
