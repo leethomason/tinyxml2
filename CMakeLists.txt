@@ -13,6 +13,7 @@ endif()
 
 project(tinyxml2)
 include(GNUInstallDirs)
+include(CTest)
 #enable_testing()
 
 #CMAKE_BUILD_TOOL
@@ -39,7 +40,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
 option(BUILD_SHARED_LIBS "build as shared library" ON)
 option(BUILD_STATIC_LIBS "build as static library" OFF)
-option(BUILD_TESTS "build xmltest" ON)
+option(BUILD_TESTS "build xmltest (deprecated: Use BUILD_TESTING)" ON)
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
@@ -120,7 +121,7 @@ install(TARGETS tinyxml2_static
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
-if(BUILD_TESTS)
+if(BUILD_TESTING AND BUILD_TESTS)
   add_executable(xmltest xmltest.cpp)
   if(BUILD_SHARED_LIBS)
     add_dependencies(xmltest tinyxml2)
@@ -136,6 +137,8 @@ if(BUILD_TESTS)
     COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:xmltest>/resources/out
     COMMENT "Configuring xmltest resources directory: ${CMAKE_BINARY_DIR}/resources"
   )
+
+  add_test(NAME xmltest COMMAND xmltest)
 endif()
 
 install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
