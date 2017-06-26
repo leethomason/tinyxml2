@@ -1803,13 +1803,11 @@ public:
     static const char* ErrorIDToName(XMLError errorID);
 
     /// Return a possibly helpful diagnostic location or string.
-    const char* GetErrorStr1() const {
-        return _errorStr1.GetStr();
-    }
+	const char* GetErrorStr1() const;
+
     /// Return a possibly helpful secondary diagnostic location or string.
-    const char* GetErrorStr2() const {
-        return _errorStr2.GetStr();
-    }
+	const char* GetErrorStr2() const;
+
     /// Return the line where the error occured, or zero if unknown.
     int GetErrorLineNum() const
     {
