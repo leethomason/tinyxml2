@@ -339,9 +339,9 @@ int main( int argc, const char ** argv )
 	fclose( fp );
 
 #if defined WIN32
-	if ( !CreateDirectory( "resources/out", NULL ) && GetLastError() != ERROR_ALREADY_EXISTS ) {
+	if ( !CreateDirectory( "resources\\out", NULL ) && GetLastError() != ERROR_ALREADY_EXISTS ) {
 #else
-	if ( mkdir( "resources/out", 0750 ) == -1 && errno != EEXIST ) {
+		if ( mkdir( "resources/out", S_IRWXU | S_IRGRP | S_IXGRP ) == -1 && errno != EEXIST ) {
 #endif
 		printf( "Unable to create directory 'resources/out': %s\n", strerror( errno ) );
 		exit( 1 );
