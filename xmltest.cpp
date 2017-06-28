@@ -1615,13 +1615,14 @@ int main( int argc, const char ** argv )
         // If it doesn't assert, it passes. Caused by objects
         // getting created during parsing which are then
         // inaccessible in the memory pools.
+        const char* xmlText = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><test>";
         {
             XMLDocument doc;
-            doc.Parse("<?xml version=\"1.0\" encoding=\"UTF-8\"?><test>");
+            doc.Parse(xmlText);
         }
         {
             XMLDocument doc;
-            doc.Parse("<?xml version=\"1.0\" encoding=\"UTF-8\"?><test>");
+            doc.Parse(xmlText);
             doc.Clear();
         }
     }
