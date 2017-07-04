@@ -1947,12 +1947,15 @@ int main( int argc, const char ** argv )
 #endif
 
 		FILE* perfFP = fopen("resources/dream.xml", "r");
+		XMLTest("Open dream.xml", true, perfFP != 0);
 		fseek(perfFP, 0, SEEK_END);
 		long size = ftell(perfFP);
 		fseek(perfFP, 0, SEEK_SET);
 
 		char* mem = new char[size + 1];
-		fread(mem, size, 1, perfFP);
+		memset(mem, 0xfe, size);
+		size_t bytesRead = fread(mem, size, 1, perfFP);
+		XMLTest("Read dream.xml", size, bytesRead);
 		fclose(perfFP);
 		mem[size] = 0;
 
