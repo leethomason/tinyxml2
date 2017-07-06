@@ -5,16 +5,20 @@
 #endif
 
 #include "tinyxml2.h"
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 
-#if defined( _MSC_VER )
+#if defined( _MSC_VER ) || defined (WIN32)
 	#include <crtdbg.h>
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 	_CrtMemState startMemState;
 	_CrtMemState endMemState;
+#else
+	#include <sys/stat.h>
+	#include <sys/types.h>
 #endif
 
 using namespace tinyxml2;
@@ -333,6 +337,15 @@ int main( int argc, const char ** argv )
 		exit( 1 );
 	}
 	fclose( fp );
+
+#if defined WIN32
+	if ( !CreateDirectory( "resources\\out", NULL ) && GetLastError() != ERROR_ALREADY_EXISTS ) {
+#else
+		if ( mkdir( "resources/out", S_IRWXU | S_IRGRP | S_IXGRP ) == -1 && errno != EEXIST ) {
+#endif
+		printf( "Unable to create directory 'resources/out': %s\n", strerror( errno ) );
+		exit( 1 );
+	}
 
 	XMLTest( "Example-1", 0, example_1() );
 	XMLTest( "Example-2", 0, example_2() );
