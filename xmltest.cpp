@@ -339,7 +339,7 @@ int main( int argc, const char ** argv )
 	fclose( fp );
 
 #if defined WIN32
-	if ( !CreateDirectory( "resources\\out", NULL ) && GetLastError() != ERROR_ALREADY_EXISTS ) {
+	if ( !CreateDirectory( L"resources\\out", NULL ) && GetLastError() != ERROR_ALREADY_EXISTS ) {
 #else
 		if ( mkdir( "resources/out", S_IRWXU | S_IRGRP | S_IXGRP ) == -1 && errno != EEXIST ) {
 #endif
@@ -2020,8 +2020,8 @@ int main( int argc, const char ** argv )
 
 		char* mem = new char[size + 1];
 		memset(mem, 0xfe, size);
-		size_t bytesRead = fread(mem, size, 1, perfFP);
-		XMLTest("Read dream.xml", size, bytesRead);
+		size_t bytesRead = fread(mem, 1, size, perfFP);
+		XMLTest("Read dream.xml", true, uint32_t(size) >= uint32_t(bytesRead));
 		fclose(perfFP);
 		mem[size] = 0;
 
