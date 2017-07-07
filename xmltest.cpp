@@ -338,6 +338,7 @@ int main( int argc, const char ** argv )
 	}
 	fclose( fp );
 
+#if 0
 #if defined WIN32
 	if ( !CreateDirectory( L"resources\\out", NULL ) && GetLastError() != ERROR_ALREADY_EXISTS ) {
 #else
@@ -346,7 +347,7 @@ int main( int argc, const char ** argv )
 		printf( "Unable to create directory 'resources/out': %s\n", strerror( errno ) );
 		exit( 1 );
 	}
-
+#endif
 	XMLTest( "Example-1", 0, example_1() );
 	XMLTest( "Example-2", 0, example_2() );
 	XMLTest( "Example-3", 0, example_3() );
