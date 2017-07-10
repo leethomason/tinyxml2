@@ -451,12 +451,14 @@ int main( int argc, const char ** argv )
 		element->LastChildElement()->DeleteAttribute( "attrib" );
 
 		XMLTest( "Programmatic DOM", true, doc->FirstChildElement()->FirstChildElement()->BoolAttribute( "attrib" ) );
-		int value1 = 10;
-		int value2 = doc->FirstChildElement()->LastChildElement()->IntAttribute( "attrib", 10 );
+		const int defaultIntValue = 10;
+		const int replacementIntValue = 20;
+		int value1 = defaultIntValue;
+		int value2 = doc->FirstChildElement()->LastChildElement()->IntAttribute( "attrib", replacementIntValue );
 		XMLError result = doc->FirstChildElement()->LastChildElement()->QueryIntAttribute( "attrib", &value1 );
 		XMLTest( "Programmatic DOM", XML_NO_ATTRIBUTE, result );
-		XMLTest( "Programmatic DOM", 10, value1 );
-		XMLTest( "Programmatic DOM", 10, value2 );
+		XMLTest( "Programmatic DOM", defaultIntValue, value1 );
+		XMLTest( "Programmatic DOM", replacementIntValue, value2 );
 
 		doc->Print();
 
