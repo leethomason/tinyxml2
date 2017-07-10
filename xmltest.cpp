@@ -471,7 +471,9 @@ int main( int argc, const char ** argv )
 			XMLTest( "Compact mode", "<element><sub attrib=\"true\"/><sub/></element>", streamer.CStr(), false );
 		}
 		doc->SaveFile( "./resources/out/pretty.xml" );
+		XMLTest( "Save pretty.xml", false, doc->Error() );
 		doc->SaveFile( "./resources/out/compact.xml", true );
+		XMLTest( "Save compact.xml", false, doc->Error() );
 		delete doc;
 	}
 	{
@@ -481,8 +483,10 @@ int main( int argc, const char ** argv )
 		//int newStart = gNew;
 		XMLDocument doc;
 		doc.LoadFile( "resources/dream.xml" );
+		XMLTest( "Load dream.xml", false, doc.Error() );
 
 		doc.SaveFile( "resources/out/dreamout.xml" );
+		XMLTest( "Save dreamout.xml", false, doc.Error() );
 		doc.PrintError();
 
 		XMLTest( "Dream", "xml version=\"1.0\"",
@@ -497,6 +501,7 @@ int main( int argc, const char ** argv )
 
 		XMLDocument doc2;
 		doc2.LoadFile( "resources/out/dreamout.xml" );
+		XMLTest( "Load dreamout.xml", false, doc2.Error() );
 		XMLTest( "Dream-out", "xml version=\"1.0\"",
 						  doc2.FirstChild()->ToDeclaration()->Value() );
 		XMLTest( "Dream-out", true, doc2.FirstChild()->NextSibling()->ToUnknown() ? true : false );
@@ -592,6 +597,7 @@ int main( int argc, const char ** argv )
 	{
 		XMLDocument doc;
 		doc.LoadFile( "resources/utf8test.xml" );
+		XMLTest( "Load utf8test.xml", false, doc.Error() );
 
 		// Get the attribute "value" from the "Russian" element and check it.
 		XMLElement* element = doc.FirstChildElement( "document" )->FirstChildElement( "Russian" );
@@ -613,6 +619,7 @@ int main( int argc, const char ** argv )
 
 		// Now try for a round trip.
 		doc.SaveFile( "resources/out/utf8testout.xml" );
+		XMLTest( "UTF-8: Save testout.xml", false, doc.Error() );
 
 		// Check the round trip.
 		int okay = 0;
@@ -1442,6 +1449,7 @@ int main( int argc, const char ** argv )
         doc.Clear();
         XMLTest( "Empty is empty after Clear()", true, doc.NoChildren() );
         doc.LoadFile( "resources/dream.xml" );
+        XMLTest( "Load dream.xml", false, doc.Error() );
         XMLTest( "Document has something to Clear()", false, doc.NoChildren() );
         doc.Clear();
         XMLTest( "Document Clear()'s", true, doc.NoChildren() );
@@ -1531,10 +1539,12 @@ int main( int argc, const char ** argv )
 
             XMLTest( "BOM preservation (compare)", xml_bom_preservation, printer.CStr(), false, true );
 			doc.SaveFile( "resources/bomtest.xml" );
+			XMLTest( "Save bomtest.xml", false, doc.Error() );
         }
 		{
 			XMLDocument doc;
 			doc.LoadFile( "resources/bomtest.xml" );
+			XMLTest( "Load bomtest.xml", false, doc.Error() );
 			XMLTest( "BOM preservation (load)", true, doc.HasBOM(), false );
 
             XMLPrinter printer;
