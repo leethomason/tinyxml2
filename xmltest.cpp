@@ -573,11 +573,23 @@ int main( int argc, const char ** argv )
 		ele->SetAttribute( "double", -1.0 );
 
 		const char* cStr = ele->Attribute( "str" );
-		ele->QueryIntAttribute( "int", &iVal );
-		ele->QueryDoubleAttribute( "double", &dVal );
+		{
+			XMLError queryResult = ele->QueryIntAttribute( "int", &iVal );
+			XMLTest( "Query int attribute", XML_SUCCESS, queryResult);
+		}
+		{
+			XMLError queryResult = ele->QueryDoubleAttribute( "double", &dVal );
+			XMLTest( "Query double attribute", XML_SUCCESS, queryResult);
+		}
 
-		ele->QueryAttribute( "int", &iVal2 );
-		ele->QueryAttribute( "double", &dVal2 );
+		{
+			int queryResult = ele->QueryAttribute( "int", &iVal2 );
+			XMLTest( "Query int attribute generic", (int)XML_SUCCESS, queryResult);
+		}
+		{
+			int queryResult = ele->QueryAttribute( "double", &dVal2 );
+			XMLTest( "Query double attribute generic", (int)XML_SUCCESS, queryResult);
+		}
 
 		XMLTest( "Attribute match test", "strValue", ele->Attribute( "str", "strValue" ) );
 		XMLTest( "Attribute round trip. c-string.", "strValue", cStr );
@@ -733,38 +745,66 @@ int main( int argc, const char ** argv )
 
 		{
 			element->SetAttribute("attrib", int(-100));
-			int v = 0;
-			element->QueryIntAttribute("attrib", &v);
-			XMLTest("Attribute: int", -100, v, true);
-			element->QueryAttribute("attrib", &v);
-			XMLTest("Attribute: int", -100, v, true);
+			{
+				int v = 0;
+				XMLError queryResult = element->QueryIntAttribute("attrib", &v);
+				XMLTest("Attribute: int", XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: int", -100, v, true);
+			}
+			{
+				int v = 0;
+				int queryResult = element->QueryAttribute("attrib", &v);
+				XMLTest("Attribute: int", (int)XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: int", -100, v, true);
+			}
 			XMLTest("Attribute: int", -100, element->IntAttribute("attrib"), true);
 		}
 		{
 			element->SetAttribute("attrib", unsigned(100));
-			unsigned v = 0;
-			element->QueryUnsignedAttribute("attrib", &v);
-			XMLTest("Attribute: unsigned", unsigned(100), v, true);
-			element->QueryAttribute("attrib", &v);
-			XMLTest("Attribute: unsigned", unsigned(100), v, true);
+			{
+				unsigned v = 0;
+				XMLError queryResult = element->QueryUnsignedAttribute("attrib", &v);
+				XMLTest("Attribute: unsigned", XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: unsigned", unsigned(100), v, true);
+			}
+			{
+				unsigned v = 0;
+				int queryResult = element->QueryAttribute("attrib", &v);
+				XMLTest("Attribute: unsigned", (int)XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: unsigned", unsigned(100), v, true);
+			}
 			XMLTest("Attribute: unsigned", unsigned(100), element->UnsignedAttribute("attrib"), true);
 		}
 		{
 			element->SetAttribute("attrib", BIG);
-			int64_t v = 0;
-			element->QueryInt64Attribute("attrib", &v);
-			XMLTest("Attribute: int64_t", BIG, v, true);
-			element->QueryAttribute("attrib", &v);
-			XMLTest("Attribute: int64_t", BIG, v, true);
+			{
+				int64_t v = 0;
+				XMLError queryResult = element->QueryInt64Attribute("attrib", &v);
+				XMLTest("Attribute: int64_t", XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: int64_t", BIG, v, true);
+			}
+			{
+				int64_t v = 0;
+				int queryResult = element->QueryAttribute("attrib", &v);
+				XMLTest("Attribute: int64_t", (int)XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: int64_t", BIG, v, true);
+			}
 			XMLTest("Attribute: int64_t", BIG, element->Int64Attribute("attrib"), true);
 		}
 		{
 			element->SetAttribute("attrib", true);
-			bool v = false;
-			element->QueryBoolAttribute("attrib", &v);
-			XMLTest("Attribute: bool", true, v, true);
-			element->QueryAttribute("attrib", &v);
-			XMLTest("Attribute: bool", true, v, true);
+			{
+				bool v = false;
+				XMLError queryResult = element->QueryBoolAttribute("attrib", &v);
+				XMLTest("Attribute: bool", XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: bool", true, v, true);
+			}
+			{
+				bool v = false;
+				int queryResult = element->QueryAttribute("attrib", &v);
+				XMLTest("Attribute: bool", (int)XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: bool", true, v, true);
+			}
 			XMLTest("Attribute: bool", true, element->BoolAttribute("attrib"), true);
 		}
 		{
@@ -781,26 +821,41 @@ int main( int argc, const char ** argv )
 		}
 		{
 			element->SetAttribute("attrib", 100.0);
-			double v = 0;
-			element->QueryDoubleAttribute("attrib", &v);
-			XMLTest("Attribute: double", 100.0, v, true);
-			element->QueryAttribute("attrib", &v);
-			XMLTest("Attribute: double", 100.0, v, true);
+			{
+				double v = 0;
+				XMLError queryResult = element->QueryDoubleAttribute("attrib", &v);
+				XMLTest("Attribute: double", XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: double", 100.0, v, true);
+			}
+			{
+				double v = 0;
+				int queryResult = element->QueryAttribute("attrib", &v);
+				XMLTest("Attribute: bool", (int)XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: double", 100.0, v, true);
+			}
 			XMLTest("Attribute: double", 100.0, element->DoubleAttribute("attrib"), true);
 		}
 		{
 			element->SetAttribute("attrib", 100.0f);
-			float v = 0;
-			element->QueryFloatAttribute("attrib", &v);
-			XMLTest("Attribute: float", 100.0f, v, true);
-			element->QueryAttribute("attrib", &v);
-			XMLTest("Attribute: float", 100.0f, v, true);
+			{
+				float v = 0;
+				XMLError queryResult = element->QueryFloatAttribute("attrib", &v);
+				XMLTest("Attribute: float", XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: float", 100.0f, v, true);
+			}
+			{
+				float v = 0;
+				int queryResult = element->QueryAttribute("attrib", &v);
+				XMLTest("Attribute: float", (int)XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: float", 100.0f, v, true);
+			}
 			XMLTest("Attribute: float", 100.0f, element->FloatAttribute("attrib"), true);
 		}
 		{
 			element->SetText(BIG);
 			int64_t v = 0;
-			element->QueryInt64Text(&v);
+			XMLError queryResult = element->QueryInt64Text(&v);
+			XMLTest("Element: int64_t", XML_SUCCESS, queryResult, true);
 			XMLTest("Element: int64_t", BIG, v, true);
 		}
 	}
