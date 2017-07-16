@@ -1,0 +1,1 @@
+This file is here to create this output directory when the source is pulled from git.
