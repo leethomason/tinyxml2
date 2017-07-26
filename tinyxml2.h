@@ -341,8 +341,8 @@ public:
     void Clear() {
         // Delete the blocks.
         while( !_blockPtrs.Empty()) {
-            Block* b  = _blockPtrs.Pop();
-            delete b;
+            Block* lastBlock = _blockPtrs.Pop();
+            delete lastBlock;
         }
         _root = 0;
         _currentAllocs = 0;
