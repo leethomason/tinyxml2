@@ -2112,10 +2112,11 @@ int main( int argc, const char ** argv )
 #endif
 
 #if defined( _MSC_VER )
-		printf("\nParsing %s of dream.xml: %.3f milli-seconds\n", note, 1000.0 * (double)(end - start) / ((double)freq * (double)COUNT));
+		const double duration = 1000.0 * (double)(end - start) / ((double)freq * (double)COUNT);
 #else
-		printf("\nParsing %s of dream.xml: %.3f milli-seconds\n", note, (double)(cend - cstart) / (double)COUNT);
+		const double duration = (double)(cend - cstart) / (double)COUNT;
 #endif
+		printf("\nParsing dream.xml (%s): %.3f milli-seconds\n", note, duration);
 	}
 
 #if defined( _MSC_VER ) &&  defined( DEBUG )
