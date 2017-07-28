@@ -2118,7 +2118,8 @@ int main( int argc, const char ** argv )
 #endif
 	}
 
-	#if defined( _MSC_VER ) &&  defined( DEBUG )
+#if defined( _MSC_VER ) &&  defined( DEBUG )
+	{
 		_CrtMemCheckpoint( &endMemState );
 
 		_CrtMemState diffMemState;
@@ -2129,7 +2130,8 @@ int main( int argc, const char ** argv )
 			int leaksBeforeExit = _CrtDumpMemoryLeaks();
 			XMLTest( "No leaks before exit?", FALSE, leaksBeforeExit );
 		}
-	#endif
+	}
+#endif
 
 	printf ("\nPass %d, Fail %d\n", gPass, gFail);
 
