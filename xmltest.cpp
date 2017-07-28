@@ -1756,6 +1756,24 @@ int main( int argc, const char ** argv )
         doc.DeleteNode(pRoot);
     }
 
+    {
+        XMLDocument doc;
+        XMLElement* root = doc.NewElement( "Root" );
+        XMLTest( "Node document before insertion", true, &doc == root->GetDocument() );
+        doc.InsertEndChild( root );
+        XMLTest( "Node document after insertion", true, &doc == root->GetDocument() );
+    }
+
+    {
+        // If this doesn't assert in DEBUG, all is well.
+        XMLDocument doc;
+        XMLElement* unlinkedRoot = doc.NewElement( "Root" );
+        XMLElement* linkedRoot = doc.NewElement( "Root" );
+        doc.InsertFirstChild( linkedRoot );
+        unlinkedRoot->GetDocument()->DeleteNode( linkedRoot );
+        unlinkedRoot->GetDocument()->DeleteNode( unlinkedRoot );
+    }
+
 	{
 		// Should not assert in DEBUG
 		XMLPrinter printer;
