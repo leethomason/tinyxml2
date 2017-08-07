@@ -1463,24 +1463,40 @@ int main( int argc, const char ** argv )
 
 		const XMLElement* pointElement = doc.RootElement();
 
-		int intValue = 0;
-		unsigned unsignedValue = 0;
-		float floatValue = 0;
-		double doubleValue = 0;
-		bool boolValue = false;
+		{
+			int intValue = 0;
+			XMLError queryResult = pointElement->FirstChildElement( "y" )->QueryIntText( &intValue );
+			XMLTest( "QueryIntText result", XML_SUCCESS, queryResult, false );
+			XMLTest( "QueryIntText", 1, intValue, false );
+		}
 
-		pointElement->FirstChildElement( "y" )->QueryIntText( &intValue );
-		pointElement->FirstChildElement( "y" )->QueryUnsignedText( &unsignedValue );
-		pointElement->FirstChildElement( "x" )->QueryFloatText( &floatValue );
-		pointElement->FirstChildElement( "x" )->QueryDoubleText( &doubleValue );
-		pointElement->FirstChildElement( "valid" )->QueryBoolText( &boolValue );
+		{
+			unsigned unsignedValue = 0;
+			XMLError queryResult = pointElement->FirstChildElement( "y" )->QueryUnsignedText( &unsignedValue );
+			XMLTest( "QueryUnsignedText result", XML_SUCCESS, queryResult, false );
+			XMLTest( "QueryUnsignedText", (unsigned)1, unsignedValue, false );
+		}
 
+		{
+			float floatValue = 0;
+			XMLError queryResult = pointElement->FirstChildElement( "x" )->QueryFloatText( &floatValue );
+			XMLTest( "QueryFloatText result", XML_SUCCESS, queryResult, false );
+			XMLTest( "QueryFloatText", 1.2f, floatValue, false );
+		}
 
-		XMLTest( "QueryIntText", 1, intValue,						false );
-		XMLTest( "QueryUnsignedText", (unsigned)1, unsignedValue,	false );
-		XMLTest( "QueryFloatText", 1.2f, floatValue,				false );
-		XMLTest( "QueryDoubleText", 1.2, doubleValue,				false );
-		XMLTest( "QueryBoolText", true, boolValue,					false );
+		{
+			double doubleValue = 0;
+			XMLError queryResult = pointElement->FirstChildElement( "x" )->QueryDoubleText( &doubleValue );
+			XMLTest( "QueryDoubleText result", XML_SUCCESS, queryResult, false );
+			XMLTest( "QueryDoubleText", 1.2, doubleValue, false );
+		}
+
+		{
+			bool boolValue = false;
+			XMLError queryResult = pointElement->FirstChildElement( "valid" )->QueryBoolText( &boolValue );
+			XMLTest( "QueryBoolText result", XML_SUCCESS, queryResult, false );
+			XMLTest( "QueryBoolText", true, boolValue, false );
+		}
 	}
 
 	{
