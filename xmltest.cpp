@@ -403,6 +403,25 @@ int main( int argc, const char ** argv )
 		delete doc;
 	}
 	{
+		// Test: Programmatic DOM nodes insertion return values
+		XMLDocument doc;
+
+		XMLNode* first = doc.NewElement( "firstElement" );
+		XMLTest( "New element", true, first != 0 );
+		XMLNode* firstAfterInsertion = doc.InsertFirstChild( first );
+		XMLTest( "New element inserted first", true, firstAfterInsertion == first );
+
+		XMLNode* last = doc.NewElement( "lastElement" );
+		XMLTest( "New element", true, last != 0 );
+		XMLNode* lastAfterInsertion = doc.InsertEndChild( last );
+		XMLTest( "New element inserted last", true, lastAfterInsertion == last );
+
+		XMLNode* middle = doc.NewElement( "middleElement" );
+		XMLTest( "New element", true, middle != 0 );
+		XMLNode* middleAfterInsertion = doc.InsertAfterChild( first, middle );
+		XMLTest( "New element inserted middle", true, middleAfterInsertion == middle );
+	}
+	{
 		// Test: Programmatic DOM
 		// Build:
 		//		<element>
@@ -946,7 +965,9 @@ int main( int argc, const char ** argv )
 		XMLElement* childText1 = doc.NewElement( "childText1" );
 
 		XMLNode* childNode0 = parent->InsertEndChild( childText0 );
+		XMLTest( "InsertEndChild() return", true, childNode0 == childText0 );
 		XMLNode* childNode1 = parent->InsertAfterChild( childNode0, childText1 );
+		XMLTest( "InsertAfterChild() return", true, childNode1 == childText1 );
 
 		XMLTest( "Test InsertAfterChild on empty node. ", true, ( childNode1 == parent->LastChild() ) );
 	}
