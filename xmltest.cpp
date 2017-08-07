@@ -1366,7 +1366,7 @@ int main( int argc, const char ** argv )
 
 		ele->DeleteAttribute( "attrib1" );
 		ele->DeleteAttribute( "attrib3" );
-		XMLTest( "Attribute order (empty)", false, ele->FirstAttribute() ? true : false );
+		XMLTest( "Attribute order (empty)", true, ele->FirstAttribute() == 0 );
 	}
 
 	{
@@ -1418,7 +1418,7 @@ int main( int argc, const char ** argv )
 
 		XMLHandle docH( doc );
 		ele = docH.FirstChildElement( "none" ).FirstChildElement( "element" ).ToElement();
-		XMLTest( "Handle, dne, mutable", false, ele != 0 );
+		XMLTest( "Handle, dne, mutable", true, ele == 0 );
 	}
 
 	{
@@ -1429,10 +1429,10 @@ int main( int argc, const char ** argv )
 		XMLConstHandle docH( doc );
 
 		const XMLElement* ele = docH.FirstChildElement( "element" ).FirstChild().ToElement();
-		XMLTest( "Handle, success, const", ele->Value(), "sub" );
+		XMLTest( "Handle, success, const", "sub", ele->Value() );
 
 		ele = docH.FirstChildElement( "none" ).FirstChildElement( "element" ).ToElement();
-		XMLTest( "Handle, dne, const", false, ele != 0 );
+		XMLTest( "Handle, dne, const", true, ele == 0 );
 	}
 	{
 		// Default Declaration & BOM
