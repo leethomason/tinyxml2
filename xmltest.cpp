@@ -881,7 +881,8 @@ int main( int argc, const char ** argv )
 	// ---------- XMLPrinter stream mode ------
 	{
 		{
-			FILE* printerfp = fopen("resources/printer.xml", "w");
+			FILE* printerfp = fopen("resources/out/printer.xml", "w");
+			XMLTest("Open printer.xml", true, printerfp != 0);
 			XMLPrinter printer(printerfp);
 			printer.OpenElement("foo");
 			printer.PushAttribute("attrib-text", "text");
@@ -895,7 +896,7 @@ int main( int argc, const char ** argv )
 		}
 		{
 			XMLDocument doc;
-			doc.LoadFile("resources/printer.xml");
+			doc.LoadFile("resources/out/printer.xml");
 			XMLTest("XMLPrinter Stream mode: load", XML_SUCCESS, doc.ErrorID(), true);
 
 			const XMLDocument& cdoc = doc;
