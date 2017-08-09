@@ -1997,10 +1997,11 @@ int main( int argc, const char ** argv )
             void TestParseError(const char *testString, const char *docStr, XMLError expected_error, int expectedLine)
             {
                 XMLDocument doc;
-                XMLError err = doc.Parse(docStr);
+                const XMLError parseError = doc.Parse(docStr);
 
+                XMLTest(testString, parseError, doc.ErrorID());
                 XMLTest(testString, true, doc.Error());
-                XMLTest(testString, expected_error, err);
+                XMLTest(testString, expected_error, parseError);
                 XMLTest(testString, expectedLine, doc.GetErrorLineNum());
             };
 
