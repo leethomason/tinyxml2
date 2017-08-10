@@ -650,14 +650,17 @@ int main( int argc, const char ** argv )
 		XMLTest( "UTF-8: Save testout.xml", false, doc.Error() );
 
 		// Check the round trip.
-		int okay = 0;
+		bool roundTripOkay = false;
 
 		FILE* saved  = fopen( "resources/out/utf8testout.xml", "r" );
+		XMLTest( "UTF-8: Open utf8testout.xml", true, saved != 0 );
+
 		FILE* verify = fopen( "resources/utf8testverify.xml", "r" );
+		XMLTest( "UTF-8: Open utf8testverify.xml", true, verify != 0 );
 
 		if ( saved && verify )
 		{
-			okay = 1;
+			roundTripOkay = true;
 			char verifyBuf[256];
 			while ( fgets( verifyBuf, 256, verify ) )
 			{
@@ -670,7 +673,7 @@ int main( int argc, const char ** argv )
 				{
 					printf( "verify:%s<\n", verifyBuf );
 					printf( "saved :%s<\n", savedBuf );
-					okay = 0;
+					roundTripOkay = false;
 					break;
 				}
 			}
@@ -679,7 +682,7 @@ int main( int argc, const char ** argv )
 			fclose( saved );
 		if ( verify )
 			fclose( verify );
-		XMLTest( "UTF-8: Verified multi-language round trip.", 1, okay );
+		XMLTest( "UTF-8: Verified multi-language round trip.", true, roundTripOkay );
 	}
 
 	// --------GetText()-----------
@@ -998,7 +1001,9 @@ int main( int argc, const char ** argv )
 
 		XMLTest( "Entity transformation: read. ", expected, context, true );
 
-		FILE* textfile = fopen( "resources/out/textfile.txt", "w" );
+		const char* textFilePath = "resources/out/textfile.txt";
+		FILE* textfile = fopen( textFilePath, "w" );
+		XMLTest( "Entity transformation: open text file for writing", true, textfile != 0, true );
 		if ( textfile )
 		{
 			XMLPrinter streamer( textfile );
@@ -1006,8 +1011,8 @@ int main( int argc, const char ** argv )
 			fclose( textfile );
 		}
 
-        textfile = fopen( "resources/out/textfile.txt", "r" );
-		TIXMLASSERT( textfile );
+		textfile = fopen( textFilePath, "r" );
+		XMLTest( "Entity transformation: open text file for reading", true, textfile != 0, true );
 		if ( textfile )
 		{
 			char buf[ 1024 ];
