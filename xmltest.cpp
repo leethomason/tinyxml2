@@ -2152,12 +2152,12 @@ int main( int argc, const char ** argv )
 			doc.Parse(mem);
 			parseDreamXmlFailed = parseDreamXmlFailed || doc.Error();
 		}
-		XMLTest( "Parse dream.xml", false, parseDreamXmlFailed );
 #if defined( _MSC_VER )
 		QueryPerformanceCounter((LARGE_INTEGER*)&end);
 #else
 		clock_t cend = clock();
 #endif
+		XMLTest( "Parse dream.xml", false, parseDreamXmlFailed );
 
 		delete[] mem;
 
