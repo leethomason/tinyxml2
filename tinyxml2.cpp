@@ -2054,7 +2054,7 @@ void XMLDocument::Clear()
 }
 
 
-void XMLDocument::DeepCopy(XMLDocument* target)
+void XMLDocument::DeepCopy(XMLDocument* target) const
 {
 	TIXMLASSERT(target);
     if (target == this) {

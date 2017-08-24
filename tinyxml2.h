@@ -1826,7 +1826,7 @@ public:
 
 		NOTE: that the 'target' must be non-null.
 	*/
-	void DeepCopy(XMLDocument* target);
+	void DeepCopy(XMLDocument* target) const;
 
 	// internal
     char* Identify( char* p, XMLNode** node );
