@@ -454,8 +454,8 @@ int main( int argc, const char ** argv )
 		XMLTest( "Programmatic DOM", 2, doc->FirstChildElement()->LastChildElement( "sub" )->IntAttribute( "attrib" ) );
 		XMLTest( "Programmatic DOM", "& Text!",
 				 doc->FirstChildElement()->LastChildElement( "sub" )->FirstChild()->ToText()->Value() );
-		XMLTest("User data", true, &dummyValue == comment->GetUserData(), false);
-		XMLTest("User data", dummyInitialValue, dummyValue, false);
+		XMLTest("User data - pointer", true, &dummyValue == comment->GetUserData(), false);
+		XMLTest("User data - value behind pointer", dummyInitialValue, dummyValue, false);
 
 		// And now deletion:
 		element->DeleteChild( sub[2] );
