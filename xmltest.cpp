@@ -1549,6 +1549,16 @@ int main( int argc, const char ** argv )
         doc.Clear();
         XMLTest( "Document Clear()'s", true, doc.NoChildren() );
     }
+
+    {
+        XMLDocument doc;
+        XMLTest( "No error initially", false, doc.Error() );
+        XMLError error = doc.Parse( "This is not XML" );
+        XMLTest( "Error after invalid XML", true, doc.Error() );
+        XMLTest( "Error after invalid XML", error, doc.ErrorID() );
+        doc.Clear();
+        XMLTest( "No error after Clear()", false, doc.Error() );
+    }
     
 	// ----------- Whitespace ------------
 	{
