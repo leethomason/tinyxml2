@@ -1939,17 +1939,18 @@ int main( int argc, const char ** argv )
 		//
 		// Previously (buggy):
 		//		The memory would be free'd when the XMLDocument is
-		//      destructed. But the destructor wasn't called, so that
-		//      memory allocated by the XMLElement would not be free'd.
-		//      In practice this meant strings allocated by the XMLElement
-		//      would leak. An edge case, but annoying.
+		//      destructed. But the XMLElement destructor wasn't called, so
+		//      memory allocated for the XMLElement text would not be free'd.
+		//      In practice this meant strings allocated for the XMLElement
+		//      text would be leaked. An edge case, but annoying.
 		// Now:
-		//      The destructor is called. But the list of unlinked nodes
-		//      has to be tracked. This has a minor performance impact
-		//   	that can become significant if you have a lot. (But why
-		//      would you do that?)
-		// The only way to see this bug is in a leak tracker. This
-		// is compiled in by default on Windows Debug.
+		//      The XMLElement destructor is called. But the unlinked nodes
+		//      have to be tracked using a list. This has a minor performance
+		//      impact that can become significant if you have a lot of
+		//      unlinked nodes. (But why would you do that?)
+		// The only way to see this bug was in a Visual C++ runtime debug heap
+		// leak tracker. This is compiled in by default on Windows Debug and
+		// enabled with _CRTDBG_LEAK_CHECK_DF parameter passed to _CrtSetDbgFlag().
 		{
 			XMLDocument doc;
 			doc.NewElement("LEAK 1");
