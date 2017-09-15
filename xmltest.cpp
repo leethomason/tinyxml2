@@ -2144,6 +2144,19 @@ int main( int argc, const char ** argv )
             "D01L01E02E03A03A03T03E04A04A04T04E05A05A05T05E06A06A06T06E07A07A07T07E08A08A08T08E09T09E10T10");
     }
 
+    // ----------- Testing error strings ------------
+    {
+            tinyxml2::XMLDocument invalid;
+            invalid.Parse("<element><test></test>");
+            XMLTest( "XMLDocument::GetErrorStr1() [invalid xml]", NULL, invalid.GetErrorStr1());
+            XMLTest( "XMLDocument::GetErrorStr2() [invalid xml]", NULL, invalid.GetErrorStr2());
+
+            tinyxml2::XMLDocument nonExistent;
+            nonExistent.LoadFile("/does/not/exist");
+            XMLTest( "XMLDocument::GetErrorStr1() [non existent file]", "/does/not/exist", nonExistent.GetErrorStr1());
+            XMLTest( "XMLDocument::GetErrorStr2() [non existent file]", NULL, nonExistent.GetErrorStr2());
+    }
+
     // ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )
