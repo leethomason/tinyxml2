@@ -1928,7 +1928,9 @@ int main( int argc, const char ** argv )
 			const XMLError error = static_cast<XMLError>(i);
 			doc.SetError( error, 0, 0, 0 );
 			XMLTest( "ErrorID() after SetError()", error, doc.ErrorID() );
-			doc.ErrorName();
+			const char* name = doc.ErrorName();
+			XMLTest( "ErrorName() after SetError()", true, name != 0 );
+			XMLTest( "ErrorName() after SetError()", true, strlen(name) > 0 );
 		}
 	}
 
