@@ -386,6 +386,34 @@ int main( int argc, const char ** argv )
 	}
 
 	{
+		// This test is pre-test for the next one
+		// (where Element1 is inserted "after itself".
+		// This code didn't use to crash.
+		XMLDocument doc;
+		XMLElement* element1 = doc.NewElement("Element1");
+		XMLElement* element2 = doc.NewElement("Element2");
+		doc.InsertEndChild(element1);
+		doc.InsertEndChild(element2);
+		doc.InsertAfterChild(element2, element2);
+		doc.InsertAfterChild(element2, element2);
+	}
+
+	{
+		XMLDocument doc;
+		XMLElement* element1 = doc.NewElement("Element1");
+		XMLElement* element2 = doc.NewElement("Element2");
+		doc.InsertEndChild(element1);
+		doc.InsertEndChild(element2);
+
+		// This insertion "after itself"
+		// used to cause invalid memory access and crash
+		doc.InsertAfterChild(element1, element1);
+		doc.InsertAfterChild(element1, element1);
+		doc.InsertAfterChild(element2, element2);
+		doc.InsertAfterChild(element2, element2);
+	}
+
+	{
 		static const char* test = "<element>Text before.</element>";
 		XMLDocument doc;
 		doc.Parse( test );
