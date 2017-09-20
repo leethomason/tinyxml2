@@ -1785,10 +1785,10 @@ public:
     */
     void DeleteNode( XMLNode* node );
 
-    void SetError( XMLError error, const char* str1, const char* str2, int lineNum );
+    void SetError( XMLError error, int lineNum, const char* format, ... );
 
     void ClearError() {
-        SetError(XML_SUCCESS, 0, 0, 0);
+        SetError(XML_SUCCESS, 0, 0);
     }
 
     /// Return true if there was an error parsing the document.
@@ -1803,10 +1803,7 @@ public:
     static const char* ErrorIDToName(XMLError errorID);
 
     /// Return a possibly helpful diagnostic location or string.
-	const char* GetErrorStr1() const;
-
-    /// Return a possibly helpful secondary diagnostic location or string.
-	const char* GetErrorStr2() const;
+	const char* GetErrorStr() const;
 
     /// Return the line where the error occured, or zero if unknown.
     int GetErrorLineNum() const
@@ -1849,8 +1846,7 @@ private:
     bool			_processEntities;
     XMLError		_errorID;
     Whitespace		_whitespaceMode;
-    mutable StrPair	_errorStr1;
-    mutable StrPair	_errorStr2;
+    mutable StrPair	_errorStr;
     int             _errorLineNum;
     char*			_charBuffer;
     int				_parseCurLineNum;

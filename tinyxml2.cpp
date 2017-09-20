@@ -165,6 +165,7 @@ void StrPair::TransferTo( StrPair* other )
     _end = 0;
 }
 
+
 void StrPair::Reset()
 {
     if ( _flags & NEEDS_DELETE ) {
@@ -1018,7 +1019,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
         if ( !p ) {
             DeleteNode( node );
             if ( !_document->Error() ) {
-                _document->SetError( XML_ERROR_PARSING, 0, 0, initialLineNum);
+                _document->SetError( XML_ERROR_PARSING, initialLineNum, 0);
             }
             break;
         }
@@ -1038,7 +1039,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
                 }
             }
             if ( !wellLocated ) {
-                _document->SetError( XML_ERROR_PARSING_DECLARATION, decl->Value(), 0, initialLineNum);
+                _document->SetError( XML_ERROR_PARSING_DECLARATION, initialLineNum, "value: %s", decl->Value());
                 DeleteNode( node );
                 break;
             }
@@ -1073,7 +1074,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
                 }
             }
             if ( mismatch ) {
-                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, ele->Name(), 0, initialLineNum);
+                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, initialLineNum, "name=%s", ele->Name());
                 DeleteNode( node );
                 break;
             }
@@ -1134,7 +1135,7 @@ char* XMLText::ParseDeep( char* p, StrPair*, int* curLineNumPtr )
     if ( this->CData() ) {
         p = _value.ParseText( p, "]]>", StrPair::NEEDS_NEWLINE_NORMALIZATION, curLineNumPtr );
         if ( !p ) {
-            _document->SetError( XML_ERROR_PARSING_CDATA, start, 0, _parseLineNum );
+            _document->SetError( XML_ERROR_PARSING_CDATA, _parseLineNum, 0 );
         }
         return p;
     }
@@ -1149,7 +1150,7 @@ char* XMLText::ParseDeep( char* p, StrPair*, int* curLineNumPtr )
             return p-1;
         }
         if ( !p ) {
-            _document->SetError( XML_ERROR_PARSING_TEXT, start, 0, _parseLineNum );
+            _document->SetError( XML_ERROR_PARSING_TEXT, _parseLineNum, 0 );
         }
     }
     return 0;
@@ -1200,7 +1201,7 @@ char* XMLComment::ParseDeep( char* p, StrPair*, int* curLineNumPtr )
     const char* start = p;
     p = _value.ParseText( p, "-->", StrPair::COMMENT, curLineNumPtr );
     if ( p == 0 ) {
-        _document->SetError( XML_ERROR_PARSING_COMMENT, start, 0, _parseLineNum );
+        _document->SetError( XML_ERROR_PARSING_COMMENT, _parseLineNum, 0 );
     }
     return p;
 }
@@ -1250,7 +1251,7 @@ char* XMLDeclaration::ParseDeep( char* p, StrPair*, int* curLineNumPtr )
     const char* start = p;
     p = _value.ParseText( p, "?>", StrPair::NEEDS_NEWLINE_NORMALIZATION, curLineNumPtr );
     if ( p == 0 ) {
-        _document->SetError( XML_ERROR_PARSING_DECLARATION, start, 0, _parseLineNum );
+        _document->SetError( XML_ERROR_PARSING_DECLARATION, _parseLineNum, 0 );
     }
     return p;
 }
@@ -1300,7 +1301,7 @@ char* XMLUnknown::ParseDeep( char* p, StrPair*, int* curLineNumPtr )
 
     p = _value.ParseText( p, ">", StrPair::NEEDS_NEWLINE_NORMALIZATION, curLineNumPtr );
     if ( !p ) {
-        _document->SetError( XML_ERROR_PARSING_UNKNOWN, start, 0, _parseLineNum );
+        _document->SetError( XML_ERROR_PARSING_UNKNOWN, _parseLineNum, 0 );
     }
     return p;
 }
@@ -1810,7 +1811,7 @@ char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
     while( p ) {
         p = XMLUtil::SkipWhiteSpace( p, curLineNumPtr );
         if ( !(*p) ) {
-            _document->SetError( XML_ERROR_PARSING_ELEMENT, start, Name(), _parseLineNum );
+            _document->SetError( XML_ERROR_PARSING_ELEMENT, _parseLineNum, "element name=%s", Name() );
             return 0;
         }
 
@@ -1825,7 +1826,7 @@ char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
             p = attrib->ParseDeep( p, _document->ProcessEntities(), curLineNumPtr );
             if ( !p || Attribute( attrib->Name() ) ) {
                 DeleteAttribute( attrib );
-                _document->SetError( XML_ERROR_PARSING_ATTRIBUTE, start, p, attrLineNum );
+                _document->SetError( XML_ERROR_PARSING_ATTRIBUTE, attrLineNum, "element name=%s", Name() );
                 return 0;
             }
             // There is a minor bug here: if the attribute in the source xml
@@ -1854,7 +1855,7 @@ char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
             return p+2;	// done; sealed element.
         }
         else {
-            _document->SetError( XML_ERROR_PARSING_ELEMENT, start, p, _parseLineNum );
+            _document->SetError( XML_ERROR_PARSING_ELEMENT, _parseLineNum, 0 );
             return 0;
         }
     }
@@ -2152,7 +2153,7 @@ XMLError XMLDocument::LoadFile( const char* filename )
     Clear();
     FILE* fp = callfopen( filename, "rb" );
     if ( !fp ) {
-        SetError( XML_ERROR_FILE_NOT_FOUND, filename, 0, 0 );
+        SetError( XML_ERROR_FILE_NOT_FOUND, 0, "filename=%s", filename );
         return _errorID;
     }
     LoadFile( fp );
@@ -2189,7 +2190,7 @@ XMLError XMLDocument::LoadFile( FILE* fp )
 
     fseek( fp, 0, SEEK_SET );
     if ( fgetc( fp ) == EOF && ferror( fp ) != 0 ) {
-        SetError( XML_ERROR_FILE_READ_ERROR, 0, 0, 0 );
+        SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
     }
 
@@ -2197,19 +2198,19 @@ XMLError XMLDocument::LoadFile( FILE* fp )
     const long filelength = ftell( fp );
     fseek( fp, 0, SEEK_SET );
     if ( filelength == -1L ) {
-        SetError( XML_ERROR_FILE_READ_ERROR, 0, 0, 0 );
+        SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
     }
     TIXMLASSERT( filelength >= 0 );
 
     if ( !LongFitsIntoSizeTMinusOne<>::Fits( filelength ) ) {
         // Cannot handle files which won't fit in buffer together with null terminator
-        SetError( XML_ERROR_FILE_READ_ERROR, 0, 0, 0 );
+        SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
     }
 
     if ( filelength == 0 ) {
-        SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0, 0 );
+        SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
         return _errorID;
     }
 
@@ -2218,7 +2219,7 @@ XMLError XMLDocument::LoadFile( FILE* fp )
     _charBuffer = new char[size+1];
     size_t read = fread( _charBuffer, 1, size, fp );
     if ( read != size ) {
-        SetError( XML_ERROR_FILE_READ_ERROR, 0, 0, 0 );
+        SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
     }
 
@@ -2233,7 +2234,7 @@ XMLError XMLDocument::SaveFile( const char* filename, bool compact )
 {
     FILE* fp = callfopen( filename, "w" );
     if ( !fp ) {
-        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, filename, 0, 0 );
+        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "filename=%s", filename );
         return _errorID;
     }
     SaveFile(fp, compact);
@@ -2258,7 +2259,7 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
     Clear();
 
     if ( len == 0 || !p || !*p ) {
-        SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0, 0 );
+        SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
         return _errorID;
     }
     if ( len == (size_t)(-1) ) {
@@ -2296,20 +2297,28 @@ void XMLDocument::Print( XMLPrinter* streamer ) const
 }
 
 
-void XMLDocument::SetError( XMLError error, const char* str1, const char* str2, int lineNum )
+void XMLDocument::SetError( XMLError error, int lineNum, const char* format, ... )
 {
     TIXMLASSERT( error >= 0 && error < XML_ERROR_COUNT );
     _errorID = error;
-	
-	_errorStr1.Reset();
-	_errorStr2.Reset();
-    _errorLineNum = lineNum;
+	_errorStr.Reset();
 
-	if (str1)
-		_errorStr1.SetStr(str1);
-	if (str2)
-		_errorStr2.SetStr(str2);
+    if (format) {
+        size_t BUFFER_SIZE = 1000;
+        char* buffer = new char[BUFFER_SIZE];
+        TIXML_SNPRINTF(buffer, BUFFER_SIZE, "Error=%s ErrorID=%d line=%d ", ErrorIDToName(error), int(error), lineNum);
+        size_t len = strlen(buffer);
+
+        va_list va;
+        va_start( va, format );
+        int result = TIXML_VSNPRINTF( buffer + len, BUFFER_SIZE - len, format, va );
+        va_end( va );
+
+        _errorStr.SetStr(buffer);
+        delete [] buffer;
+    }
 }
+
 
 /*static*/ const char* XMLDocument::ErrorIDToName(XMLError errorID)
 {
@@ -2319,14 +2328,9 @@ void XMLDocument::SetError( XMLError error, const char* str1, const char* str2, 
     return errorName;
 }
 
-const char* XMLDocument::GetErrorStr1() const 
+const char* XMLDocument::GetErrorStr() const 
 {
-	return _errorStr1.GetStr();
-}
-
-const char* XMLDocument::GetErrorStr2() const 
-{
-	return _errorStr2.GetStr();
+	return _errorStr.Empty() ? "" : _errorStr.GetStr();
 }
 
 const char* XMLDocument::ErrorName() const
@@ -2341,13 +2345,9 @@ void XMLDocument::PrintError() const
         char buf1[LEN] = { 0 };
         char buf2[LEN] = { 0 };
 
-        if ( !_errorStr1.Empty() ) {
-            TIXML_SNPRINTF( buf1, LEN, "%s", _errorStr1.GetStr() );
+        if ( !_errorStr.Empty() ) {
+            TIXML_SNPRINTF( buf1, LEN, "%s", _errorStr.GetStr() );
         }
-        if ( !_errorStr2.Empty() ) {
-            TIXML_SNPRINTF( buf2, LEN, "%s", _errorStr2.GetStr() );
-        }
-
         // Should check INT_MIN <= _errorID && _errorId <= INT_MAX, but that
         // causes a clang "always true" -Wtautological-constant-out-of-range-compare warning
         TIXMLASSERT( 0 <= _errorID && XML_ERROR_COUNT - 1 <= INT_MAX );
@@ -2366,7 +2366,7 @@ void XMLDocument::Parse()
     p = XMLUtil::SkipWhiteSpace( p, &_parseCurLineNum );
     p = const_cast<char*>( XMLUtil::ReadBOM( p, &_writeBOM ) );
     if ( !*p ) {
-        SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0, 0 );
+        SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
         return;
     }
     ParseDeep(p, 0, &_parseCurLineNum );
