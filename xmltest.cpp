@@ -2017,19 +2017,29 @@ int main( int argc, const char ** argv )
 		XMLElement* playlist = doc.FirstChildElement("playlist");
 		XMLTest("Crash bug parsing", true, playlist != 0);
 
-		tinyxml2::XMLElement* entry = playlist->FirstChildElement("entry");
-		XMLTest("Crash bug parsing", true, entry != 0);
-		while (entry) {
-			tinyxml2::XMLElement* todelete = entry;
-			entry = entry->NextSiblingElement("entry");
-			playlist->DeleteChild(todelete);
-		};
-		tinyxml2::XMLElement* blank = playlist->FirstChildElement("blank");
-		while (blank) {
-			tinyxml2::XMLElement* todelete = blank;
-			blank = blank->NextSiblingElement("blank");
-			playlist->DeleteChild(todelete);
-		};
+		{
+			const char* elementName = "entry";
+			XMLElement* entry = playlist->FirstChildElement(elementName);
+			XMLTest("Crash bug parsing", true, entry != 0);
+			while (entry) {
+				XMLElement* todelete = entry;
+				entry = entry->NextSiblingElement(elementName);
+				playlist->DeleteChild(todelete);
+			}
+			entry = playlist->FirstChildElement(elementName);
+			XMLTest("Crash bug parsing", true, entry == 0);
+		}
+		{
+			const char* elementName = "blank";
+			XMLElement* blank = playlist->FirstChildElement(elementName);
+			XMLTest("Crash bug parsing", true, blank != 0);
+			while (blank) {
+				XMLElement* todelete = blank;
+				blank = blank->NextSiblingElement(elementName);
+				playlist->DeleteChild(todelete);
+			}
+			XMLTest("Crash bug parsing", true, blank == 0);
+		}
 
 		tinyxml2::XMLPrinter printer;
 		playlist->Accept(&printer);
