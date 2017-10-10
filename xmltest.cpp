@@ -2067,6 +2067,8 @@ int main( int argc, const char ** argv )
     {
         struct TestUtil: XMLVisitor
         {
+            TestUtil() : str() {}
+
             void TestParseError(const char *testString, const char *docStr, XMLError expected_error, int expectedLine)
             {
                 XMLDocument doc;
