@@ -2329,12 +2329,12 @@ void XMLDocument::SetError( XMLError error, const char* str1, const char* str2, 
 
 const char* XMLDocument::GetErrorStr1() const 
 {
-	return _errorStr1.GetStr();
+	return _errorStr1.Empty() ? 0 : _errorStr1.GetStr();
 }
 
 const char* XMLDocument::GetErrorStr2() const 
 {
-	return _errorStr2.GetStr();
+	return _errorStr2.Empty() ? 0 : _errorStr2.GetStr();
 }
 
 const char* XMLDocument::ErrorName() const
