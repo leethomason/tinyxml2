@@ -1035,8 +1035,9 @@ int main( int argc, const char ** argv )
 		if ( textfile )
 		{
 			XMLPrinter streamer( textfile );
-			psg->Accept( &streamer );
+			bool acceptResult = psg->Accept( &streamer );
 			fclose( textfile );
+			XMLTest( "Entity transformation: Accept", true, acceptResult );
 		}
 
 		textfile = fopen( textFilePath, "r" );
@@ -1332,7 +1333,8 @@ int main( int argc, const char ** argv )
 			XMLTest( "Parse before deep cloning sub element", false, doc.Error() );
 
 			const XMLElement* subElement = doc.FirstChildElement("root")->FirstChildElement("child2");
-			subElement->Accept(&printer1);
+			bool acceptResult = subElement->Accept(&printer1);
+			XMLTest( "Accept before deep cloning", true, acceptResult );
 
 			XMLNode* clonedSubElement = subElement->DeepClone(&doc2);
 			doc2.InsertFirstChild(clonedSubElement);
@@ -1648,7 +1650,8 @@ int main( int argc, const char ** argv )
 		XMLElement* ele = doc.FirstChildElement( "parent")->FirstChildElement( "child");
 
 		XMLPrinter printer;
-		ele->Accept( &printer );
+		bool acceptResult = ele->Accept( &printer );
+		XMLTest( "Accept of sub-element", true, acceptResult );
 		XMLTest( "Printing of sub-element", "<child>abc</child>\n", printer.CStr(), false );
 	}
 
@@ -1730,7 +1733,8 @@ int main( int argc, const char ** argv )
 		XMLElement* two = doc.RootElement()->FirstChildElement("two");
 		two->InsertFirstChild(subtree);
 		XMLPrinter printer1(0, true);
-		doc.Accept(&printer1);
+		bool acceptResult = doc.Accept(&printer1);
+		XMLTest("Move node from within <one> to <two> - Accept()", true, acceptResult);
 		XMLTest("Move node from within <one> to <two>", xmlInsideTwo, printer1.CStr());
 
 		doc.Parse(xml);
@@ -1739,7 +1743,8 @@ int main( int argc, const char ** argv )
 		two = doc.RootElement()->FirstChildElement("two");
 		doc.RootElement()->InsertAfterChild(two, subtree);
 		XMLPrinter printer2(0, true);
-		doc.Accept(&printer2);
+		acceptResult = doc.Accept(&printer2);
+		XMLTest("Move node from within <one> after <two> - Accept()", true, acceptResult);
 		XMLTest("Move node from within <one> after <two>", xmlAfterTwo, printer2.CStr(), false);
 
 		doc.Parse(xml);
@@ -1748,7 +1753,8 @@ int main( int argc, const char ** argv )
 		subtree = one->FirstChildElement("subtree");
 		doc.RootElement()->InsertAfterChild(one, subtree);
 		XMLPrinter printer3(0, true);
-		doc.Accept(&printer3);
+		acceptResult = doc.Accept(&printer3);
+		XMLTest("Move node from within <one> after <one> - Accept()", true, acceptResult);
 		XMLTest("Move node from within <one> after <one>", xmlAfterOne, printer3.CStr(), false);
 
 		doc.Parse(xml);
@@ -1757,7 +1763,8 @@ int main( int argc, const char ** argv )
 		two = doc.RootElement()->FirstChildElement("two");
 		doc.RootElement()->InsertEndChild(subtree);
 		XMLPrinter printer4(0, true);
-		doc.Accept(&printer4);
+		acceptResult = doc.Accept(&printer4);
+		XMLTest("Move node from within <one> after <two> - Accept()", true, acceptResult);
 		XMLTest("Move node from within <one> after <two>", xmlAfterTwo, printer4.CStr(), false);
 	}
 
@@ -1881,7 +1888,8 @@ int main( int argc, const char ** argv )
 		XMLDocument doc;
 		XMLElement* newElement = doc.NewElement( "printme" );
 		XMLPrinter printer;
-		newElement->Accept( &printer );
+		bool acceptResult = newElement->Accept( &printer );
+		XMLTest( "printme - Accept()", true, acceptResult );
 		// Delete the node to avoid possible memory leak report in debug output
 		doc.DeleteNode( newElement );
 	}
@@ -2015,22 +2023,33 @@ int main( int argc, const char ** argv )
 		XMLElement* playlist = doc.FirstChildElement("playlist");
 		XMLTest("Crash bug parsing", true, playlist != 0);
 
-		tinyxml2::XMLElement* entry = playlist->FirstChildElement("entry");
-		XMLTest("Crash bug parsing", true, entry != 0);
-		while (entry) {
-			tinyxml2::XMLElement* todelete = entry;
-			entry = entry->NextSiblingElement("entry");
-			playlist->DeleteChild(todelete);
-		};
-		tinyxml2::XMLElement* blank = playlist->FirstChildElement("blank");
-		while (blank) {
-			tinyxml2::XMLElement* todelete = blank;
-			blank = blank->NextSiblingElement("blank");
-			playlist->DeleteChild(todelete);
-		};
+		{
+			const char* elementName = "entry";
+			XMLElement* entry = playlist->FirstChildElement(elementName);
+			XMLTest("Crash bug parsing", true, entry != 0);
+			while (entry) {
+				XMLElement* todelete = entry;
+				entry = entry->NextSiblingElement(elementName);
+				playlist->DeleteChild(todelete);
+			}
+			entry = playlist->FirstChildElement(elementName);
+			XMLTest("Crash bug parsing", true, entry == 0);
+		}
+		{
+			const char* elementName = "blank";
+			XMLElement* blank = playlist->FirstChildElement(elementName);
+			XMLTest("Crash bug parsing", true, blank != 0);
+			while (blank) {
+				XMLElement* todelete = blank;
+				blank = blank->NextSiblingElement(elementName);
+				playlist->DeleteChild(todelete);
+			}
+			XMLTest("Crash bug parsing", true, blank == 0);
+		}
 
 		tinyxml2::XMLPrinter printer;
-		playlist->Accept(&printer);
+		const bool acceptResult = playlist->Accept(&printer);
+		XMLTest("Crash bug parsing - Accept()", true, acceptResult);
 		printf("%s\n", printer.CStr());
 
 		// No test; it only need to not crash. 
@@ -2046,6 +2065,8 @@ int main( int argc, const char ** argv )
     {
         struct TestUtil: XMLVisitor
         {
+            TestUtil() : str() {}
+
             void TestParseError(const char *testString, const char *docStr, XMLError expected_error, int expectedLine)
             {
                 XMLDocument doc;
@@ -2119,7 +2140,8 @@ int main( int argc, const char ** argv )
             void TestDocLines(const char *testString, XMLDocument &doc, const char *expectedLines)
             {
                 str.Clear();
-                doc.Accept(this);
+                const bool acceptResult = doc.Accept(this);
+                XMLTest(testString, true, acceptResult);
                 str.Push(0);
                 XMLTest(testString, expectedLines, str.Mem());
             }
