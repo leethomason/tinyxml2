@@ -1039,7 +1039,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
                 }
             }
             if ( !wellLocated ) {
-                _document->SetError( XML_ERROR_PARSING_DECLARATION, initialLineNum, "value: %s", decl->Value());
+                _document->SetError( XML_ERROR_PARSING_DECLARATION, initialLineNum, "XMLDeclaration value=%s", decl->Value());
                 DeleteNode( node );
                 break;
             }
@@ -1074,7 +1074,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
                 }
             }
             if ( mismatch ) {
-                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, initialLineNum, "name=%s", ele->Name());
+                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, initialLineNum, "XMLElement name=%s", ele->Name());
                 DeleteNode( node );
                 break;
             }
@@ -1811,7 +1811,7 @@ char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
     while( p ) {
         p = XMLUtil::SkipWhiteSpace( p, curLineNumPtr );
         if ( !(*p) ) {
-            _document->SetError( XML_ERROR_PARSING_ELEMENT, _parseLineNum, "element name=%s", Name() );
+            _document->SetError( XML_ERROR_PARSING_ELEMENT, _parseLineNum, "XMLElement name=%s", Name() );
             return 0;
         }
 
@@ -1826,7 +1826,7 @@ char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
             p = attrib->ParseDeep( p, _document->ProcessEntities(), curLineNumPtr );
             if ( !p || Attribute( attrib->Name() ) ) {
                 DeleteAttribute( attrib );
-                _document->SetError( XML_ERROR_PARSING_ATTRIBUTE, attrLineNum, "element name=%s", Name() );
+                _document->SetError( XML_ERROR_PARSING_ATTRIBUTE, attrLineNum, "XMLElement name=%s", Name() );
                 return 0;
             }
             // There is a minor bug here: if the attribute in the source xml
@@ -2153,7 +2153,7 @@ XMLError XMLDocument::LoadFile( const char* filename )
     Clear();
     FILE* fp = callfopen( filename, "rb" );
     if ( !fp ) {
-        SetError( XML_ERROR_FILE_NOT_FOUND, 0, "filename=%s", filename );
+        SetError( XML_ERROR_FILE_NOT_FOUND, 0, "filename=%s", filename ? filename : "<null>");
         return _errorID;
     }
     LoadFile( fp );
@@ -2234,7 +2234,7 @@ XMLError XMLDocument::SaveFile( const char* filename, bool compact )
 {
     FILE* fp = callfopen( filename, "w" );
     if ( !fp ) {
-        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "filename=%s", filename );
+        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "filename=%s", filename ? filename : "<null>");
         return _errorID;
     }
     SaveFile(fp, compact);
@@ -2307,7 +2307,7 @@ void XMLDocument::SetError( XMLError error, int lineNum, const char* format, ...
     if (format) {
         size_t BUFFER_SIZE = 1000;
         char* buffer = new char[BUFFER_SIZE];
-        TIXML_SNPRINTF(buffer, BUFFER_SIZE, "Error=%s ErrorID=%d line=%d ", ErrorIDToName(error), int(error), lineNum);
+        TIXML_SNPRINTF(buffer, BUFFER_SIZE, "Error=%s ErrorID=%d (0x%x) Line number=%d: ", ErrorIDToName(error), int(error), int(error), lineNum);
         size_t len = strlen(buffer);
 
         va_list va;
@@ -2329,32 +2329,20 @@ void XMLDocument::SetError( XMLError error, int lineNum, const char* format, ...
     return errorName;
 }
 
-const char* XMLDocument::GetErrorStr() const 
+const char* XMLDocument::ErrorStr() const 
 {
 	return _errorStr.Empty() ? "" : _errorStr.GetStr();
+}
+
+
+void XMLDocument::PrintError() const
+{
+    printf("%s\n", ErrorStr());
 }
 
 const char* XMLDocument::ErrorName() const
 {
     return ErrorIDToName(_errorID);
-}
-
-void XMLDocument::PrintError() const
-{
-    if ( Error() ) {
-        static const int LEN = 20;
-        char buf1[LEN] = { 0 };
-        char buf2[LEN] = { 0 };
-
-        if ( !_errorStr.Empty() ) {
-            TIXML_SNPRINTF( buf1, LEN, "%s", _errorStr.GetStr() );
-        }
-        // Should check INT_MIN <= _errorID && _errorId <= INT_MAX, but that
-        // causes a clang "always true" -Wtautological-constant-out-of-range-compare warning
-        TIXMLASSERT( 0 <= _errorID && XML_ERROR_COUNT - 1 <= INT_MAX );
-        printf( "XMLDocument error id=%d '%s' str1=%s str2=%s line=%d\n",
-                static_cast<int>( _errorID ), ErrorName(), buf1, buf2, _errorLineNum );
-    }
 }
 
 void XMLDocument::Parse()
