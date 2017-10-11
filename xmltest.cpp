@@ -499,8 +499,12 @@ int main( int argc, const char ** argv )
 		int value2 = doc->FirstChildElement()->LastChildElement()->IntAttribute( "attrib", replacementIntValue );
 		XMLError result = doc->FirstChildElement()->LastChildElement()->QueryIntAttribute( "attrib", &value1 );
 		XMLTest( "Programmatic DOM", XML_NO_ATTRIBUTE, result );
+		doc->PrintError();
 		XMLTest( "Programmatic DOM", defaultIntValue, value1 );
 		XMLTest( "Programmatic DOM", replacementIntValue, value2 );
+
+
+		exit(0);
 
 		doc->Print();
 
