@@ -1,4 +1,5 @@
 # intermediate files
+build/
 Win32/
 x64/
 ipch/
