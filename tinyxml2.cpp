@@ -2489,7 +2489,7 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
                     for( int i=0; i<NUM_ENTITIES; ++i ) {
                         if ( entities[i].value == *q ) {
                             Putc( '&' );
-                            Write( entities[i].pattern );
+                            Write( entities[i].pattern, entities[i].length );
                             Putc( ';' );
                             entityPatternPrinted = true;
                             break;
@@ -2510,7 +2510,9 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
     // string if an entity wasn't found.
     TIXMLASSERT( p <= q );
     if ( !_processEntities || ( p < q ) ) {
-        Write( p );
+        const size_t delta = q - p;
+        const int toPrint = ( INT_MAX < delta ) ? INT_MAX : (int)delta;
+        Write( p, toPrint );
     }
 }
 
@@ -2551,11 +2553,11 @@ void XMLPrinter::OpenElement( const char* name, bool compactMode )
 void XMLPrinter::PushAttribute( const char* name, const char* value )
 {
     TIXMLASSERT( _elementJustOpened );
-    Write( " " );
+    Putc ( ' ' );
     Write( name );
     Write( "=\"" );
     PrintString( value, false );
-    Write( "\"" );
+    Putc ( '\"' );
 }
 
 
@@ -2740,7 +2742,7 @@ void XMLPrinter::PushUnknown( const char* value )
 
     Write( "<!" );
     Write( value );
-    Write( ">" );
+    Putc( '>' );
 }
 
 
