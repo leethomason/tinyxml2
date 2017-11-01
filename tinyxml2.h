@@ -2224,6 +2224,9 @@ protected:
 	*/
     virtual void PrintSpace( int depth );
     void Print( const char* format, ... );
+    void Write( const char* data, size_t size );
+    inline void Write( const char* data )           { Write( data, strlen( data ) ); }
+    void Putc( char ch );
 
     void SealElementIfJustOpened();
     bool _elementJustOpened;
