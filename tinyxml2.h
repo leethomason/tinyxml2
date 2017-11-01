@@ -1635,6 +1635,13 @@ enum Whitespace {
 class TINYXML2_LIB XMLDocument : public XMLNode
 {
     friend class XMLElement;
+    // Gives access to SetError, but over-access for everything else.
+    // Wishing C++ had "internal" scope.
+    friend class XMLNode;       
+    friend class XMLText;
+    friend class XMLComment;
+    friend class XMLDeclaration;
+    friend class XMLUnknown;
 public:
     /// constructor
     XMLDocument( bool processEntities = true, Whitespace whitespaceMode = PRESERVE_WHITESPACE );
@@ -1786,10 +1793,8 @@ public:
     */
     void DeleteNode( XMLNode* node );
 
-    void SetError( XMLError error, const char* str1, const char* str2, int lineNum );
-
     void ClearError() {
-        SetError(XML_SUCCESS, 0, 0, 0);
+        SetError(XML_SUCCESS, 0, 0);
     }
 
     /// Return true if there was an error parsing the document.
@@ -1803,19 +1808,19 @@ public:
 	const char* ErrorName() const;
     static const char* ErrorIDToName(XMLError errorID);
 
-    /// Return a possibly helpful diagnostic location or string.
-	const char* GetErrorStr1() const;
+    /** Returns a "long form" error description. A hopefully helpful 
+        diagnostic with location, line number, and/or additional info.
+    */
+	const char* ErrorStr() const;
 
-    /// Return a possibly helpful secondary diagnostic location or string.
-	const char* GetErrorStr2() const;
+    /// A (trivial) utility function that prints the ErrorStr() to stdout.
+    void PrintError() const;
 
     /// Return the line where the error occured, or zero if unknown.
-    int GetErrorLineNum() const
+    int ErrorLineNum() const
     {
         return _errorLineNum;
     }
-    /// If there is an error, print it to stdout.
-    void PrintError() const;
     
     /// Clear the document, resetting it to the initial state.
     void Clear();
@@ -1850,8 +1855,7 @@ private:
     bool			_processEntities;
     XMLError		_errorID;
     Whitespace		_whitespaceMode;
-    mutable StrPair	_errorStr1;
-    mutable StrPair	_errorStr2;
+    mutable StrPair	_errorStr;
     int             _errorLineNum;
     char*			_charBuffer;
     int				_parseCurLineNum;
@@ -1871,6 +1875,8 @@ private:
 	static const char* _errorNames[XML_ERROR_COUNT];
 
     void Parse();
+
+    void SetError( XMLError error, int lineNum, const char* format, ... );
 
     template<class NodeType, int PoolElementSize>
     NodeType* CreateUnlinkedNode( MemPoolT<PoolElementSize>& pool );

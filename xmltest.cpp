@@ -1962,11 +1962,9 @@ int main( int argc, const char ** argv )
 		XMLDocument doc;
 		for( int i = 0; i < XML_ERROR_COUNT; i++ ) {
 			const XMLError error = static_cast<XMLError>(i);
-			doc.SetError( error, 0, 0, 0 );
-			XMLTest( "ErrorID() after SetError()", error, doc.ErrorID() );
-			const char* name = doc.ErrorName();
-			XMLTest( "ErrorName() after SetError()", true, name != 0 );
-			XMLTest( "ErrorName() after SetError()", true, strlen(name) > 0 );
+			const char* name = XMLDocument::ErrorIDToName(error);
+			XMLTest( "ErrorName() after ClearError()", true, name != 0 );
+			XMLTest( "ErrorName() after ClearError()", true, strlen(name) > 0 );
 		}
 	}
 
@@ -2077,7 +2075,7 @@ int main( int argc, const char ** argv )
                 XMLTest(testString, parseError, doc.ErrorID());
                 XMLTest(testString, true, doc.Error());
                 XMLTest(testString, expected_error, parseError);
-                XMLTest(testString, expectedLine, doc.GetErrorLineNum());
+                XMLTest(testString, expectedLine, doc.ErrorLineNum());
             };
 
             void TestStringLines(const char *testString, const char *docStr, const char *expectedLines)
@@ -2194,6 +2192,18 @@ int main( int argc, const char ** argv )
             "LineNumbers-File",
             "resources/utf8test.xml",
             "D01L01E02E03A03A03T03E04A04A04T04E05A05A05T05E06A06A06T06E07A07A07T07E08A08A08T08E09T09E10T10");
+    }
+
+    {
+    	const char* xml = "<Hello>Text</Error>";
+    	XMLDocument doc;
+    	doc.Parse(xml);
+    	XMLTest("Test mismatched elements.", true, doc.Error());
+    	XMLTest("Test mismatched elements.", XML_ERROR_MISMATCHED_ELEMENT, doc.ErrorID());
+    	// For now just make sure calls work & doesn't crash.
+    	// May solidify the error output in the future.
+    	printf("%s\n", doc.ErrorStr());
+    	doc.PrintError();
     }
 
     // ----------- Performance tracking --------------
