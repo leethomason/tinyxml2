@@ -1132,7 +1132,6 @@ const XMLElement* XMLNode::ToElementWithName( const char* name ) const
 // --------- XMLText ---------- //
 char* XMLText::ParseDeep( char* p, StrPair*, int* curLineNumPtr )
 {
-    const char* start = p;
     if ( this->CData() ) {
         p = _value.ParseText( p, "]]>", StrPair::NEEDS_NEWLINE_NORMALIZATION, curLineNumPtr );
         if ( !p ) {
@@ -1199,7 +1198,6 @@ XMLComment::~XMLComment()
 char* XMLComment::ParseDeep( char* p, StrPair*, int* curLineNumPtr )
 {
     // Comment parses as text.
-    const char* start = p;
     p = _value.ParseText( p, "-->", StrPair::COMMENT, curLineNumPtr );
     if ( p == 0 ) {
         _document->SetError( XML_ERROR_PARSING_COMMENT, _parseLineNum, 0 );
@@ -1249,7 +1247,6 @@ XMLDeclaration::~XMLDeclaration()
 char* XMLDeclaration::ParseDeep( char* p, StrPair*, int* curLineNumPtr )
 {
     // Declaration parses as text.
-    const char* start = p;
     p = _value.ParseText( p, "?>", StrPair::NEEDS_NEWLINE_NORMALIZATION, curLineNumPtr );
     if ( p == 0 ) {
         _document->SetError( XML_ERROR_PARSING_DECLARATION, _parseLineNum, 0 );
@@ -1298,8 +1295,6 @@ XMLUnknown::~XMLUnknown()
 char* XMLUnknown::ParseDeep( char* p, StrPair*, int* curLineNumPtr )
 {
     // Unknown parses as text.
-    const char* start = p;
-
     p = _value.ParseText( p, ">", StrPair::NEEDS_NEWLINE_NORMALIZATION, curLineNumPtr );
     if ( !p ) {
         _document->SetError( XML_ERROR_PARSING_UNKNOWN, _parseLineNum, 0 );
@@ -1805,7 +1800,6 @@ void XMLElement::DeleteAttribute( const char* name )
 
 char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
 {
-    const char* start = p;
     XMLAttribute* prevAttribute = 0;
 
     // Read the attributes.
@@ -2319,7 +2313,7 @@ void XMLDocument::SetError( XMLError error, int lineNum, const char* format, ...
 
         va_list va;
         va_start( va, format );
-        int result = TIXML_VSNPRINTF( buffer + len, BUFFER_SIZE - len, format, va );
+        TIXML_VSNPRINTF( buffer + len, BUFFER_SIZE - len, format, va );
         va_end( va );
 
         _errorStr.SetStr(buffer);
