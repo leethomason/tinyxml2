@@ -7,6 +7,8 @@ tinyxml2/tinyxml2-cbp/bin/
 tinyxml2/tinyxml2-cbp/obj/
 tinyxml2/bin/
 tinyxml2/temp/
+.artifacts/
+.projects/
 *.sdf
 *.suo
 *.opensdf
