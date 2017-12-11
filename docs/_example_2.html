@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>TinyXML-2: File List</title>
+<title>TinyXML-2: Parse an XML from char buffer</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -43,7 +43,6 @@ $(function() {
 });
 </script>
 <div id="main-nav"></div>
-</div><!-- top -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -58,17 +57,14 @@ $(function() {
 </iframe>
 </div>
 
+</div><!-- top -->
 <div class="header">
   <div class="headertitle">
-<div class="title">File List</div>  </div>
+<div class="title">Parse an XML from char buffer </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock">Here is a list of all documented files with brief descriptions:</div><div class="directory">
-<table class="directory">
-<tr id="row_0_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a href="tinyxml2_8h_source.html"><span class="icondoc"></span></a><b>tinyxml2.h</b></td><td class="desc"></td></tr>
-</table>
-</div><!-- directory -->
-</div><!-- contents -->
+<div class="textblock"> Basic XML string parsing. The basic syntax to parse an XML for a char* and check for an error. (ErrorID() will return 0 for no error.) <div class="fragment"><div class="line"><span class="keywordtype">int</span> example_2()</div><div class="line">{</div><div class="line">    <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* xml = <span class="stringliteral">&quot;&lt;element/&gt;&quot;</span>;</div><div class="line">    XMLDocument doc;</div><div class="line">    doc.Parse( xml );</div><div class="line"></div><div class="line">    <span class="keywordflow">return</span> doc.ErrorID();</div><div class="line">}</div></div><!-- fragment --> </p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated on Sun Dec 10 2017 20:03:20 for TinyXML-2 by &#160;<a href="http://www.doxygen.org/index.html">
