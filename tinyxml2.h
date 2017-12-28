@@ -102,6 +102,10 @@ static const int TIXML2_MAJOR_VERSION = 5;
 static const int TIXML2_MINOR_VERSION = 0;
 static const int TIXML2_PATCH_VERSION = 1;
 
+#define TINYXML2_MAJOR_VERSION 5
+#define TINYXML2_MINOR_VERSION 0
+#define TINYXML2_PATCH_VERSION 1
+
 namespace tinyxml2
 {
 class XMLDocument;
