@@ -112,7 +112,7 @@ int example_1()
 
 	return doc.ErrorID();
 }
-/** @page Example-1 Load an XML File
+/** @page Example_1 Load an XML File
  *  @dontinclude ./xmltest.cpp
  *  Basic XML file loading.
  *  The basic syntax to load an XML file from
@@ -131,7 +131,7 @@ int example_2()
 
 	return doc.ErrorID();
 }
-/** @page Example-2 Parse an XML from char buffer
+/** @page Example_2 Parse an XML from char buffer
  *  @dontinclude ./xmltest.cpp
  *  Basic XML string parsing.
  *  The basic syntax to parse an XML for
@@ -164,7 +164,7 @@ int example_3()
 
 	return doc.ErrorID();
 }
-/** @page Example-3 Get information out of XML
+/** @page Example_3 Get information out of XML
 	@dontinclude ./xmltest.cpp
 	In this example, we navigate a simple XML
 	file, and read some interesting text. Note
@@ -255,7 +255,7 @@ bool example_4()
 
 	return !doc.Error() && ( v0 == v1 );
 }
-/** @page Example-4 Read attributes and text information.
+/** @page Example_4 Read attributes and text information.
 	@dontinclude ./xmltest.cpp
 
 	There are fundamentally 2 ways of writing a key-value
@@ -338,10 +338,10 @@ int main( int argc, const char ** argv )
 	}
 	fclose( fp );
 
-	XMLTest( "Example-1", 0, example_1() );
-	XMLTest( "Example-2", 0, example_2() );
-	XMLTest( "Example-3", 0, example_3() );
-	XMLTest( "Example-4", true, example_4() );
+	XMLTest( "Example_1", 0, example_1() );
+	XMLTest( "Example_2", 0, example_2() );
+	XMLTest( "Example_3", 0, example_3() );
+	XMLTest( "Example_4", true, example_4() );
 
 	/* ------ Example 2: Lookup information. ---- */
 

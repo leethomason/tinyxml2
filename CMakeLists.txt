@@ -21,8 +21,8 @@ include(CTest)
 ################################
 # set lib version here
 
-set(GENERIC_LIB_VERSION "5.0.1")
-set(GENERIC_LIB_SOVERSION "5")
+set(GENERIC_LIB_VERSION "6.0.0")
+set(GENERIC_LIB_SOVERSION "6")
 
 ################################
 # Add definitions
