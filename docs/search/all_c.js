@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['parse_20an_20xml_20from_20char_20buffer',['Parse an XML from char buffer',['../_example-2.html',1,'']]],
+  ['parse_20an_20xml_20from_20char_20buffer',['Parse an XML from char buffer',['../_example_2.html',1,'']]],
   ['parent',['Parent',['../classtinyxml2_1_1_x_m_l_node.html#ae0f62bc186c56c2e0483ebd52dbfbe34',1,'tinyxml2::XMLNode']]],
   ['parse',['Parse',['../classtinyxml2_1_1_x_m_l_document.html#a1819bd34f540a7304c105a6232d25a1f',1,'tinyxml2::XMLDocument']]],
   ['previoussibling',['PreviousSibling',['../classtinyxml2_1_1_x_m_l_node.html#aac667c513d445f8b783e1e15ef9d3551',1,'tinyxml2::XMLNode::PreviousSibling()'],['../classtinyxml2_1_1_x_m_l_handle.html#a428374e756f4db4cbc287fec64eae02c',1,'tinyxml2::XMLHandle::PreviousSibling()']]],
