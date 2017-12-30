@@ -75,7 +75,7 @@ endif()
 
 # export targets for find_package config mode
 export(TARGETS tinyxml2
-      FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
+      APPEND FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
 
 install(TARGETS tinyxml2
         EXPORT ${CMAKE_PROJECT_NAME}Targets
@@ -112,7 +112,7 @@ endif()
 
 # export targets for find_package config mode
 export(TARGETS tinyxml2_static
-      FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
+      APPEND FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
 
 install(TARGETS tinyxml2_static
         EXPORT ${CMAKE_PROJECT_NAME}Targets
