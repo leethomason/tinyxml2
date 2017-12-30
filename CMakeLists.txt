@@ -90,7 +90,7 @@ set_target_properties(tinyxml2_static PROPERTIES
         COMPILE_DEFINITONS "TINYXML2_EXPORT"
         VERSION "${GENERIC_LIB_VERSION}"
         SOVERSION "${GENERIC_LIB_SOVERSION}")
-set_target_properties( tinyxml2_static PROPERTIES OUTPUT_NAME tinyxml2 )
+set_target_properties( tinyxml2_static PROPERTIES OUTPUT_NAME tinyxml2_static )
 
 target_compile_definitions(tinyxml2_static PUBLIC -D_CRT_SECURE_NO_WARNINGS)
 
