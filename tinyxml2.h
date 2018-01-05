@@ -1365,6 +1365,17 @@ public:
         return a->QueryFloatValue( value );
     }
 
+	/// See QueryIntAttribute()
+	XMLError QueryStringAttribute(const char* name, const char** value) const {
+		const XMLAttribute* a = FindAttribute(name);
+		if (!a) {
+			return XML_NO_ATTRIBUTE;
+		}
+		*value = a->Value();
+		return XML_SUCCESS;
+	}
+
+
 	
     /** Given an attribute name, QueryAttribute() returns
     	XML_SUCCESS, XML_WRONG_ATTRIBUTE_TYPE if the conversion

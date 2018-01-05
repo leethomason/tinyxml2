@@ -831,6 +831,14 @@ int main( int argc, const char ** argv )
 				XMLTest("Attribute: unsigned", (int)XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: unsigned", unsigned(100), v, true);
 			}
+			{
+				const char* v = "failed";
+				int queryResult = element->QueryStringAttribute("not-attrib", &v);
+				XMLTest("Attribute: string default", false, queryResult == XML_SUCCESS);
+				queryResult = element->QueryStringAttribute("attrib", &v);
+				XMLTest("Attribute: string", (int)XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: string", "100", v);
+			}
 			XMLTest("Attribute: unsigned", unsigned(100), element->UnsignedAttribute("attrib"), true);
 		}
 		{
