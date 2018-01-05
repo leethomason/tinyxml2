@@ -567,6 +567,10 @@ int main( int argc, const char ** argv )
 		XMLDocument doc;
 		doc.Parse( error );
 		XMLTest( "Bad XML", XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );
+		const char* errorStr = doc.ErrorStr();
+		XMLTest("Formatted error string",
+			"Error=XML_ERROR_PARSING_ATTRIBUTE ErrorID=8 (0x8) Line number=3: XMLElement name=wrong",
+			errorStr);
 	}
 
 	{
@@ -1160,6 +1164,12 @@ int main( int argc, const char ** argv )
 		XMLDocument doc;
 		doc.Parse( str );
 		XMLTest( "Empty document error", XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
+
+		// But be sure there is an error string!
+		const char* errorStr = doc.ErrorStr();
+		XMLTest("Error string should be set",
+			"Error=XML_ERROR_EMPTY_DOCUMENT ErrorID=15 (0xf) Line number=0",
+			errorStr);
 	}
 
 	{

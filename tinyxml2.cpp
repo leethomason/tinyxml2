@@ -2305,20 +2305,23 @@ void XMLDocument::SetError( XMLError error, int lineNum, const char* format, ...
     _errorLineNum = lineNum;
 	_errorStr.Reset();
 
-    if (format) {
-        size_t BUFFER_SIZE = 1000;
-        char* buffer = new char[BUFFER_SIZE];
-        TIXML_SNPRINTF(buffer, BUFFER_SIZE, "Error=%s ErrorID=%d (0x%x) Line number=%d: ", ErrorIDToName(error), int(error), int(error), lineNum);
-        size_t len = strlen(buffer);
+    size_t BUFFER_SIZE = 1000;
+    char* buffer = new char[BUFFER_SIZE];
 
-        va_list va;
-        va_start( va, format );
-        TIXML_VSNPRINTF( buffer + len, BUFFER_SIZE - len, format, va );
-        va_end( va );
+    TIXML_SNPRINTF(buffer, BUFFER_SIZE, "Error=%s ErrorID=%d (0x%x) Line number=%d", ErrorIDToName(error), int(error), int(error), lineNum);
 
-        _errorStr.SetStr(buffer);
-        delete [] buffer;
-    }
+	if (format) {
+		size_t len = strlen(buffer);
+		TIXML_SNPRINTF(buffer + len, BUFFER_SIZE - len, ": ");
+		len = strlen(buffer);
+
+		va_list va;
+		va_start(va, format);
+		TIXML_VSNPRINTF(buffer + len, BUFFER_SIZE - len, format, va);
+		va_end(va);
+	}
+	_errorStr.SetStr(buffer);
+	delete[] buffer;
 }
 
 
