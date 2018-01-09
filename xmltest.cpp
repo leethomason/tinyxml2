@@ -292,7 +292,7 @@ bool example_4()
 
 int main( int argc, const char ** argv )
 {
-	#if defined( _MSC_VER ) && defined( DEBUG )
+	#if defined( _MSC_VER ) && defined( TINYXML2_DEBUG )
 		_CrtMemCheckpoint( &startMemState );
 		// Enable MS Visual C++ debug heap memory leaks dump on exit
 		_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
@@ -1861,7 +1861,7 @@ int main( int argc, const char ** argv )
     }
     
     {
-        // If this doesn't assert in DEBUG, all is well.
+        // If this doesn't assert in TINYXML2_DEBUG, all is well.
         tinyxml2::XMLDocument doc;
         tinyxml2::XMLElement *pRoot = doc.NewElement("Root");
         doc.DeleteNode(pRoot);
@@ -1876,7 +1876,7 @@ int main( int argc, const char ** argv )
     }
 
     {
-        // If this doesn't assert in DEBUG, all is well.
+        // If this doesn't assert in TINYXML2_DEBUG, all is well.
         XMLDocument doc;
         XMLElement* unlinkedRoot = doc.NewElement( "Root" );
         XMLElement* linkedRoot = doc.NewElement( "Root" );
@@ -1886,7 +1886,7 @@ int main( int argc, const char ** argv )
     }
 
 	{
-		// Should not assert in DEBUG
+		// Should not assert in TINYXML2_DEBUG
 		XMLPrinter printer;
 	}
 
@@ -2266,7 +2266,7 @@ int main( int argc, const char ** argv )
 		delete[] mem;
 
 		static const char* note =
-#ifdef DEBUG
+#ifdef TINYXML2_DEBUG
 			"DEBUG";
 #else
 			"Release";
@@ -2280,7 +2280,7 @@ int main( int argc, const char ** argv )
 		printf("\nParsing dream.xml (%s): %.3f milli-seconds\n", note, duration);
 	}
 
-#if defined( _MSC_VER ) &&  defined( DEBUG )
+#if defined( _MSC_VER ) &&  defined( TINYXML2_DEBUG )
 	{
 		_CrtMemCheckpoint( &endMemState );
 
