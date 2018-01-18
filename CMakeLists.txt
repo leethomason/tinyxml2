@@ -27,7 +27,7 @@ set(GENERIC_LIB_SOVERSION "6")
 ################################
 # Add definitions
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DTINYXML2_DEBUG")
 
 ################################
 # Add targets
