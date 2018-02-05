@@ -13,7 +13,7 @@ MKDIR = mkdir -p
 
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL) -m 044
+INSTALL_DATA = $(INSTALL) -m 644
 
 prefix = /usr/local
 bindir = $(prefix)/bin
@@ -39,7 +39,7 @@ clean:
 # Standard GNU target
 distclean:
 	-$(RM) *.o xmltest libtinyxml2.a
-	
+
 test: clean xmltest
 	./xmltest
 
@@ -52,7 +52,7 @@ staticlib: libtinyxml2.a
 libtinyxml2.a: tinyxml2.o
 	$(AR) $(ARFLAGS) $@ $^
 	$(RANLIB) $@
-	
+
 tinyxml2.o: tinyxml2.cpp tinyxml2.h
 
 directories:
