@@ -138,7 +138,7 @@ if(BUILD_TESTING AND BUILD_TESTS)
     COMMENT "Configuring xmltest resources directory: ${CMAKE_BINARY_DIR}/resources"
   )
 
-  add_test(NAME xmltest COMMAND xmltest)
+  add_test(NAME xmltest COMMAND xmltest WORKING_DIRECTORY $<TARGET_FILE_DIR:xmltest>)
 endif()
 
 install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
