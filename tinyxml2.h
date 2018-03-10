@@ -1690,7 +1690,7 @@ public:
     */
     XMLError LoadFile( const char* filename );
 
-    #ifdef _MSC_VER
+    #if defined(_MSC_VER)
     XMLError LoadFile( const wchar_t* filename );
     #endif
 
@@ -1714,7 +1714,7 @@ public:
     */
     XMLError SaveFile( const char* filename, bool compact = false );
 
-    #ifdef _MSC_VER
+    #if defined(_MSC_VER)
     XMLError SaveFile( const wchar_t* filename, bool compact = false );
     #endif
 
