@@ -2131,6 +2131,21 @@ static FILE* callfopen( const char* filepath, const char* mode )
     return fp;
 }
 
+#ifdef _MSC_VER
+static FILE* callwfopen( const char* wchar_t, const wchar_t* mode )
+{
+    TIXMLASSERT( filepath );
+    TIXMLASSERT( mode );
+
+    FILE* fp = 0;
+    errno_t err = _wfopen_s( &fp, filepath, mode );
+    if ( err ) {
+        return 0;
+    }
+    return fp;
+}
+#endif
+
 void XMLDocument::DeleteNode( XMLNode* node )	{
     TIXMLASSERT( node );
     TIXMLASSERT(node->_document == this );
@@ -2167,6 +2182,27 @@ XMLError XMLDocument::LoadFile( const char* filename )
     fclose( fp );
     return _errorID;
 }
+
+#ifdef _MSC_VER
+XMLError XMLDocument::LoadFile( const wchar_t* filename )
+{
+    if ( !filename ) {
+        TIXMLASSERT( false );
+        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "filename=<null>" );
+        return _errorID;
+    }
+
+    Clear();
+    FILE* fp = callwfopen( filename, L"rb" );
+    if ( !fp ) {
+        SetError( XML_ERROR_FILE_NOT_FOUND, 0, "filename=%s", filename );
+        return _errorID;
+    }
+    LoadFile( fp );
+    fclose( fp );
+    return _errorID;
+}
+#endif
 
 // This is likely overengineered template art to have a check that unsigned long value incremented
 // by one still fits into size_t. If size_t type is larger than unsigned long type
@@ -2255,6 +2291,25 @@ XMLError XMLDocument::SaveFile( const char* filename, bool compact )
     return _errorID;
 }
 
+#ifdef _MSC_VER
+XMLError XMLDocument::SaveFile( const wchar_t* filename, bool compact )
+{
+    if ( !filename ) {
+        TIXMLASSERT( false );
+        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "filename=<null>" );
+        return _errorID;
+    }
+
+    FILE* fp = callwfopen( filename, L"w" );
+    if ( !fp ) {
+        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "filename=%s", filename );
+        return _errorID;
+    }
+    SaveFile(fp, compact);
+    fclose( fp );
+    return _errorID;
+}
+#endif
 
 XMLError XMLDocument::SaveFile( FILE* fp, bool compact )
 {

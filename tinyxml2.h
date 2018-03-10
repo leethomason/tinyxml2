@@ -1690,6 +1690,10 @@ public:
     */
     XMLError LoadFile( const char* filename );
 
+    #ifdef _MSC_VER
+    XMLError LoadFile( const wchar_t* filename );
+    #endif
+
     /**
     	Load an XML file from disk. You are responsible
     	for providing and closing the FILE*. 
@@ -1709,6 +1713,10 @@ public:
     	an errorID.
     */
     XMLError SaveFile( const char* filename, bool compact = false );
+
+    #ifdef _MSC_VER
+    XMLError SaveFile( const wchar_t* filename, bool compact = false );
+    #endif
 
     /**
     	Save the XML file to disk. You are responsible
