@@ -2131,17 +2131,23 @@ static FILE* callfopen( const char* filepath, const char* mode )
     return fp;
 }
 
-#if defined (_MSC_VER)
+#if defined (_WIN32)
 static FILE* callwfopen(const wchar_t* filepath, const wchar_t* mode)
 {
     TIXMLASSERT( filepath );
     TIXMLASSERT( mode );
 
     FILE* fp = 0;
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
     errno_t err = _wfopen_s( &fp, filepath, mode );
     if ( err ) {
         return 0;
     }
+#else
+    fp = _wfopen(filepath, mode);
+#endif
+    
     return fp;
 }
 #endif
@@ -2183,7 +2189,7 @@ XMLError XMLDocument::LoadFile( const char* filename )
     return _errorID;
 }
 
-#if defined(_MSC_VER)
+#if defined(_WIN32)
 XMLError XMLDocument::LoadFile( const wchar_t* filename )
 {
     if ( !filename ) {
@@ -2291,7 +2297,7 @@ XMLError XMLDocument::SaveFile( const char* filename, bool compact )
     return _errorID;
 }
 
-#if defined(_MSC_VER)
+#if defined(_WIN32)
 XMLError XMLDocument::SaveFile( const wchar_t* filename, bool compact )
 {
     if ( !filename ) {
