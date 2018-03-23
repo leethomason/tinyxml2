@@ -535,7 +535,7 @@ int main( int argc, const char ** argv )
 
 		XMLTest( "Dream", "xml version=\"1.0\"",
 						  doc.FirstChild()->ToDeclaration()->Value() );
-		XMLTest( "Dream", true, doc.FirstChild()->NextSibling()->ToUnknown() ? true : false );
+		XMLTest( "Dream", true, doc.FirstChild()->NextSibling()->ToUnknown() != 0 );
 		XMLTest( "Dream", "DOCTYPE PLAY SYSTEM \"play.dtd\"",
 						  doc.FirstChild()->NextSibling()->ToUnknown()->Value() );
 		XMLTest( "Dream", "And Robin shall restore amends.",
@@ -548,7 +548,7 @@ int main( int argc, const char ** argv )
 		XMLTest( "Load dreamout.xml", false, doc2.Error() );
 		XMLTest( "Dream-out", "xml version=\"1.0\"",
 						  doc2.FirstChild()->ToDeclaration()->Value() );
-		XMLTest( "Dream-out", true, doc2.FirstChild()->NextSibling()->ToUnknown() ? true : false );
+		XMLTest( "Dream-out", true, doc2.FirstChild()->NextSibling()->ToUnknown() != 0 );
 		XMLTest( "Dream-out", "DOCTYPE PLAY SYSTEM \"play.dtd\"",
 						  doc2.FirstChild()->NextSibling()->ToUnknown()->Value() );
 		XMLTest( "Dream-out", "And Robin shall restore amends.",
