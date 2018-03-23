@@ -1984,8 +1984,14 @@ int main( int argc, const char ** argv )
 		for( int i = 0; i < XML_ERROR_COUNT; i++ ) {
 			const XMLError error = static_cast<XMLError>(i);
 			const char* name = XMLDocument::ErrorIDToName(error);
-			XMLTest( "ErrorName() after ClearError()", true, name != 0 );
-			XMLTest( "ErrorName() after ClearError()", true, strlen(name) > 0 );
+			XMLTest( "ErrorName() not null after ClearError()", true, name != 0 );
+			if( name == 0 ) {
+				// passing null pointer into strlen() is undefined behavior, so
+				// compiler is allowed to optimise away the null test above if it's
+				// as reachable as the strlen() call
+				continue;
+			}
+			XMLTest( "ErrorName() not empty after ClearError()", true, strlen(name) > 0 );
 		}
 	}
 
