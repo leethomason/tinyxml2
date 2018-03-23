@@ -1470,28 +1470,31 @@ int main( int argc, const char ** argv )
 		static const char* xml = "<element attrib='bar'><sub>Text</sub></element>";
 		XMLDocument doc;
 		doc.Parse( xml );
-		XMLTest( "Parse element with attribute and nested element round 1", false, doc.Error() );
+		XMLTest( "Handle, parse element with attribute and nested element", false, doc.Error() );
 
-		XMLElement* ele = XMLHandle( doc ).FirstChildElement( "element" ).FirstChild().ToElement();
-		XMLTest( "Handle, success, mutable", "sub", ele->Value() );
+		{
+			XMLElement* ele = XMLHandle( doc ).FirstChildElement( "element" ).FirstChild().ToElement();
+			XMLTest( "Handle, non-const, element is found", true, ele != 0 );
+			XMLTest( "Handle, non-const, element name matches", "sub", ele->Value() );
+		}
 
-		XMLHandle docH( doc );
-		ele = docH.FirstChildElement( "none" ).FirstChildElement( "element" ).ToElement();
-		XMLTest( "Handle, dne, mutable", true, ele == 0 );
-	}
+		{
+			XMLHandle docH( doc );
+			XMLElement* ele = docH.FirstChildElement( "noSuchElement" ).FirstChildElement( "element" ).ToElement();
+			XMLTest( "Handle, non-const, element not found", true, ele == 0 );
+		}
 
-	{
-		static const char* xml = "<element attrib='bar'><sub>Text</sub></element>";
-		XMLDocument doc;
-		doc.Parse( xml );
-		XMLTest( "Parse element with attribute and nested element round 2", false, doc.Error() );
-		XMLConstHandle docH( doc );
+		{
+			const XMLElement* ele = XMLConstHandle( doc ).FirstChildElement( "element" ).FirstChild().ToElement();
+			XMLTest( "Handle, const, element is found", true, ele != 0 );
+			XMLTest( "Handle, const, element name matches", "sub", ele->Value() );
+		}
 
-		const XMLElement* ele = docH.FirstChildElement( "element" ).FirstChild().ToElement();
-		XMLTest( "Handle, success, const", "sub", ele->Value() );
-
-		ele = docH.FirstChildElement( "none" ).FirstChildElement( "element" ).ToElement();
-		XMLTest( "Handle, dne, const", true, ele == 0 );
+		{
+			XMLConstHandle docH( doc );
+			const XMLElement* ele = docH.FirstChildElement( "noSuchElement" ).FirstChildElement( "element" ).ToElement();
+			XMLTest( "Handle, const, element not found", true, ele == 0 );
+		}
 	}
 	{
 		// Default Declaration & BOM
