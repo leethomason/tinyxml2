@@ -1004,7 +1004,11 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
     // 'endTag' is the end tag for this node, it is returned by a call to a child.
     // 'parentEnd' is the end tag for the parent, which is filled in and returned.
 
-    while( p && *p ) {
+	XMLDocument::DepthTracker tracker(_document);
+	if (_document->Error())
+		return 0;
+
+	while( p && *p ) {
         XMLNode* node = 0;
 
         p = _document->Identify( p, &node );
@@ -1986,7 +1990,8 @@ const char* XMLDocument::_errorNames[XML_ERROR_COUNT] = {
     "XML_ERROR_MISMATCHED_ELEMENT",
     "XML_ERROR_PARSING",
     "XML_CAN_NOT_CONVERT_TEXT",
-    "XML_NO_TEXT_NODE"
+    "XML_NO_TEXT_NODE",
+	"XML_ELEMENT_DEPTH_EXCEEDED"
 };
 
 
@@ -2000,6 +2005,7 @@ XMLDocument::XMLDocument( bool processEntities, Whitespace whitespaceMode ) :
     _errorLineNum( 0 ),
     _charBuffer( 0 ),
     _parseCurLineNum( 0 ),
+	_parsingDepth(0),
     _unlinked(),
     _elementPool(),
     _attributePool(),
@@ -2044,6 +2050,7 @@ void XMLDocument::Clear()
 
     delete [] _charBuffer;
     _charBuffer = 0;
+	_parsingDepth = 0;
 
 #if 0
     _textPool.Trace( "text" );
@@ -2375,6 +2382,23 @@ void XMLDocument::Parse()
         return;
     }
     ParseDeep(p, 0, &_parseCurLineNum );
+}
+
+bool XMLDocument::PushDepth()
+{
+	_parsingDepth++;
+	if (_parsingDepth == TINYXML2_MAX_ELEMENT_DEPTH) {
+		SetError(XMLError::XML_ELEMENT_DEPTH_EXCEEDED, _parseCurLineNum, "Element nesting is too deep." );
+		return false;
+	}
+	return true;
+}
+
+bool XMLDocument::PopDepth()
+{
+	TIXMLASSERT(_parsingDepth > 0);
+	--_parsingDepth;
+	return true;
 }
 
 XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :

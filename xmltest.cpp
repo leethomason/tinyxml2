@@ -2026,6 +2026,13 @@ int main( int argc, const char ** argv )
 	}
 
 	{
+		// Bad bad crash.
+		XMLDocument doc;
+		doc.LoadFile("./resources/xmltest-5330.xml");
+		XMLTest("Stack overflow prevented.", XMLError::XML_ELEMENT_DEPTH_EXCEEDED, doc.ErrorID());
+	}
+
+	{
 		// Crashing reported via email.
 		const char* xml =
 			"<playlist id='playlist1'>"

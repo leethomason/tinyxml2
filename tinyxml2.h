@@ -106,6 +106,11 @@ static const int TIXML2_PATCH_VERSION = 0;
 #define TINYXML2_MINOR_VERSION 1
 #define TINYXML2_PATCH_VERSION 0
 
+// This is problematic. There needs to be a limit to avoid a stack
+// overflow. However, that limit varies per system. Going with 
+// the MS value for now. May adjust in future versions.
+static const int TINYXML2_MAX_ELEMENT_DEPTH = 256;
+
 namespace tinyxml2
 {
 class XMLDocument;
@@ -532,6 +537,7 @@ enum XMLError {
     XML_ERROR_PARSING,
     XML_CAN_NOT_CONVERT_TEXT,
     XML_NO_TEXT_NODE,
+	XML_ELEMENT_DEPTH_EXCEEDED,
 
 	XML_ERROR_COUNT
 };
@@ -1650,7 +1656,7 @@ enum Whitespace {
 class TINYXML2_LIB XMLDocument : public XMLNode
 {
     friend class XMLElement;
-    // Gives access to SetError, but over-access for everything else.
+    // Gives access to SetError and Push/PopDepth, but over-access for everything else.
     // Wishing C++ had "internal" scope.
     friend class XMLNode;       
     friend class XMLText;
@@ -1874,6 +1880,7 @@ private:
     int             _errorLineNum;
     char*			_charBuffer;
     int				_parseCurLineNum;
+	int				_parsingDepth;
 	// Memory tracking does add some overhead.
 	// However, the code assumes that you don't
 	// have a bunch of unlinked nodes around.
@@ -1892,6 +1899,24 @@ private:
     void Parse();
 
     void SetError( XMLError error, int lineNum, const char* format, ... );
+
+	// Something of an obvious security hole, once it was discovered.
+	// Either an ill-formed XML or an excessively deep one can overflow
+	// the stack. Track stack depth, and error out if needed.
+	class DepthTracker {
+	public:
+		DepthTracker(XMLDocument * document) { 
+			this->_document = document; 
+			document->PushDepth();
+		}
+		~DepthTracker() {
+			_document->PopDepth();
+		}
+	private:
+		XMLDocument * _document;
+	};
+	bool PushDepth();
+	bool PopDepth();
 
     template<class NodeType, int PoolElementSize>
     NodeType* CreateUnlinkedNode( MemPoolT<PoolElementSize>& pool );
