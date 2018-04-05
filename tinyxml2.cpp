@@ -2384,21 +2384,18 @@ void XMLDocument::Parse()
     ParseDeep(p, 0, &_parseCurLineNum );
 }
 
-bool XMLDocument::PushDepth()
+void XMLDocument::PushDepth()
 {
 	_parsingDepth++;
 	if (_parsingDepth == TINYXML2_MAX_ELEMENT_DEPTH) {
 		SetError(XMLError::XML_ELEMENT_DEPTH_EXCEEDED, _parseCurLineNum, "Element nesting is too deep." );
-		return false;
 	}
-	return true;
 }
 
-bool XMLDocument::PopDepth()
+void XMLDocument::PopDepth()
 {
 	TIXMLASSERT(_parsingDepth > 0);
 	--_parsingDepth;
-	return true;
 }
 
 XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :

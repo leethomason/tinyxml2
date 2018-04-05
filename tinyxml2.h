@@ -106,10 +106,12 @@ static const int TIXML2_PATCH_VERSION = 0;
 #define TINYXML2_MINOR_VERSION 1
 #define TINYXML2_PATCH_VERSION 0
 
-// This is problematic. There needs to be a limit to avoid a stack
-// overflow. However, that limit varies per system. Going with 
-// the MS value for now. May adjust in future versions.
-static const int TINYXML2_MAX_ELEMENT_DEPTH = 256;
+// A fixed element depth limit is problematic. There needs to be a 
+// limit to avoid a stack overflow. However, that limit varies per 
+// system, and the capacity of the stack. On the other hand, it's a trivial 
+// attack that can result from ill, malicious, or even correctly formed XML, 
+// so there needs to be a limit in place.
+static const int TINYXML2_MAX_ELEMENT_DEPTH = 100;
 
 namespace tinyxml2
 {
@@ -1915,8 +1917,8 @@ private:
 	private:
 		XMLDocument * _document;
 	};
-	bool PushDepth();
-	bool PopDepth();
+	void PushDepth();
+	void PopDepth();
 
     template<class NodeType, int PoolElementSize>
     NodeType* CreateUnlinkedNode( MemPoolT<PoolElementSize>& pool );
