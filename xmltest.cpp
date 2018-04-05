@@ -2036,7 +2036,7 @@ int main( int argc, const char ** argv )
 		for (int i=0; TESTS[i]; ++i) {
 			XMLDocument doc;
 			doc.LoadFile(TESTS[i]);
-			XMLTest("Stack overflow prevented.", XMLError::XML_ELEMENT_DEPTH_EXCEEDED, doc.ErrorID());
+			XMLTest("Stack overflow prevented.", XML_ELEMENT_DEPTH_EXCEEDED, doc.ErrorID());
 		}
 	}
 	{
