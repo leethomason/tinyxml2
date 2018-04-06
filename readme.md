@@ -5,7 +5,7 @@ TinyXML-2
 
 ![TinyXML-2 Logo](http://www.grinninglizard.com/tinyxml2/TinyXML2_small.png)
 
-TinyXML-2 is a simple, small, efficient, C++ XML parser that can be 
+TinyXML-2 is a simple, small, efficient, C++ XML parser that can be
 easily integrated into other programs.
 
 The master is hosted on github:
@@ -18,30 +18,30 @@ Examples are in the "related pages" tab of the HTML docs.
 
 What it does.
 -------------
-	
-In brief, TinyXML-2 parses an XML document, and builds from that a 
+
+In brief, TinyXML-2 parses an XML document, and builds from that a
 Document Object Model (DOM) that can be read, modified, and saved.
 
 XML stands for "eXtensible Markup Language." It is a general purpose
 human and machine readable markup language to describe arbitrary data.
-All those random file formats created to store application data can 
+All those random file formats created to store application data can
 all be replaced with XML. One parser for everything.
 
 http://en.wikipedia.org/wiki/XML
 
 There are different ways to access and interact with XML data.
 TinyXML-2 uses a Document Object Model (DOM), meaning the XML data is parsed
-into a C++ objects that can be browsed and manipulated, and then 
-written to disk or another output stream. You can also construct an XML document 
+into a C++ objects that can be browsed and manipulated, and then
+written to disk or another output stream. You can also construct an XML document
 from scratch with C++ objects and write this to disk or another output
 stream. You can even use TinyXML-2 to stream XML programmatically from
 code without creating a document first.
 
 TinyXML-2 is designed to be easy and fast to learn. It is one header and
-one cpp file. Simply add these to your project and off you go. 
-There is an example file - xmltest.cpp - to get you started. 
+one cpp file. Simply add these to your project and off you go.
+There is an example file - xmltest.cpp - to get you started.
 
-TinyXML-2 is released under the ZLib license, 
+TinyXML-2 is released under the ZLib license,
 so you can use it in open source or commercial code. The details
 of the license are at the top of every source file.
 
@@ -53,49 +53,37 @@ What it doesn't do.
 -------------------
 
 TinyXML-2 doesn't parse or use DTDs (Document Type Definitions) or XSLs
-(eXtensible Stylesheet Language.) There are other parsers out there 
-that are much more fully featured. But they are also much bigger, 
-take longer to set up in your project, have a higher learning curve, 
-and often have a more restrictive license. If you are working with 
+(eXtensible Stylesheet Language.) There are other parsers out there
+that are much more fully featured. But they are also much bigger,
+take longer to set up in your project, have a higher learning curve,
+and often have a more restrictive license. If you are working with
 browsers or have more complete XML needs, TinyXML-2 is not the parser for you.
 
 TinyXML-1 vs. TinyXML-2
 -----------------------
 
 TinyXML-2 is now the focus of all development, well tested, and your
-best choice unless you have a requirement to maintain TinyXML-1 code.
+best choice between the two APIs. At this point, unless you are maintaining
+legacy code, you should choose TinyXML-2.
 
 TinyXML-2 uses a similar API to TinyXML-1 and the same
 rich test cases. But the implementation of the parser is completely re-written
 to make it more appropriate for use in a game. It uses less memory, is faster,
 and uses far fewer memory allocations.
 
-TinyXML-2 has no requirement for STL, but has also dropped all STL support. All
-strings are query and set as 'const char*'. This allows the use of internal 
-allocators, and keeps the code much simpler.
-
-Both parsers:
-
-1.  Simple to use with similar APIs.
-2.  DOM based parser.
-3.  UTF-8 Unicode support. http://en.wikipedia.org/wiki/UTF-8
-
-Advantages of TinyXML-2
-
-1.  The focus of all future dev.
-2.  Many fewer memory allocation (1/10th to 1/100th), uses less memory
-    (about 40% of TinyXML-1), and faster.
-3.  No STL requirement.
-4.  More modern C++, including a proper namespace.
-5.  Proper and useful handling of whitespace
-
-Advantages of TinyXML-1
-
-1.  Support for some C++ STL conventions: streams and strings
-2.  Very mature and well debugged code base.
+TinyXML-2 has no requirement or support for STL. By returning `const char*`
+TinyXML-2 can be much more efficient with memory usage. (TinyXML-1 did support
+and use STL, but consumed much more memory for the DOM representation.)
 
 Features
 --------
+
+### Code Page
+
+TinyXML-2 uses UTF-8 exclusively when interpreting XML. All XML is assumed to
+be UTF-8.
+
+Filenames for loading / saving are passed unchanged to the underlying OS.
 
 ### Memory Model
 
@@ -123,13 +111,13 @@ White space in text is preserved. For example:
 
 	<element> Hello,  World</element>
 
-The leading space before the "Hello" and the double space after the comma are 
+The leading space before the "Hello" and the double space after the comma are
 preserved. Line-feeds are preserved, as in this example:
 
-	<element> Hello again,  
+	<element> Hello again,
 	          World</element>
 
-However, white space between elements is **not** preserved. Although not strictly 
+However, white space between elements is **not** preserved. Although not strictly
 compliant, tracking and reporting inter-element space is awkward, and not normally
 valuable. TinyXML-2 sees these as the same XML:
 
@@ -145,7 +133,7 @@ valuable. TinyXML-2 sees these as the same XML:
 
 For some applications, it is preferable to collapse whitespace. Collapsing
 whitespace gives you "HTML-like" behavior, which is sometimes more suitable
-for hand typed documents. 
+for hand typed documents.
 
 TinyXML-2 supports this with the 'whitespace' parameter to the XMLDocument constructor.
 (The default is to preserve whitespace, as described above.)
@@ -166,7 +154,7 @@ cannot be parsed correctly. In addition, all nodes (elements, declarations,
 text, comments etc.) and attributes have a line number recorded as they are parsed.
 This allows an application that performs additional validation of the parsed
 XML document (e.g. application-implemented DTD validation) to report
-line number information in it's errors.
+line number information for error messages.
 
 ### Entities
 
@@ -185,10 +173,10 @@ UTF-8 equivalents. For instance, text with the XML of:
 	Far &amp; Away
 
 will have the Value() of "Far & Away" when queried from the XMLText object,
-and will be written back to the XML stream/file as an ampersand. 
+and will be written back to the XML stream/file as an ampersand.
 
 Additionally, any character can be specified by its Unicode code point:
-The syntax `&#xA0;` or `&#160;` are both to the non-breaking space character. 
+The syntax `&#xA0;` or `&#160;` are both to the non-breaking space character.
 This is called a 'numeric character reference'. Any numeric character reference
 that isn't one of the special entities above, will be read, but written as a
 regular code point. The output is correct, but the entity syntax isn't preserved.
@@ -234,7 +222,7 @@ Examples
 
 #### Load and parse an XML file.
 
-	/* ------ Example 1: Load and parse an XML file. ---- */	
+	/* ------ Example 1: Load and parse an XML file. ---- */
 	{
 		XMLDocument doc;
 		doc.LoadFile( "dream.xml" );
@@ -242,22 +230,22 @@ Examples
 
 #### Lookup information.
 
-	/* ------ Example 2: Lookup information. ---- */	
+	/* ------ Example 2: Lookup information. ---- */
 	{
 		XMLDocument doc;
 		doc.LoadFile( "dream.xml" );
 
 		// Structure of the XML file:
-		// - Element "PLAY"      the root Element, which is the 
+		// - Element "PLAY"      the root Element, which is the
 		//                       FirstChildElement of the Document
 		// - - Element "TITLE"   child of the root PLAY Element
 		// - - - Text            child of the TITLE Element
-		
+
 		// Navigate to the title, using the convenience function,
 		// with a dangerous lack of error checking.
 		const char* title = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->GetText();
 		printf( "Name of play (1): %s\n", title );
-		
+
 		// Text is just another Node to TinyXML-2. The more
 		// general way to get to the XMLText:
 		XMLText* textNode = doc.FirstChildElement( "PLAY" )->FirstChildElement( "TITLE" )->FirstChild()->ToText();
@@ -275,10 +263,10 @@ There are 2 files in TinyXML-2:
 And additionally a test file:
 * xmltest.cpp
 
-Simply compile and run. There is a visual studio 2015 project included, a simple Makefile, 
-an Xcode project, a Code::Blocks project, and a cmake CMakeLists.txt included to help you. 
-The top of tinyxml.h even has a simple g++ command line if you are are *nix and don't want 
-to use a build system.
+Simply compile and run. There is a visual studio 2017 project included, a simple Makefile,
+an Xcode project, a Code::Blocks project, and a cmake CMakeLists.txt included to help you.
+The top of tinyxml.h even has a simple g++ command line if you are are Unix/Linuk/BSD and
+don't want to use a build system.
 
 Versioning
 ----------
@@ -291,7 +279,7 @@ common.
 Documentation
 -------------
 
-The documentation is build with Doxygen, using the 'dox' 
+The documentation is build with Doxygen, using the 'dox'
 configuration file.
 
 License
@@ -299,27 +287,27 @@ License
 
 TinyXML-2 is released under the zlib license:
 
-This software is provided 'as-is', without any express or implied 
-warranty. In no event will the authors be held liable for any 
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any
 damages arising from the use of this software.
 
-Permission is granted to anyone to use this software for any 
-purpose, including commercial applications, and to alter it and 
+Permission is granted to anyone to use this software for any
+purpose, including commercial applications, and to alter it and
 redistribute it freely, subject to the following restrictions:
 
-1. The origin of this software must not be misrepresented; you must 
-not claim that you wrote the original software. If you use this 
-software in a product, an acknowledgment in the product documentation 
+1. The origin of this software must not be misrepresented; you must
+not claim that you wrote the original software. If you use this
+software in a product, an acknowledgment in the product documentation
 would be appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and 
+2. Altered source versions must be plainly marked as such, and
 must not be misrepresented as being the original software.
-3. This notice may not be removed or altered from any source 
+3. This notice may not be removed or altered from any source
 distribution.
 
 Contributors
 ------------
 
-Thanks very much to everyone who sends suggestions, bugs, ideas, and 
+Thanks very much to everyone who sends suggestions, bugs, ideas, and
 encouragement. It all helps, and makes this project fun.
 
 The original TinyXML-1 has many contributors, who all deserve thanks
