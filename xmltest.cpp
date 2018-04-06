@@ -2026,6 +2026,20 @@ int main( int argc, const char ** argv )
 	}
 
 	{
+		// Bad bad crash. Parsing error results in stack overflow, if uncaught.
+		const char* TESTS[] = {
+			"./resources/xmltest-5330.xml",
+			"./resources/xmltest-4636783552757760.xml",
+			"./resources/xmltest-5720541257269248.xml",
+			0
+		};
+		for (int i=0; TESTS[i]; ++i) {
+			XMLDocument doc;
+			doc.LoadFile(TESTS[i]);
+			XMLTest("Stack overflow prevented.", XML_ELEMENT_DEPTH_EXCEEDED, doc.ErrorID());
+		}
+	}
+	{
 		// Crashing reported via email.
 		const char* xml =
 			"<playlist id='playlist1'>"
