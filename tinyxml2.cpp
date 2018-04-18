@@ -2523,14 +2523,16 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
             ++q;
             TIXMLASSERT( p <= q );
         }
+        // Flush the remaining string. This will be the entire
+        // string if an entity wasn't found.
+        if ( p < q ) {
+            const size_t delta = q - p;
+            const int toPrint = ( INT_MAX < delta ) ? INT_MAX : (int)delta;
+            Write( p, toPrint );
+        }
     }
-    // Flush the remaining string. This will be the entire
-    // string if an entity wasn't found.
-    TIXMLASSERT( p <= q );
-    if ( !_processEntities || ( p < q ) ) {
-        const size_t delta = q - p;
-        const int toPrint = ( INT_MAX < delta ) ? INT_MAX : (int)delta;
-        Write( p, toPrint );
+    else {
+        Write( p );
     }
 }
 
