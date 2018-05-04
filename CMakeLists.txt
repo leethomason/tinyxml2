@@ -27,8 +27,6 @@ set(GENERIC_LIB_SOVERSION "6")
 ################################
 # Add definitions
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DTINYXML2_DEBUG")
-
 ################################
 # Add targets
 # By Default shared libray is being built
@@ -54,6 +52,7 @@ set_target_properties(tinyxml2 PROPERTIES
 	VERSION "${GENERIC_LIB_VERSION}"
 	SOVERSION "${GENERIC_LIB_SOVERSION}")
 
+target_compile_definitions(tinyxml2 PUBLIC $<$<CONFIG:Debug>:TINYXML2_DEBUG>)
 
 if(DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
     target_include_directories(tinyxml2 PUBLIC 
