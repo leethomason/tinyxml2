@@ -1698,6 +1698,10 @@ public:
     */
     XMLError LoadFile( const char* filename );
 
+    #if defined(_WIN32)
+    XMLError LoadFile( const wchar_t* filename );
+    #endif
+
     /**
     	Load an XML file from disk. You are responsible
     	for providing and closing the FILE*. 
@@ -1717,6 +1721,10 @@ public:
     	an errorID.
     */
     XMLError SaveFile( const char* filename, bool compact = false );
+
+    #if defined(_WIN32)
+    XMLError SaveFile( const wchar_t* filename, bool compact = false );
+    #endif
 
     /**
     	Save the XML file to disk. You are responsible
