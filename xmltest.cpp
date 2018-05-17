@@ -1996,6 +1996,17 @@ int main( int argc, const char ** argv )
 	}
 
 	{
+		const char* html("<!DOCTYPE html><html><body><p>test</p><p><br/></p></body></html>");
+		XMLDocument doc(false);
+		doc.Parse(html);
+
+		XMLPrinter printer(0, true);
+		doc.Print(&printer);
+
+		XMLTest(html, html, printer.CStr());
+	}
+
+	{
 		// Evil memory leaks. 
 		// If an XMLElement (etc) is allocated via NewElement() (etc.)
 		// and NOT added to the XMLDocument, what happens?
