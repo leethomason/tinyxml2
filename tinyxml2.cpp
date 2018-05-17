@@ -372,7 +372,7 @@ const char* StrPair::GetStr()
 const char* XMLUtil::writeBoolTrue  = "true";
 const char* XMLUtil::writeBoolFalse = "false";
 
-size_t XMLUtil::StringLen(char* p, size_t bufferSize)
+size_t XMLUtil::StrLen(char* p, size_t bufferSize)
 {
     TIXMLASSERT(p);
     TIXMLASSERT(bufferSize > 0);
@@ -380,12 +380,12 @@ size_t XMLUtil::StringLen(char* p, size_t bufferSize)
         return 0;
 
     void* end = memchr(p, 0, bufferSize);
+    TIXMLASSERT(end);
     if (!end) {
-        // Overflow!! Not a string. Fix it.
         p[bufferSize-1] = 0;
         return bufferSize - 1;
     }
-    return end - p;
+    return end - (void*)p;
 }
 
 
