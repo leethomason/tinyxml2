@@ -601,10 +601,8 @@ public:
         return strncmp( p, q, nChar ) == 0;
     }
 
-
-    // Gets the lengith of a buffer. Note this is *aggressive* safe;
-    // if there isn't a null terminator, it will add one!
-    static size_t StringLen(char* p, size_t bufferSize);
+    // Safe buffer strlen
+    static size_t StrLen(const char* p, size_t bufferSize);
 
     inline static bool IsUTF8Continuation( char p ) {
         return ( p & 0x80 ) != 0;

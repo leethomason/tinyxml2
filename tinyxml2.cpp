@@ -372,20 +372,19 @@ const char* StrPair::GetStr()
 const char* XMLUtil::writeBoolTrue  = "true";
 const char* XMLUtil::writeBoolFalse = "false";
 
-size_t XMLUtil::StrLen(char* p, size_t bufferSize)
+size_t XMLUtil::StrLen(const char* p, size_t bufferSize)
 {
     TIXMLASSERT(p);
     TIXMLASSERT(bufferSize > 0);
     if (!p || !bufferSize)
         return 0;
 
-    void* end = memchr(p, 0, bufferSize);
+    void* end = memchr((void*)p, 0, bufferSize);
     TIXMLASSERT(end);
     if (!end) {
-        p[bufferSize-1] = 0;
-        return bufferSize - 1;
+        return 0;
     }
-    return end - (void*)p;
+    return (char*)end - p;
 }
 
 
