@@ -372,6 +372,22 @@ const char* StrPair::GetStr()
 const char* XMLUtil::writeBoolTrue  = "true";
 const char* XMLUtil::writeBoolFalse = "false";
 
+size_t XMLUtil::StrLen(const char* p, size_t bufferSize)
+{
+    TIXMLASSERT(p);
+    TIXMLASSERT(bufferSize > 0);
+    if (!p || !bufferSize)
+        return 0;
+
+    void* end = memchr((void*)p, 0, bufferSize);
+    TIXMLASSERT(end);
+    if (!end) {
+        return 0;
+    }
+    return (char*)end - p;
+}
+
+
 void XMLUtil::SetBoolSerialization(const char* writeTrue, const char* writeFalse)
 {
 	static const char* defTrue  = "true";
@@ -2283,7 +2299,7 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
         return _errorID;
     }
     if ( len == (size_t)(-1) ) {
-        len = strlen( p );
+        len = XMLUtil::StrLen(p, len);
     }
     TIXMLASSERT( _charBuffer == 0 );
     _charBuffer = new char[ len+1 ];
@@ -2330,9 +2346,9 @@ void XMLDocument::SetError( XMLError error, int lineNum, const char* format, ...
     TIXML_SNPRINTF(buffer, BUFFER_SIZE, "Error=%s ErrorID=%d (0x%x) Line number=%d", ErrorIDToName(error), int(error), int(error), lineNum);
 
 	if (format) {
-		size_t len = strlen(buffer);
+		size_t len = XMLUtil::StrLen(buffer, BUFFER_SIZE);
 		TIXML_SNPRINTF(buffer + len, BUFFER_SIZE - len, ": ");
-		len = strlen(buffer);
+		len = XMLUtil::StrLen(buffer, BUFFER_SIZE);
 
 		va_list va;
 		va_start(va, format);
