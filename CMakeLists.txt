@@ -60,7 +60,7 @@ set_target_properties(tinyxml2 PROPERTIES
 if(DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
     target_include_directories(tinyxml2 PUBLIC 
                           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
+                          $<INSTALL_INTERFACE:include>)
 
     if(MSVC)
       target_compile_definitions(tinyxml2 PUBLIC -D_CRT_SECURE_NO_WARNINGS)
@@ -97,7 +97,7 @@ target_compile_definitions(tinyxml2_static PUBLIC -D_CRT_SECURE_NO_WARNINGS)
 if(DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
     target_include_directories(tinyxml2_static PUBLIC 
                           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
+                          $<INSTALL_INTERFACE:include>)
 
     if(MSVC)
       target_compile_definitions(tinyxml2_static PUBLIC -D_CRT_SECURE_NO_WARNINGS)
@@ -173,4 +173,4 @@ install(FILES
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME})
 
 install(EXPORT ${CMAKE_PROJECT_NAME}Targets
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME})
+        DESTINATION lib/cmake/${CMAKE_PROJECT_NAME})
