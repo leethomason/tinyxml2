@@ -45,14 +45,14 @@ distribution.
 	{
 		va_list va;
 		va_start( va, format );
-		int result = vsnprintf_s( buffer, size, _TRUNCATE, format, va );
+		const int result = vsnprintf_s( buffer, size, _TRUNCATE, format, va );
 		va_end( va );
 		return result;
 	}
 
 	static inline int TIXML_VSNPRINTF( char* buffer, size_t size, const char* format, va_list va )
 	{
-		int result = vsnprintf_s( buffer, size, _TRUNCATE, format, va );
+		const int result = vsnprintf_s( buffer, size, _TRUNCATE, format, va );
 		return result;
 	}
 
@@ -197,7 +197,7 @@ char* StrPair::ParseText( char* p, const char* endTag, int strFlags, int* curLin
 	TIXMLASSERT(curLineNumPtr);
 
     char* start = p;
-    char  endChar = *endTag;
+    const char  endChar = *endTag;
     size_t length = strlen( endTag );
 
     // Inner loop of text parsing.
@@ -310,7 +310,7 @@ const char* StrPair::GetStr()
                         const int buflen = 10;
                         char buf[buflen] = { 0 };
                         int len = 0;
-                        char* adjusted = const_cast<char*>( XMLUtil::GetCharacterRef( p, buf, &len ) );
+                        const char* const adjusted = const_cast<char*>( XMLUtil::GetCharacterRef( p, buf, &len ) );
                         if ( adjusted == 0 ) {
                             *q = *p;
                             ++p;
@@ -1013,7 +1013,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
             break;
         }
 
-        int initialLineNum = node->_parseLineNum;
+        const int initialLineNum = node->_parseLineNum;
 
         StrPair endTag;
         p = node->ParseDeep( p, &endTag, curLineNumPtr );
@@ -1025,7 +1025,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
             break;
         }
 
-        XMLDeclaration* decl = node->ToDeclaration();
+        const XMLDeclaration * const decl = node->ToDeclaration();
         if ( decl ) {
             // Declarations are only allowed at document level
             bool wellLocated = ( ToDocument() != 0 );
@@ -1359,7 +1359,7 @@ char* XMLAttribute::ParseDeep( char* p, bool processEntities, int* curLineNumPtr
         return 0;
     }
 
-    char endTag[2] = { *p, 0 };
+    const char endTag[2] = { *p, 0 };
     ++p;	// move past opening quote
 
     p = _value.ParseText( p, endTag, processEntities ? StrPair::ATTRIBUTE_VALUE : StrPair::ATTRIBUTE_VALUE_LEAVE_ENTITIES, curLineNumPtr );
@@ -1816,7 +1816,7 @@ char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
             TIXMLASSERT( attrib );
             attrib->_parseLineNum = _document->_parseCurLineNum;
 
-            int attrLineNum = attrib->_parseLineNum;
+            const int attrLineNum = attrib->_parseLineNum;
 
             p = attrib->ParseDeep( p, _document->ProcessEntities(), curLineNumPtr );
             if ( !p || Attribute( attrib->Name() ) ) {
@@ -2121,7 +2121,7 @@ static FILE* callfopen( const char* filepath, const char* mode )
     TIXMLASSERT( mode );
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
     FILE* fp = 0;
-    errno_t err = fopen_s( &fp, filepath, mode );
+    const errno_t err = fopen_s( &fp, filepath, mode );
     if ( err ) {
         return 0;
     }
@@ -2171,7 +2171,7 @@ XMLError XMLDocument::LoadFile( const char* filename )
 template
 <bool = (sizeof(unsigned long) >= sizeof(size_t))>
 struct LongFitsIntoSizeTMinusOne {
-    static bool Fits( unsigned long value )
+    static bool Fits( const unsigned long value )
     {
         return value < (size_t)-1;
     }
@@ -2218,7 +2218,7 @@ XMLError XMLDocument::LoadFile( FILE* fp )
     const size_t size = filelength;
     TIXMLASSERT( _charBuffer == 0 );
     _charBuffer = new char[size+1];
-    size_t read = fread( _charBuffer, 1, size, fp );
+    const size_t read = fread( _charBuffer, 1, size, fp );
     if ( read != size ) {
         SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
@@ -2306,10 +2306,10 @@ void XMLDocument::SetError( XMLError error, int lineNum, const char* format, ...
 	_errorStr.Reset();
 
     if (format) {
-        size_t BUFFER_SIZE = 1000;
+        const size_t BUFFER_SIZE = 1000;
         char* buffer = new char[BUFFER_SIZE];
         TIXML_SNPRINTF(buffer, BUFFER_SIZE, "Error=%s ErrorID=%d (0x%x) Line number=%d: ", ErrorIDToName(error), int(error), int(error), lineNum);
-        size_t len = strlen(buffer);
+        const size_t len = strlen(buffer);
 
         va_list va;
         va_start( va, format );
