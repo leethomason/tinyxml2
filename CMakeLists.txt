@@ -90,7 +90,7 @@ set_target_properties(tinyxml2_static PROPERTIES
         COMPILE_DEFINITONS "TINYXML2_EXPORT"
         VERSION "${GENERIC_LIB_VERSION}"
         SOVERSION "${GENERIC_LIB_SOVERSION}")
-set_target_properties( tinyxml2_static PROPERTIES OUTPUT_NAME tinyxml2 )
+set_target_properties( tinyxml2_static PROPERTIES OUTPUT_NAME tinyxml2_static )
 
 target_compile_definitions(tinyxml2_static PUBLIC -D_CRT_SECURE_NO_WARNINGS)
 
@@ -111,8 +111,13 @@ else()
 endif()
 
 # export targets for find_package config mode
-export(TARGETS tinyxml2_static
-      FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
+	if(BUILD_SHARED_LIBS) #append to *Targets.cmake
+		export(TARGETS tinyxml2_static
+				APPEND FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
+	else() #discard previous contents of *Targets.cmake
+		export(TARGETS tinyxml2_static
+				FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
+	endif()
 
 install(TARGETS tinyxml2_static
         EXPORT ${CMAKE_PROJECT_NAME}Targets
