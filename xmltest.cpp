@@ -34,7 +34,7 @@ bool XMLTest (const char* testString, const char* expected, const char* found, b
 		pass = true;
 	else if ( !expected || !found )
 		pass = false;
-	else 
+	else
 		pass = !strcmp( expected, found );
 	if ( pass )
 		printf ("[pass]");
@@ -121,7 +121,7 @@ int example_1()
  *  @skip example_1()
  *  @until }
  */
- 
+
 
 int example_2()
 {
@@ -172,8 +172,8 @@ int example_3()
 	checking; working code should check for null
 	pointers when walking an XML tree, or use
 	XMLHandle.
-	
-	(The XML is an excerpt from "dream.xml"). 
+
+	(The XML is an excerpt from "dream.xml").
 
 	@skip example_3()
 	@until </PLAY>";
@@ -192,7 +192,7 @@ int example_3()
 		</ul>
 	</ul>
 
-	For this example, we want to print out the 
+	For this example, we want to print out the
 	title of the play. The text of the title (what
 	we want) is child of the "TITLE" element which
 	is a child of the "PLAY" element.
@@ -212,8 +212,8 @@ int example_3()
 
 	Text is just another Node in the XML DOM. And in
 	fact you should be a little cautious with it, as
-	text nodes can contain elements. 
-	
+	text nodes can contain elements.
+
 	@verbatim
 	Consider: A Midsummer Night's <b>Dream</b>
 	@endverbatim
@@ -225,7 +225,7 @@ int example_3()
 
 	Noting that here we use FirstChild() since we are
 	looking for XMLText, not an element, and ToText()
-	is a cast from a Node to a XMLText. 
+	is a cast from a Node to a XMLText.
 */
 
 
@@ -269,7 +269,7 @@ bool example_4()
 	@skip example_4()
 	@until "</information>";
 
-	TinyXML-2 has accessors for both approaches. 
+	TinyXML-2 has accessors for both approaches.
 
 	When using an attribute, you navigate to the XMLElement
 	with that attribute and use the QueryIntAttribute()
@@ -569,7 +569,7 @@ int main( int argc, const char ** argv )
 		XMLTest( "Bad XML", XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );
 		const char* errorStr = doc.ErrorStr();
 		XMLTest("Formatted error string",
-			"Error=XML_ERROR_PARSING_ATTRIBUTE ErrorID=8 (0x8) Line number=3: XMLElement name=wrong",
+			"Error=XML_ERROR_PARSING_ATTRIBUTE ErrorID=7 (0x7) Line number=3: XMLElement name=wrong",
 			errorStr);
 	}
 
@@ -651,7 +651,7 @@ int main( int argc, const char ** argv )
 		XMLTest( "Alternate query", true, iVal == iVal2 );
 		XMLTest( "Alternate query", true, dVal == dVal2 );
 		XMLTest( "Alternate query", true, iVal == ele->IntAttribute("int") );
-		XMLTest( "Alternate query", true, dVal == ele->DoubleAttribute("double") );		
+		XMLTest( "Alternate query", true, dVal == ele->DoubleAttribute("double") );
 	}
 
 	{
@@ -766,7 +766,7 @@ int main( int argc, const char ** argv )
 		doc.Parse( str );
 		XMLTest( "Text in nested element", false, doc.Error() );
 		element = doc.RootElement();
-		
+
 		element->SetText("wolves");
 		XMLTest( "SetText() prefix to nested non-text children.", "wolves", element->GetText() );
 
@@ -774,7 +774,7 @@ int main( int argc, const char ** argv )
 		doc.Parse( str );
 		XMLTest( "Empty self-closed element round 2", false, doc.Error() );
 		element = doc.RootElement();
-		
+
 		element->SetText( "str" );
 		XMLTest( "SetText types", "str", element->GetText() );
 
@@ -1176,7 +1176,7 @@ int main( int argc, const char ** argv )
 		// But be sure there is an error string!
 		const char* errorStr = doc.ErrorStr();
 		XMLTest("Error string should be set",
-			"Error=XML_ERROR_EMPTY_DOCUMENT ErrorID=15 (0xf) Line number=0",
+			"Error=XML_ERROR_EMPTY_DOCUMENT ErrorID=13 (0xd) Line number=0",
 			errorStr);
 	}
 
@@ -1567,14 +1567,14 @@ int main( int argc, const char ** argv )
 		doc.Parse( xml );
 		XMLTest( "Non-alpha element lead letter parses.", false, doc.Error() );
 	}
-    
+
     {
         const char* xml = "<element _attr1=\"foo\" :attr2=\"bar\"></element>";
         XMLDocument doc;
         doc.Parse( xml );
         XMLTest("Non-alpha attribute lead character parses.", false, doc.Error());
     }
-    
+
     {
         const char* xml = "<3lement></3lement>";
         XMLDocument doc;
@@ -1610,7 +1610,7 @@ int main( int argc, const char ** argv )
         doc.Clear();
         XMLTest( "No error after Clear()", false, doc.Error() );
     }
-    
+
 	// ----------- Whitespace ------------
 	{
 		const char* xml = "<element>"
@@ -1809,7 +1809,7 @@ int main( int argc, const char ** argv )
 	}
 
 #if 1
-		// the question being explored is what kind of print to use: 
+		// the question being explored is what kind of print to use:
 		// https://github.com/leethomason/tinyxml2/issues/63
 	{
 		//const char* xml = "<element attrA='123456789.123456789' attrB='1.001e9' attrC='1.0e-10' attrD='1001000000.000000' attrE='0.1234567890123456789'/>";
@@ -1836,14 +1836,14 @@ int main( int argc, const char ** argv )
 		/* The result of this test is platform, compiler, and library version dependent. :("
 		XMLPrinter printer;
 		doc.Print( &printer );
-		XMLTest( "Float and double formatting.", 
+		XMLTest( "Float and double formatting.",
 			"<element attrA-f64=\"123456789.12345679\" attrB-f64=\"1001000000\" attrC-f64=\"1e+20\" attrD-f64=\"0.123456789\" attrA-f32=\"1.2345679e+08\" attrB-f32=\"1.001e+09\" attrC-f32=\"1e+20\" attrD-f32=\"0.12345679\"/>\n",
-			printer.CStr(), 
+			printer.CStr(),
 			true );
 		*/
 	}
 #endif
-    
+
     {
         // Issue #184
         // If it doesn't assert, it passes. Caused by objects
@@ -1862,7 +1862,7 @@ int main( int argc, const char ** argv )
             doc.Clear();
         }
     }
-    
+
     {
         // If this doesn't assert in TINYXML2_DEBUG, all is well.
         tinyxml2::XMLDocument doc;
@@ -1904,7 +1904,7 @@ int main( int argc, const char ** argv )
 		doc.Print( &printer );
 	}
 	{
-		// Issue 299. Can print elements that are not linked in. 
+		// Issue 299. Can print elements that are not linked in.
 		// Will crash if issue not fixed.
 		XMLDocument doc;
 		XMLElement* newElement = doc.NewElement( "printme" );
@@ -2007,7 +2007,7 @@ int main( int argc, const char ** argv )
 	}
 
 	{
-		// Evil memory leaks. 
+		// Evil memory leaks.
 		// If an XMLElement (etc) is allocated via NewElement() (etc.)
 		// and NOT added to the XMLDocument, what happens?
 		//
@@ -2104,7 +2104,7 @@ int main( int argc, const char ** argv )
 		XMLTest("Crash bug parsing - Accept()", true, acceptResult);
 		printf("%s\n", printer.CStr());
 
-		// No test; it only need to not crash. 
+		// No test; it only need to not crash.
 		// Still, wrap it up with a sanity check
 		int nProperty = 0;
 		for (const XMLElement* p = playlist->FirstChildElement("property"); p; p = p->NextSiblingElement("property")) {
