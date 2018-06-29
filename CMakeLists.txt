@@ -27,8 +27,6 @@ set(GENERIC_LIB_SOVERSION "6")
 ################################
 # Add definitions
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DTINYXML2_DEBUG")
-
 ################################
 # Add targets
 # By Default shared libray is being built
@@ -39,7 +37,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DTINYXML2_DEBUG")
 # To disable the building of the tests, use cmake . -DBUILD_TESTS:BOOL=OFF
 
 option(BUILD_SHARED_LIBS "build as shared library" ON)
-option(BUILD_STATIC_LIBS "build as static library" OFF)
 option(BUILD_TESTS "build xmltest (deprecated: Use BUILD_TESTING)" ON)
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -48,19 +45,19 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 # to distinguish between debug and release lib
 set(CMAKE_DEBUG_POSTFIX "d")
 
-if(BUILD_SHARED_LIBS)
-add_library(tinyxml2 SHARED tinyxml2.cpp tinyxml2.h)
+add_library(tinyxml2 tinyxml2.cpp tinyxml2.h)
 
 set_target_properties(tinyxml2 PROPERTIES
         COMPILE_DEFINITIONS "TINYXML2_EXPORT"
 	VERSION "${GENERIC_LIB_VERSION}"
 	SOVERSION "${GENERIC_LIB_SOVERSION}")
 
+target_compile_definitions(tinyxml2 PUBLIC $<$<CONFIG:Debug>:TINYXML2_DEBUG>)
 
 if(DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
     target_include_directories(tinyxml2 PUBLIC 
                           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-                          $<INSTALL_INTERFACE:include>)
+                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
     if(MSVC)
       target_compile_definitions(tinyxml2 PUBLIC -D_CRT_SECURE_NO_WARNINGS)
@@ -82,54 +79,11 @@ install(TARGETS tinyxml2
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-endif()
-
-if(BUILD_STATIC_LIBS)
-add_library(tinyxml2_static STATIC tinyxml2.cpp tinyxml2.h)
-set_target_properties(tinyxml2_static PROPERTIES
-        COMPILE_DEFINITONS "TINYXML2_EXPORT"
-        VERSION "${GENERIC_LIB_VERSION}"
-        SOVERSION "${GENERIC_LIB_SOVERSION}")
-set_target_properties( tinyxml2_static PROPERTIES OUTPUT_NAME tinyxml2 )
-
-target_compile_definitions(tinyxml2_static PUBLIC -D_CRT_SECURE_NO_WARNINGS)
-
-if(DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-    target_include_directories(tinyxml2_static PUBLIC 
-                          $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-                          $<INSTALL_INTERFACE:include>)
-
-    if(MSVC)
-      target_compile_definitions(tinyxml2_static PUBLIC -D_CRT_SECURE_NO_WARNINGS)
-    endif(MSVC)
-else()
-    include_directories(${PROJECT_SOURCE_DIR})
-
-    if(MSVC)
-      add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    endif(MSVC)
-endif()
-
-# export targets for find_package config mode
-export(TARGETS tinyxml2_static
-      FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
-
-install(TARGETS tinyxml2_static
-        EXPORT ${CMAKE_PROJECT_NAME}Targets
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-endif()
 
 if(BUILD_TESTING AND BUILD_TESTS)
   add_executable(xmltest xmltest.cpp)
-  if(BUILD_SHARED_LIBS)
-    add_dependencies(xmltest tinyxml2)
-    target_link_libraries(xmltest tinyxml2)
-  else(BUILD_STATIC_LIBS)
-    add_dependencies(xmltest tinyxml2_static)
-    target_link_libraries(xmltest tinyxml2_static)
-  endif()
+  add_dependencies(xmltest tinyxml2)
+  target_link_libraries(xmltest tinyxml2)
 
   # Copy test resources and create test output directory
   add_custom_command(TARGET xmltest POST_BUILD
@@ -157,10 +111,13 @@ if(NOT TARGET uninstall)
       COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
-file(WRITE
-    ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
-    "include(\${CMAKE_CURRENT_LIST_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)\n")
-
+include(CMakePackageConfigHelpers)
+set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
+configure_package_config_file(
+  "Config.cmake.in"
+  "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake"
+  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}"
+)
 install(FILES
         ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME})
