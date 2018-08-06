@@ -29,7 +29,7 @@ set(GENERIC_LIB_SOVERSION "6")
 
 ################################
 # Add targets
-# By Default shared libray is being built
+# By Default shared library is being built
 # To build static libs also - Do cmake . -DBUILD_STATIC_LIBS:BOOL=ON
 # User can choose not to build shared library by using cmake -DBUILD_SHARED_LIBS:BOOL=OFF
 # To build only static libs use cmake . -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_STATIC_LIBS:BOOL=ON

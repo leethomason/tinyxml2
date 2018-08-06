@@ -1967,7 +1967,7 @@ int main( int argc, const char ** argv )
     {
 	    // No matter - before or after successfully parsing a text -
 	    // calling XMLDocument::Value() used to cause an assert in debug.
-	    // Null must be retured.
+	    // Null must be returned.
 	    const char* validXml = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
 	                           "<first />"
 	                           "<second />";
