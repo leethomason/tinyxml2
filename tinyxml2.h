@@ -1691,6 +1691,9 @@ public:
     	an errorID.
     */
     XMLError LoadFile( const char* filename );
+#if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
+	XMLError LoadFile( const wchar_t* filename );
+#endif
 
     /**
     	Load an XML file from disk. You are responsible
