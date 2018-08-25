@@ -334,7 +334,6 @@ public:
     virtual void* Alloc() = 0;
     virtual void Free( void* ) = 0;
     virtual void SetTracked() = 0;
-    virtual void Clear() = 0;
 };
 
 
@@ -347,7 +346,7 @@ class MemPoolT : public MemPool
 public:
     MemPoolT() : _blockPtrs(), _root(0), _currentAllocs(0), _nAllocs(0), _maxAllocs(0), _nUntracked(0)	{}
     ~MemPoolT() {
-        Clear();
+        MemPoolT< ITEM_SIZE >::Clear();
     }
 
     void Clear() {
