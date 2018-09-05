@@ -288,7 +288,7 @@ public:
         return _mem;
     }
 
-    T* Mem()							{
+    T* Mem() {
         TIXMLASSERT( _mem );
         return _mem;
     }
@@ -937,7 +937,7 @@ public:
 	void* GetUserData() const			{ return _userData; }
 
 protected:
-    XMLNode( XMLDocument* );
+    explicit XMLNode( XMLDocument* );
     virtual ~XMLNode();
 
     virtual char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr);
@@ -1005,7 +1005,7 @@ public:
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
-    XMLText( XMLDocument* doc )	: XMLNode( doc ), _isCData( false )	{}
+    explicit XMLText( XMLDocument* doc )	: XMLNode( doc ), _isCData( false )	{}
     virtual ~XMLText()												{}
 
     char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
@@ -1036,7 +1036,7 @@ public:
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
-    XMLComment( XMLDocument* doc );
+    explicit XMLComment( XMLDocument* doc );
     virtual ~XMLComment();
 
     char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr);
@@ -1075,7 +1075,7 @@ public:
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
-    XMLDeclaration( XMLDocument* doc );
+    explicit XMLDeclaration( XMLDocument* doc );
     virtual ~XMLDeclaration();
 
     char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
@@ -1110,7 +1110,7 @@ public:
     virtual bool ShallowEqual( const XMLNode* compare ) const;
 
 protected:
-    XMLUnknown( XMLDocument* doc );
+    explicit XMLUnknown( XMLDocument* doc );
     virtual ~XMLUnknown();
 
     char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
@@ -1900,7 +1900,7 @@ private:
 	// the stack. Track stack depth, and error out if needed.
 	class DepthTracker {
 	public:
-		DepthTracker(XMLDocument * document) {
+		explicit DepthTracker(XMLDocument * document) {
 			this->_document = document;
 			document->PushDepth();
 		}
@@ -1989,10 +1989,10 @@ class TINYXML2_LIB XMLHandle
 {
 public:
     /// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
-    XMLHandle( XMLNode* node ) : _node( node ) {
+    explicit XMLHandle( XMLNode* node ) : _node( node ) {
     }
     /// Create a handle from a node.
-    XMLHandle( XMLNode& node ) : _node( &node ) {
+    explicit XMLHandle( XMLNode& node ) : _node( &node ) {
     }
     /// Copy constructor
     XMLHandle( const XMLHandle& ref ) : _node( ref._node ) {
@@ -2069,9 +2069,9 @@ private:
 class TINYXML2_LIB XMLConstHandle
 {
 public:
-    XMLConstHandle( const XMLNode* node ) : _node( node ) {
+    explicit XMLConstHandle( const XMLNode* node ) : _node( node ) {
     }
-    XMLConstHandle( const XMLNode& node ) : _node( &node ) {
+    explicit XMLConstHandle( const XMLNode& node ) : _node( &node ) {
     }
     XMLConstHandle( const XMLConstHandle& ref ) : _node( ref._node ) {
     }
