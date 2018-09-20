@@ -87,9 +87,9 @@ if(BUILD_TESTING AND BUILD_TESTS)
 
   # Copy test resources and create test output directory
   add_custom_command(TARGET xmltest POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources $<TARGET_FILE_DIR:xmltest>/resources
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:xmltest>/resources
     COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:xmltest>/resources/out
-    COMMENT "Configuring xmltest resources directory: ${CMAKE_BINARY_DIR}/resources"
+    COMMENT "Configuring xmltest resources directory: ${CMAKE_CURRENT_BINARY_DIR}/resources"
   )
 
   add_test(NAME xmltest COMMAND xmltest WORKING_DIRECTORY $<TARGET_FILE_DIR:xmltest>)
