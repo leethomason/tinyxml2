@@ -39,6 +39,9 @@ set(GENERIC_LIB_SOVERSION "6")
 option(BUILD_SHARED_LIBS "build as shared library" ON)
 option(BUILD_TESTS "build xmltest (deprecated: Use BUILD_TESTING)" ON)
 
+# To allow using tinyxml in another shared library
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
