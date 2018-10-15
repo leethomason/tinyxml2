@@ -1782,6 +1782,7 @@ int main( int argc, const char ** argv )
 		XMLTest( "Insertion with removal parse round 4", false, doc.Error() );
 		subtree = doc.RootElement()->FirstChildElement("one")->FirstChildElement("subtree");
 		two = doc.RootElement()->FirstChildElement("two");
+		XMLTest("<two> is the last child at root level", true, two == doc.RootElement()->LastChildElement());
 		doc.RootElement()->InsertEndChild(subtree);
 		XMLPrinter printer4(0, true);
 		acceptResult = doc.Accept(&printer4);
