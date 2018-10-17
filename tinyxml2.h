@@ -40,6 +40,7 @@ distribution.
 #   include <cstdlib>
 #   include <cstring>
 #endif
+#include <algorithm>
 #include <stdint.h>
 
 /*
@@ -190,7 +191,7 @@ private:
     char*   _end;
 
     StrPair( const StrPair& other );	// not supported
-    void operator=( StrPair& other );	// not supported, use TransferTo()
+    StrPair& operator=( const StrPair& other );	// not supported, use TransferTo()
 };
 
 
@@ -295,7 +296,7 @@ public:
 
 private:
     DynArray( const DynArray& ); // not supported
-    void operator=( const DynArray& ); // not supported
+    DynArray& operator=( const DynArray& ); // not supported
 
     void EnsureCapacity( int cap ) {
         TIXMLASSERT( cap > 0 );
@@ -304,7 +305,7 @@ private:
             int newAllocated = cap * 2;
             T* newMem = new T[newAllocated];
             TIXMLASSERT( newAllocated >= _size );
-            memcpy( newMem, _mem, sizeof(T)*_size );	// warning: not using constructors, only works for PODs
+            std::copy( _mem, _mem+_size, newMem );	// warning: not using constructors, only works for PODs
             if ( _mem != _pool ) {
                 delete [] _mem;
             }
@@ -436,7 +437,7 @@ public:
 
 private:
     MemPoolT( const MemPoolT& ); // not supported
-    void operator=( const MemPoolT& ); // not supported
+    MemPoolT& operator=( const MemPoolT& ); // not supported
 
     union Item {
         Item*   next;
@@ -561,7 +562,7 @@ public:
         return p;
     }
     static char* SkipWhiteSpace( char* p, int* curLineNumPtr )				{
-        return const_cast<char*>( SkipWhiteSpace( const_cast<const char*>(p), curLineNumPtr ) );
+        return const_cast<char*>( SkipWhiteSpace( static_cast<const char*>(p), curLineNumPtr ) );
     }
 
     // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
@@ -771,7 +772,7 @@ public:
     const XMLElement* FirstChildElement( const char* name = 0 ) const;
 
     XMLElement* FirstChildElement( const char* name = 0 )	{
-        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( name ));
+        return const_cast<XMLElement*>(static_cast<const XMLNode*>(this)->FirstChildElement( name ));
     }
 
     /// Get the last child node, or null if none exists.
@@ -789,7 +790,7 @@ public:
     const XMLElement* LastChildElement( const char* name = 0 ) const;
 
     XMLElement* LastChildElement( const char* name = 0 )	{
-        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(name) );
+        return const_cast<XMLElement*>(static_cast<const XMLNode*>(this)->LastChildElement(name) );
     }
 
     /// Get the previous (left) sibling node of this node.
@@ -805,7 +806,7 @@ public:
     const XMLElement*	PreviousSiblingElement( const char* name = 0 ) const ;
 
     XMLElement*	PreviousSiblingElement( const char* name = 0 ) {
-        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( name ) );
+        return const_cast<XMLElement*>(static_cast<const XMLNode*>(this)->PreviousSiblingElement( name ) );
     }
 
     /// Get the next (right) sibling node of this node.
@@ -821,7 +822,7 @@ public:
     const XMLElement*	NextSiblingElement( const char* name = 0 ) const;
 
     XMLElement*	NextSiblingElement( const char* name = 0 )	{
-        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement( name ) );
+        return const_cast<XMLElement*>(static_cast<const XMLNode*>(this)->NextSiblingElement( name ) );
     }
 
     /**
@@ -1225,7 +1226,7 @@ private:
     virtual ~XMLAttribute()	{}
 
     XMLAttribute( const XMLAttribute& );	// not supported
-    void operator=( const XMLAttribute& );	// not supported
+    XMLAttribute& operator=( const XMLAttribute& );	// not supported
     void SetName( const char* name );
 
     char* ParseDeep( char* p, bool processEntities, int* curLineNumPtr );
@@ -1621,7 +1622,7 @@ private:
     XMLElement( XMLDocument* doc );
     virtual ~XMLElement();
     XMLElement( const XMLElement& );	// not supported
-    void operator=( const XMLElement& );	// not supported
+    XMLElement& operator=( const XMLElement& );	// not supported
 
     XMLAttribute* FindOrCreateAttribute( const char* name );
     char* ParseAttributes( char* p, int* curLineNumPtr );
@@ -1865,7 +1866,7 @@ public:
 
 private:
     XMLDocument( const XMLDocument& );	// not supported
-    void operator=( const XMLDocument& );	// not supported
+    XMLDocument& operator=( const XMLDocument& );	// not supported
 
     bool			_writeBOM;
     bool			_processEntities;
