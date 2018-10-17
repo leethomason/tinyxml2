@@ -184,7 +184,7 @@ void StrPair::SetStr( const char* str, int flags )
     size_t len = strlen( str );
     TIXMLASSERT( _start == 0 );
     _start = new char[ len+1 ];
-    memcpy( _start, str, len+1 );
+    std::copy( str, str+len+1, _start );
     _end = _start + len;
     _flags = flags | NEEDS_DELETE;
 }
@@ -320,7 +320,7 @@ const char* StrPair::GetStr()
                             TIXMLASSERT( 0 <= len && len <= buflen );
                             TIXMLASSERT( q + len <= adjusted );
                             p = adjusted;
-                            memcpy( q, buf, len );
+                            std::copy( buf, buf+len, q );
                             q += len;
                         }
                     }
@@ -626,19 +626,13 @@ bool XMLUtil::ToBool( const char* str, bool* value )
 
 bool XMLUtil::ToFloat( const char* str, float* value )
 {
-    if ( TIXML_SSCANF( str, "%f", value ) == 1 ) {
-        return true;
-    }
-    return false;
+    return TIXML_SSCANF(str, "%f", value ) == 1;
 }
 
 
 bool XMLUtil::ToDouble( const char* str, double* value )
 {
-    if ( TIXML_SSCANF( str, "%lf", value ) == 1 ) {
-        return true;
-    }
-    return false;
+    return TIXML_SSCANF(str, "%lf", value ) == 1;
 }
 
 
@@ -940,8 +934,7 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
 const XMLElement* XMLNode::FirstChildElement( const char* name ) const
 {
     for( const XMLNode* node = _firstChild; node; node = node->_next ) {
-        const XMLElement* element = node->ToElementWithName( name );
-        if ( element ) {
+        if ( const XMLElement* element = node->ToElementWithName( name ) ) {
             return element;
         }
     }
@@ -952,8 +945,7 @@ const XMLElement* XMLNode::FirstChildElement( const char* name ) const
 const XMLElement* XMLNode::LastChildElement( const char* name ) const
 {
     for( const XMLNode* node = _lastChild; node; node = node->_prev ) {
-        const XMLElement* element = node->ToElementWithName( name );
-        if ( element ) {
+        if ( const XMLElement* element = node->ToElementWithName( name ) ) {
             return element;
         }
     }
@@ -964,8 +956,7 @@ const XMLElement* XMLNode::LastChildElement( const char* name ) const
 const XMLElement* XMLNode::NextSiblingElement( const char* name ) const
 {
     for( const XMLNode* node = _next; node; node = node->_next ) {
-        const XMLElement* element = node->ToElementWithName( name );
-        if ( element ) {
+        if ( const XMLElement* element = node->ToElementWithName( name ) ) {
             return element;
         }
     }
@@ -976,8 +967,7 @@ const XMLElement* XMLNode::NextSiblingElement( const char* name ) const
 const XMLElement* XMLNode::PreviousSiblingElement( const char* name ) const
 {
     for( const XMLNode* node = _prev; node; node = node->_prev ) {
-        const XMLElement* element = node->ToElementWithName( name );
-        if ( element ) {
+        if ( const XMLElement* element = node->ToElementWithName( name ) ) {
             return element;
         }
     }
@@ -2295,7 +2285,7 @@ XMLError XMLDocument::Parse( const char* p, size_t len )
     }
     TIXMLASSERT( _charBuffer == 0 );
     _charBuffer = new char[ len+1 ];
-    memcpy( _charBuffer, p, len );
+    std::copy( p, p+len, _charBuffer );
     _charBuffer[len] = 0;
 
     Parse();
@@ -2464,7 +2454,7 @@ void XMLPrinter::Write( const char* data, size_t size )
     }
     else {
         char* p = _buffer.PushArr( static_cast<int>(size) ) - 1;   // back up over the null terminator.
-        memcpy( p, data, size );
+        std::copy( data, data+size, p );
         p[size] = 0;
     }
 }
