@@ -190,7 +190,7 @@ private:
     char*   _end;
 
     StrPair( const StrPair& other );	// not supported
-    void operator=( StrPair& other );	// not supported, use TransferTo()
+    void operator=( const StrPair& other );	// not supported, use TransferTo()
 };
 
 
