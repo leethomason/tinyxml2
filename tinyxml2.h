@@ -98,12 +98,12 @@ distribution.
 /* Versioning, past 1.0.14:
 	http://semver.org/
 */
-static const int TIXML2_MAJOR_VERSION = 6;
-static const int TIXML2_MINOR_VERSION = 2;
+static const int TIXML2_MAJOR_VERSION = 7;
+static const int TIXML2_MINOR_VERSION = 0;
 static const int TIXML2_PATCH_VERSION = 0;
 
-#define TINYXML2_MAJOR_VERSION 6
-#define TINYXML2_MINOR_VERSION 2
+#define TINYXML2_MAJOR_VERSION 7
+#define TINYXML2_MINOR_VERSION 0
 #define TINYXML2_PATCH_VERSION 0
 
 // A fixed element depth limit is problematic. There needs to be a
