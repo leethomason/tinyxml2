@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['queryattribute',['QueryAttribute',['../classtinyxml2_1_1_x_m_l_element.html#a042fc30504347b84a56cf863ad528a4f',1,'tinyxml2::XMLElement']]],
+  ['queryattribute',['QueryAttribute',['../classtinyxml2_1_1_x_m_l_element.html#a5b7df3bed2b8954eabf227fa204522eb',1,'tinyxml2::XMLElement']]],
   ['queryboolattribute',['QueryBoolAttribute',['../classtinyxml2_1_1_x_m_l_element.html#a14c1bb77c39689838be01838d86ca872',1,'tinyxml2::XMLElement']]],
   ['querybooltext',['QueryBoolText',['../classtinyxml2_1_1_x_m_l_element.html#a3fe5417d59eb8f5c4afe924b7d332736',1,'tinyxml2::XMLElement']]],
   ['queryboolvalue',['QueryBoolValue',['../classtinyxml2_1_1_x_m_l_attribute.html#a5f32e038954256f61c21ff20fd13a09c',1,'tinyxml2::XMLAttribute']]],
@@ -16,6 +16,7 @@ var searchData=
   ['queryintattribute',['QueryIntAttribute',['../classtinyxml2_1_1_x_m_l_element.html#a8a78bc1187c1c45ad89f2690eab567b1',1,'tinyxml2::XMLElement']]],
   ['queryinttext',['QueryIntText',['../classtinyxml2_1_1_x_m_l_element.html#a926357996bef633cb736e1a558419632',1,'tinyxml2::XMLElement']]],
   ['queryintvalue',['QueryIntValue',['../classtinyxml2_1_1_x_m_l_attribute.html#a6d5176260db00ea301c01af8457cd993',1,'tinyxml2::XMLAttribute']]],
+  ['querystringattribute',['QueryStringAttribute',['../classtinyxml2_1_1_x_m_l_element.html#adb8ae765f98d0c5037faec48deea78bc',1,'tinyxml2::XMLElement']]],
   ['queryunsignedattribute',['QueryUnsignedAttribute',['../classtinyxml2_1_1_x_m_l_element.html#a26fc84cbfba6769dafcfbf256c05e22f',1,'tinyxml2::XMLElement']]],
   ['queryunsignedtext',['QueryUnsignedText',['../classtinyxml2_1_1_x_m_l_element.html#a14d38aa4b5e18a46274a27425188a6a1',1,'tinyxml2::XMLElement']]],
   ['queryunsignedvalue',['QueryUnsignedValue',['../classtinyxml2_1_1_x_m_l_attribute.html#a48a7f3496f1415832e451bd8d09c9cb9',1,'tinyxml2::XMLAttribute']]]

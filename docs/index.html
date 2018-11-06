@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">TinyXML-2
-   &#160;<span id="projectnumber">6.0.0</span>
+   &#160;<span id="projectnumber">7.0.0</span>
    </div>
   </td>
  </tr>
@@ -82,29 +82,13 @@ $(function() {
 <h2>What it doesn't do. </h2>
 <p>TinyXML-2 doesn't parse or use DTDs (Document Type Definitions) or XSLs (eXtensible Stylesheet Language.) There are other parsers out there that are much more fully featured. But they are also much bigger, take longer to set up in your project, have a higher learning curve, and often have a more restrictive license. If you are working with browsers or have more complete XML needs, TinyXML-2 is not the parser for you.</p>
 <h2>TinyXML-1 vs. TinyXML-2 </h2>
-<p>TinyXML-2 is now the focus of all development, well tested, and your best choice unless you have a requirement to maintain TinyXML-1 code.</p>
+<p>TinyXML-2 is now the focus of all development, well tested, and your best choice between the two APIs. At this point, unless you are maintaining legacy code, you should choose TinyXML-2.</p>
 <p>TinyXML-2 uses a similar API to TinyXML-1 and the same rich test cases. But the implementation of the parser is completely re-written to make it more appropriate for use in a game. It uses less memory, is faster, and uses far fewer memory allocations.</p>
-<p>TinyXML-2 has no requirement for STL, but has also dropped all STL support. All strings are query and set as 'const char*'. This allows the use of internal allocators, and keeps the code much simpler.</p>
-<p>Both parsers:</p>
-<ol type="1">
-<li>Simple to use with similar APIs.</li>
-<li>DOM based parser.</li>
-<li>UTF-8 Unicode support. <a href="http://en.wikipedia.org/wiki/UTF-8">http://en.wikipedia.org/wiki/UTF-8</a></li>
-</ol>
-<p>Advantages of TinyXML-2</p>
-<ol type="1">
-<li>The focus of all future dev.</li>
-<li>Many fewer memory allocation (1/10th to 1/100th), uses less memory (about 40% of TinyXML-1), and faster.</li>
-<li>No STL requirement.</li>
-<li>More modern C++, including a proper namespace.</li>
-<li>Proper and useful handling of whitespace</li>
-</ol>
-<p>Advantages of TinyXML-1</p>
-<ol type="1">
-<li>Support for some C++ STL conventions: streams and strings</li>
-<li>Very mature and well debugged code base.</li>
-</ol>
+<p>TinyXML-2 has no requirement or support for STL. By returning <code>const char*</code> TinyXML-2 can be much more efficient with memory usage. (TinyXML-1 did support and use STL, but consumed much more memory for the DOM representation.)</p>
 <h2>Features </h2>
+<h3>Code Page</h3>
+<p>TinyXML-2 uses UTF-8 exclusively when interpreting XML. All XML is assumed to be UTF-8.</p>
+<p>Filenames for loading / saving are passed unchanged to the underlying OS.</p>
 <h3>Memory Model</h3>
 <p>An XMLDocument is a C++ object like any other, that can be on the stack, or new'd and deleted on the heap.</p>
 <p>However, any sub-node of the Document, XMLElement, XMLText, etc, can only be created by calling the appropriate XMLDocument::NewElement, NewText, etc. method. Although you have pointers to these objects, they are still owned by the Document. When the Document is deleted, so are all the nodes it contains.</p>
@@ -114,7 +98,7 @@ $(function() {
 <p>By default, TinyXML-2 preserves white space in a (hopefully) sane way that is almost compliant with the spec. (TinyXML-1 used a completely different model, much more similar to 'collapse', below.)</p>
 <p>As a first step, all newlines / carriage-returns / line-feeds are normalized to a line-feed character, as required by the XML spec.</p>
 <p>White space in text is preserved. For example: </p><pre class="fragment">&lt;element&gt; Hello,  World&lt;/element&gt;
-</pre><p>The leading space before the "Hello" and the double space after the comma are preserved. Line-feeds are preserved, as in this example: </p><pre class="fragment">&lt;element&gt; Hello again,  
+</pre><p>The leading space before the "Hello" and the double space after the comma are preserved. Line-feeds are preserved, as in this example: </p><pre class="fragment">&lt;element&gt; Hello again,
           World&lt;/element&gt;
 </pre><p>However, white space between elements is <b>not</b> preserved. Although not strictly compliant, tracking and reporting inter-element space is awkward, and not normally valuable. TinyXML-2 sees these as the same XML: </p><pre class="fragment">&lt;document&gt;
     &lt;data&gt;1&lt;/data&gt;
@@ -134,7 +118,7 @@ $(function() {
 </ul>
 <p>Note that (currently) there is a performance impact for using COLLAPSE_WHITESPACE. It essentially causes the XML to be parsed twice.</p>
 <h4>Error Reporting</h4>
-<p>TinyXML-2 reports the line number of any errors in an XML document that cannot be parsed correctly. In addition, all nodes (elements, declarations, text, comments etc.) and attributes have a line number recorded as they are parsed. This allows an application that performs additional validation of the parsed XML document (e.g. application-implemented DTD validation) to report line number information in it's errors.</p>
+<p>TinyXML-2 reports the line number of any errors in an XML document that cannot be parsed correctly. In addition, all nodes (elements, declarations, text, comments etc.) and attributes have a line number recorded as they are parsed. This allows an application that performs additional validation of the parsed XML document (e.g. application-implemented DTD validation) to report line number information for error messages.</p>
 <h3>Entities</h3>
 <p>TinyXML-2 recognizes the pre-defined "character entities", meaning special characters. Namely: </p><pre class="fragment">&amp;amp;   &amp;
 &amp;lt;    &lt;
@@ -163,19 +147,19 @@ printer.PushAttribute( "foo", "bar" );
 printer.CloseElement();
 </pre><h2>Examples </h2>
 <h4>Load and parse an XML file.</h4>
-<pre class="fragment">/* ------ Example 1: Load and parse an XML file. ---- */    
+<pre class="fragment">/* ------ Example 1: Load and parse an XML file. ---- */
 {
     XMLDocument doc;
     doc.LoadFile( "dream.xml" );
 }
 </pre><h4>Lookup information.</h4>
-<pre class="fragment">/* ------ Example 2: Lookup information. ---- */    
+<pre class="fragment">/* ------ Example 2: Lookup information. ---- */
 {
     XMLDocument doc;
     doc.LoadFile( "dream.xml" );
 
     // Structure of the XML file:
-    // - Element "PLAY"      the root Element, which is the 
+    // - Element "PLAY"      the root Element, which is the
     //                       FirstChildElement of the Document
     // - - Element "TITLE"   child of the root PLAY Element
     // - - - Text            child of the TITLE Element
@@ -199,7 +183,7 @@ printer.CloseElement();
 <p>And additionally a test file:</p><ul>
 <li>xmltest.cpp</li>
 </ul>
-<p>Simply compile and run. There is a visual studio 2015 project included, a simple Makefile, an Xcode project, a Code::Blocks project, and a cmake CMakeLists.txt included to help you. The top of tinyxml.h even has a simple g++ command line if you are are *nix and don't want to use a build system.</p>
+<p>Simply compile and run. There is a visual studio 2017 project included, a simple Makefile, an Xcode project, a Code::Blocks project, and a cmake CMakeLists.txt included to help you. The top of tinyxml.h even has a simple g++ command line if you are are Unix/Linuk/BSD and don't want to use a build system.</p>
 <h2>Versioning </h2>
 <p>TinyXML-2 uses semantic versioning. <a href="http://semver.org/">http://semver.org/</a> Releases are now tagged in github.</p>
 <p>Note that the major version will (probably) change fairly rapidly. API changes are fairly common.</p>
@@ -222,7 +206,7 @@ printer.CloseElement();
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Dec 10 2017 20:04:44 for TinyXML-2 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Nov 6 2018 09:38:26 for TinyXML-2 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>

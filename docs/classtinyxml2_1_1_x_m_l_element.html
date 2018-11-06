@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">TinyXML-2
-   &#160;<span id="projectnumber">6.0.0</span>
+   &#160;<span id="projectnumber">7.0.0</span>
    </div>
   </td>
  </tr>
@@ -144,8 +144,12 @@ XMLError&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 XMLError&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtinyxml2_1_1_x_m_l_element.html#acd5eeddf6002ef90806af794b9d9a5a5">QueryFloatAttribute</a> (const char *name, float *value) const</td></tr>
 <tr class="memdesc:acd5eeddf6002ef90806af794b9d9a5a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">See <a class="el" href="classtinyxml2_1_1_x_m_l_element.html#a8a78bc1187c1c45ad89f2690eab567b1">QueryIntAttribute()</a> <br /></td></tr>
 <tr class="separator:acd5eeddf6002ef90806af794b9d9a5a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a042fc30504347b84a56cf863ad528a4f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtinyxml2_1_1_x_m_l_element.html#a042fc30504347b84a56cf863ad528a4f">QueryAttribute</a> (const char *name, int *value) const</td></tr>
-<tr class="separator:a042fc30504347b84a56cf863ad528a4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb8ae765f98d0c5037faec48deea78bc"><td class="memItemLeft" align="right" valign="top"><a id="adb8ae765f98d0c5037faec48deea78bc"></a>
+XMLError&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtinyxml2_1_1_x_m_l_element.html#adb8ae765f98d0c5037faec48deea78bc">QueryStringAttribute</a> (const char *name, const char **value) const</td></tr>
+<tr class="memdesc:adb8ae765f98d0c5037faec48deea78bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">See <a class="el" href="classtinyxml2_1_1_x_m_l_element.html#a8a78bc1187c1c45ad89f2690eab567b1">QueryIntAttribute()</a> <br /></td></tr>
+<tr class="separator:adb8ae765f98d0c5037faec48deea78bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b7df3bed2b8954eabf227fa204522eb"><td class="memItemLeft" align="right" valign="top">XMLError&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtinyxml2_1_1_x_m_l_element.html#a5b7df3bed2b8954eabf227fa204522eb">QueryAttribute</a> (const char *name, int *value) const</td></tr>
+<tr class="separator:a5b7df3bed2b8954eabf227fa204522eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11943abf2d0831548c3790dd5d9f119c"><td class="memItemLeft" align="right" valign="top"><a id="a11943abf2d0831548c3790dd5d9f119c"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtinyxml2_1_1_x_m_l_element.html#a11943abf2d0831548c3790dd5d9f119c">SetAttribute</a> (const char *name, const char *value)</td></tr>
 <tr class="memdesc:a11943abf2d0831548c3790dd5d9f119c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the named attribute to value. <br /></td></tr>
@@ -498,8 +502,8 @@ const char* xmlcstr = printer.CStr();
 
 </div>
 </div>
-<a id="a042fc30504347b84a56cf863ad528a4f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a042fc30504347b84a56cf863ad528a4f">&#9670;&nbsp;</a></span>QueryAttribute()</h2>
+<a id="a5b7df3bed2b8954eabf227fa204522eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b7df3bed2b8954eabf227fa204522eb">&#9670;&nbsp;</a></span>QueryAttribute()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -508,7 +512,7 @@ const char* xmlcstr = printer.CStr();
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int tinyxml2::XMLElement::QueryAttribute </td>
+          <td class="memname">XMLError tinyxml2::XMLElement::QueryAttribute </td>
           <td>(</td>
           <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>name</em>, </td>
@@ -531,7 +535,7 @@ const char* xmlcstr = printer.CStr();
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Given an attribute name, <a class="el" href="classtinyxml2_1_1_x_m_l_element.html#a042fc30504347b84a56cf863ad528a4f">QueryAttribute()</a> returns XML_SUCCESS, XML_WRONG_ATTRIBUTE_TYPE if the conversion can't be performed, or XML_NO_ATTRIBUTE if the attribute doesn't exist. It is overloaded for the primitive types, and is a generally more convenient replacement of <a class="el" href="classtinyxml2_1_1_x_m_l_element.html#a8a78bc1187c1c45ad89f2690eab567b1">QueryIntAttribute()</a> and related functions.</p>
+<p>Given an attribute name, <a class="el" href="classtinyxml2_1_1_x_m_l_element.html#a5b7df3bed2b8954eabf227fa204522eb">QueryAttribute()</a> returns XML_SUCCESS, XML_WRONG_ATTRIBUTE_TYPE if the conversion can't be performed, or XML_NO_ATTRIBUTE if the attribute doesn't exist. It is overloaded for the primitive types, and is a generally more convenient replacement of <a class="el" href="classtinyxml2_1_1_x_m_l_element.html#a8a78bc1187c1c45ad89f2690eab567b1">QueryIntAttribute()</a> and related functions.</p>
 <p>If successful, the result of the conversion will be written to 'value'. If not successful, nothing will be written to 'value'. This allows you to provide default value:</p>
 <pre class="fragment">int value = 10;
 QueryAttribute( "foo", &amp;value );        // if "foo" isn't found, value will still be 10
@@ -700,7 +704,7 @@ QueryIntAttribute( "foo", &amp;value );     // if "foo" isn't found, value will 
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Dec 10 2017 20:04:44 for TinyXML-2 by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Nov 6 2018 09:38:26 for TinyXML-2 by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.13
 </small></address>
