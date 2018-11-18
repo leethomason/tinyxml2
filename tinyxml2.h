@@ -100,11 +100,11 @@ distribution.
 */
 static const int TIXML2_MAJOR_VERSION = 7;
 static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 0;
+static const int TIXML2_PATCH_VERSION = 1;
 
 #define TINYXML2_MAJOR_VERSION 7
 #define TINYXML2_MINOR_VERSION 0
-#define TINYXML2_PATCH_VERSION 0
+#define TINYXML2_PATCH_VERSION 1
 
 // A fixed element depth limit is problematic. There needs to be a
 // limit to avoid a stack overflow. However, that limit varies per
@@ -129,8 +129,10 @@ class XMLPrinter;
 	pointers into the XML file itself, and will apply normalization
 	and entity translation if actually read. Can also store (and memory
 	manage) a traditional char[]
+
+    Isn't clear why TINYXML2_LIB is needed; but seems to fix #719
 */
-class StrPair
+class TINYXML2_LIB StrPair
 {
 public:
     enum {
