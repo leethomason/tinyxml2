@@ -303,7 +303,7 @@ private:
         TIXMLASSERT( cap > 0 );
         if ( cap > _allocated ) {
             TIXMLASSERT( cap <= INT_MAX / 2 );
-            int newAllocated = cap * 2;
+            const int newAllocated = cap * 2;
             T* newMem = new T[newAllocated];
             TIXMLASSERT( newAllocated >= _size );
             memcpy( newMem, _mem, sizeof(T)*_size );	// warning: not using constructors, only works for PODs
