@@ -54,9 +54,8 @@ What it doesn't do.
 
 TinyXML-2 doesn't parse or use DTDs (Document Type Definitions) or XSLs
 (eXtensible Stylesheet Language.) There are other parsers out there
-that are much more fully featured. But they are also much bigger,
-take longer to set up in your project, have a higher learning curve,
-and often have a more restrictive license. If you are working with
+that are much more fully featured. But they are generally bigger and
+more difficult to use. If you are working with
 browsers or have more complete XML needs, TinyXML-2 is not the parser for you.
 
 TinyXML-1 vs. TinyXML-2
