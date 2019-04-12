@@ -653,6 +653,16 @@ bool XMLUtil::ToInt64(const char* str, int64_t* value)
 }
 
 
+bool XMLUtil::ToUnsigned64(const char* str, uint64_t* value) {
+    unsigned long long v = 0;	// horrible syntax trick to make the compiler happy about %llu
+    if(TIXML_SSCANF(str, "%llu", &v) == 1) {
+        *value = (uint64_t)v;
+        return true;
+    }
+    return false;
+}
+
+
 char* XMLDocument::Identify( char* p, XMLNode** node )
 {
     TIXMLASSERT( node );
@@ -1411,6 +1421,15 @@ XMLError XMLAttribute::QueryInt64Value(int64_t* value) const
 		return XML_SUCCESS;
 	}
 	return XML_WRONG_ATTRIBUTE_TYPE;
+}
+
+
+XMLError XMLAttribute::QueryUnsigned64Value(uint64_t* value) const
+{
+    if(XMLUtil::ToUnsigned64(Value(), value)) {
+        return XML_SUCCESS;
+    }
+    return XML_WRONG_ATTRIBUTE_TYPE;
 }
 
 
