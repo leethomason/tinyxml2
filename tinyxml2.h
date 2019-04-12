@@ -617,6 +617,7 @@ public:
     static void ToStr( float v, char* buffer, int bufferSize );
     static void ToStr( double v, char* buffer, int bufferSize );
 	static void ToStr(int64_t v, char* buffer, int bufferSize);
+    static void ToStr(uint64_t v, char* buffer, int bufferSize);
 
     // converts strings to primitive types
     static bool	ToInt( const char* str, int* value );
@@ -1565,6 +1566,8 @@ public:
     void SetText( unsigned value );
 	/// Convenience method for setting text inside an element. See SetText() for important limitations.
 	void SetText(int64_t value);
+    /// Convenience method for setting text inside an element. See SetText() for important limitations.
+    void SetText(uint64_t value);
 	/// Convenience method for setting text inside an element. See SetText() for important limitations.
     void SetText( bool value );
     /// Convenience method for setting text inside an element. See SetText() for important limitations.
@@ -1604,6 +1607,8 @@ public:
 	/// See QueryIntText()
 	XMLError QueryInt64Text(int64_t* uval) const;
 	/// See QueryIntText()
+	XMLError QueryUnsigned64Text(uint64_t* uval) const;
+	/// See QueryIntText()
     XMLError QueryBoolText( bool* bval ) const;
     /// See QueryIntText()
     XMLError QueryDoubleText( double* dval ) const;
@@ -1616,6 +1621,8 @@ public:
 	unsigned UnsignedText(unsigned defaultValue = 0) const;
 	/// See QueryIntText()
 	int64_t Int64Text(int64_t defaultValue = 0) const;
+    /// See QueryIntText()
+    uint64_t Unsigned64Text(uint64_t defaultValue = 0) const;
 	/// See QueryIntText()
 	bool BoolText(bool defaultValue = false) const;
 	/// See QueryIntText()

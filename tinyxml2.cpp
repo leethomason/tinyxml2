@@ -582,12 +582,17 @@ void XMLUtil::ToStr( double v, char* buffer, int bufferSize )
 }
 
 
-void XMLUtil::ToStr(int64_t v, char* buffer, int bufferSize)
+void XMLUtil::ToStr( int64_t v, char* buffer, int bufferSize )
 {
 	// horrible syntax trick to make the compiler happy about %lld
 	TIXML_SNPRINTF(buffer, bufferSize, "%lld", (long long)v);
 }
 
+void XMLUtil::ToStr( uint64_t v, char* buffer, int bufferSize )
+{
+    // horrible syntax trick to make the compiler happy about %llu
+    TIXML_SNPRINTF(buffer, bufferSize, "%llu", (long long)v);
+}
 
 bool XMLUtil::ToInt( const char* str, int* value )
 {
@@ -1639,6 +1644,12 @@ void XMLElement::SetText(int64_t v)
 	SetText(buf);
 }
 
+void XMLElement::SetText(uint64_t v) {
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr(v, buf, BUF_SIZE);
+    SetText(buf);
+}
+
 
 void XMLElement::SetText( bool v )
 {
@@ -1700,6 +1711,18 @@ XMLError XMLElement::QueryInt64Text(int64_t* ival) const
 		return XML_CAN_NOT_CONVERT_TEXT;
 	}
 	return XML_NO_TEXT_NODE;
+}
+
+
+XMLError XMLElement::QueryUnsigned64Text(uint64_t* ival) const {
+    if(FirstChild() && FirstChild()->ToText()) {
+        const char* t = FirstChild()->Value();
+        if(XMLUtil::ToUnsigned64(t, ival)) {
+            return XML_SUCCESS;
+        }
+        return XML_CAN_NOT_CONVERT_TEXT;
+    }
+    return XML_NO_TEXT_NODE;
 }
 
 
