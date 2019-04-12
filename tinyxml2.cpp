@@ -1714,7 +1714,8 @@ XMLError XMLElement::QueryInt64Text(int64_t* ival) const
 }
 
 
-XMLError XMLElement::QueryUnsigned64Text(uint64_t* ival) const {
+XMLError XMLElement::QueryUnsigned64Text(uint64_t* ival) const
+{
     if(FirstChild() && FirstChild()->ToText()) {
         const char* t = FirstChild()->Value();
         if(XMLUtil::ToUnsigned64(t, ival)) {
@@ -1782,6 +1783,13 @@ int64_t XMLElement::Int64Text(int64_t defaultValue) const
 {
 	int64_t i = defaultValue;
 	QueryInt64Text(&i);
+	return i;
+}
+
+uint64_t XMLElement::Unsigned64Text(uint64_t defaultValue) const
+{
+	uint64_t i = defaultValue;
+	QueryUnsigned64Text(&i);
 	return i;
 }
 
