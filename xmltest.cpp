@@ -461,9 +461,9 @@ int main( int argc, const char ** argv )
 		// Build:
 		//		<element>
 		//			<!--comment-->
+		//			<sub attrib="0" />
 		//			<sub attrib="1" />
-		//			<sub attrib="2" />
-		//			<sub attrib="3" >& Text!</sub>
+		//			<sub attrib="2" >& Text!</sub>
 		//		<element>
 
 		XMLDocument* doc = new XMLDocument();
