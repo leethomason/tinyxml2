@@ -2220,7 +2220,8 @@ public:
     void PushAttribute( const char* name, const char* value );
     void PushAttribute( const char* name, int value );
     void PushAttribute( const char* name, unsigned value );
-	void PushAttribute(const char* name, int64_t value);
+	void PushAttribute( const char* name, int64_t value );
+	void PushAttribute( const char* name, uint64_t value );
 	void PushAttribute( const char* name, bool value );
     void PushAttribute( const char* name, double value );
     /// If streaming, close the Element.
@@ -2232,8 +2233,10 @@ public:
     void PushText( int value );
     /// Add a text node from an unsigned.
     void PushText( unsigned value );
-	/// Add a text node from an unsigned.
-	void PushText(int64_t value);
+	/// Add a text node from a signed 64bit integer.
+	void PushText( int64_t value );
+	/// Add a text node from an unsigned 64bit integer.
+	void PushText( uint64_t value );
 	/// Add a text node from a bool.
     void PushText( bool value );
     /// Add a text node from a float.

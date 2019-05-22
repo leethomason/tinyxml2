@@ -1580,6 +1580,13 @@ int64_t XMLElement::Int64Attribute(const char* name, int64_t defaultValue) const
 	return i;
 }
 
+uint64_t XMLElement::Unsigned64Attribute(const char* name, uint64_t defaultValue) const
+{
+	uint64_t i = defaultValue;
+	QueryUnsigned64Attribute(name, &i);
+	return i;
+}
+
 bool XMLElement::BoolAttribute(const char* name, bool defaultValue) const
 {
 	bool b = defaultValue;
@@ -2664,6 +2671,14 @@ void XMLPrinter::PushAttribute(const char* name, int64_t v)
 }
 
 
+void XMLPrinter::PushAttribute(const char* name, uint64_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	PushAttribute(name, buf);
+}
+
+
 void XMLPrinter::PushAttribute( const char* name, bool v )
 {
     char buf[BUF_SIZE];
@@ -2733,12 +2748,22 @@ void XMLPrinter::PushText( const char* text, bool cdata )
     }
 }
 
+
 void XMLPrinter::PushText( int64_t value )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( value, buf, BUF_SIZE );
     PushText( buf, false );
 }
+
+
+void XMLPrinter::PushText( uint64_t value )
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(value, buf, BUF_SIZE);
+	PushText(buf, false);
+}
+
 
 void XMLPrinter::PushText( int value )
 {
