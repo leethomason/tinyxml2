@@ -1702,12 +1702,12 @@ int main( int argc, const char ** argv )
             doc.Print( &printer );
 
             XMLTest( "BOM preservation (compare)", xml_bom_preservation, printer.CStr(), false, true );
-			doc.SaveFile( "resources/bomtest.xml" );
+			doc.SaveFile( "resources/out/bomtest.xml" );
 			XMLTest( "Save bomtest.xml", false, doc.Error() );
         }
 		{
 			XMLDocument doc;
-			doc.LoadFile( "resources/bomtest.xml" );
+			doc.LoadFile( "resources/out/bomtest.xml" );
 			XMLTest( "Load bomtest.xml", false, doc.Error() );
 			XMLTest( "BOM preservation (load)", true, doc.HasBOM(), false );
 
