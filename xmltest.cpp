@@ -1530,22 +1530,22 @@ int main( int argc, const char ** argv )
 		XMLDocument doc;
 		doc.Parse( xml );
 		const XMLElement* pointElement = doc.RootElement();
-		int text1;
+		int test1;
 		test1 = pointElement->FirstChildElement("IntText")->IntText();
 		XMLTest( "IntText() test",-24,test1);
-		unsigned text2;
+		unsigned test2;
 		test2 = pointElement->FirstChildElement("UnsignedText")->UnsignedText();
 		XMLTest( "UnsignedText() test",42,test2);
-		int64_t text3;
+		int64_t test3;
 		test3 = pointElement->FirstChildElement("Int64Text")->Int64Text();
 		XMLTest( "Int64Text() test",38,test3);
-		double text4;
+		double test4;
 		test4 = pointElement->FirstChildElement("DoubleText")->DoubleText();
 		XMLTest( "DoubleText() test",2.35,test4);
-		float text5;
+		float test5;
 		test5 = pointElement->FirstChildElement("DoubleText")->FloatText();
 		XMLTest( "FloatText()) test",2.35,test5);
-		bool text6;
+		bool test6;
 		test6 = pointElement->FirstChildElement("BoolText")->BoolText();
 		XMLTest( "FloatText()) test",true,test6);
 	}
@@ -1575,15 +1575,15 @@ int main( int argc, const char ** argv )
 						  "</playlist>";
 		XMLDocument doc;
 		doc.Parse( xml );
-		XMLElement* ElementPlaylist = doc.FirstChildElement("playlist");
+		const XMLNode* ElementPlaylist = doc.FirstChildElement("playlist");
 		XMLTest("previousSiblingElement() test",true,ElementPlaylist != 0);
-		const XMLElement* pre = ElementPlaylist->previousSiblingElement();
+		const XMLNode* pre = ElementPlaylist->previousSiblingElement();
 		XMLTest("previousSiblingElement() test",true,pre == 0);
-		XMLElement* ElementBlank = doc.FirstChildElement("entry")->NextSiblingElement("blank");
+		const XMLNode* ElementBlank = doc.FirstChildElement("entry")->NextSiblingElement("blank");
 		XMLTest("NextSiblingElement() test",true,ElementBlank != 0);
-		const XMLElement* next = ElementBlank->NextSiblingElement();
+		const XMLNode* next = ElementBlank->NextSiblingElement();
 		XMLTest("NextSiblingElement() test",true,next == 0);
-		const XMLElement* ElementEntry = ElementBlank->previousSiblingElement("entry");
+		const XMLNode* ElementEntry = ElementBlank->previousSiblingElement("entry");
 		XMLTest("NextSiblingElement() test",true,ElementEntry != 0);
 	}
 
