@@ -1577,13 +1577,13 @@ int main( int argc, const char ** argv )
 		doc.Parse( xml );
 		XMLElement* ElementPlaylist = doc.FirstChildElement("playlist");
 		XMLTest("previousSiblingElement() test",true,ElementPlaylist != 0);
-		const XMLElement* pre = ElementPlaylist->previousSiblingElement();
+		const XMLElement* pre = ElementPlaylist->PreviousSiblingElement();
 		XMLTest("previousSiblingElement() test",true,pre == 0);
 		const XMLElement* ElementBlank = doc.FirstChildElement("entry")->NextSiblingElement("blank");
 		XMLTest("NextSiblingElement() test",true,ElementBlank != 0);
 		const XMLElement* next = ElementBlank->NextSiblingElement();
 		XMLTest("NextSiblingElement() test",true,next == 0);
-		const XMLElement* ElementEntry = ElementBlank->previousSiblingElement("entry");
+		const XMLElement* ElementEntry = ElementBlank->PreviousSiblingElement("entry");
 		XMLTest("NextSiblingElement() test",true,ElementEntry != 0);
 	}
 
