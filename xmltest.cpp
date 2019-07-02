@@ -1575,15 +1575,15 @@ int main( int argc, const char ** argv )
 						  "</playlist>";
 		XMLDocument doc;
 		doc.Parse( xml );
-		const XMLNode* ElementPlaylist = doc.FirstChildElement("playlist");
+		XMLElement* ElementPlaylist = doc.FirstChildElement("playlist");
 		XMLTest("previousSiblingElement() test",true,ElementPlaylist != 0);
-		const XMLNode* pre = ElementPlaylist->previousSiblingElement();
+		const XMLElement* pre = ElementPlaylist->previousSiblingElement();
 		XMLTest("previousSiblingElement() test",true,pre == 0);
-		const XMLNode* ElementBlank = doc.FirstChildElement("entry")->NextSiblingElement("blank");
+		const XMLElement* ElementBlank = doc.FirstChildElement("entry")->NextSiblingElement("blank");
 		XMLTest("NextSiblingElement() test",true,ElementBlank != 0);
-		const XMLNode* next = ElementBlank->NextSiblingElement();
+		const XMLElement* next = ElementBlank->NextSiblingElement();
 		XMLTest("NextSiblingElement() test",true,next == 0);
-		const XMLNode* ElementEntry = ElementBlank->previousSiblingElement("entry");
+		const XMLElement* ElementEntry = ElementBlank->previousSiblingElement("entry");
 		XMLTest("NextSiblingElement() test",true,ElementEntry != 0);
 	}
 
