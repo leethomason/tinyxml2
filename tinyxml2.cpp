@@ -582,12 +582,17 @@ void XMLUtil::ToStr( double v, char* buffer, int bufferSize )
 }
 
 
-void XMLUtil::ToStr(int64_t v, char* buffer, int bufferSize)
+void XMLUtil::ToStr( int64_t v, char* buffer, int bufferSize )
 {
 	// horrible syntax trick to make the compiler happy about %lld
 	TIXML_SNPRINTF(buffer, bufferSize, "%lld", (long long)v);
 }
 
+void XMLUtil::ToStr( uint64_t v, char* buffer, int bufferSize )
+{
+    // horrible syntax trick to make the compiler happy about %llu
+    TIXML_SNPRINTF(buffer, bufferSize, "%llu", (long long)v);
+}
 
 bool XMLUtil::ToInt( const char* str, int* value )
 {
@@ -657,6 +662,16 @@ bool XMLUtil::ToInt64(const char* str, int64_t* value)
 		return true;
 	}
 	return false;
+}
+
+
+bool XMLUtil::ToUnsigned64(const char* str, uint64_t* value) {
+    unsigned long long v = 0;	// horrible syntax trick to make the compiler happy about %llu
+    if(TIXML_SSCANF(str, "%llu", &v) == 1) {
+        *value = (uint64_t)v;
+        return true;
+    }
+    return false;
 }
 
 
@@ -1421,6 +1436,15 @@ XMLError XMLAttribute::QueryInt64Value(int64_t* value) const
 }
 
 
+XMLError XMLAttribute::QueryUnsigned64Value(uint64_t* value) const
+{
+    if(XMLUtil::ToUnsigned64(Value(), value)) {
+        return XML_SUCCESS;
+    }
+    return XML_WRONG_ATTRIBUTE_TYPE;
+}
+
+
 XMLError XMLAttribute::QueryBoolValue( bool* value ) const
 {
     if ( XMLUtil::ToBool( Value(), value )) {
@@ -1477,6 +1501,12 @@ void XMLAttribute::SetAttribute(int64_t v)
 	_value.SetStr(buf);
 }
 
+void XMLAttribute::SetAttribute(uint64_t v)
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr(v, buf, BUF_SIZE);
+    _value.SetStr(buf);
+}
 
 
 void XMLAttribute::SetAttribute( bool v )
@@ -1563,6 +1593,13 @@ int64_t XMLElement::Int64Attribute(const char* name, int64_t defaultValue) const
 	return i;
 }
 
+uint64_t XMLElement::Unsigned64Attribute(const char* name, uint64_t defaultValue) const
+{
+	uint64_t i = defaultValue;
+	QueryUnsigned64Attribute(name, &i);
+	return i;
+}
+
 bool XMLElement::BoolAttribute(const char* name, bool defaultValue) const
 {
 	bool b = defaultValue;
@@ -1625,6 +1662,12 @@ void XMLElement::SetText(int64_t v)
 	char buf[BUF_SIZE];
 	XMLUtil::ToStr(v, buf, BUF_SIZE);
 	SetText(buf);
+}
+
+void XMLElement::SetText(uint64_t v) {
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr(v, buf, BUF_SIZE);
+    SetText(buf);
 }
 
 
@@ -1691,6 +1734,19 @@ XMLError XMLElement::QueryInt64Text(int64_t* ival) const
 }
 
 
+XMLError XMLElement::QueryUnsigned64Text(uint64_t* ival) const
+{
+    if(FirstChild() && FirstChild()->ToText()) {
+        const char* t = FirstChild()->Value();
+        if(XMLUtil::ToUnsigned64(t, ival)) {
+            return XML_SUCCESS;
+        }
+        return XML_CAN_NOT_CONVERT_TEXT;
+    }
+    return XML_NO_TEXT_NODE;
+}
+
+
 XMLError XMLElement::QueryBoolText( bool* bval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
@@ -1747,6 +1803,13 @@ int64_t XMLElement::Int64Text(int64_t defaultValue) const
 {
 	int64_t i = defaultValue;
 	QueryInt64Text(&i);
+	return i;
+}
+
+uint64_t XMLElement::Unsigned64Text(uint64_t defaultValue) const
+{
+	uint64_t i = defaultValue;
+	QueryUnsigned64Text(&i);
 	return i;
 }
 
@@ -2621,6 +2684,14 @@ void XMLPrinter::PushAttribute(const char* name, int64_t v)
 }
 
 
+void XMLPrinter::PushAttribute(const char* name, uint64_t v)
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(v, buf, BUF_SIZE);
+	PushAttribute(name, buf);
+}
+
+
 void XMLPrinter::PushAttribute( const char* name, bool v )
 {
     char buf[BUF_SIZE];
@@ -2690,12 +2761,22 @@ void XMLPrinter::PushText( const char* text, bool cdata )
     }
 }
 
+
 void XMLPrinter::PushText( int64_t value )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( value, buf, BUF_SIZE );
     PushText( buf, false );
 }
+
+
+void XMLPrinter::PushText( uint64_t value )
+{
+	char buf[BUF_SIZE];
+	XMLUtil::ToStr(value, buf, BUF_SIZE);
+	PushText(buf, false);
+}
+
 
 void XMLPrinter::PushText( int value )
 {
