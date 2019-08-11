@@ -612,13 +612,20 @@ bool XMLUtil::ToBool( const char* str, bool* value )
         *value = (ival==0) ? false : true;
         return true;
     }
-    if ( StringEqual( str, "true" ) ) {
-        *value = true;
-        return true;
+    static const char* TRUE[] = { "true", "True", "TRUE", 0 };
+    static const char* FALSE[] = { "false", "False", "FALSE", 0 };
+
+    for (int i = 0; TRUE[i]; ++i) {
+        if (StringEqual(str, TRUE[i])) {
+            *value = true;
+            return true;
+        }
     }
-    else if ( StringEqual( str, "false" ) ) {
-        *value = false;
-        return true;
+    for (int i = 0; FALSE[i]; ++i) {
+        if (StringEqual(str, FALSE[i])) {
+            *value = false;
+            return true;
+        }
     }
     return false;
 }
