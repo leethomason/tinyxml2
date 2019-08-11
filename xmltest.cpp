@@ -804,6 +804,7 @@ int main( int argc, const char ** argv )
 	// ---------- Attributes ---------
 	{
 		static const int64_t BIG = -123456789012345678;
+        static const uint64_t BIG_POS = 123456789012345678;
 		XMLDocument doc;
 		XMLElement* element = doc.NewElement("element");
 		doc.InsertFirstChild(element);
@@ -864,7 +865,23 @@ int main( int argc, const char ** argv )
 			}
 			XMLTest("Attribute: int64_t", BIG, element->Int64Attribute("attrib"), true);
 		}
-		{
+        {
+            element->SetAttribute("attrib", BIG_POS);
+            {
+                uint64_t v = 0;
+                XMLError queryResult = element->QueryUnsigned64Attribute("attrib", &v);
+                XMLTest("Attribute: uint64_t", XML_SUCCESS, queryResult, true);
+                XMLTest("Attribute: uint64_t", BIG_POS, v, true);
+            }
+            {
+                uint64_t v = 0;
+                int queryResult = element->QueryAttribute("attrib", &v);
+                XMLTest("Attribute: uint64_t", (int)XML_SUCCESS, queryResult, true);
+                XMLTest("Attribute: uint64_t", BIG_POS, v, true);
+            }
+            XMLTest("Attribute: uint64_t", BIG_POS, element->Unsigned64Attribute("attrib"), true);
+        }
+        {
 			element->SetAttribute("attrib", true);
 			{
 				bool v = false;
@@ -931,7 +948,14 @@ int main( int argc, const char ** argv )
 			XMLTest("Element: int64_t", XML_SUCCESS, queryResult, true);
 			XMLTest("Element: int64_t", BIG, v, true);
 		}
-	}
+        {
+            element->SetText(BIG_POS);
+            uint64_t v = 0;
+            XMLError queryResult = element->QueryUnsigned64Text(&v);
+            XMLTest("Element: uint64_t", XML_SUCCESS, queryResult, true);
+            XMLTest("Element: uint64_t", BIG_POS, v, true);
+        }
+    }
 
 	// ---------- XMLPrinter stream mode ------
 	{
@@ -944,7 +968,8 @@ int main( int argc, const char ** argv )
 			printer.PushAttribute("attrib-int", int(1));
 			printer.PushAttribute("attrib-unsigned", unsigned(2));
 			printer.PushAttribute("attrib-int64", int64_t(3));
-			printer.PushAttribute("attrib-bool", true);
+            printer.PushAttribute("attrib-uint64", uint64_t(37));
+            printer.PushAttribute("attrib-bool", true);
 			printer.PushAttribute("attrib-double", 4.0);
 			printer.CloseElement();
 			fclose(printerfp);
@@ -964,7 +989,9 @@ int main( int argc, const char ** argv )
 			XMLTest("attrib-unsigned", unsigned(2), attrib->UnsignedValue(), true);
 			attrib = cdoc.FirstChildElement("foo")->FindAttribute("attrib-int64");
 			XMLTest("attrib-int64", int64_t(3), attrib->Int64Value(), true);
-			attrib = cdoc.FirstChildElement("foo")->FindAttribute("attrib-bool");
+            attrib = cdoc.FirstChildElement("foo")->FindAttribute("attrib-uint64");
+            XMLTest("attrib-uint64", uint64_t(37), attrib->Unsigned64Value(), true);
+            attrib = cdoc.FirstChildElement("foo")->FindAttribute("attrib-bool");
 			XMLTest("attrib-bool", true, attrib->BoolValue(), true);
 			attrib = cdoc.FirstChildElement("foo")->FindAttribute("attrib-double");
 			XMLTest("attrib-double", 4.0, attrib->DoubleValue(), true);

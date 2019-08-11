@@ -1494,6 +1494,12 @@ void XMLAttribute::SetAttribute(int64_t v)
 	_value.SetStr(buf);
 }
 
+void XMLAttribute::SetAttribute(uint64_t v)
+{
+    char buf[BUF_SIZE];
+    XMLUtil::ToStr(v, buf, BUF_SIZE);
+    _value.SetStr(buf);
+}
 
 
 void XMLAttribute::SetAttribute( bool v )

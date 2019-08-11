@@ -1222,7 +1222,9 @@ public:
     void SetAttribute( unsigned value );
 	/// Set the attribute to value.
 	void SetAttribute(int64_t value);
-	/// Set the attribute to value.
+    /// Set the attribute to value.
+    void SetAttribute(uint64_t value);
+    /// Set the attribute to value.
     void SetAttribute( bool value );
     /// Set the attribute to value.
     void SetAttribute( double value );
@@ -1433,7 +1435,11 @@ public:
 		return QueryInt64Attribute(name, value);
 	}
 
-	XMLError QueryAttribute( const char* name, bool* value ) const {
+    XMLError QueryAttribute(const char* name, uint64_t* value) const {
+        return QueryUnsigned64Attribute(name, value);
+    }
+
+    XMLError QueryAttribute( const char* name, bool* value ) const {
 		return QueryBoolAttribute( name, value );
 	}
 
@@ -1467,7 +1473,13 @@ public:
 		a->SetAttribute(value);
 	}
 
-	/// Sets the named attribute to value.
+    /// Sets the named attribute to value.
+    void SetAttribute(const char* name, uint64_t value) {
+        XMLAttribute* a = FindOrCreateAttribute(name);
+        a->SetAttribute(value);
+    }
+    
+    /// Sets the named attribute to value.
     void SetAttribute( const char* name, bool value )			{
         XMLAttribute* a = FindOrCreateAttribute( name );
         a->SetAttribute( value );
