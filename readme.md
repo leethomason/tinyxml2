@@ -264,7 +264,7 @@ And additionally a test file:
 
 Simply compile and run. There is a visual studio 2017 project included, a simple Makefile,
 an Xcode project, a Code::Blocks project, and a cmake CMakeLists.txt included to help you.
-The top of tinyxml.h even has a simple g++ command line if you are are Unix/Linuk/BSD and
+The top of tinyxml.h even has a simple g++ command line if you are using Unix/Linux/BSD and
 don't want to use a build system.
 
 Versioning
@@ -278,7 +278,7 @@ common.
 Documentation
 -------------
 
-The documentation is build with Doxygen, using the 'dox'
+The documentation is built with Doxygen, using the 'dox'
 configuration file.
 
 License
