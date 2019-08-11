@@ -1550,6 +1550,70 @@ int main( int argc, const char ** argv )
 		XMLTest( "Ill formed XML", true, doc.Error() );
 	}
 
+	{
+		//API:IntText(),UnsignedText(),Int64Text(),DoubleText(),BoolText() and FloatText() test
+		const char* xml = "<point> <IntText>-24</IntText> <UnsignedText>42</UnsignedText> \
+						   <Int64Text>38</Int64Text> <BoolText>true</BoolText> <DoubleText>2.35</DoubleText> </point>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		const XMLElement* pointElement = doc.RootElement();
+		int test1;
+		test1 = pointElement->FirstChildElement("IntText")->IntText();
+		XMLTest( "IntText() test",-24,test1);
+		unsigned test2;
+		test2 = pointElement->FirstChildElement("UnsignedText")->UnsignedText();
+		XMLTest( "UnsignedText() test",42,test2);
+		int64_t test3;
+		test3 = pointElement->FirstChildElement("Int64Text")->Int64Text();
+		XMLTest( "Int64Text() test",38,test3);
+		double test4;
+		test4 = pointElement->FirstChildElement("DoubleText")->DoubleText();
+		XMLTest( "DoubleText() test",2.35,test4);
+		float test5;
+		test5 = pointElement->FirstChildElement("DoubleText")->FloatText();
+		XMLTest( "FloatText()) test",2.35,test5);
+		bool test6;
+		test6 = pointElement->FirstChildElement("BoolText")->BoolText();
+		XMLTest( "FloatText()) test",true,test6);
+	}
+
+	{
+		//API:ShallowEqual() test
+		const char* xml = "<playlist id = 'playlist'>"
+						    "<property name = 'track_name'>voice</property>"
+						  "</playlist>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		const XMLNode* PlaylistNode = doc.RootElement();
+		const XMLNode* PropertyNode = PlaylistNode->FirstChildElement();
+		bool result;
+		result = PlaylistNode->ShallowEqual(PropertyNode);
+		XMLTest("ShallowEqual() test",false,result);
+		result = PlaylistNode->ShallowEqual(PlaylistNode);
+		XMLTest("ShallowEqual() test",true,result);
+	}
+
+	{
+		//API: previousSiblingElement() and NextSiblingElement() test
+		const char* xml = "<playlist id = 'playlist'>"
+						    "<property name = 'track_name'>voice</property>"
+						    "<entry out = '946' producer = '2_playlist1' in = '0'/>"
+							"<blank length = '1'/>"
+						  "</playlist>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLElement* ElementPlaylist = doc.FirstChildElement("playlist");
+		XMLTest("previousSiblingElement() test",true,ElementPlaylist != 0);
+		const XMLElement* pre = ElementPlaylist->PreviousSiblingElement();
+		XMLTest("previousSiblingElement() test",true,pre == 0);
+		const XMLElement* ElementBlank = ElementPlaylist->FirstChildElement("entry")->NextSiblingElement("blank");
+		XMLTest("NextSiblingElement() test",true,ElementBlank != 0);
+		const XMLElement* next = ElementBlank->NextSiblingElement();
+		XMLTest("NextSiblingElement() test",true,next == 0);
+		const XMLElement* ElementEntry = ElementBlank->PreviousSiblingElement("entry");
+		XMLTest("PreviousSiblingElement test",true,ElementEntry != 0);
+	}
+
 	// QueryXYZText
 	{
 		const char* xml = "<point> <x>1.2</x> <y>1</y> <z>38</z> <valid>true</valid> </point>";
