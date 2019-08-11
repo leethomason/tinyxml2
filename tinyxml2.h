@@ -1722,7 +1722,7 @@ public:
     	specified, TinyXML-2 will assume 'xml' points to a
     	null terminated string.
     */
-    XMLError Parse( const char* xml, size_t nBytes=(size_t)(-1) );
+    XMLError Parse( const char* xml, size_t nBytes=static_cast<size_t>(-1) );
 
     /**
     	Load an XML file from disk.
