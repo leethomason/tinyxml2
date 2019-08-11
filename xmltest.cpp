@@ -1550,32 +1550,32 @@ int main( int argc, const char ** argv )
 		XMLTest( "Ill formed XML", true, doc.Error() );
 	}
 
-	{
-		//API:IntText(),UnsignedText(),Int64Text(),DoubleText(),BoolText() and FloatText() test
-		const char* xml = "<point> <IntText>-24</IntText> <UnsignedText>42</UnsignedText> \
+    {
+        //API:IntText(),UnsignedText(),Int64Text(),DoubleText(),BoolText() and FloatText() test
+        const char* xml = "<point> <IntText>-24</IntText> <UnsignedText>42</UnsignedText> \
 						   <Int64Text>38</Int64Text> <BoolText>true</BoolText> <DoubleText>2.35</DoubleText> </point>";
-		XMLDocument doc;
-		doc.Parse( xml );
-		const XMLElement* pointElement = doc.RootElement();
-		int test1;
-		test1 = pointElement->FirstChildElement("IntText")->IntText();
-		XMLTest( "IntText() test",-24,test1);
-		unsigned test2;
-		test2 = pointElement->FirstChildElement("UnsignedText")->UnsignedText();
-		XMLTest( "UnsignedText() test",42,test2);
-		int64_t test3;
-		test3 = pointElement->FirstChildElement("Int64Text")->Int64Text();
-		XMLTest( "Int64Text() test",38,test3);
-		double test4;
-		test4 = pointElement->FirstChildElement("DoubleText")->DoubleText();
-		XMLTest( "DoubleText() test",2.35,test4);
-		float test5;
-		test5 = pointElement->FirstChildElement("DoubleText")->FloatText();
-		XMLTest( "FloatText()) test",2.35,test5);
-		bool test6;
-		test6 = pointElement->FirstChildElement("BoolText")->BoolText();
-		XMLTest( "FloatText()) test",true,test6);
-	}
+        XMLDocument doc;
+        doc.Parse(xml);
+
+        const XMLElement* pointElement = doc.RootElement();
+        int test1 = pointElement->FirstChildElement("IntText")->IntText();
+        XMLTest("IntText() test", -24, test1);
+
+        unsigned test2 = pointElement->FirstChildElement("UnsignedText")->UnsignedText();
+        XMLTest("UnsignedText() test", static_cast<unsigned>(42), test2);
+
+        int64_t test3 = pointElement->FirstChildElement("Int64Text")->Int64Text();
+        XMLTest("Int64Text() test", static_cast<int64_t>(38), test3);
+
+        double test4 = pointElement->FirstChildElement("DoubleText")->DoubleText();
+        XMLTest("DoubleText() test", 2.35, test4);
+
+        float test5 = pointElement->FirstChildElement("DoubleText")->FloatText();
+        XMLTest("FloatText()) test", 2.35f, test5);
+
+        bool test6 = pointElement->FirstChildElement("BoolText")->BoolText();
+        XMLTest("FloatText()) test", true, test6);
+    }
 
 	{
 		//API:ShallowEqual() test
