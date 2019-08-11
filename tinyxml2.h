@@ -2253,10 +2253,10 @@ public:
     	If in print to memory mode, reset the buffer to the
     	beginning.
     */
-    void ClearBuffer() {
+    void ClearBuffer( bool resetToFirstElement = true ) {
         _buffer.Clear();
         _buffer.Push(0);
-		_firstElement = true;
+		_firstElement = resetToFirstElement;
     }
 
 protected:
