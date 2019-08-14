@@ -2101,7 +2101,7 @@ XMLDocument::~XMLDocument()
 }
 
 
-void XMLDocument::MarkInUse(XMLNode* node)
+void XMLDocument::MarkInUse(const XMLNode* const node)
 {
 	TIXMLASSERT(node);
 	TIXMLASSERT(node->_parent == 0);
