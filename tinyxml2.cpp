@@ -2635,8 +2635,6 @@ void XMLPrinter::OpenElement( const char* name, bool compactMode )
 
     if ( _textDepth < 0 && !_firstElement && !compactMode ) {
         Putc( '\n' );
-    }
-    if ( !compactMode ) {
         PrintSpace( _depth );
     }
 
