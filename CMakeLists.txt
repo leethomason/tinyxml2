@@ -75,10 +75,10 @@ endif()
 
 # export targets for find_package config mode
 export(TARGETS tinyxml2
-      FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
+      FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}Targets.cmake)
 
 install(TARGETS tinyxml2
-        EXPORT ${CMAKE_PROJECT_NAME}Targets
+        EXPORT ${PROJECT_NAME}Targets
         RUNTIME 
                 DESTINATION ${CMAKE_INSTALL_BINDIR}
                 COMPONENT tinyxml2_runtime
@@ -121,23 +121,24 @@ if(NOT TARGET uninstall)
 endif()
 
 include(CMakePackageConfigHelpers)
-set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
 configure_package_config_file(
   "Config.cmake.in"
-  "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}"
+  "${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
 )
 write_basic_package_version_file(
-  "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
+  "${CMAKE_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
   VERSION ${GENERIC_LIB_VERSION}
   COMPATIBILITY SameMajorVersion
 )
 install(FILES
-        ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
-        ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
+        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
         COMPONENT tinyxml2_config)
 
-install(EXPORT ${CMAKE_PROJECT_NAME}Targets NAMESPACE tinyxml2::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
+install(EXPORT ${PROJECT_NAME}Targets
+        NAMESPACE tinyxml2::
+        FILE tinyxml2-config.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
         COMPONENT tinyxml2_config)
