@@ -688,15 +688,17 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
     // These strings define the matching patterns:
     static const char* xmlHeader		= { "<?" };
     static const char* commentHeader	= { "<!--" };
+    static const char* badCommentHeader	= { "<! --" }; // [FX]: For broken comments
     static const char* cdataHeader		= { "<![CDATA[" };
     static const char* dtdHeader		= { "<!" };
     static const char* elementHeader	= { "<" };	// and a header for everything else; check last.
 
-    static const int xmlHeaderLen		= (int)strlen(xmlHeader);
-    static const int commentHeaderLen	= (int)strlen(commentHeader);
-    static const int cdataHeaderLen		= (int)strlen(cdataHeader);
-    static const int dtdHeaderLen		= (int)strlen(dtdHeader);
-    static const int elementHeaderLen	= (int)strlen(elementHeader);
+    static const int xmlHeaderLen		 = (int)strlen(xmlHeader);
+    static const int commentHeaderLen	 = (int)strlen(commentHeader);
+    static const int badCommentHeaderLen = (int)strlen(badCommentHeader);
+    static const int cdataHeaderLen		 = (int)strlen(cdataHeader);
+    static const int dtdHeaderLen		 = (int)strlen(dtdHeader);
+    static const int elementHeaderLen	 = (int)strlen(elementHeader);
 
 	TIXMLSTATICASSERT(sizeof(XMLComment) == sizeof(XMLUnknown));		// use same memory pool
 	TIXMLSTATICASSERT(sizeof(XMLComment) == sizeof(XMLDeclaration));	// use same memory pool
@@ -711,6 +713,11 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
         returnNode = CreateUnlinkedNode<XMLComment>( _commentPool );
         returnNode->_parseLineNum = _parseCurLineNum;
         p += commentHeaderLen;
+    }
+    else if ( XMLUtil::StringEqual( p, badCommentHeader, badCommentHeaderLen ) ) {
+        returnNode = CreateUnlinkedNode<XMLDeclaration>( _commentPool );
+        returnNode->_parseLineNum = _parseCurLineNum;
+        p += xmlHeaderLen;
     }
     else if ( XMLUtil::StringEqual( p, cdataHeader, cdataHeaderLen ) ) {
         XMLText* text = CreateUnlinkedNode<XMLText>( _textPool );
