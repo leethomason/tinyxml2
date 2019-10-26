@@ -225,10 +225,11 @@ char* StrPair::ParseName( char* p )
     }
 
     char* const start = p;
-    ++p;
-    while ( *p && XMLUtil::IsNameChar( *p ) ) {
+
+    do
+    {
         ++p;
-    }
+    } while (*p && XMLUtil::IsNameChar( *p ));
 
     Set( start, p, 0 );
     return p;
@@ -374,13 +375,9 @@ const char* XMLUtil::writeBoolFalse = "false";
 
 void XMLUtil::SetBoolSerialization(const char* writeTrue, const char* writeFalse)
 {
-	static const char* defTrue  = "true";
-	static const char* defFalse = "false";
-
-	writeBoolTrue = (writeTrue) ? writeTrue : defTrue;
-	writeBoolFalse = (writeFalse) ? writeFalse : defFalse;
+	writeBoolTrue = (writeTrue) ? writeTrue : writeBoolTrue;
+	writeBoolFalse = (writeFalse) ? writeFalse : writeBoolFalse;
 }
-
 
 const char* XMLUtil::ReadBOM( const char* p, bool* bom )
 {
@@ -617,8 +614,8 @@ bool XMLUtil::ToBool( const char* str, bool* value )
         *value = (ival==0) ? false : true;
         return true;
     }
-    static const char* TRUE[] = { "true", "True", "TRUE", 0 };
-    static const char* FALSE[] = { "false", "False", "FALSE", 0 };
+    static const char* TRUE[] = { "true", "True", "TRUE", "1", 0 };
+    static const char* FALSE[] = { "false", "False", "FALSE", "0", 0 };
 
     for (int i = 0; TRUE[i]; ++i) {
         if (StringEqual(str, TRUE[i])) {
@@ -695,11 +692,11 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
     static const char* dtdHeader		= { "<!" };
     static const char* elementHeader	= { "<" };	// and a header for everything else; check last.
 
-    static const int xmlHeaderLen		= 2;
-    static const int commentHeaderLen	= 4;
-    static const int cdataHeaderLen		= 9;
-    static const int dtdHeaderLen		= 2;
-    static const int elementHeaderLen	= 1;
+    static const int xmlHeaderLen		= strlen(xmlHeaderLen);
+    static const int commentHeaderLen	= strlen(commentHeader);
+    static const int cdataHeaderLen		= strlen(cdataHeader);
+    static const int dtdHeaderLen		= strlen(dtdHeader);
+    static const int elementHeaderLen	= strlen(elementHeader);
 
     TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLUnknown ) );		// use same memory pool
     TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLDeclaration ) );	// use same memory pool
