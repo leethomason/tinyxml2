@@ -94,6 +94,11 @@ distribution.
 #   define TIXMLASSERT( x )               {}
 #endif
 
+#if defined(TINYXML2_DEBUG) && defined(_MSC_VER) && _MSC_VER >= 1800
+#define TIXMLSTATICASSERT(x) static_assert(x, "Incorrect size!")
+#else
+#define TIXMLSTATICASSERT(x) TIXMLASSERT(x)
+#endif
 
 /* Versioning, past 1.0.14:
 	http://semver.org/

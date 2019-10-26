@@ -692,14 +692,15 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
     static const char* dtdHeader		= { "<!" };
     static const char* elementHeader	= { "<" };	// and a header for everything else; check last.
 
-    static const int xmlHeaderLen		= strlen(xmlHeaderLen);
-    static const int commentHeaderLen	= strlen(commentHeader);
-    static const int cdataHeaderLen		= strlen(cdataHeader);
-    static const int dtdHeaderLen		= strlen(dtdHeader);
-    static const int elementHeaderLen	= strlen(elementHeader);
+    static const int xmlHeaderLen		= (int)strlen(xmlHeader);
+    static const int commentHeaderLen	= (int)strlen(commentHeader);
+    static const int cdataHeaderLen		= (int)strlen(cdataHeader);
+    static const int dtdHeaderLen		= (int)strlen(dtdHeader);
+    static const int elementHeaderLen	= (int)strlen(elementHeader);
 
-    TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLUnknown ) );		// use same memory pool
-    TIXMLASSERT( sizeof( XMLComment ) == sizeof( XMLDeclaration ) );	// use same memory pool
+	TIXMLSTATICASSERT(sizeof(XMLComment) == sizeof(XMLUnknown));		// use same memory pool
+	TIXMLSTATICASSERT(sizeof(XMLComment) == sizeof(XMLDeclaration));	// use same memory pool
+
     XMLNode* returnNode = 0;
     if ( XMLUtil::StringEqual( p, xmlHeader, xmlHeaderLen ) ) {
         returnNode = CreateUnlinkedNode<XMLDeclaration>( _commentPool );
