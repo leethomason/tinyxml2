@@ -100,6 +100,20 @@ distribution.
 	#define TIXML_SSCANF   sscanf
 #endif
 
+#if defined(_WIN64)
+	#define TIXML_FSEEK _fseeki64
+	#define TIXML_FTELL _ftelli64
+#elif defined(__APPLE__)
+	#define TIXML_FSEEK fseeko
+	#define TIXML_FTELL ftello
+#elif defined(__x86_64__)
+	#define TIXML_FSEEK fseeko64
+	#define TIXML_FTELL ftello64
+#else
+	#define TIXML_FSEEK fseek
+	#define TIXML_FTELL ftell
+#endif
+
 
 static const char LINE_FEED				= static_cast<char>(0x0a);			// all line endings are normalized to LF
 static const char LF = LINE_FEED;
@@ -2280,15 +2294,15 @@ XMLError XMLDocument::LoadFile( FILE* fp )
 {
     Clear();
 
-    fseek( fp, 0, SEEK_SET );
+    TIXML_FSEEK( fp, 0, SEEK_SET );
     if ( fgetc( fp ) == EOF && ferror( fp ) != 0 ) {
         SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
     }
 
-    fseek( fp, 0, SEEK_END );
-    const long filelength = ftell( fp );
-    fseek( fp, 0, SEEK_SET );
+    TIXML_FSEEK( fp, 0, SEEK_END );
+    const long long filelength = TIXML_FTELL( fp );
+    TIXML_FSEEK( fp, 0, SEEK_SET );
     if ( filelength == -1L ) {
         SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
