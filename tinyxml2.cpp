@@ -2267,29 +2267,6 @@ XMLError XMLDocument::LoadFile( const char* filename )
     return _errorID;
 }
 
-// This is likely overengineered template art to have a check that unsigned long value incremented
-// by one still fits into size_t. If size_t type is larger than unsigned long type
-// (x86_64-w64-mingw32 target) then the check is redundant and gcc and clang emit
-// -Wtype-limits warning. This piece makes the compiler select code with a check when a check
-// is useful and code with no check when a check is redundant depending on how size_t and unsigned long
-// types sizes relate to each other.
-template
-<bool = (sizeof(unsigned long) >= sizeof(size_t))>
-struct LongFitsIntoSizeTMinusOne {
-    static bool Fits( unsigned long value )
-    {
-        return value < static_cast<size_t>(-1);
-    }
-};
-
-template <>
-struct LongFitsIntoSizeTMinusOne<false> {
-    static bool Fits( unsigned long )
-    {
-        return true;
-    }
-};
-
 XMLError XMLDocument::LoadFile( FILE* fp )
 {
     Clear();
@@ -2309,7 +2286,7 @@ XMLError XMLDocument::LoadFile( FILE* fp )
     }
     TIXMLASSERT( filelength >= 0 );
 
-    if ( !LongFitsIntoSizeTMinusOne<>::Fits( filelength ) ) {
+    if ( filelength >= static_cast<size_t>(-1) ) {
         // Cannot handle files which won't fit in buffer together with null terminator
         SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
