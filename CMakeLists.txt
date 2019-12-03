@@ -121,7 +121,7 @@ if(NOT TARGET uninstall)
 endif()
 
 include(CMakePackageConfigHelpers)
-set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
+set(TARGETS_EXPORT_NAME "${CMAKE_PROJECT_NAME}Targets")
 configure_package_config_file(
   "Config.cmake.in"
   "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake"
