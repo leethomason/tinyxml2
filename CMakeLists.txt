@@ -48,6 +48,8 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 # to distinguish between debug and release lib
 set(CMAKE_DEBUG_POSTFIX "d")
 
+set(TARGETS_EXPORT_NAME "${CMAKE_PROJECT_NAME}Targets")
+
 add_library(tinyxml2 tinyxml2.cpp tinyxml2.h)
 
 set_target_properties(tinyxml2 PROPERTIES
@@ -72,8 +74,6 @@ else()
       add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     endif(MSVC)
 endif()
-
-set(TARGETS_EXPORT_NAME "${CMAKE_PROJECT_NAME}Targets")
 
 # Export cmake script that can be used by downstream project
 # via `include()`
