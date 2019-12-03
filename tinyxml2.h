@@ -1640,7 +1640,22 @@ public:
 	/// See QueryIntText()
 	double DoubleText(double defaultValue = 0) const;
 	/// See QueryIntText()
-	float FloatText(float defaultValue = 0) const;
+    float FloatText(float defaultValue = 0) const;
+
+    /**
+        Convenience method to create a new XMLElement and add it as last (right)
+        child of this node. Returns the created and inserted element.
+    */
+    XMLElement* PushNewChildElement(const char* name);
+    /// See PushNewChildElement()
+    XMLComment* PushNewChildComment(const char* comment);
+    /// See PushNewChildElement()
+    XMLText* PushNewChildText(const char* text);
+    /// See PushNewChildElement()
+    XMLDeclaration* PushNewChildDeclaration(const char* text);
+    /// See PushNewChildElement()
+    XMLUnknown* PushNewUnknown(const char* text);
+
 
     // internal:
     enum ElementClosingType {
