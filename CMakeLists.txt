@@ -73,12 +73,14 @@ else()
     endif(MSVC)
 endif()
 
+set(TARGETS_EXPORT_NAME "${CMAKE_PROJECT_NAME}Targets")
+
 # export targets for find_package config mode
 export(TARGETS tinyxml2
-      FILE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake)
+      FILE ${CMAKE_BINARY_DIR}/${TARGETS_EXPORT_NAME}.cmake)
 
 install(TARGETS tinyxml2
-        EXPORT ${CMAKE_PROJECT_NAME}Targets
+        EXPORT ${TARGETS_EXPORT_NAME}
         RUNTIME 
                 DESTINATION ${CMAKE_INSTALL_BINDIR}
                 COMPONENT tinyxml2_runtime
@@ -121,7 +123,6 @@ if(NOT TARGET uninstall)
 endif()
 
 include(CMakePackageConfigHelpers)
-set(TARGETS_EXPORT_NAME "${CMAKE_PROJECT_NAME}Targets")
 configure_package_config_file(
   "Config.cmake.in"
   "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake"
@@ -138,6 +139,6 @@ install(FILES
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
         COMPONENT tinyxml2_config)
 
-install(EXPORT ${CMAKE_PROJECT_NAME}Targets NAMESPACE tinyxml2::
+install(EXPORT ${TARGETS_EXPORT_NAME} NAMESPACE tinyxml2::
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
         COMPONENT tinyxml2_config)
