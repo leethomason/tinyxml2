@@ -75,7 +75,8 @@ endif()
 
 set(TARGETS_EXPORT_NAME "${CMAKE_PROJECT_NAME}Targets")
 
-# export targets for find_package config mode
+# Export cmake script that can be used by downstream project
+# via `include()`
 export(TARGETS tinyxml2
       FILE ${CMAKE_BINARY_DIR}/${TARGETS_EXPORT_NAME}.cmake)
 
@@ -139,6 +140,7 @@ install(FILES
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
         COMPONENT tinyxml2_config)
 
+# Export targets for find_package config mode
 install(EXPORT ${TARGETS_EXPORT_NAME} NAMESPACE tinyxml2::
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
         COMPONENT tinyxml2_config)
