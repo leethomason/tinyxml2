@@ -596,7 +596,7 @@ void XMLUtil::ToStr( uint64_t v, char* buffer, int bufferSize )
 
 bool XMLUtil::ToInt( const char* str, int* value )
 {
-    if ( TIXML_SSCANF( str, "%d", value ) == 1 ) {
+    if ( TIXML_SSCANF( str, IsPrefixHex(str) ? "%x" : "%d", value ) == 1 ) {
         return true;
     }
     return false;
@@ -604,7 +604,7 @@ bool XMLUtil::ToInt( const char* str, int* value )
 
 bool XMLUtil::ToUnsigned( const char* str, unsigned *value )
 {
-    if ( TIXML_SSCANF( str, "%u", value ) == 1 ) {
+    if ( TIXML_SSCANF( str, IsPrefixHex(str) ? "%x" : "%u", value ) == 1 ) {
         return true;
     }
     return false;
@@ -657,7 +657,7 @@ bool XMLUtil::ToDouble( const char* str, double* value )
 bool XMLUtil::ToInt64(const char* str, int64_t* value)
 {
 	long long v = 0;	// horrible syntax trick to make the compiler happy about %lld
-	if (TIXML_SSCANF(str, "%lld", &v) == 1) {
+	if (TIXML_SSCANF(str, IsPrefixHex(str) ? "%llx" : "%lld", &v) == 1) {
 		*value = static_cast<int64_t>(v);
 		return true;
 	}
@@ -667,7 +667,7 @@ bool XMLUtil::ToInt64(const char* str, int64_t* value)
 
 bool XMLUtil::ToUnsigned64(const char* str, uint64_t* value) {
     unsigned long long v = 0;	// horrible syntax trick to make the compiler happy about %llu
-    if(TIXML_SSCANF(str, "%llu", &v) == 1) {
+    if(TIXML_SSCANF(str, IsPrefixHex(str) ? "%llx" : "%llu", &v) == 1) {
         *value = (uint64_t)v;
         return true;
     }
