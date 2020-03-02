@@ -996,7 +996,105 @@ int main( int argc, const char ** argv )
 			attrib = cdoc.FirstChildElement("foo")->FindAttribute("attrib-double");
 			XMLTest("attrib-double", 4.0, attrib->DoubleValue(), true);
 		}
+    // Add API_testcatse :PushDeclaration();PushText();PushComment()
+    {
+      FILE* fp = fopen("resources/out/printer_1.xml","w");
+      XMLPrinter printer(fp);
+  
+      printer.PushDeclaration("version = '1.0' enconding = 'utf-8'");
+  
+      printer.OpenElement("foo");  
+      printer.PushAttribute("attrib-text", "text");
+      
+      printer.OpenElement("text");
+      printer.PushText("Tinyxml2");
+      printer.CloseElement();
+      
+      printer.OpenElement("int");
+      printer.PushText(int(11));
+      printer.CloseElement();
+      
+      printer.OpenElement("unsigned");
+      printer.PushText(unsigned(12));
+      printer.CloseElement();
+      
+      printer.OpenElement("int64_t");
+      printer.PushText(int64_t(13));
+      printer.CloseElement();
+      
+      printer.OpenElement("uint64_t");
+      printer.PushText(uint64_t(14));
+      printer.CloseElement();
+      
+      printer.OpenElement("bool");
+      printer.PushText(true);
+      printer.CloseElement();
+      
+      printer.OpenElement("float");
+      printer.PushText("1.56");
+      printer.CloseElement();
+      
+      printer.OpenElement("double");
+      printer.PushText("12.12");
+      printer.CloseElement();
+      
+      printer.OpenElement("comment");
+      printer.PushComment("this is Tinyxml2");
+      printer.CloseElement();
+      
+      printer.CloseElement();
+      fclose(fp);
+    }
+    {
+      XMLDocument doc;
+      doc.LoadFile("resources/out/printer_1.xml");
+      XMLTest("XMLPrinter Stream mode: load", XML_SUCCESS, doc.ErrorID(), true);
 
+      const XMLDocument& cdoc = doc;
+
+      const  XMLElement* root = cdoc.FirstChildElement("foo");
+      
+      const char * text_value;
+      text_value = root->FirstChildElement("text")->GetText();
+      XMLTest("PushText( const char* text, bool cdata=false ) test","Tinyxml2",text_value);
+
+      int  int_value;
+      int_value = root->FirstChildElement("int")->IntText();
+      XMLTest("PushText( int value ) test",11,int_value);
+      
+      unsigned  unsigned_value;
+      unsigned_value = root->FirstChildElement("unsigned")->UnsignedText();
+      XMLTest("PushText( unsigned value ) test",12,unsigned_value);
+      
+      int64_t  int64_t_value;
+      int64_t_value = root->FirstChildElement("int64_t")->Int64Text();
+      XMLTest("PushText( int64_t value ) test",13,int64_t_value);
+      
+      uint64_t uint64_t_value;
+      uint64_t_value = root->FirstChildElement("uint64_t")->Unsigned64Text();
+      XMLTest("PushText( uint64_t value ) test",14,uint64_t_value);
+      
+      float  float_value;
+      float_value = root->FirstChildElement("float")->FloatText();
+      XMLTest("PushText( float value ) test",1.56,float_value);
+      
+      double double_value;
+      double_value = root->FirstChildElement("double")->DoubleText();
+      XMLTest("PushText( double value ) test",12.12,double_value);
+      
+      bool bool_value;
+      bool_value = root->FirstChildElement("bool")->BoolText();
+      XMLTest("PushText( bool value ) test",true,bool_value);
+      
+      const XMLComment * comment = root->FirstChildElement("comment")->FirstChild()->ToComment();
+      const char * comment_value = comment->Value();
+      XMLTest("PushComment() test","this is Tinyxml2",comment_value);
+      
+      const XMLDeclaration * declaration = cdoc.FirstChild()->ToDeclaration();
+      const char * declaration_value = declaration->Value();
+      XMLTest("PushDeclaration() test","version = '1.0' enconding = 'utf-8'",declaration_value);
+
+    }
 	}
 
 
