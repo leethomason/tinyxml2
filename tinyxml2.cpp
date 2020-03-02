@@ -2278,15 +2278,23 @@ XMLError XMLDocument::LoadFile( FILE* fp )
     }
 
     TIXML_FSEEK( fp, 0, SEEK_END );
-    const long long filelength = TIXML_FTELL( fp );
-    TIXML_FSEEK( fp, 0, SEEK_SET );
-    if ( filelength == -1L ) {
-        SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
-        return _errorID;
-    }
-    TIXMLASSERT( filelength >= 0 );
 
-    if ( filelength >= static_cast<size_t>(-1) ) {
+    unsigned long long filelength;
+    {
+        const long long fileLengthSigned = TIXML_FTELL( fp );
+        TIXML_FSEEK( fp, 0, SEEK_SET );
+        if ( fileLengthSigned == -1L ) {
+            SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
+            return _errorID;
+        }
+        TIXMLASSERT( fileLengthSigned >= 0 );
+        filelength = static_cast<unsigned long long>(fileLengthSigned);
+    }
+
+    const size_t maxSizeT = static_cast<size_t>(-1);
+    // We'll do the comparison as an unsigned long long, because that's guaranteed to be at
+    // least 8 bytes, even on a 32-bit platform.
+    if ( filelength >= static_cast<unsigned long long>(maxSizeT) ) {
         // Cannot handle files which won't fit in buffer together with null terminator
         SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
         return _errorID;
@@ -2297,7 +2305,7 @@ XMLError XMLDocument::LoadFile( FILE* fp )
         return _errorID;
     }
 
-    const size_t size = filelength;
+    const size_t size = static_cast<size_t>(filelength);
     TIXMLASSERT( _charBuffer == 0 );
     _charBuffer = new char[size+1];
     const size_t read = fread( _charBuffer, 1, size, fp );
