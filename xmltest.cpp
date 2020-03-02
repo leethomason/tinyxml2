@@ -1290,7 +1290,7 @@ int main( int argc, const char ** argv )
 	}
 
 	{
-		// trying to repro ]1874301]. If it doesn't go into an infinite loop, all is well.
+		// trying to repro [1874301]. If it doesn't go into an infinite loop, all is well.
 		unsigned char buf[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?><feed><![CDATA[Test XMLblablablalblbl";
 		buf[60] = 239;
 		buf[61] = 0;
