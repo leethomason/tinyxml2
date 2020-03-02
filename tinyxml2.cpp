@@ -1961,6 +1961,46 @@ XMLAttribute* XMLElement::CreateAttribute()
     return attrib;
 }
 
+
+XMLElement* XMLElement::PushNewChildElement(const char* name)
+{
+    XMLElement* element = _document->NewElement(name);
+    // by construction, the new element has the same Document, so this
+    // call will always succeed
+    InsertEndChild(element);
+    return element;
+}
+
+XMLComment* XMLElement::PushNewChildComment(const char* comment)
+{
+    XMLComment* element = _document->NewComment(comment);
+    InsertEndChild(element);
+    return element;
+}
+
+XMLText* XMLElement::PushNewChildText(const char* text)
+{
+    XMLText* element = _document->NewText(text);
+    InsertEndChild(element);
+    return element;
+}
+
+XMLDeclaration* XMLElement::PushNewChildDeclaration(const char* text)
+{
+    XMLDeclaration* element = _document->NewDeclaration(text);
+    InsertEndChild(element);
+    return element;
+}
+
+XMLUnknown* XMLElement::PushNewUnknown(const char* text)
+{
+    XMLUnknown* element = _document->NewUnknown(text);
+    InsertEndChild(element);
+    return element;
+}
+
+
+
 //
 //	<ele></ele>
 //	<ele>foo<b>bar</b></ele>
