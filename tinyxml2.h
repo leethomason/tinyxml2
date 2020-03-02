@@ -562,7 +562,7 @@ public:
         TIXMLASSERT( p );
         return p;
     }
-    static char* SkipWhiteSpace( char* p, int* curLineNumPtr )				{
+    static char* SkipWhiteSpace( char* const p, int* curLineNumPtr ) {
         return const_cast<char*>( SkipWhiteSpace( const_cast<const char*>(p), curLineNumPtr ) );
     }
 
@@ -600,7 +600,7 @@ public:
         return strncmp( p, q, nChar ) == 0;
     }
 
-    inline static bool IsUTF8Continuation( char p ) {
+    inline static bool IsUTF8Continuation( const char p ) {
         return ( p & 0x80 ) != 0;
     }
 
@@ -1894,7 +1894,7 @@ public:
     char* Identify( char* p, XMLNode** node );
 
 	// internal
-	void MarkInUse(XMLNode*);
+	void MarkInUse(const XMLNode* const);
 
     virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const	{
         return 0;
