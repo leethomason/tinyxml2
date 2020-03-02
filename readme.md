@@ -262,7 +262,7 @@ There are 2 files in TinyXML-2:
 And additionally a test file:
 * xmltest.cpp
 
-Simply compile and run. There is a visual studio 2017 project included, a simple Makefile,
+Simply compile and run. There is a visual studio 2019 project included, a simple Makefile,
 an Xcode project, a Code::Blocks project, and a cmake CMakeLists.txt included to help you.
 The top of tinyxml.h even has a simple g++ command line if you are using Unix/Linux/BSD and
 don't want to use a build system.
