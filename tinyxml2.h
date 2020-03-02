@@ -1646,15 +1646,15 @@ public:
         Convenience method to create a new XMLElement and add it as last (right)
         child of this node. Returns the created and inserted element.
     */
-    XMLElement* PushNewChildElement(const char* name);
-    /// See PushNewChildElement()
-    XMLComment* PushNewChildComment(const char* comment);
-    /// See PushNewChildElement()
-    XMLText* PushNewChildText(const char* text);
-    /// See PushNewChildElement()
-    XMLDeclaration* PushNewChildDeclaration(const char* text);
-    /// See PushNewChildElement()
-    XMLUnknown* PushNewUnknown(const char* text);
+    XMLElement* InsertNewChildElement(const char* name);
+    /// See InsertNewChildElement()
+    XMLComment* InsertNewComment(const char* comment);
+    /// See InsertNewChildElement()
+    XMLText* InsertNewText(const char* text);
+    /// See InsertNewChildElement()
+    XMLDeclaration* InsertNewDeclaration(const char* text);
+    /// See InsertNewChildElement()
+    XMLUnknown* InsertNewUnknown(const char* text);
 
 
     // internal:
