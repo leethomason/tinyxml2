@@ -106,7 +106,7 @@ distribution.
 #elif defined(__APPLE__)
 	#define TIXML_FSEEK fseeko
 	#define TIXML_FTELL ftello
-#elif defined(__x86_64__)
+#elif defined(__unix__) && defined(__x86_64__)
 	#define TIXML_FSEEK fseeko64
 	#define TIXML_FTELL ftello64
 #else
