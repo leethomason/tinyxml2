@@ -67,6 +67,28 @@ def engineRule( line ):
 
 fileProcess( "tinyxml2.h", engineRule )
 
+def macroVersionRule( line ):
+
+	matchMajor = "#define TINYXML2_MAJOR_VERSION"
+	matchMinor = "#define TINYXML2_MINOR_VERSION"
+	matchBuild = "#define TINYXML2_PATCH_VERSION"
+
+	if line[0:len(matchMajor)] == matchMajor:
+		print( "1)macro Major found" )
+		return matchMajor + " " + major + "\n"
+
+	elif line[0:len(matchMinor)] == matchMinor:
+		print( "2)macro Minor found" )
+		return matchMinor + " " + minor + "\n"
+
+	elif line[0:len(matchBuild)] == matchBuild:
+		print( "3)macro Build found" )
+		return matchBuild + " " + build + "\n"
+
+	else:
+		return line;
+
+fileProcess("tinyxml2.h", macroVersionRule)
 
 #### Write the dox ####
 
@@ -113,7 +135,7 @@ def cmakeRule2( line ):
 fileProcess( "CMakeLists.txt", cmakeRule2 )
 
 print( "Release note:" )
-print( '1. Build.   g++ -Wall -DDEBUG tinyxml2.cpp xmltest.cpp -o gccxmltest.exe' )
+print( '1. Build.   g++ -Wall -DTINYXML2_DEBUG tinyxml2.cpp xmltest.cpp -o gccxmltest.exe' )
 print( '2. Commit.  git commit -am"setting the version to ' + versionStr + '"' )
 print( '3. Tag.     git tag ' + versionStr )
 print( '   OR       git tag -a ' + versionStr + ' -m [tag message]' )

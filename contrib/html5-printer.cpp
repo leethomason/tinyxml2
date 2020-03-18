@@ -40,7 +40,7 @@ distribution.
 */
 
 
-#include <tinyxml2.h>
+#include "../tinyxml2.h"
 #include <iostream>
 
 #if defined (_MSC_VER)
@@ -65,7 +65,7 @@ public:
 protected:
     virtual void CloseElement () {
         if (_elementJustOpened && !isVoidElement (_stack.PeekTop())) {
-            SealElement();
+            SealElementIfJustOpened();
             }
         XMLPrinter::CloseElement();
     }
