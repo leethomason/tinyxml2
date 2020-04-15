@@ -1,15 +1,14 @@
 name: C/C++ CI
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [push, pull_request]
 
 jobs:
   build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
