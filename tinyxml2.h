@@ -2316,16 +2316,28 @@ public:
     }
 
 protected:
+    /**
+     * Functions which directly write to the output of the printer.
+     * All other functions use them in the background. These must be
+     * kept virtual so that subclasses can derive XMLPrinter and
+     * just have to override these and not any XML-specifics.
+     */
+    /// Resolve the given format string and write the resulting
+    /// buffer to the output FILE* or memory buffer
+    virtual void Print( const char* format, ... );
+    /// Copy the given number of bytes from the given buffer to
+    /// the output FILE* or memory buffer
+    virtual void Write( const char* data, size_t size );
+    /// Write the given char to the output FILE* or memory buffer
+    virtual void Putc( char ch );
+
 	virtual bool CompactMode( const XMLElement& )	{ return _compactMode; }
 
 	/** Prints out the space before an element. You may override to change
 	    the space and tabs used. A PrintSpace() override should call Print().
 	*/
     virtual void PrintSpace( int depth );
-    void Print( const char* format, ... );
-    void Write( const char* data, size_t size );
     inline void Write( const char* data )           { Write( data, strlen( data ) ); }
-    void Putc( char ch );
 
     void SealElementIfJustOpened();
     bool _elementJustOpened;
