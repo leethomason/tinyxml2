@@ -1,0 +1,26 @@
+name: "tinixml2"
+version: "v8.0.0"
+cmake_minimum_required: "3.0"
+cmake_cxx_standard: "11"
+description: "TinyXML-2 is a simple, small, efficient, C++ XML parser that can be easily integrated into other programs."
+
+authors:
+  - name: "Lee Thomason"
+    email: "leethomason@gmail.com"
+
+origins:
+  - address: "https://wsjcpp.org/packages/"
+    type: "package-registry"
+
+keywords:
+  - "c++"
+  - "xml"
+  - "xml-parser"
+
+distribution:
+  - source-file: "tinyxml2.cpp"
+    target-file: "tinyxml2.cpp"
+    type: "source-code"
+  - source-file: "tinyxml2.h"
+    target-file: "tinyxml2.h"
+    type: "source-code"

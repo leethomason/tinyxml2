@@ -267,6 +267,14 @@ an Xcode project, a Code::Blocks project, and a cmake CMakeLists.txt included to
 The top of tinyxml.h even has a simple g++ command line if you are using Unix/Linux/BSD and
 don't want to use a build system.
 
+Install TinyXML-2 - Using wsjcpp
+--------------------------------
+
+Latest version:
+```
+$ wsjcpp install https://github.com/leethomason/tinyxml2:master
+```
+
 Building TinyXML-2 - Using vcpkg
 --------------------------------
 
