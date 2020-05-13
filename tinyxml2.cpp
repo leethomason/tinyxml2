@@ -234,13 +234,13 @@ char* StrPair::ParseName( char* p )
     if ( !p || !(*p) ) {
         return 0;
     }
-    if ( !XMLUtil::IsNameStartChar( *p ) ) {
+    if ( !XMLUtil::IsNameStartChar( (unsigned char) *p ) ) {
         return 0;
     }
 
     char* const start = p;
     ++p;
-    while ( *p && XMLUtil::IsNameChar( *p ) ) {
+    while ( *p && XMLUtil::IsNameChar( (unsigned char) *p ) ) {
         ++p;
     }
 
@@ -1909,7 +1909,7 @@ char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
         }
 
         // attribute.
-        if (XMLUtil::IsNameStartChar( *p ) ) {
+        if (XMLUtil::IsNameStartChar( (unsigned char) *p ) ) {
             XMLAttribute* attrib = CreateAttribute();
             TIXMLASSERT( attrib );
             attrib->_parseLineNum = _document->_parseCurLineNum;
