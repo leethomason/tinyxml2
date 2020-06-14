@@ -2659,22 +2659,33 @@ void XMLPrinter::PushHeader( bool writeBOM, bool writeDec )
     }
 }
 
-
-void XMLPrinter::OpenElement( const char* name, bool compactMode )
+void XMLPrinter::PrepareForNewNode( bool compactMode )
 {
     SealElementIfJustOpened();
-    _stack.Push( name );
 
-    if ( _textDepth < 0 && !_firstElement && !compactMode ) {
+    if ( compactMode ) {
+        return;
+    }
+
+    if ( _firstElement ) {
+        PrintSpace (_depth);
+    } else if ( _textDepth < 0) {
         Putc( '\n' );
         PrintSpace( _depth );
     }
+
+    _firstElement = false;
+}
+
+void XMLPrinter::OpenElement( const char* name, bool compactMode )
+{
+    PrepareForNewNode( compactMode );
+    _stack.Push( name );
 
     Write ( "<" );
     Write ( name );
 
     _elementJustOpened = true;
-    _firstElement = false;
     ++_depth;
 }
 
@@ -2850,12 +2861,7 @@ void XMLPrinter::PushText( double value )
 
 void XMLPrinter::PushComment( const char* comment )
 {
-    SealElementIfJustOpened();
-    if ( _textDepth < 0 && !_firstElement && !_compactMode) {
-        Putc( '\n' );
-        PrintSpace( _depth );
-    }
-    _firstElement = false;
+    PrepareForNewNode( _compactMode );
 
     Write( "<!--" );
     Write( comment );
@@ -2865,12 +2871,7 @@ void XMLPrinter::PushComment( const char* comment )
 
 void XMLPrinter::PushDeclaration( const char* value )
 {
-    SealElementIfJustOpened();
-    if ( _textDepth < 0 && !_firstElement && !_compactMode) {
-        Putc( '\n' );
-        PrintSpace( _depth );
-    }
-    _firstElement = false;
+    PrepareForNewNode( _compactMode );
 
     Write( "<?" );
     Write( value );
@@ -2880,12 +2881,7 @@ void XMLPrinter::PushDeclaration( const char* value )
 
 void XMLPrinter::PushUnknown( const char* value )
 {
-    SealElementIfJustOpened();
-    if ( _textDepth < 0 && !_firstElement && !_compactMode) {
-        Putc( '\n' );
-        PrintSpace( _depth );
-    }
-    _firstElement = false;
+    PrepareForNewNode( _compactMode );
 
     Write( "<!" );
     Write( value );
