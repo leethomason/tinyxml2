@@ -2327,10 +2327,11 @@ protected:
 	    the space and tabs used. A PrintSpace() override should call Print().
 	*/
     virtual void PrintSpace( int depth );
-    void Print( const char* format, ... );
-    void Write( const char* data, size_t size );
-    inline void Write( const char* data )           { Write( data, strlen( data ) ); }
-    void Putc( char ch );
+    virtual void Print( const char* format, ... );
+    virtual void Write( const char* data, size_t size );
+    virtual void Putc( char ch );
+
+    inline void Write(const char* data) { Write(data, strlen(data)); }
 
     void SealElementIfJustOpened();
     bool _elementJustOpened;
