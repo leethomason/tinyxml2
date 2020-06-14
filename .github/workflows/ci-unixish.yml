@@ -1,0 +1,20 @@
+name: C/C++ CI Unixish
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: make
+      run: make
+    - name: make check
+      run: make check
+    - name: Install
+      run: sudo make install
