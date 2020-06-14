@@ -608,17 +608,17 @@ void XMLUtil::ToStr( uint64_t v, char* buffer, int bufferSize )
     TIXML_SNPRINTF(buffer, bufferSize, "%llu", (long long)v);
 }
 
-bool XMLUtil::ToInt( const char* str, int* value )
+bool XMLUtil::ToInt(const char* str, int* value)
 {
-    if ( TIXML_SSCANF( str, IsPrefixHex(str) ? "%x" : "%d", value ) == 1 ) {
+    if (TIXML_SSCANF(str, IsPrefixHex(str) ? "%x" : "%d", value) == 1) {
         return true;
     }
     return false;
 }
 
-bool XMLUtil::ToUnsigned( const char* str, unsigned *value )
+bool XMLUtil::ToUnsigned(const char* str, unsigned* value)
 {
-    if ( TIXML_SSCANF( str, IsPrefixHex(str) ? "%x" : "%u", value ) == 1 ) {
+    if (TIXML_SSCANF(str, IsPrefixHex(str) ? "%x" : "%u", value) == 1) {
         return true;
     }
     return false;

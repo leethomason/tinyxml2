@@ -1675,21 +1675,21 @@ int main( int argc, const char ** argv )
     }
 
     {
-        //API:IntText(),UnsignedText(),Int64Text(), hex value test
-        const char* xml = "<point> <IntText>  -0x2020</IntText> <UnsignedText>0x2020</UnsignedText> \
-						   <Int64Text> +0x1234</Int64Text></point>";
+        // hex value test
+        const char* xml = "<point> <IntText>  0x2020</IntText> <UnsignedText>0X2020</UnsignedText> \
+						   <Int64Text> 0x1234</Int64Text></point>";
         XMLDocument doc;
         doc.Parse(xml);
 
         const XMLElement* pointElement = doc.RootElement();
         int test1 = pointElement->FirstChildElement("IntText")->IntText();
-        XMLTest("IntText() hex value test", -0x2020, test1);
+        XMLTest("IntText() hex value test", 0x2020, test1);
 
         unsigned test2 = pointElement->FirstChildElement("UnsignedText")->UnsignedText();
         XMLTest("UnsignedText() hex value test", static_cast<unsigned>(0x2020), test2);
 
         int64_t test3 = pointElement->FirstChildElement("Int64Text")->Int64Text();
-        XMLTest("Int64Text() hex value test", static_cast<int64_t>(+0x1234), test3);
+        XMLTest("Int64Text() hex value test", static_cast<int64_t>(0x1234), test3);
     }
 
 	{

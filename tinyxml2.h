@@ -591,10 +591,8 @@ public:
     }
 
     inline static bool IsPrefixHex( const char* p) {
-        while (p && *p != '\0' && !isdigit(*p)) {
-            ++p;
-        }
-        return *p == '0' && ( *(p + 1) == 'x' || *(p + 1) == 'X');
+        p = SkipWhiteSpace(p, 0);
+        return p && *p == '0' && ( *(p + 1) == 'x' || *(p + 1) == 'X');
     }
 
     inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
