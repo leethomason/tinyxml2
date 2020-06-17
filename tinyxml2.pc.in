@@ -6,5 +6,5 @@ includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
 Name: TinyXML2
 Description: simple, small, C++ XML parser
 Version: @GENERIC_LIB_VERSION@
-Libs: -L${libdir} -ltinyxml2
+Libs: -L${libdir} -ltinyxml2@LIB_POSTFIX@
 Cflags: -I${includedir}
