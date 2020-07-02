@@ -5,6 +5,8 @@ TinyXML-2
 
 ![TinyXML-2 Logo](http://www.grinninglizard.com/tinyxml2/TinyXML2_small.png)
 
+![C/C++ CI Unixish](https://github.com/leethomason/tinyxml2/workflows/C/C++%20CI%20Unixish/badge.svg)
+
 TinyXML-2 is a simple, small, efficient, C++ XML parser that can be
 easily integrated into other programs.
 
