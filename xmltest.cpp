@@ -632,6 +632,10 @@ int main( int argc, const char ** argv )
 		ele->SetAttribute( "int", 1 );
 		ele->SetAttribute( "double", -1.0 );
 
+		const char* answer = 0;
+		ele->QueryAttribute("str", &answer);
+		XMLTest("Query char attribute", "strValue", answer);
+
 		const char* cStr = ele->Attribute( "str" );
 		{
 			XMLError queryResult = ele->QueryIntAttribute( "int", &iVal );
