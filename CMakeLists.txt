@@ -107,6 +107,9 @@ endif()
 
 install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT tinyxml2_headers)
 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  set(LIB_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+endif()
 configure_file(tinyxml2.pc.in tinyxml2.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig COMPONENT tinyxml2_config)
 
