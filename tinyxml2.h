@@ -136,7 +136,7 @@ class XMLPrinter;
 class TINYXML2_LIB StrPair
 {
 public:
-    enum Mode : uint32_t {
+    enum Mode {
         NEEDS_ENTITY_PROCESSING			= 0x01,
         NEEDS_NEWLINE_NORMALIZATION		= 0x02,
         NEEDS_WHITESPACE_COLLAPSING     = 0x04,
