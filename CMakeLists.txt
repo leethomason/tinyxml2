@@ -76,7 +76,8 @@ endif()
 # Export cmake script that can be used by downstream project
 # via `include()`
 export(TARGETS tinyxml2
-      FILE ${CMAKE_BINARY_DIR}/${TARGETS_EXPORT_NAME}.cmake)
+       NAMESPACE tinyxml2::
+       FILE ${CMAKE_BINARY_DIR}/${TARGETS_EXPORT_NAME}.cmake)
 
 install(TARGETS tinyxml2
         EXPORT ${TARGETS_EXPORT_NAME}
