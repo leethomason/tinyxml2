@@ -134,6 +134,15 @@ def cmakeRule2( line ):
 
 fileProcess( "CMakeLists.txt", cmakeRule2 )
 
+def mesonRule(line):
+	match = re.search(r"(\s*version) : '(\d+.\d+.\d+)',", line)
+	if match:
+		print("1)meson.build version found.")
+		return "{} : '{}.{}.{}',\n".format(match.group(1), major, minor, build)
+	return line
+
+fileProcess("meson.build", mesonRule)
+
 print( "Release note:" )
 print( '1. Build.   g++ -Wall -DTINYXML2_DEBUG tinyxml2.cpp xmltest.cpp -o gccxmltest.exe' )
 print( '2. Commit.  git commit -am"setting the version to ' + versionStr + '"' )
