@@ -1637,8 +1637,18 @@ float XMLElement::FloatAttribute(const char* name, float defaultValue) const
 
 const char* XMLElement::GetText() const
 {
-    if ( FirstChild() && FirstChild()->ToText() ) {
-        return FirstChild()->Value();
+    /* skip comment node */
+    const XMLNode* node = FirstChild();
+    while (node) {
+        if (node->ToComment()) {
+            node = node->NextSibling();
+            continue;
+        }
+        break;
+    }
+
+    if ( node && node->ToText() ) {
+        return node->Value();
     }
     return 0;
 }
