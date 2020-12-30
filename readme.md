@@ -265,9 +265,31 @@ And additionally a test file:
 * xmltest.cpp
 
 Simply compile and run. There is a visual studio 2019 project included, a simple Makefile,
-an Xcode project, a Code::Blocks project, and a cmake CMakeLists.txt included to help you.
-The top of tinyxml.h even has a simple g++ command line if you are using Unix/Linux/BSD and
-don't want to use a build system.
+an Xcode project, a Code::Blocks project, a cmake CMakeLists.txt, and a meson.build are
+included to help you. The top of tinyxml.h even has a simple g++ command line if you are
+using Unix/Linux/BSD and don't want to use a build system.
+
+Using as a Meson Subproject
+---------------------------
+
+Create a wrap file such as:
+```ini
+[wrap-git]
+url = https://github.com/leethomason/tinyxml2.git
+revision = 8.0.1  # this can be any commit-ish (tag, sha) or the special value `head`
+```
+
+or, if you prefer to not use git
+
+```ini
+[wrap-file]
+directory = tinyxml2-8.0.1  # this is the name of the directory after de-compressing
+source_url = https://github.com/leethomason/tinyxml2/archive/8.0.1.tar.gz
+source_hash = sha256sum of compressed sources
+```
+
+in your project's `subprojects/` folder, and follow the meson documentation
+for using fallbacks.
 
 Building TinyXML-2 - Using vcpkg
 --------------------------------
