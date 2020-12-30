@@ -2455,6 +2455,13 @@ void XMLDocument::Print( XMLPrinter* streamer ) const
 }
 
 
+void XMLDocument::ClearError() {
+    _errorID = XML_SUCCESS;
+    _errorLineNum = 0;
+    _errorStr.Reset();
+}
+
+
 void XMLDocument::SetError( XMLError error, int lineNum, const char* format, ... )
 {
     TIXMLASSERT( error >= 0 && error < XML_ERROR_COUNT );
