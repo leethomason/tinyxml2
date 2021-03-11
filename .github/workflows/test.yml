@@ -1,0 +1,111 @@
+name: Test
+on: [ push, pull_request ]
+jobs:
+  test:
+    name: ${{ matrix.os }}, ${{ matrix.cmake_name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-2019, macos-10.15, ubuntu-20.04 ]
+        cmake: [ 3.15, 3.x ]
+        include:
+          - os: windows-2019
+            static_postfix: _static
+            tree: tree /F
+            CXX: cl
+
+          - os: ubuntu-20.04
+            tree: tree
+
+          - os: macos-10.15
+            tree: find
+
+          - cmake: 3.15
+            cmake_name: CMake 3.15
+          - cmake: 3.x
+            cmake_name: Latest CMake
+    env:
+      # CMake 3.15 doesn't detect Visual Studio correctly without these.
+      CXX: ${{ matrix.CXX }}
+      CC: ${{ matrix.CXX }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      # System set-up
+      - uses: actions/checkout@v2
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: seanmiddleditch/gha-setup-ninja@master
+      - uses: jwlawson/actions-setup-cmake@v1.8
+        with:
+          cmake-version: ${{ matrix.cmake }}
+
+      # Static Debug
+      - name: "Static Debug: Configure"
+        run: cmake -G Ninja -S . -B build-static-dbg -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_DEBUG_POSTFIX=d${{matrix.static_postfix}}"
+      - name: "Static Debug: Build"
+        run: cmake --build build-static-dbg
+      - name: "Static Debug: Test"
+        run: ctest --output-on-failure
+        working-directory: build-static-dbg
+
+      # Shared Debug
+      - name: "Shared Debug: Configure"
+        run: cmake -G Ninja -S . -B build-shared-dbg -DCMAKE_BUILD_TYPE=Debug -DCMAKE_DEBUG_POSTFIX=d -DBUILD_SHARED_LIBS=ON
+      - name: "Shared Debug: Build"
+        run: cmake --build build-shared-dbg
+      - name: "Shared Debug: Test"
+        run: ctest --output-on-failure
+        working-directory: build-shared-dbg
+
+      # Static Release
+      - name: "Static Release: Configure"
+        run: cmake -G Ninja -S . -B build-static-rel -DCMAKE_BUILD_TYPE=Release "-DCMAKE_RELEASE_POSTFIX=${{matrix.static_postfix}}"
+      - name: "Static Release: Build"
+        run: cmake --build build-static-rel
+      - name: "Static Release: Test"
+        run: ctest --output-on-failure
+        working-directory: build-static-rel
+
+      # Shared Release
+      - name: "Shared Release: Configure"
+        run: cmake -G Ninja -S . -B build-shared-rel -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
+      - name: "Shared Release: Build"
+        run: cmake --build build-shared-rel
+      - name: "Shared Release: Test"
+        run: ctest --output-on-failure
+        working-directory: build-shared-rel
+
+      # Joint install
+      - name: Install
+        run: |
+          cmake --install build-shared-dbg --prefix install
+          cmake --install build-static-dbg --prefix install
+          cmake --install build-shared-rel --prefix install
+          cmake --install build-static-rel --prefix install
+      - name: List install tree
+        run: ${{matrix.tree}} install
+
+      # Test find_package
+      - name: "Test find_package: Static Debug"
+        run: >-
+          ctest --build-and-test test test-static-dbg
+          --build-generator Ninja
+          --build-options -DCMAKE_BUILD_TYPE=Debug -Dtinyxml2_SHARED_LIBS=NO -DCMAKE_PREFIX_PATH=${{github.workspace}}/install
+          --test-command ctest --output-on-failure
+      - name: "Test find_package: Static Release"
+        run: >-
+          ctest --build-and-test test test-static-rel
+          --build-generator Ninja
+          --build-options -DCMAKE_BUILD_TYPE=Release -Dtinyxml2_SHARED_LIBS=NO -DCMAKE_PREFIX_PATH=${{github.workspace}}/install
+          --test-command ctest --output-on-failure
+      - name: "Test find_package: Shared Debug"
+        run: >-
+          ctest --build-and-test test test-shared-dbg
+          --build-generator Ninja
+          --build-options -DCMAKE_BUILD_TYPE=Debug -Dtinyxml2_SHARED_LIBS=YES -DCMAKE_PREFIX_PATH=${{github.workspace}}/install
+          --test-command ctest --output-on-failure
+      - name: "Test find_package: Shared Release"
+        run: >-
+          ctest --build-and-test test test-shared-rel
+          --build-generator Ninja
+          --build-options -DCMAKE_BUILD_TYPE=Release -Dtinyxml2_SHARED_LIBS=YES -DCMAKE_PREFIX_PATH=${{github.workspace}}/install
+          --test-command ctest --output-on-failure

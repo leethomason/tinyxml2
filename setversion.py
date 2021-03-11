@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Python program to set the version.
 ##############################################
 
@@ -18,14 +19,14 @@ def fileProcess( name, lineFunction ):
 		if not line: break
 		output += lineFunction( line )
 	filestream.close()
-	
+
 	if not output: return			# basic error checking
-	
+
 	print( "Writing file " + name )
 	filestream = open( name, "w" );
 	filestream.write( output );
 	filestream.close()
-	
+
 def echoInput( line ):
 	return line
 
@@ -108,31 +109,19 @@ fileProcess( "dox", doxRule )
 
 #### Write the CMakeLists.txt ####
 
-def cmakeRule1( line ):
+def cmakeRule( line ):
 
-	matchVersion = "set(GENERIC_LIB_VERSION"
+	matchVersion = "project(tinyxml2 VERSION"
 
 	if line[0:len(matchVersion)] == matchVersion:
 		print( "1)tinyxml2.h Major found" )
-		return matchVersion + " \"" + major + "." + minor + "." + build + "\")" + "\n"
+		return matchVersion + " " + major + "." + minor + "." + build + ")\n"
 
 	else:
 		return line;
 
-fileProcess( "CMakeLists.txt", cmakeRule1 )
+fileProcess( "CMakeLists.txt", cmakeRule )
 
-def cmakeRule2( line ):
-
-	matchSoversion = "set(GENERIC_LIB_SOVERSION"
-
-	if line[0:len(matchSoversion)] == matchSoversion:
-		print( "1)tinyxml2.h Major found" )
-		return matchSoversion + " \"" + major + "\")" + "\n"
-
-	else:
-		return line;
-
-fileProcess( "CMakeLists.txt", cmakeRule2 )
 
 def mesonRule(line):
 	match = re.search(r"(\s*version) : '(\d+.\d+.\d+)',", line)
@@ -150,5 +139,3 @@ print( '3. Tag.     git tag ' + versionStr )
 print( '   OR       git tag -a ' + versionStr + ' -m [tag message]' )
 print( 'Remember to "git push" both code and tag. For the tag:' )
 print( 'git push origin [tagname]')
-
- 
