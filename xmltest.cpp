@@ -313,6 +313,9 @@ int main( int argc, const char ** argv )
 		TIXMLASSERT( true );
 	}
 
+    bool runtest  = true;
+    int  exitcode = 0;
+
 	if ( argc > 1 ) {
 		XMLDocument* doc = new XMLDocument();
 		clock_t startTime = clock();
@@ -328,8 +331,11 @@ int main( int argc, const char ** argv )
 			printf( "Delete time=%u\n", (unsigned)(deleteTime - loadTime) );
 			printf( "Total time=%u\n",  (unsigned)(deleteTime - startTime) );
 		}
-		exit(0);
+		//exit(0);
+		runtest = false;
 	}
+	
+  if (runtest) {	
 
 	FILE* fp = fopen( "resources/dream.xml", "r" );
 	if ( !fp ) {
@@ -341,10 +347,14 @@ int main( int argc, const char ** argv )
 				"Properties->Debugging->Working Directory to '..'\n"
 	#endif
 			  );
-		exit( 1 );
+		//exit( 1 );
+		runtest  = false;
+		exitcode = 1;
 	}
 	fclose( fp );
-
+  }
+  
+  if (runtest) {
 	XMLTest( "Example_1", 0, example_1() );
 	XMLTest( "Example_2", 0, example_2() );
 	XMLTest( "Example_3", 0, example_3() );
@@ -2560,6 +2570,12 @@ int main( int argc, const char ** argv )
 #endif
 
 	printf ("\nPass %d, Fail %d\n", gPass, gFail);
-
+  }
+  
+  getchar();
+  
+  if (runtest)
 	return gFail;
+  else
+    return exitcode;
 }
