@@ -184,8 +184,8 @@ public:
 private:
     void CollapseWhitespace();
 
-    static inline const int NEEDS_FLUSH = 0x100;
-    static inline const int NEEDS_DELETE = 0x200;
+    static const int NEEDS_FLUSH = 0x100;
+    static const int NEEDS_DELETE = 0x200;
 
     int     _flags;
     char*   _start;
@@ -454,7 +454,7 @@ public:
 	//		64k:	4000	21000
     // Declared public because some compilers do not accept to use ITEMS_PER_BLOCK
     // in private part if ITEMS_PER_BLOCK is private
-    static inline const int ITEMS_PER_BLOCK = (4 * 1024) / ITEM_SIZE;
+    static const int ITEMS_PER_BLOCK = (4 * 1024) / ITEM_SIZE;
 
 private:
     MemPoolT( const MemPoolT& ); // not supported
@@ -1257,7 +1257,7 @@ public:
     void SetAttribute( float value );
 
 private:
-    static inline const int BUF_SIZE = 200;
+    static const int BUF_SIZE = 200;
 
     XMLAttribute() : _name(), _value(),_parseLineNum( 0 ), _next( 0 ), _memPool( 0 ) {}
     virtual ~XMLAttribute()	{}
@@ -1712,7 +1712,7 @@ private:
     static void DeleteAttribute( XMLAttribute* attribute );
     XMLAttribute* CreateAttribute();
 
-    static inline const int BUF_SIZE = 200;
+    static const int BUF_SIZE = 200;
     ElementClosingType _closingType;
     // The attribute list is ordered; there is no 'lastAttribute'
     // because the list needs to be scanned for dupes before adding
@@ -2376,7 +2376,7 @@ private:
 	bool _compactMode;
 
     static constexpr int ENTITY_RANGE = 64;
-    static inline const int BUF_SIZE = 200;
+    static const int BUF_SIZE = 200;
     bool _entityFlag[ENTITY_RANGE];
     bool _restrictedEntityFlag[ENTITY_RANGE];
 
