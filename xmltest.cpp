@@ -117,7 +117,7 @@ int example_1()
 	XMLDocument doc;
 	doc.LoadFile( "resources/dream.xml" );
 
-	return doc.ErrorID();
+	return static_cast<std::underlying_type_t<XMLError>>(doc.ErrorID());
 }
 /** @page Example_1 Load an XML File
  *  @dontinclude ./xmltest.cpp
@@ -136,7 +136,7 @@ int example_2()
 	XMLDocument doc;
 	doc.Parse( xml );
 
-	return doc.ErrorID();
+	return static_cast<std::underlying_type_t<XMLError>>(doc.ErrorID());
 }
 /** @page Example_2 Parse an XML from char buffer
  *  @dontinclude ./xmltest.cpp
@@ -169,7 +169,7 @@ int example_3()
 	title = textNode->Value();
 	printf( "Name of play (2): %s\n", title );
 
-	return doc.ErrorID();
+	return static_cast<std::underlying_type_t<XMLError>>(doc.ErrorID());
 }
 /** @page Example_3 Get information out of XML
 	@dontinclude ./xmltest.cpp
@@ -318,7 +318,7 @@ int main( int argc, const char ** argv )
 		clock_t startTime = clock();
 		doc->LoadFile( argv[1] );
  		clock_t loadTime = clock();
-		int errorID = doc->ErrorID();
+		int errorID = static_cast<std::underlying_type_t<XMLError>>(doc->ErrorID());
 		delete doc; doc = 0;
  		clock_t deleteTime = clock();
 
@@ -505,7 +505,7 @@ int main( int argc, const char ** argv )
 		int value1 = defaultIntValue;
 		int value2 = doc->FirstChildElement()->LastChildElement()->IntAttribute( "attrib", replacementIntValue );
 		XMLError result = doc->FirstChildElement()->LastChildElement()->QueryIntAttribute( "attrib", &value1 );
-		XMLTest( "Programmatic DOM", XML_NO_ATTRIBUTE, result );
+		XMLTest( "Programmatic DOM", XMLError::XML_NO_ATTRIBUTE, result );
 		XMLTest( "Programmatic DOM", defaultIntValue, value1 );
 		XMLTest( "Programmatic DOM", replacementIntValue, value2 );
 
@@ -573,7 +573,7 @@ int main( int argc, const char ** argv )
 
 		XMLDocument doc;
 		doc.Parse( error );
-		XMLTest( "Bad XML", XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );
+		XMLTest( "Bad XML", XMLError::XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );
 		const char* errorStr = doc.ErrorStr();
 		XMLTest("Formatted error string",
 			"Error=XML_ERROR_PARSING_ATTRIBUTE ErrorID=7 (0x7) Line number=3: XMLElement name=wrong",
@@ -594,25 +594,25 @@ int main( int argc, const char ** argv )
 		double dVal;
 
 		result = ele->QueryDoubleAttribute( "attr0", &dVal );
-		XMLTest( "Query attribute: int as double", XML_SUCCESS, result);
+		XMLTest( "Query attribute: int as double", XMLError::XML_SUCCESS, result);
 		XMLTest( "Query attribute: int as double", 1, (int)dVal );
 		XMLTest( "Query attribute: int as double", 1, (int)ele->DoubleAttribute("attr0"));
 
 		result = ele->QueryDoubleAttribute( "attr1", &dVal );
-		XMLTest( "Query attribute: double as double", XML_SUCCESS, result);
+		XMLTest( "Query attribute: double as double", XMLError::XML_SUCCESS, result);
 		XMLTest( "Query attribute: double as double", 2.0, dVal );
 		XMLTest( "Query attribute: double as double", 2.0, ele->DoubleAttribute("attr1") );
 
 		result = ele->QueryIntAttribute( "attr1", &iVal );
-		XMLTest( "Query attribute: double as int", XML_SUCCESS, result);
+		XMLTest( "Query attribute: double as int", XMLError::XML_SUCCESS, result);
 		XMLTest( "Query attribute: double as int", 2, iVal );
 
 		result = ele->QueryIntAttribute( "attr2", &iVal );
-		XMLTest( "Query attribute: not a number", XML_WRONG_ATTRIBUTE_TYPE, result );
+		XMLTest( "Query attribute: not a number", XMLError::XML_WRONG_ATTRIBUTE_TYPE, result );
 		XMLTest( "Query attribute: not a number", 4.0, ele->DoubleAttribute("attr2", 4.0) );
 
 		result = ele->QueryIntAttribute( "bar", &iVal );
-		XMLTest( "Query attribute: does not exist", XML_NO_ATTRIBUTE, result );
+		XMLTest( "Query attribute: does not exist", XMLError::XML_NO_ATTRIBUTE, result );
 		XMLTest( "Query attribute: does not exist", true, ele->BoolAttribute("bar", true) );
 	}
 
@@ -639,20 +639,20 @@ int main( int argc, const char ** argv )
 		const char* cStr = ele->Attribute( "str" );
 		{
 			XMLError queryResult = ele->QueryIntAttribute( "int", &iVal );
-			XMLTest( "Query int attribute", XML_SUCCESS, queryResult);
+			XMLTest( "Query int attribute", XMLError::XML_SUCCESS, queryResult);
 		}
 		{
 			XMLError queryResult = ele->QueryDoubleAttribute( "double", &dVal );
-			XMLTest( "Query double attribute", XML_SUCCESS, queryResult);
+			XMLTest( "Query double attribute", XMLError::XML_SUCCESS, queryResult);
 		}
 
 		{
-			int queryResult = ele->QueryAttribute( "int", &iVal2 );
-			XMLTest( "Query int attribute generic", (int)XML_SUCCESS, queryResult);
+			XMLError queryResult = ele->QueryAttribute( "int", &iVal2 );
+			XMLTest( "Query int attribute generic", XMLError::XML_SUCCESS, queryResult);
 		}
 		{
-			int queryResult = ele->QueryAttribute( "double", &dVal2 );
-			XMLTest( "Query double attribute generic", (int)XML_SUCCESS, queryResult);
+			XMLError queryResult = ele->QueryAttribute( "double", &dVal2 );
+			XMLTest( "Query double attribute generic", XMLError::XML_SUCCESS, queryResult);
 		}
 
 		XMLTest( "Attribute match test", "strValue", ele->Attribute( "str", "strValue" ) );
@@ -818,13 +818,13 @@ int main( int argc, const char ** argv )
 			{
 				int v = 0;
 				XMLError queryResult = element->QueryIntAttribute("attrib", &v);
-				XMLTest("Attribute: int", XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: int", XMLError::XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: int", -100, v, true);
 			}
 			{
 				int v = 0;
-				int queryResult = element->QueryAttribute("attrib", &v);
-				XMLTest("Attribute: int", (int)XML_SUCCESS, queryResult, true);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
+				XMLTest("Attribute: int", XMLError::XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: int", -100, v, true);
 			}
 			XMLTest("Attribute: int", -100, element->IntAttribute("attrib"), true);
@@ -834,21 +834,21 @@ int main( int argc, const char ** argv )
 			{
 				unsigned v = 0;
 				XMLError queryResult = element->QueryUnsignedAttribute("attrib", &v);
-				XMLTest("Attribute: unsigned", XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: unsigned", XMLError::XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: unsigned", unsigned(100), v, true);
 			}
 			{
 				unsigned v = 0;
-				int queryResult = element->QueryAttribute("attrib", &v);
-				XMLTest("Attribute: unsigned", (int)XML_SUCCESS, queryResult, true);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
+				XMLTest("Attribute: unsigned", XMLError::XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: unsigned", unsigned(100), v, true);
 			}
 			{
 				const char* v = "failed";
 				XMLError queryResult = element->QueryStringAttribute("not-attrib", &v);
-				XMLTest("Attribute: string default", false, queryResult == XML_SUCCESS);
+				XMLTest("Attribute: string default", false, queryResult == XMLError::XML_SUCCESS);
 				queryResult = element->QueryStringAttribute("attrib", &v);
-				XMLTest("Attribute: string", XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: string", XMLError::XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: string", "100", v);
 			}
 			XMLTest("Attribute: unsigned", unsigned(100), element->UnsignedAttribute("attrib"), true);
@@ -858,13 +858,13 @@ int main( int argc, const char ** argv )
 			{
 				int64_t v = 0;
 				XMLError queryResult = element->QueryInt64Attribute("attrib", &v);
-				XMLTest("Attribute: int64_t", XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: int64_t", XMLError::XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: int64_t", BIG, v, true);
 			}
 			{
 				int64_t v = 0;
-				int queryResult = element->QueryAttribute("attrib", &v);
-				XMLTest("Attribute: int64_t", (int)XML_SUCCESS, queryResult, true);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
+				XMLTest("Attribute: int64_t", XMLError::XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: int64_t", BIG, v, true);
 			}
 			XMLTest("Attribute: int64_t", BIG, element->Int64Attribute("attrib"), true);
@@ -874,13 +874,13 @@ int main( int argc, const char ** argv )
             {
                 uint64_t v = 0;
                 XMLError queryResult = element->QueryUnsigned64Attribute("attrib", &v);
-                XMLTest("Attribute: uint64_t", XML_SUCCESS, queryResult, true);
+                XMLTest("Attribute: uint64_t", XMLError::XML_SUCCESS, queryResult, true);
                 XMLTest("Attribute: uint64_t", BIG_POS, v, true);
             }
             {
                 uint64_t v = 0;
-                int queryResult = element->QueryAttribute("attrib", &v);
-                XMLTest("Attribute: uint64_t", (int)XML_SUCCESS, queryResult, true);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
+                XMLTest("Attribute: uint64_t", XMLError::XML_SUCCESS, queryResult, true);
                 XMLTest("Attribute: uint64_t", BIG_POS, v, true);
             }
             XMLTest("Attribute: uint64_t", BIG_POS, element->Unsigned64Attribute("attrib"), true);
@@ -890,13 +890,13 @@ int main( int argc, const char ** argv )
 			{
 				bool v = false;
 				XMLError queryResult = element->QueryBoolAttribute("attrib", &v);
-				XMLTest("Attribute: bool", XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: bool", XMLError::XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: bool", true, v, true);
 			}
 			{
 				bool v = false;
-				int queryResult = element->QueryAttribute("attrib", &v);
-				XMLTest("Attribute: bool", (int)XML_SUCCESS, queryResult, true);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
+				XMLTest("Attribute: bool", XMLError::XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: bool", true, v, true);
 			}
 			XMLTest("Attribute: bool", true, element->BoolAttribute("attrib"), true);
@@ -918,13 +918,13 @@ int main( int argc, const char ** argv )
 			{
 				double v = 0;
 				XMLError queryResult = element->QueryDoubleAttribute("attrib", &v);
-				XMLTest("Attribute: double", XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: double", XMLError::XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: double", 100.0, v, true);
 			}
 			{
 				double v = 0;
-				int queryResult = element->QueryAttribute("attrib", &v);
-				XMLTest("Attribute: bool", (int)XML_SUCCESS, queryResult, true);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
+				XMLTest("Attribute: bool", XMLError::XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: double", 100.0, v, true);
 			}
 			XMLTest("Attribute: double", 100.0, element->DoubleAttribute("attrib"), true);
@@ -934,13 +934,13 @@ int main( int argc, const char ** argv )
 			{
 				float v = 0;
 				XMLError queryResult = element->QueryFloatAttribute("attrib", &v);
-				XMLTest("Attribute: float", XML_SUCCESS, queryResult, true);
+				XMLTest("Attribute: float", XMLError::XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: float", 100.0f, v, true);
 			}
 			{
 				float v = 0;
-				int queryResult = element->QueryAttribute("attrib", &v);
-				XMLTest("Attribute: float", (int)XML_SUCCESS, queryResult, true);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
+				XMLTest("Attribute: float", XMLError::XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: float", 100.0f, v, true);
 			}
 			XMLTest("Attribute: float", 100.0f, element->FloatAttribute("attrib"), true);
@@ -949,14 +949,14 @@ int main( int argc, const char ** argv )
 			element->SetText(BIG);
 			int64_t v = 0;
 			XMLError queryResult = element->QueryInt64Text(&v);
-			XMLTest("Element: int64_t", XML_SUCCESS, queryResult, true);
+			XMLTest("Element: int64_t", XMLError::XML_SUCCESS, queryResult, true);
 			XMLTest("Element: int64_t", BIG, v, true);
 		}
         {
             element->SetText(BIG_POS);
             uint64_t v = 0;
             XMLError queryResult = element->QueryUnsigned64Text(&v);
-            XMLTest("Element: uint64_t", XML_SUCCESS, queryResult, true);
+            XMLTest("Element: uint64_t", XMLError::XML_SUCCESS, queryResult, true);
             XMLTest("Element: uint64_t", BIG_POS, v, true);
         }
     }
@@ -981,7 +981,7 @@ int main( int argc, const char ** argv )
 		{
 			XMLDocument doc;
 			doc.LoadFile("resources/out/printer.xml");
-			XMLTest("XMLPrinter Stream mode: load", XML_SUCCESS, doc.ErrorID(), true);
+			XMLTest("XMLPrinter Stream mode: load", XMLError::XML_SUCCESS, doc.ErrorID(), true);
 
 			const XMLDocument& cdoc = doc;
 
@@ -1052,7 +1052,7 @@ int main( int argc, const char ** argv )
 		{
 			XMLDocument doc;
 			doc.LoadFile("resources/out/printer_1.xml");
-			XMLTest("XMLPrinter Stream mode: load", XML_SUCCESS, doc.ErrorID(), true);
+			XMLTest("XMLPrinter Stream mode: load", XMLError::XML_SUCCESS, doc.ErrorID(), true);
 
 			const XMLDocument& cdoc = doc;
 
@@ -1288,7 +1288,7 @@ int main( int argc, const char ** argv )
 		XMLDocument doc;
 		doc.Parse( doctype );
 
-		XMLTest( "Parsing repeated attributes.", XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );	// is an  error to tinyxml (didn't use to be, but caused issues)
+		XMLTest( "Parsing repeated attributes.", XMLError::XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );	// is an  error to tinyxml (didn't use to be, but caused issues)
 		doc.PrintError();
 	}
 
@@ -1306,7 +1306,7 @@ int main( int argc, const char ** argv )
 		const char* str = "";
 		XMLDocument doc;
 		doc.Parse( str );
-		XMLTest( "Empty document error", XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
+		XMLTest( "Empty document error", XMLError::XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
 
 		// But be sure there is an error string!
 		const char* errorStr = doc.ErrorStr();
@@ -1320,7 +1320,7 @@ int main( int argc, const char ** argv )
 		const char* str = "    ";
 		XMLDocument doc;
 		doc.Parse( str );
-		XMLTest( "All whitespaces document error", XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
+		XMLTest( "All whitespaces document error", XMLError::XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
 	}
 
 	{
@@ -1348,7 +1348,7 @@ int main( int argc, const char ** argv )
 		xml.Parse("<x> ");
 		XMLTest("Missing end tag with trailing whitespace", true, xml.Error());
 		xml.Parse("<x></y>");
-		XMLTest("Mismatched tags", XML_ERROR_MISMATCHED_ELEMENT, xml.ErrorID() );
+		XMLTest("Mismatched tags", XMLError::XML_ERROR_MISMATCHED_ELEMENT, xml.ErrorID() );
 	}
 
 
@@ -1529,7 +1529,7 @@ int main( int argc, const char ** argv )
  	{
 		// This shouldn't crash.
 		XMLDocument doc;
-		if(XML_SUCCESS != doc.LoadFile( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ))
+		if(XMLError::XML_SUCCESS != doc.LoadFile( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ))
 		{
 			doc.PrintError();
 		}
@@ -1745,35 +1745,35 @@ int main( int argc, const char ** argv )
 		{
 			int intValue = 0;
 			XMLError queryResult = pointElement->FirstChildElement( "y" )->QueryIntText( &intValue );
-			XMLTest( "QueryIntText result", XML_SUCCESS, queryResult, false );
+			XMLTest( "QueryIntText result", XMLError::XML_SUCCESS, queryResult, false );
 			XMLTest( "QueryIntText", 1, intValue, false );
 		}
 
 		{
 			unsigned unsignedValue = 0;
 			XMLError queryResult = pointElement->FirstChildElement( "y" )->QueryUnsignedText( &unsignedValue );
-			XMLTest( "QueryUnsignedText result", XML_SUCCESS, queryResult, false );
+			XMLTest( "QueryUnsignedText result", XMLError::XML_SUCCESS, queryResult, false );
 			XMLTest( "QueryUnsignedText", (unsigned)1, unsignedValue, false );
 		}
 
 		{
 			float floatValue = 0;
 			XMLError queryResult = pointElement->FirstChildElement( "x" )->QueryFloatText( &floatValue );
-			XMLTest( "QueryFloatText result", XML_SUCCESS, queryResult, false );
+			XMLTest( "QueryFloatText result", XMLError::XML_SUCCESS, queryResult, false );
 			XMLTest( "QueryFloatText", 1.2f, floatValue, false );
 		}
 
 		{
 			double doubleValue = 0;
 			XMLError queryResult = pointElement->FirstChildElement( "x" )->QueryDoubleText( &doubleValue );
-			XMLTest( "QueryDoubleText result", XML_SUCCESS, queryResult, false );
+			XMLTest( "QueryDoubleText result", XMLError::XML_SUCCESS, queryResult, false );
 			XMLTest( "QueryDoubleText", 1.2, doubleValue, false );
 		}
 
 		{
 			bool boolValue = false;
 			XMLError queryResult = pointElement->FirstChildElement( "valid" )->QueryBoolText( &boolValue );
-			XMLTest( "QueryBoolText result", XML_SUCCESS, queryResult, false );
+			XMLTest( "QueryBoolText result", XMLError::XML_SUCCESS, queryResult, false );
 			XMLTest( "QueryBoolText", true, boolValue, false );
 		}
 	}
@@ -1835,7 +1835,7 @@ int main( int argc, const char ** argv )
 							"<b>  This is &apos; text &apos;  \n</b>"
 							"<c>This  is  &apos;  \n\n text &apos;</c>"
 						  "</element>";
-		XMLDocument doc( true, COLLAPSE_WHITESPACE );
+		XMLDocument doc( true, Whitespace::COLLAPSE_WHITESPACE );
 		doc.Parse( xml );
 		XMLTest( "Parse with whitespace collapsing and &apos", false, doc.Error() );
 
@@ -1863,7 +1863,7 @@ int main( int argc, const char ** argv )
 
 	{
 		const char* xml = "<element>    </element>";
-		XMLDocument doc( true, COLLAPSE_WHITESPACE );
+		XMLDocument doc( true, Whitespace::COLLAPSE_WHITESPACE );
 		doc.Parse( xml );
 		XMLTest( "Parse with all whitespaces", false, doc.Error() );
 		XMLTest( "Whitespace  all space", true, 0 == doc.FirstChildElement()->FirstChild() );
@@ -1897,7 +1897,7 @@ int main( int argc, const char ** argv )
 	{
 		XMLDocument doc;
 		XMLError error = doc.LoadFile( "resources/empty.xml" );
-		XMLTest( "Loading an empty file", XML_ERROR_EMPTY_DOCUMENT, error );
+		XMLTest( "Loading an empty file", XMLError::XML_ERROR_EMPTY_DOCUMENT, error );
 		XMLTest( "Loading an empty file and ErrorName as string", "XML_ERROR_EMPTY_DOCUMENT", doc.ErrorName() );
 		doc.PrintError();
 	}
@@ -1907,7 +1907,7 @@ int main( int argc, const char ** argv )
         static const char* xml_bom_preservation  = "\xef\xbb\xbf<element/>\n";
         {
 			XMLDocument doc;
-			XMLTest( "BOM preservation (parse)", XML_SUCCESS, doc.Parse( xml_bom_preservation ), false );
+			XMLTest( "BOM preservation (parse)", XMLError::XML_SUCCESS, doc.Parse( xml_bom_preservation ), false );
             XMLPrinter printer;
             doc.Print( &printer );
 
@@ -2175,11 +2175,11 @@ int main( int argc, const char ** argv )
 	    doc.Parse(xml1);
 	    XMLTest("Test that the second declaration is allowed", false, doc.Error() );
 	    doc.Parse(xml2);
-	    XMLTest("Test that declaration after self-closed child is not allowed", XML_ERROR_PARSING_DECLARATION, doc.ErrorID() );
+	    XMLTest("Test that declaration after self-closed child is not allowed", XMLError::XML_ERROR_PARSING_DECLARATION, doc.ErrorID() );
 	    doc.Parse(xml3);
-	    XMLTest("Test that declaration after a child is not allowed", XML_ERROR_PARSING_DECLARATION, doc.ErrorID() );
+	    XMLTest("Test that declaration after a child is not allowed", XMLError::XML_ERROR_PARSING_DECLARATION, doc.ErrorID() );
 	    doc.Parse(xml4);
-	    XMLTest("Test that declaration inside a child is not allowed", XML_ERROR_PARSING_DECLARATION, doc.ErrorID() );
+	    XMLTest("Test that declaration inside a child is not allowed", XMLError::XML_ERROR_PARSING_DECLARATION, doc.ErrorID() );
 	}
 
     {
@@ -2199,7 +2199,7 @@ int main( int argc, const char ** argv )
 
 	{
 		XMLDocument doc;
-		for( int i = 0; i < XML_ERROR_COUNT; i++ ) {
+		for( int i = 0; i < static_cast<std::underlying_type_t<XMLError>>(XMLError::XML_ERROR_COUNT); i++ ) {
 			const XMLError error = static_cast<XMLError>(i);
 			const char* name = XMLDocument::ErrorIDToName(error);
 			XMLTest( "ErrorName() not null after ClearError()", true, name != 0 );
@@ -2265,7 +2265,7 @@ int main( int argc, const char ** argv )
 		for (int i=0; TESTS[i]; ++i) {
 			XMLDocument doc;
 			doc.LoadFile(TESTS[i]);
-			XMLTest("Stack overflow prevented.", XML_ELEMENT_DEPTH_EXCEEDED, doc.ErrorID());
+			XMLTest("Stack overflow prevented.", XMLError::XML_ELEMENT_DEPTH_EXCEEDED, doc.ErrorID());
 		}
 	}
     {
@@ -2300,7 +2300,7 @@ int main( int argc, const char ** argv )
 		// an interesting test case.
 		XMLDocument doc;
 		XMLError err = doc.Parse(xml);
-		XMLTest("Crash bug parsing", XML_SUCCESS, err );
+		XMLTest("Crash bug parsing", XMLError::XML_SUCCESS, err );
 
 		XMLElement* playlist = doc.FirstChildElement("playlist");
 		XMLTest("Crash bug parsing", true, playlist != 0);
@@ -2429,17 +2429,17 @@ int main( int argc, const char ** argv )
             }
         } tester;
 
-		tester.TestParseError("ErrorLine-Parsing", "\n<root>\n foo \n<unclosed/>", XML_ERROR_PARSING, 2);
-        tester.TestParseError("ErrorLine-Declaration", "<root>\n<?xml version=\"1.0\"?>", XML_ERROR_PARSING_DECLARATION, 2);
-        tester.TestParseError("ErrorLine-Mismatch", "\n<root>\n</mismatch>", XML_ERROR_MISMATCHED_ELEMENT, 2);
-        tester.TestParseError("ErrorLine-CData", "\n<root><![CDATA[ \n foo bar \n", XML_ERROR_PARSING_CDATA, 2);
-        tester.TestParseError("ErrorLine-Text", "\n<root>\n foo bar \n", XML_ERROR_PARSING_TEXT, 3);
-        tester.TestParseError("ErrorLine-Comment", "\n<root>\n<!-- >\n", XML_ERROR_PARSING_COMMENT, 3);
-        tester.TestParseError("ErrorLine-Declaration", "\n<root>\n<? >\n", XML_ERROR_PARSING_DECLARATION, 3);
-        tester.TestParseError("ErrorLine-Unknown", "\n<root>\n<! \n", XML_ERROR_PARSING_UNKNOWN, 3);
-        tester.TestParseError("ErrorLine-Element", "\n<root>\n<unclosed \n", XML_ERROR_PARSING_ELEMENT, 3);
-        tester.TestParseError("ErrorLine-Attribute", "\n<root>\n<unclosed \n att\n", XML_ERROR_PARSING_ATTRIBUTE, 4);
-        tester.TestParseError("ErrorLine-ElementClose", "\n<root>\n<unclosed \n/unexpected", XML_ERROR_PARSING_ELEMENT, 3);
+		tester.TestParseError("ErrorLine-Parsing", "\n<root>\n foo \n<unclosed/>", XMLError::XML_ERROR_PARSING, 2);
+        tester.TestParseError("ErrorLine-Declaration", "<root>\n<?xml version=\"1.0\"?>", XMLError::XML_ERROR_PARSING_DECLARATION, 2);
+        tester.TestParseError("ErrorLine-Mismatch", "\n<root>\n</mismatch>", XMLError::XML_ERROR_MISMATCHED_ELEMENT, 2);
+        tester.TestParseError("ErrorLine-CData", "\n<root><![CDATA[ \n foo bar \n", XMLError::XML_ERROR_PARSING_CDATA, 2);
+        tester.TestParseError("ErrorLine-Text", "\n<root>\n foo bar \n", XMLError::XML_ERROR_PARSING_TEXT, 3);
+        tester.TestParseError("ErrorLine-Comment", "\n<root>\n<!-- >\n", XMLError::XML_ERROR_PARSING_COMMENT, 3);
+        tester.TestParseError("ErrorLine-Declaration", "\n<root>\n<? >\n", XMLError::XML_ERROR_PARSING_DECLARATION, 3);
+        tester.TestParseError("ErrorLine-Unknown", "\n<root>\n<! \n", XMLError::XML_ERROR_PARSING_UNKNOWN, 3);
+        tester.TestParseError("ErrorLine-Element", "\n<root>\n<unclosed \n", XMLError::XML_ERROR_PARSING_ELEMENT, 3);
+        tester.TestParseError("ErrorLine-Attribute", "\n<root>\n<unclosed \n att\n", XMLError::XML_ERROR_PARSING_ATTRIBUTE, 4);
+        tester.TestParseError("ErrorLine-ElementClose", "\n<root>\n<unclosed \n/unexpected", XMLError::XML_ERROR_PARSING_ELEMENT, 3);
 
 		tester.TestStringLines(
             "LineNumbers-String",
@@ -2481,7 +2481,7 @@ int main( int argc, const char ** argv )
     	XMLDocument doc;
     	doc.Parse(xml);
     	XMLTest("Test mismatched elements.", true, doc.Error());
-    	XMLTest("Test mismatched elements.", XML_ERROR_MISMATCHED_ELEMENT, doc.ErrorID());
+    	XMLTest("Test mismatched elements.", XMLError::XML_ERROR_MISMATCHED_ELEMENT, doc.ErrorID());
     	// For now just make sure calls work & doesn't crash.
     	// May solidify the error output in the future.
     	printf("%s\n", doc.ErrorStr());

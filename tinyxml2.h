@@ -41,6 +41,7 @@ distribution.
 #   include <cstring>
 #endif
 #include <stdint.h>
+#include <type_traits>
 
 /*
    TODO: intern strings instead of allocation.
@@ -136,7 +137,7 @@ class XMLPrinter;
 class TINYXML2_LIB StrPair
 {
 public:
-    enum Mode {
+    enum class Mode {
         NEEDS_ENTITY_PROCESSING			= 0x01,
         NEEDS_NEWLINE_NORMALIZATION		= 0x02,
         NEEDS_WHITESPACE_COLLAPSING     = 0x04,
@@ -183,10 +184,8 @@ public:
 private:
     void CollapseWhitespace();
 
-    enum {
-        NEEDS_FLUSH = 0x100,
-        NEEDS_DELETE = 0x200
-    };
+    static inline const int NEEDS_FLUSH = 0x100;
+    static inline const int NEEDS_DELETE = 0x200;
 
     int     _flags;
     char*   _start;
@@ -196,6 +195,26 @@ private:
     void operator=( const StrPair& other );	// not supported, use TransferTo()
 };
 
+StrPair::Mode operator&(const StrPair::Mode& lhs, const StrPair::Mode& rhs) {
+    typedef std::underlying_type_t<StrPair::Mode> underlying;
+    underlying a = static_cast<underlying>(lhs);
+    underlying b = static_cast<underlying>(rhs);
+    return static_cast<StrPair::Mode>(a & b);
+}
+
+StrPair::Mode& operator|=(StrPair::Mode& lhs, const StrPair::Mode& rhs) {
+    typedef std::underlying_type_t<StrPair::Mode> underlying;
+    underlying a = static_cast<underlying>(lhs);
+    underlying b = static_cast<underlying>(rhs);
+    lhs = static_cast<StrPair::Mode>(a | b);
+    return lhs;
+}
+
+StrPair::Mode operator|(const StrPair::Mode& lhs, const StrPair::Mode& rhs) {
+    StrPair::Mode result = lhs;
+    result |= rhs;
+    return result;
+}
 
 /*
 	A dynamic array of Plain Old Data. Doesn't support constructors, etc.
@@ -435,7 +454,7 @@ public:
 	//		64k:	4000	21000
     // Declared public because some compilers do not accept to use ITEMS_PER_BLOCK
     // in private part if ITEMS_PER_BLOCK is private
-    enum { ITEMS_PER_BLOCK = (4 * 1024) / ITEM_SIZE };
+    static inline const int ITEMS_PER_BLOCK = (4 * 1024) / ITEM_SIZE;
 
 private:
     MemPoolT( const MemPoolT& ); // not supported
@@ -520,7 +539,7 @@ public:
 };
 
 // WARNING: must match XMLDocument::_errorNames[]
-enum XMLError {
+enum class XMLError {
     XML_SUCCESS = 0,
     XML_NO_ATTRIBUTE,
     XML_WRONG_ATTRIBUTE_TYPE,
@@ -1238,7 +1257,7 @@ public:
     void SetAttribute( float value );
 
 private:
-    enum { BUF_SIZE = 200 };
+    static inline const int BUF_SIZE = 200;
 
     XMLAttribute() : _name(), _value(),_parseLineNum( 0 ), _next( 0 ), _memPool( 0 ) {}
     virtual ~XMLAttribute()	{}
@@ -1343,7 +1362,7 @@ public:
     XMLError QueryIntAttribute( const char* name, int* value ) const				{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
-            return XML_NO_ATTRIBUTE;
+            return XMLError::XML_NO_ATTRIBUTE;
         }
         return a->QueryIntValue( value );
     }
@@ -1352,7 +1371,7 @@ public:
     XMLError QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
-            return XML_NO_ATTRIBUTE;
+            return XMLError::XML_NO_ATTRIBUTE;
         }
         return a->QueryUnsignedValue( value );
     }
@@ -1361,7 +1380,7 @@ public:
 	XMLError QueryInt64Attribute(const char* name, int64_t* value) const {
 		const XMLAttribute* a = FindAttribute(name);
 		if (!a) {
-			return XML_NO_ATTRIBUTE;
+			return XMLError::XML_NO_ATTRIBUTE;
 		}
 		return a->QueryInt64Value(value);
 	}
@@ -1370,7 +1389,7 @@ public:
     XMLError QueryUnsigned64Attribute(const char* name, uint64_t* value) const {
         const XMLAttribute* a = FindAttribute(name);
         if(!a) {
-            return XML_NO_ATTRIBUTE;
+            return XMLError::XML_NO_ATTRIBUTE;
         }
         return a->QueryUnsigned64Value(value);
     }
@@ -1379,7 +1398,7 @@ public:
     XMLError QueryBoolAttribute( const char* name, bool* value ) const				{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
-            return XML_NO_ATTRIBUTE;
+            return XMLError::XML_NO_ATTRIBUTE;
         }
         return a->QueryBoolValue( value );
     }
@@ -1387,7 +1406,7 @@ public:
     XMLError QueryDoubleAttribute( const char* name, double* value ) const			{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
-            return XML_NO_ATTRIBUTE;
+            return XMLError::XML_NO_ATTRIBUTE;
         }
         return a->QueryDoubleValue( value );
     }
@@ -1395,7 +1414,7 @@ public:
     XMLError QueryFloatAttribute( const char* name, float* value ) const			{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
-            return XML_NO_ATTRIBUTE;
+            return XMLError::XML_NO_ATTRIBUTE;
         }
         return a->QueryFloatValue( value );
     }
@@ -1404,10 +1423,10 @@ public:
 	XMLError QueryStringAttribute(const char* name, const char** value) const {
 		const XMLAttribute* a = FindAttribute(name);
 		if (!a) {
-			return XML_NO_ATTRIBUTE;
+			return XMLError::XML_NO_ATTRIBUTE;
 		}
 		*value = a->Value();
-		return XML_SUCCESS;
+		return XMLError::XML_SUCCESS;
 	}
 
 
@@ -1668,7 +1687,7 @@ public:
 
 
     // internal:
-    enum ElementClosingType {
+    enum class ElementClosingType {
         OPEN,		// <foo>
         CLOSED,		// <foo/>
         CLOSING		// </foo>
@@ -1693,7 +1712,7 @@ private:
     static void DeleteAttribute( XMLAttribute* attribute );
     XMLAttribute* CreateAttribute();
 
-    enum { BUF_SIZE = 200 };
+    static inline const int BUF_SIZE = 200;
     ElementClosingType _closingType;
     // The attribute list is ordered; there is no 'lastAttribute'
     // because the list needs to be scanned for dupes before adding
@@ -1702,7 +1721,7 @@ private:
 };
 
 
-enum Whitespace {
+enum class Whitespace {
     PRESERVE_WHITESPACE,
     COLLAPSE_WHITESPACE
 };
@@ -1725,7 +1744,7 @@ class TINYXML2_LIB XMLDocument : public XMLNode
     friend class XMLUnknown;
 public:
     /// constructor
-    XMLDocument( bool processEntities = true, Whitespace whitespaceMode = PRESERVE_WHITESPACE );
+    XMLDocument( bool processEntities = true, Whitespace whitespaceMode = Whitespace::PRESERVE_WHITESPACE );
     ~XMLDocument();
 
     virtual XMLDocument* ToDocument()				{
@@ -1879,7 +1898,7 @@ public:
 
     /// Return true if there was an error parsing the document.
     bool Error() const {
-        return _errorID != XML_SUCCESS;
+        return _errorID != XMLError::XML_SUCCESS;
     }
     /// Return the errorID.
     XMLError  ErrorID() const {
@@ -1953,7 +1972,7 @@ private:
     MemPoolT< sizeof(XMLText) >		 _textPool;
     MemPoolT< sizeof(XMLComment) >	 _commentPool;
 
-	static const char* _errorNames[XML_ERROR_COUNT];
+	static const char* _errorNames[static_cast<std::underlying_type_t<XMLError>>(XMLError::XML_ERROR_COUNT)];
 
     void Parse();
 
@@ -2356,10 +2375,8 @@ private:
     bool _processEntities;
 	bool _compactMode;
 
-    enum {
-        ENTITY_RANGE = 64,
-        BUF_SIZE = 200
-    };
+    static constexpr int ENTITY_RANGE = 64;
+    static inline const int BUF_SIZE = 200;
     bool _entityFlag[ENTITY_RANGE];
     bool _restrictedEntityFlag[ENTITY_RANGE];
 
