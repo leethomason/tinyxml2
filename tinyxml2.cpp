@@ -148,6 +148,26 @@ static const Entity entities[NUM_ENTITIES] = {
     { "gt",	2,		'>'	 }
 };
 
+StrPair::Mode operator&(const StrPair::Mode& lhs, const StrPair::Mode& rhs) {
+    typedef std::underlying_type_t<StrPair::Mode> underlying;
+    underlying a = static_cast<underlying>(lhs);
+    underlying b = static_cast<underlying>(rhs);
+    return static_cast<StrPair::Mode>(a & b);
+}
+
+StrPair::Mode& operator|=(StrPair::Mode& lhs, const StrPair::Mode& rhs) {
+    typedef std::underlying_type_t<StrPair::Mode> underlying;
+    underlying a = static_cast<underlying>(lhs);
+    underlying b = static_cast<underlying>(rhs);
+    lhs = static_cast<StrPair::Mode>(a | b);
+    return lhs;
+}
+
+StrPair::Mode operator|(const StrPair::Mode& lhs, const StrPair::Mode& rhs) {
+    StrPair::Mode result = lhs;
+    result |= rhs;
+    return result;
+}
 
 StrPair::~StrPair()
 {
