@@ -50,7 +50,7 @@ lib_tinyxml2 = library(
     install : true,
 )
 
-dep_tinxyml2 = declare_dependency(
+dep_tinyxml2 = declare_dependency(
     link_with : lib_tinyxml2,
     include_directories : include_directories('.'),
 )
