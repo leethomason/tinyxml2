@@ -647,11 +647,11 @@ int main( int argc, const char ** argv )
 		}
 
 		{
-			int queryResult = ele->QueryAttribute( "int", &iVal2 );
+			XMLError queryResult = ele->QueryAttribute( "int", &iVal2 );
 			XMLTest( "Query int attribute generic", (int)XML_SUCCESS, queryResult);
 		}
 		{
-			int queryResult = ele->QueryAttribute( "double", &dVal2 );
+			XMLError queryResult = ele->QueryAttribute( "double", &dVal2 );
 			XMLTest( "Query double attribute generic", (int)XML_SUCCESS, queryResult);
 		}
 
@@ -823,7 +823,7 @@ int main( int argc, const char ** argv )
 			}
 			{
 				int v = 0;
-				int queryResult = element->QueryAttribute("attrib", &v);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
 				XMLTest("Attribute: int", (int)XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: int", -100, v, true);
 			}
@@ -839,7 +839,7 @@ int main( int argc, const char ** argv )
 			}
 			{
 				unsigned v = 0;
-				int queryResult = element->QueryAttribute("attrib", &v);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
 				XMLTest("Attribute: unsigned", (int)XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: unsigned", unsigned(100), v, true);
 			}
@@ -863,7 +863,7 @@ int main( int argc, const char ** argv )
 			}
 			{
 				int64_t v = 0;
-				int queryResult = element->QueryAttribute("attrib", &v);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
 				XMLTest("Attribute: int64_t", (int)XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: int64_t", BIG, v, true);
 			}
@@ -879,7 +879,7 @@ int main( int argc, const char ** argv )
             }
             {
                 uint64_t v = 0;
-                int queryResult = element->QueryAttribute("attrib", &v);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
                 XMLTest("Attribute: uint64_t", (int)XML_SUCCESS, queryResult, true);
                 XMLTest("Attribute: uint64_t", BIG_POS, v, true);
             }
@@ -895,7 +895,7 @@ int main( int argc, const char ** argv )
 			}
 			{
 				bool v = false;
-				int queryResult = element->QueryAttribute("attrib", &v);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
 				XMLTest("Attribute: bool", (int)XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: bool", true, v, true);
 			}
@@ -923,7 +923,7 @@ int main( int argc, const char ** argv )
 			}
 			{
 				double v = 0;
-				int queryResult = element->QueryAttribute("attrib", &v);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
 				XMLTest("Attribute: bool", (int)XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: double", 100.0, v, true);
 			}
@@ -939,7 +939,7 @@ int main( int argc, const char ** argv )
 			}
 			{
 				float v = 0;
-				int queryResult = element->QueryAttribute("attrib", &v);
+				XMLError queryResult = element->QueryAttribute("attrib", &v);
 				XMLTest("Attribute: float", (int)XML_SUCCESS, queryResult, true);
 				XMLTest("Attribute: float", 100.0f, v, true);
 			}
