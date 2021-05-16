@@ -1,9 +1,7 @@
 TinyXML-2
 =========
 
-[![TravisCI Status](https://travis-ci.org/leethomason/tinyxml2.svg?branch=master)](https://travis-ci.org/leethomason/tinyxml2) [![AppVeyor Status](https://ci.appveyor.com/api/projects/status/github/leethomason/tinyxml2?branch=master&svg=true)](https://ci.appveyor.com/project/leethomason/tinyxml2)
-
-![C/C++ CI Unixish](https://github.com/leethomason/tinyxml2/workflows/C/C++%20CI%20Unixish/badge.svg)
+![Build](https://github.com/leethomason/tinyxml2/actions/workflows/test.yml/badge.svg)
 
 ![TinyXML-2 Logo](http://www.grinninglizard.com/tinyxml2/TinyXML2_small.png)
 
