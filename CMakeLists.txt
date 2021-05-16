@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(tinyxml2 VERSION 8.0.0)
+project(tinyxml2 VERSION 8.1.0)
 
 include(CTest)
 option(tinyxml2_BUILD_TESTING "Build tests for tinyxml2" "${BUILD_TESTING}")
