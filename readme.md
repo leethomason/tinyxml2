@@ -259,12 +259,14 @@ There are 2 files in TinyXML-2:
 And additionally a test file:
 * xmltest.cpp
 
-Generally speaking, the intent is that you simply include the files in your project
-and build.
+Generally speaking, the intent is that you simply include the tinyxml2.cpp and 
+tinyxml2.h files in your project and build with your other source code.
 
-There is also a CMake build included.
+There is also a CMake build included. CMake is the general build for TinyXML-2.
+Additional build systems are costly to maintain, and tend to bit-rot. 
 
-A Visual Studio project is included, but that is largely for developer convenience.
+A Visual Studio project is included, but that is largely for developer convenience,
+and is not intended to integrate well with other builds.
 
 Building TinyXML-2 - Using vcpkg
 --------------------------------
