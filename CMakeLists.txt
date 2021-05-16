@@ -1,148 +1,129 @@
-IF(BIICODE)
-	ADD_BIICODE_TARGETS()
-	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/resources)
-		file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    ENDIF()
-    RETURN()
-ENDIF(BIICODE)
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-cmake_policy(VERSION 2.6)
-if(POLICY CMP0063)
-	cmake_policy(SET CMP0063 OLD)
-endif()
+cmake_minimum_required(VERSION 3.15)
+project(tinyxml2 VERSION 8.0.0)
 
-project(tinyxml2)
-include(GNUInstallDirs)
 include(CTest)
-#enable_testing()
+option(tinyxml2_BUILD_TESTING "Build tests for tinyxml2" "${BUILD_TESTING}")
 
-#CMAKE_BUILD_TOOL
+##
+## Honor tinyxml2_SHARED_LIBS to match install interface
+##
 
-################################
-# set lib version here
+if (DEFINED tinyxml2_SHARED_LIBS)
+    set(BUILD_SHARED_LIBS "${tinyxml2_SHARED_LIBS}")
+endif ()
 
-set(GENERIC_LIB_VERSION "8.0.0")
-set(GENERIC_LIB_SOVERSION "8")
-
-################################
-# Add definitions
-
-################################
-# Add targets
-# By Default shared library is being built
-# User can choose to build static library by using cmake -DBUILD_SHARED_LIBS:BOOL=OFF
-# To build the tests, use cmake . -DBUILD_TESTS:BOOL=ON
-# To disable the building of the tests, use cmake . -DBUILD_TESTS:BOOL=OFF
-
-option(BUILD_SHARED_LIBS "build as shared library" ON)
-option(BUILD_TESTS "build xmltest (deprecated: Use BUILD_TESTING)" ON)
-
-# To allow using tinyxml in another shared library
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+##
+## Main library build
+##
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-
-# to distinguish between debug and release lib
-set(CMAKE_DEBUG_POSTFIX "d")
-
-set(TARGETS_EXPORT_NAME "${CMAKE_PROJECT_NAME}Targets")
+set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
 
 add_library(tinyxml2 tinyxml2.cpp tinyxml2.h)
+add_library(tinyxml2::tinyxml2 ALIAS tinyxml2)
 
-set_target_properties(tinyxml2 PROPERTIES
-	DEFINE_SYMBOL "TINYXML2_EXPORT"
-	VERSION "${GENERIC_LIB_VERSION}"
-	SOVERSION "${GENERIC_LIB_SOVERSION}")
+# Uncomment the following line to require C++11 (or greater) to use tinyxml2
+# target_compile_features(tinyxml2 PUBLIC cxx_std_11)
+target_include_directories(tinyxml2 PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")
 
-target_compile_definitions(tinyxml2 PUBLIC $<$<CONFIG:Debug>:TINYXML2_DEBUG>)
+target_compile_definitions(
+    tinyxml2
+    PUBLIC $<$<CONFIG:Debug>:TINYXML2_DEBUG>
+    INTERFACE $<$<BOOL:${BUILD_SHARED_LIBS}>:TINYXML2_IMPORT>
+    PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
+)
 
-if(DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-    target_include_directories(tinyxml2 PUBLIC 
-                          $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+set_target_properties(
+    tinyxml2
+    PROPERTIES
+    DEFINE_SYMBOL "TINYXML2_EXPORT"
+    VERSION "${tinyxml2_VERSION}"
+    SOVERSION "${tinyxml2_VERSION_MAJOR}"
+)
 
-    if(MSVC)
-      target_compile_definitions(tinyxml2 PUBLIC -D_CRT_SECURE_NO_WARNINGS)
-    endif(MSVC)
-else()
-    include_directories(${PROJECT_SOURCE_DIR})
+if (tinyxml2_BUILD_TESTING)
+    add_executable(xmltest xmltest.cpp)
+    target_link_libraries(xmltest PRIVATE tinyxml2::tinyxml2)
 
-    if(MSVC)
-      add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    endif(MSVC)
-endif()
+    add_test(
+        NAME xmltest
+        COMMAND xmltest
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
 
-# Export cmake script that can be used by downstream project
-# via `include()`
-export(TARGETS tinyxml2
-       NAMESPACE tinyxml2::
-       FILE ${CMAKE_BINARY_DIR}/${TARGETS_EXPORT_NAME}.cmake)
+    set_tests_properties(xmltest PROPERTIES PASS_REGULAR_EXPRESSION ", Fail 0")
+endif ()
 
-install(TARGETS tinyxml2
-        EXPORT ${TARGETS_EXPORT_NAME}
-        RUNTIME 
-                DESTINATION ${CMAKE_INSTALL_BINDIR}
-                COMPONENT tinyxml2_runtime
-        LIBRARY 
-                DESTINATION ${CMAKE_INSTALL_LIBDIR}
-                COMPONENT tinyxml2_libraries
-        ARCHIVE 
-                DESTINATION ${CMAKE_INSTALL_LIBDIR}
-                COMPONENT tinyxml2_libraries)
+##
+## Installation
+##
 
-if(BUILD_TESTING AND BUILD_TESTS)
-  add_executable(xmltest xmltest.cpp)
-  add_dependencies(xmltest tinyxml2)
-  target_link_libraries(xmltest tinyxml2)
-
-  # Copy test resources and create test output directory
-  add_custom_command(TARGET xmltest POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:xmltest>/resources
-    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:xmltest>/resources/out
-    COMMENT "Configuring xmltest resources directory: ${CMAKE_CURRENT_BINARY_DIR}/resources"
-  )
-
-  add_test(NAME xmltest COMMAND xmltest WORKING_DIRECTORY $<TARGET_FILE_DIR:xmltest>)
-endif()
-
-install(FILES tinyxml2.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT tinyxml2_headers)
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-  set(LIB_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-endif()
-configure_file(tinyxml2.pc.in tinyxml2.pc @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig COMPONENT tinyxml2_config)
-
-# uninstall target
-if(NOT TARGET uninstall)
-  configure_file(
-      "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-      "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-      IMMEDIATE @ONLY)
-
-  add_custom_target(uninstall
-      COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
-endif()
-
+## Standard modules
+include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
-configure_package_config_file(
-  "Config.cmake.in"
-  "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake"
-  INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}"
-)
-write_basic_package_version_file(
-  "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
-  VERSION ${GENERIC_LIB_VERSION}
-  COMPATIBILITY SameMajorVersion
-)
-install(FILES
-        ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
-        ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
-        COMPONENT tinyxml2_config)
 
-# Export targets for find_package config mode
-install(EXPORT ${TARGETS_EXPORT_NAME} NAMESPACE tinyxml2::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
-        COMPONENT tinyxml2_config)
+## Custom locations
+set(tinyxml2_INSTALL_PKGCONFIGDIR "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+    CACHE PATH "Directory for pkgconfig files")
+
+set(tinyxml2_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/tinyxml2"
+    CACHE STRING "Path to tinyxml2 CMake files")
+
+## CMake targets and export scripts
+
+install(
+    TARGETS tinyxml2 EXPORT tinyxml2-targets
+    RUNTIME COMPONENT tinyxml2_runtime
+    LIBRARY COMPONENT tinyxml2_runtime
+    NAMELINK_COMPONENT tinyxml2_development
+    ARCHIVE COMPONENT tinyxml2_development
+    INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
+
+# Type-specific targets
+
+if (BUILD_SHARED_LIBS)
+    set(type shared)
+else ()
+    set(type static)
+endif ()
+
+install(
+    EXPORT tinyxml2-targets
+    DESTINATION "${tinyxml2_INSTALL_CMAKEDIR}"
+    NAMESPACE tinyxml2::
+    FILE tinyxml2-${type}-targets.cmake
+    COMPONENT tinyxml2_development
+)
+
+# Auto-generated version compatibility file
+write_basic_package_version_file(
+    tinyxml2-config-version.cmake
+    COMPATIBILITY SameMajorVersion
+)
+
+install(
+    FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/tinyxml2-config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/tinyxml2-config-version.cmake"
+    DESTINATION "${tinyxml2_INSTALL_CMAKEDIR}"
+    COMPONENT tinyxml2_development
+)
+
+## Headers
+
+install(
+    FILES tinyxml2.h
+    TYPE INCLUDE
+    COMPONENT tinyxml2_development
+)
+
+## pkg-config
+
+configure_file(cmake/tinyxml2.pc.in tinyxml2.pc.gen @ONLY)
+file(GENERATE OUTPUT tinyxml2.pc INPUT "${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc.gen")
+install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc"
+    DESTINATION "${tinyxml2_INSTALL_PKGCONFIGDIR}"
+    COMPONENT tinyxml2_development
+)

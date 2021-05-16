@@ -1,9 +1,7 @@
 TinyXML-2
 =========
 
-[![TravisCI Status](https://travis-ci.org/leethomason/tinyxml2.svg?branch=master)](https://travis-ci.org/leethomason/tinyxml2) [![AppVeyor Status](https://ci.appveyor.com/api/projects/status/github/leethomason/tinyxml2?branch=master&svg=true)](https://ci.appveyor.com/project/leethomason/tinyxml2)
-
-![C/C++ CI Unixish](https://github.com/leethomason/tinyxml2/workflows/C/C++%20CI%20Unixish/badge.svg)
+![Build](https://github.com/leethomason/tinyxml2/actions/workflows/test.yml/badge.svg)
 
 ![TinyXML-2 Logo](http://www.grinninglizard.com/tinyxml2/TinyXML2_small.png)
 
@@ -63,18 +61,15 @@ browsers or have more complete XML needs, TinyXML-2 is not the parser for you.
 TinyXML-1 vs. TinyXML-2
 -----------------------
 
-TinyXML-2 is now the focus of all development, well tested, and your
-best choice between the two APIs. At this point, unless you are maintaining
-legacy code, you should choose TinyXML-2.
+TinyXML-2 long been the focus of all development. It is well tested 
+and should be used instead of TinyXML-1.
 
 TinyXML-2 uses a similar API to TinyXML-1 and the same
 rich test cases. But the implementation of the parser is completely re-written
 to make it more appropriate for use in a game. It uses less memory, is faster,
 and uses far fewer memory allocations.
 
-TinyXML-2 has no requirement or support for STL. By returning `const char*`
-TinyXML-2 can be much more efficient with memory usage. (TinyXML-1 did support
-and use STL, but consumed much more memory for the DOM representation.)
+TinyXML-2 has no requirement or support for STL.
 
 Features
 --------
@@ -264,32 +259,14 @@ There are 2 files in TinyXML-2:
 And additionally a test file:
 * xmltest.cpp
 
-Simply compile and run. There is a visual studio 2019 project included, a simple Makefile,
-an Xcode project, a Code::Blocks project, a cmake CMakeLists.txt, and a meson.build are
-included to help you. The top of tinyxml.h even has a simple g++ command line if you are
-using Unix/Linux/BSD and don't want to use a build system.
+Generally speaking, the intent is that you simply include the tinyxml2.cpp and 
+tinyxml2.h files in your project and build with your other source code.
 
-Using as a Meson Subproject
----------------------------
+There is also a CMake build included. CMake is the general build for TinyXML-2.
+Additional build systems are costly to maintain, and tend to bit-rot. 
 
-Create a wrap file such as:
-```ini
-[wrap-git]
-url = https://github.com/leethomason/tinyxml2.git
-revision = 8.0.1  # this can be any commit-ish (tag, sha) or the special value `head`
-```
-
-or, if you prefer to not use git
-
-```ini
-[wrap-file]
-directory = tinyxml2-8.0.1  # this is the name of the directory after de-compressing
-source_url = https://github.com/leethomason/tinyxml2/archive/8.0.1.tar.gz
-source_hash = sha256sum of compressed sources
-```
-
-in your project's `subprojects/` folder, and follow the meson documentation
-for using fallbacks.
+A Visual Studio project is included, but that is largely for developer convenience,
+and is not intended to integrate well with other builds.
 
 Building TinyXML-2 - Using vcpkg
 --------------------------------
@@ -311,12 +288,6 @@ TinyXML-2 uses semantic versioning. http://semver.org/ Releases are now tagged i
 
 Note that the major version will (probably) change fairly rapidly. API changes are fairly
 common.
-
-Documentation
--------------
-
-The documentation is built with Doxygen, using the 'dox'
-configuration file.
 
 License
 -------
