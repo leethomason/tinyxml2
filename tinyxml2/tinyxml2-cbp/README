@@ -1,3 +1,0 @@
-The (default) Release configuration of this project builds a ready to use static library.
-The Debug configuration of this project builds an executable console application that 
-executes all tests provided for tinyxml2 in the xmltest.cpp file.
