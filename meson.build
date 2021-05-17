@@ -58,7 +58,7 @@ dep_tinyxml2 = declare_dependency(
 # This is the new way to set dependencies, but let's not break users of older
 # versions of meson
 if meson.version().version_compare('>= 0.54.0')
-  meson.override_dependency('tinyxml2', dep_tinxyml2)
+  meson.override_dependency('tinyxml2', dep_tinyxml2)
 endif
 
 if get_option('tests')
