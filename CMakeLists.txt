@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.10.2)
 project(tinyxml2 VERSION 8.1.0)
 
 include(CTest)
@@ -71,14 +71,26 @@ set(tinyxml2_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/tinyxml2"
 
 ## CMake targets and export scripts
 
-install(
-    TARGETS tinyxml2 EXPORT tinyxml2-targets
-    RUNTIME COMPONENT tinyxml2_runtime
-    LIBRARY COMPONENT tinyxml2_runtime
-    NAMELINK_COMPONENT tinyxml2_development
-    ARCHIVE COMPONENT tinyxml2_development
-    INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-)
+# Set NAMELINK_COMPONENT only if cmake_version >= 3.12
+if(${CMAKE_VERSION} VERSION_LESS "3.12")
+    install(
+        TARGETS tinyxml2 EXPORT tinyxml2-targets
+        RUNTIME COMPONENT tinyxml2_runtime
+        LIBRARY COMPONENT tinyxml2_runtime
+        ARCHIVE COMPONENT tinyxml2_development
+                DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+    )
+else()
+    install(
+        TARGETS tinyxml2 EXPORT tinyxml2-targets
+        RUNTIME COMPONENT tinyxml2_runtime
+        LIBRARY COMPONENT tinyxml2_runtime
+        NAMELINK_COMPONENT tinyxml2_development
+        ARCHIVE COMPONENT tinyxml2_development
+        INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+    )
+endif()
 
 # Type-specific targets
 
@@ -112,18 +124,28 @@ install(
 
 ## Headers
 
-install(
-    FILES tinyxml2.h
-    TYPE INCLUDE
-    COMPONENT tinyxml2_development
-)
+if(${CMAKE_VERSION} VERSION_LESS_EQUAL "3.13.5")
+    install(
+        FILES tinyxml2.h
+        COMPONENT tinyxml2_development
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+else()
+    install(
+        FILES tinyxml2.h
+        TYPE INCLUDE
+        COMPONENT tinyxml2_development
+    )
+endif()
 
 ## pkg-config
 
-configure_file(cmake/tinyxml2.pc.in tinyxml2.pc.gen @ONLY)
-file(GENERATE OUTPUT tinyxml2.pc INPUT "${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc.gen")
-install(
-    FILES "${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc"
-    DESTINATION "${tinyxml2_INSTALL_PKGCONFIGDIR}"
-    COMPONENT tinyxml2_development
-)
+if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
+    configure_file(cmake/tinyxml2.pc.in tinyxml2.pc.gen @ONLY)
+    file(GENERATE OUTPUT tinyxml2.pc INPUT "${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc.gen")
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc"
+        DESTINATION "${tinyxml2_INSTALL_PKGCONFIGDIR}"
+        COMPONENT tinyxml2_development
+    )
+endif()

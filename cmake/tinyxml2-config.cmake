@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.10.2)
 
 set(tinyxml2_known_comps static shared)
 set(tinyxml2_comp_static NO)
