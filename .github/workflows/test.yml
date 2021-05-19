@@ -6,13 +6,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-2019, macos-10.15, ubuntu-20.04 ]
+        os: [ windows-2019, macos-10.15, ubuntu-18.04, ubuntu-20.04 ]
         cmake: [ 3.15, 3.x ]
         include:
           - os: windows-2019
             static_postfix: _static
             tree: tree /F
             CXX: cl
+
+          - os: ubuntu-18.04
+            tree: tree
 
           - os: ubuntu-20.04
             tree: tree
