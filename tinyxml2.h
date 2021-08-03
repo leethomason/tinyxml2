@@ -99,13 +99,13 @@ distribution.
 /* Versioning, past 1.0.14:
 	http://semver.org/
 */
-static const int TIXML2_MAJOR_VERSION = 9;
-static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 0;
+static constexpr int TIXML2_MAJOR_VERSION = 9;
+static constexpr int TIXML2_MINOR_VERSION = 0;
+static constexpr int TIXML2_PATCH_VERSION = 0;
 
-#define TINYXML2_MAJOR_VERSION 9
-#define TINYXML2_MINOR_VERSION 0
-#define TINYXML2_PATCH_VERSION 0
+#define TINYXML2_MAJOR_VERSION TIXML2_MAJOR_VERSION
+#define TINYXML2_MINOR_VERSION TIXML2_MINOR_VERSION
+#define TINYXML2_PATCH_VERSION TIXML2_PATCH_VERSION
 
 // A fixed element depth limit is problematic. There needs to be a
 // limit to avoid a stack overflow. However, that limit varies per
