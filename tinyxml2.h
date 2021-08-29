@@ -41,6 +41,7 @@ distribution.
 #   include <cstring>
 #endif
 #include <stdint.h>
+#include <string>
 
 /*
    TODO: intern strings instead of allocation.
@@ -617,6 +618,7 @@ public:
     static void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
 
     // converts primitive types to strings
+    static void ToStr( std::string v, char* buffer, int bufferSize );
     static void ToStr( int v, char* buffer, int bufferSize );
     static void ToStr( unsigned v, char* buffer, int bufferSize );
     static void ToStr( bool v, char* buffer, int bufferSize );
@@ -626,6 +628,7 @@ public:
     static void ToStr(uint64_t v, char* buffer, int bufferSize);
 
     // converts strings to primitive types
+    static bool ToStr( const char* str, std::string* value );
     static bool	ToInt( const char* str, int* value );
     static bool ToUnsigned( const char* str, unsigned* value );
     static bool	ToBool( const char* str, bool* value );
@@ -1219,7 +1222,11 @@ public:
     XMLError QueryDoubleValue( double* value ) const;
     /// See QueryIntValue
     XMLError QueryFloatValue( float* value ) const;
+    /// See QueryIntValue
+    XMLError QueryStringValue( std::string* value ) const;
 
+    /// Set the attribute to a string value.
+    void SetAttribute( const std::string &value );
     /// Set the attribute to a string value.
     void SetAttribute( const char* value );
     /// Set the attribute to value.
@@ -1306,6 +1313,7 @@ public:
     	@endverbatim
     */
     const char* Attribute( const char* name, const char* value=0 ) const;
+    const char* Attribute( const char* name, const std::string& value ) const;
 
     /** Given an attribute name, IntAttribute() returns the value
     	of the attribute interpreted as an integer. The default
@@ -1326,6 +1334,8 @@ public:
 	double DoubleAttribute(const char* name, double defaultValue = 0) const;
     /// See IntAttribute()
 	float FloatAttribute(const char* name, float defaultValue = 0) const;
+    /// See IntAttribute()
+        std::string StringAttribute(const char* name, const std::string& defaultValue = "") const;
 
     /** Given an attribute name, QueryIntAttribute() returns
     	XML_SUCCESS, XML_WRONG_ATTRIBUTE_TYPE if the conversion
@@ -1399,6 +1409,14 @@ public:
         }
         return a->QueryFloatValue( value );
     }
+    /// See QueryIntAttribute()
+    XMLError QueryStringAttribute( const char* name, std::string* value ) const			{
+      const XMLAttribute* a = FindAttribute( name );
+      if ( !a ) {
+        return XML_NO_ATTRIBUTE;
+      }
+      return a->QueryStringValue( value );
+    }
 
 	/// See QueryIntAttribute()
 	XMLError QueryStringAttribute(const char* name, const char** value) const {
@@ -1461,6 +1479,10 @@ public:
 		return QueryStringAttribute(name, value);
 	}
 
+        XMLError QueryAttribute(const char* name, std::string* value) const {
+          return QueryStringAttribute(name, value);
+        }
+
 	/// Sets the named attribute to value.
     void SetAttribute( const char* name, const char* value )	{
         XMLAttribute* a = FindOrCreateAttribute( name );
@@ -1503,6 +1525,12 @@ public:
     void SetAttribute( const char* name, float value )		{
         XMLAttribute* a = FindOrCreateAttribute( name );
         a->SetAttribute( value );
+    }
+
+    /// Sets the named attribute to value.
+    void SetAttribute( const char* name, const std::string& value ) {
+      XMLAttribute* a = FindOrCreateAttribute( name );
+      a->SetAttribute( value.c_str() );
     }
 
     /**
@@ -1581,6 +1609,9 @@ public:
     		<foo>Hullaballoo!</foo>
     	@endverbatim
     */
+
+    void SetText( std::string inText );
+    /// Convenience method for setting text inside an element. See SetText() for important limitations.
 	void SetText( const char* inText );
     /// Convenience method for setting text inside an element. See SetText() for important limitations.
     void SetText( int value );
@@ -1636,6 +1667,8 @@ public:
     XMLError QueryDoubleText( double* dval ) const;
     /// See QueryIntText()
     XMLError QueryFloatText( float* fval ) const;
+    /// See QueryIntText()
+    XMLError QueryStrText( std::string* fval ) const;
 
 	int IntText(int defaultValue = 0) const;
 

@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <string>
 
 #if defined( _MSC_VER ) || defined (WIN32)
 	#include <crtdbg.h>
@@ -627,10 +628,13 @@ int main( int argc, const char ** argv )
 
 		int iVal, iVal2;
 		double dVal, dVal2;
+		const std::string test_string("ThiS is A Sample StrIng with SpeCiaL characters: .-_:{,'**äöüÄÖÜ?ß\\)(/&%$§\"!}][");
+		std::string test_string_query;
 
 		ele->SetAttribute( "str", "strValue" );
 		ele->SetAttribute( "int", 1 );
 		ele->SetAttribute( "double", -1.0 );
+		ele->SetAttribute( "stdString", test_string); 
 
 		const char* answer = 0;
 		ele->QueryAttribute("str", &answer);
@@ -654,8 +658,14 @@ int main( int argc, const char ** argv )
 			XMLError queryResult = ele->QueryAttribute( "double", &dVal2 );
 			XMLTest( "Query double attribute generic", (int)XML_SUCCESS, queryResult);
 		}
-
+		{
+			XMLError queryResult = ele->QueryAttribute( "stdString", &test_string_query );
+			XMLTest( "Query std::string attribute generic", (int)XML_SUCCESS, queryResult);
+		}
+		
+                XMLTest( "Attribute match test", test_string.c_str(), ele->Attribute( "stdString", test_string ) );
 		XMLTest( "Attribute match test", "strValue", ele->Attribute( "str", "strValue" ) );
+		XMLTest( "Attribute round trip. std::string.", test_string.c_str(), test_string.c_str() );
 		XMLTest( "Attribute round trip. c-string.", "strValue", cStr );
 		XMLTest( "Attribute round trip. int.", 1, iVal );
 		XMLTest( "Attribute round trip. double.", -1, (int)dVal );
@@ -663,6 +673,7 @@ int main( int argc, const char ** argv )
 		XMLTest( "Alternate query", true, dVal == dVal2 );
 		XMLTest( "Alternate query", true, iVal == ele->IntAttribute("int") );
 		XMLTest( "Alternate query", true, dVal == ele->DoubleAttribute("double") );
+		XMLTest( "Alternate query", true, test_string == ele->StringAttribute("stdString") );
 	}
 
 	{
