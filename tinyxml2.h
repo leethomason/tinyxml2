@@ -78,6 +78,12 @@ distribution.
 #   define TINYXML2_LIB
 #endif
 
+#ifdef __GNUC__
+#	define TINYXML2_ATTR_FORMAT(type, a, b) __attribute__((format (type, a, b)))
+#else
+#	define TINYXML2_ATTR_FORMAT
+#endif
+
 
 #if !defined(TIXMLASSERT)
 #if defined(TINYXML2_DEBUG)
@@ -1957,7 +1963,7 @@ private:
 
     void Parse();
 
-    void SetError( XMLError error, int lineNum, const char* format, ... );
+    void SetError( XMLError error, int lineNum, const char* format, ... ) TINYXML2_ATTR_FORMAT(printf, 4, 5);
 
 	// Something of an obvious security hole, once it was discovered.
 	// Either an ill-formed XML or an excessively deep one can overflow
@@ -2331,7 +2337,7 @@ protected:
 	    the space and tabs used. A PrintSpace() override should call Print().
 	*/
     virtual void PrintSpace( int depth );
-    virtual void Print( const char* format, ... );
+    virtual void Print( const char* format, ... ) TINYXML2_ATTR_FORMAT(printf, 2, 3);
     virtual void Write( const char* data, size_t size );
     virtual void Putc( char ch );
 

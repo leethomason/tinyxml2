@@ -91,7 +91,7 @@ distribution.
 	//#warning( "Using sn* functions." )
 	#define TIXML_SNPRINTF	snprintf
 	#define TIXML_VSNPRINTF	vsnprintf
-	static inline int TIXML_VSCPRINTF( const char* format, va_list va )
+	static inline TINYXML2_ATTR_FORMAT(printf, 1, 0) int TIXML_VSCPRINTF( const char* format, va_list va )
 	{
 		int len = vsnprintf( 0, 0, format, va );
 		TIXMLASSERT( len >= 0 );
