@@ -2104,6 +2104,7 @@ XMLError XMLDocument::SaveFile(FILE* fp, bool compact) {
   ClearError();
   XMLPrinter stream(fp, compact);
   Print(&stream);
+  SetError(stream.GetError(), 0, nullptr);
   return _errorID;
 }
 
@@ -2231,6 +2232,7 @@ XMLPrinter::XMLPrinter(FILE* file, bool compact, int depth) : _elementJustOpened
                                                               _textDepth(-1),
                                                               _processEntities(true),
                                                               _compactMode(compact),
+                                                              _error(XML_SUCCESS),
                                                               _buffer() {
   for (int i = 0; i < ENTITY_RANGE; ++i) {
     _entityFlag[i] = false;
@@ -2267,18 +2269,17 @@ void XMLPrinter::Print(const char* format, ...) {
   va_end(va);
 }
 
-XMLError XMLPrinter::Write(const char* data, size_t size) {
+void XMLPrinter::Write(const char* data, size_t size) {
   XMLError r = XML_SUCCESS;
   if (_fp) {
     if (fwrite(data, sizeof(char), size, _fp) != size) {
-      r = errno2XMLError();
+      _error = errno2XMLError();
     }
   } else {
     char* p = _buffer.PushArr(static_cast<int>(size)) - 1;// back up over the null terminator.
     memcpy(p, data, size);
     p[size] = 0;
   }
-  return r;
 }
 
 void XMLPrinter::Putc(char ch) {
@@ -2589,6 +2590,10 @@ bool XMLPrinter::Visit(const XMLDeclaration& declaration) {
 bool XMLPrinter::Visit(const XMLUnknown& unknown) {
   PushUnknown(unknown.Value());
   return true;
+}
+
+XMLError XMLPrinter::GetError() const {
+  return this->_error;
 }
 
 }// namespace tinyxml2

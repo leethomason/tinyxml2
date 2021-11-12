@@ -535,6 +535,7 @@ enum XMLError {
   XML_ERROR_IO,                 // EIO
   XML_ERROR_NO_SPACE,           // ENOSPC
   XML_ERROR_PIPE,               // EPIPE
+
   XML_ERROR_COUNT
 };
 
@@ -2282,6 +2283,8 @@ class TINYXML2_LIB XMLPrinter : public XMLVisitor {
   virtual bool Visit(const XMLDeclaration& declaration);
   virtual bool Visit(const XMLUnknown& unknown);
 
+  virtual XMLError GetError() const;
+
   /**
           If in print to memory mode, return a pointer to
           the XML file in memory.
@@ -2315,10 +2318,10 @@ class TINYXML2_LIB XMLPrinter : public XMLVisitor {
   */
   virtual void PrintSpace(int depth);
   virtual void Print(const char* format, ...);
-  virtual XMLError Write(const char* data, size_t size);
+  virtual void Write(const char* data, size_t size);
   virtual void Putc(char ch);
 
-  inline XMLError Write(const char* data) { return Write(data, strlen(data)); }
+  inline void Write(const char* data) { Write(data, strlen(data)); }
 
   void SealElementIfJustOpened();
   bool _elementJustOpened;
@@ -2338,6 +2341,7 @@ class TINYXML2_LIB XMLPrinter : public XMLVisitor {
   int _textDepth;
   bool _processEntities;
   bool _compactMode;
+  XMLError _error;
 
   enum {
     ENTITY_RANGE = 64,
