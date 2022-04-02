@@ -106,7 +106,7 @@ distribution.
 #elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__) || (__CYGWIN__)
 	#define TIXML_FSEEK fseeko
 	#define TIXML_FTELL ftello
-#elif defined defined(__ANDROID__) 
+#elif defined(__ANDROID__) 
     #if __ANDROID_API__ > 24
         #define TIXML_FSEEK fseeko64
         #define TIXML_FTELL ftello64
