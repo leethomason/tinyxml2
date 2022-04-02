@@ -62,26 +62,6 @@ if meson.version().version_compare('>= 0.54.0')
 endif
 
 if get_option('tests')
-    # Try to find a copy command. If this is windows we probably don't have cp,
-    # but if this is msys then we do, so make cp not required in that case, and
-    # try Xcopy if cp isn't found
-    prog_cp = find_program('cp', required : build_machine.system() != 'windows')
-    command = ['-r']
-    if not prog_cp.found()
-        prog_cp = find_program('Xcopy')
-        command = ['/E', '/I']
-    endif
-
-    # Copy the test resources into the build dir
-    run_command(
-        prog_cp,
-        [
-            command,
-            meson.current_source_dir() / 'resources',
-            meson.current_build_dir(),
-        ],
-    )
-
     test(
         'xmltest',
         executable(
@@ -89,7 +69,7 @@ if get_option('tests')
             ['xmltest.cpp'],
             link_with : [lib_tinyxml2],
         ),
-        workdir : meson.current_build_dir(),
+        workdir : meson.current_source_dir(),
     )
 endif
 
