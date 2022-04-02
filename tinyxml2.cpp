@@ -1777,11 +1777,11 @@ XMLError XMLElement::QueryInt64Text(int64_t* ival) const
 }
 
 
-XMLError XMLElement::QueryUnsigned64Text(uint64_t* ival) const
+XMLError XMLElement::QueryUnsigned64Text(uint64_t* uval) const
 {
     if(FirstChild() && FirstChild()->ToText()) {
         const char* t = FirstChild()->Value();
-        if(XMLUtil::ToUnsigned64(t, ival)) {
+        if(XMLUtil::ToUnsigned64(t, uval)) {
             return XML_SUCCESS;
         }
         return XML_CAN_NOT_CONVERT_TEXT;
@@ -2413,21 +2413,21 @@ XMLError XMLDocument::SaveFile( FILE* fp, bool compact )
 }
 
 
-XMLError XMLDocument::Parse( const char* p, size_t len )
+XMLError XMLDocument::Parse( const char* xml, size_t nBytes )
 {
     Clear();
 
-    if ( len == 0 || !p || !*p ) {
+    if ( nBytes == 0 || !xml || !*xml ) {
         SetError( XML_ERROR_EMPTY_DOCUMENT, 0, 0 );
         return _errorID;
     }
-    if ( len == static_cast<size_t>(-1) ) {
-        len = strlen( p );
+    if ( nBytes == static_cast<size_t>(-1) ) {
+        nBytes = strlen( xml );
     }
     TIXMLASSERT( _charBuffer == 0 );
-    _charBuffer = new char[ len+1 ];
-    memcpy( _charBuffer, p, len );
-    _charBuffer[len] = 0;
+    _charBuffer = new char[ nBytes+1 ];
+    memcpy( _charBuffer, xml, nBytes );
+    _charBuffer[nBytes] = 0;
 
     Parse();
     if ( Error() ) {
