@@ -1,0 +1,44 @@
+<!-- Taken from https://github.com/cdcseacave/Visual-Studio-Visualizers/blob/master/TinyXML2.natvis -->
+
+<?xml version='1.0' encoding='utf-8'?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+<Type Name="tinyxml2::StrPair">
+    <DisplayString>{start, [end-start]s}</DisplayString>
+    <StringView>start, [end-start]s</StringView>
+</Type>
+<Type Name="tinyxml2::XMLNode">
+    <DisplayString>{value}</DisplayString>
+    <StringView>value</StringView>
+    <Expand>
+        <LinkedListItems> 
+            <HeadPointer>firstChild</HeadPointer> 
+            <NextPointer>next</NextPointer> 
+            <ValueNode>this</ValueNode> 
+        </LinkedListItems>
+    </Expand>
+</Type>
+<Type Name="tinyxml2::XMLElement">
+    <DisplayString Condition="closingType==1">[CLOSED] {value}</DisplayString>
+    <DisplayString Condition="closingType==2">[CLOSING] {value}</DisplayString>
+    <DisplayString>[OPEN] {value}</DisplayString>
+    <StringView>value</StringView>
+    <Expand>
+        <Item Name="attributes">rootAttribute</Item>
+        <LinkedListItems> 
+            <HeadPointer>firstChild</HeadPointer> 
+            <NextPointer>next</NextPointer> 
+            <ValueNode>this</ValueNode> 
+        </LinkedListItems>
+    </Expand>
+</Type>
+<Type Name="tinyxml2::XMLAttribute">
+    <DisplayString>{name} = {value}</DisplayString>
+    <Expand>
+        <LinkedListItems> 
+            <HeadPointer>this</HeadPointer> 
+            <NextPointer>next</NextPointer> 
+            <ValueNode>this</ValueNode> 
+        </LinkedListItems>
+    </Expand>
+</Type>
+</AutoVisualizer>
