@@ -305,7 +305,7 @@ private:
         if ( cap > _allocated ) {
             TIXMLASSERT( cap <= INT_MAX / 2 );
             const int newAllocated = cap * 2;
-            T* newMem = new T[static_cast<size_t>(newAllocated)];
+            T* newMem = new T[static_cast<unsigned int>(newAllocated)];
             TIXMLASSERT( newAllocated >= _size );
             memcpy( newMem, _mem, sizeof(T)*static_cast<size_t>(_size) );	// warning: not using constructors, only works for PODs
             if ( _mem != _pool ) {
