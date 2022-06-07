@@ -317,7 +317,7 @@ private:
     }
 
     T*  _mem;
-    T   _pool[INITIAL_SIZE];
+    T   _pool[static_cast<size_t>(INITIAL_SIZE)];
     int _allocated;		// objects allocated
     int _size;			// number objects in use
 };
@@ -443,7 +443,7 @@ private:
 
     union Item {
         Item*   next;
-        char    itemData[ITEM_SIZE];
+        char    itemData[static_cast<size_t>(ITEM_SIZE)];
     };
     struct Block {
         Item items[ITEMS_PER_BLOCK];
