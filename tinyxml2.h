@@ -435,7 +435,7 @@ public:
 	//		64k:	4000	21000
     // Declared public because some compilers do not accept to use ITEMS_PER_BLOCK
     // in private part if ITEMS_PER_BLOCK is private
-    enum { ITEMS_PER_BLOCK = (4 * 1024) / ITEM_SIZE };
+    enum { ITEMS_PER_BLOCK = (100 * 1024) / ITEM_SIZE };
 
 private:
     MemPoolT( const MemPoolT& ); // not supported
