@@ -1047,6 +1047,48 @@ const XMLElement* XMLNode::PreviousSiblingElement( const char* name ) const
 }
 
 
+const XMLElement* XMLNode::FirstDescendantElement(const char** names) const
+{
+    if (!names || !*names)
+    {
+        return 0;
+    }
+
+    const XMLNode* node = this;
+    for (const char** ptr = names; *ptr; ptr++)
+    {
+        node = node->FirstChildElement((**ptr) ? *ptr : 0);
+        if (!node)
+        {
+            return 0;
+        }
+    }
+
+    return (XMLElement*)node;
+}
+
+
+const XMLElement* XMLNode::LastDescendantElement(const char** names) const
+{
+    if (!names || !*names)
+    {
+        return 0;
+    }
+
+    const XMLNode* node = this;
+    for (const char** ptr = names; *ptr; ptr++)
+    {
+        node = node->LastChildElement((**ptr) ? *ptr : 0);
+        if (!node)
+        {
+            return 0;
+        }
+    }
+
+    return (XMLElement*)node;
+}
+
+
 char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
 {
     // This is a recursive method, but thinking about it "at the current level"

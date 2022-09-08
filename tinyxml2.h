@@ -833,6 +833,22 @@ public:
         return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement( name ) );
     }
 
+    /** Get the first descendant element with the specified list of name.
+    */
+    const XMLElement* FirstDescendantElement(const char** names) const;
+
+    XMLElement* FirstDescendantElement(const char** names) {
+        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstDescendantElement(names));
+    }
+
+    /** Get the last descendant element with the specified list of name.
+    */
+    const XMLElement* LastDescendantElement(const char** names) const;
+
+    XMLElement* LastDescendantElement(const char** names) {
+        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastDescendantElement(names));
+    }
+
     /**
     	Add a child node as the last (right) child.
 		If the child node is already part of the document,
