@@ -16,8 +16,10 @@ endif ()
 ## Main library build
 ##
 
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
+if (BUILD_SHARED_LIBS)
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
+endif()
 
 add_library(tinyxml2 tinyxml2.cpp tinyxml2.h)
 add_library(tinyxml2::tinyxml2 ALIAS tinyxml2)
@@ -36,10 +38,13 @@ target_compile_definitions(
 set_target_properties(
     tinyxml2
     PROPERTIES
-    DEFINE_SYMBOL "TINYXML2_EXPORT"
     VERSION "${tinyxml2_VERSION}"
     SOVERSION "${tinyxml2_VERSION_MAJOR}"
 )
+
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(tinyxml2 PRIVATE "TINYXML2_EXPORT")
+endif()
 
 if (tinyxml2_BUILD_TESTING)
     add_executable(xmltest xmltest.cpp)
