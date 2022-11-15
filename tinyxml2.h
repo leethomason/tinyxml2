@@ -375,7 +375,7 @@ public:
     virtual void* Alloc() {
         if ( !_root ) {
             // Need a new block.
-            Block* block = new Block();
+            Block* block = new Block;
             _blockPtrs.Push( block );
 
             Item* blockItems = block->items;
