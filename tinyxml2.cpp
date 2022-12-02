@@ -720,12 +720,16 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
     TIXMLASSERT( node );
     TIXMLASSERT( p );
     char* const start = p;
+    char* nextc;
     int const startLine = _parseCurLineNum;
-    p = XMLUtil::SkipWhiteSpace( p, &_parseCurLineNum );
-    if( !*p ) {
+    nextc = XMLUtil::SkipWhiteSpace( p, &_parseCurLineNum );
+    if( !*nextc ) {
         *node = 0;
-        TIXMLASSERT( p );
-        return p;
+        TIXMLASSERT( nextc );
+        return nextc;
+    }
+    if ( !_startedElements || _document->WhitespaceMode() == COLLAPSE_WHITESPACE ) {
+      p = nextc;
     }
 
     // These strings define the matching patterns:
@@ -767,6 +771,7 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
         p += dtdHeaderLen;
     }
     else if ( XMLUtil::StringEqual( p, elementHeader, elementHeaderLen ) ) {
+        _startedElements = true;
         returnNode =  CreateUnlinkedNode<XMLElement>( _elementPool );
         returnNode->_parseLineNum = _parseCurLineNum;
         p += elementHeaderLen;
@@ -2204,6 +2209,7 @@ void XMLDocument::Clear()
 		DeleteNode(_unlinked[0]);	// Will remove from _unlinked as part of delete.
 	}
 
+    _startedElements = false;
 #ifdef TINYXML2_DEBUG
     const bool hadError = Error();
 #endif

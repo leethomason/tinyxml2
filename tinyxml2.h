@@ -1933,6 +1933,7 @@ private:
 
     bool			_writeBOM;
     bool			_processEntities;
+    bool			_startedElements;    
     XMLError		_errorID;
     Whitespace		_whitespaceMode;
     mutable StrPair	_errorStr;
