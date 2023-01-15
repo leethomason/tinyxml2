@@ -2149,6 +2149,12 @@ int main( int argc, const char ** argv )
 		XMLTest( "Should be no error initially", false, doc.Error() );
 		doc.LoadFile( "resources/no-such-file.xml" );
 		XMLTest( "No such file - should fail", true, doc.Error() );
+                
+                doc.LoadFile( "resources/xmltest-5330.xml" );
+                XMLTest( "parse errors occur - should fail", true, doc.Error() );
+
+		doc.LoadFile( "resources/dream.xml" );
+		XMLTest( "Error should be cleared", false, doc.Error() );
 
 		doc.LoadFile( "resources/dream.xml" );
 		XMLTest( "Error should be cleared", false, doc.Error() );
