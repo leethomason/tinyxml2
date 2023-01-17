@@ -38,13 +38,10 @@ target_compile_definitions(
 set_target_properties(
     tinyxml2
     PROPERTIES
+    DEFINE_SYMBOL "TINYXML2_EXPORT" # only used when BUILD_SHARED_LIBS is ON
     VERSION "${tinyxml2_VERSION}"
     SOVERSION "${tinyxml2_VERSION_MAJOR}"
 )
-
-if(BUILD_SHARED_LIBS)
-    target_compile_definitions(tinyxml2 PRIVATE "TINYXML2_EXPORT")
-endif()
 
 if (tinyxml2_BUILD_TESTING)
     add_executable(xmltest xmltest.cpp)
