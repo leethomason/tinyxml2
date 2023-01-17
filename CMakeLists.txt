@@ -38,7 +38,8 @@ target_compile_definitions(
 set_target_properties(
     tinyxml2
     PROPERTIES
-    DEFINE_SYMBOL "TINYXML2_EXPORT" # only used when BUILD_SHARED_LIBS is ON
+    DEFINE_SYMBOL "TINYXML2_EXPORT" # only used when tinyxml2_SHARED_LIBS/BUILD_SHARED_LIBS is ON
+
     VERSION "${tinyxml2_VERSION}"
     SOVERSION "${tinyxml2_VERSION_MAJOR}"
 )
