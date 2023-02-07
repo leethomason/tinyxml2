@@ -61,7 +61,7 @@ browsers or have more complete XML needs, TinyXML-2 is not the parser for you.
 TinyXML-1 vs. TinyXML-2
 -----------------------
 
-TinyXML-2 long been the focus of all development. It is well tested 
+TinyXML-2 long been the focus of all development. It is well tested
 and should be used instead of TinyXML-1.
 
 TinyXML-2 uses a similar API to TinyXML-1 and the same
@@ -259,11 +259,11 @@ There are 2 files in TinyXML-2:
 And additionally a test file:
 * xmltest.cpp
 
-Generally speaking, the intent is that you simply include the tinyxml2.cpp and 
+Generally speaking, the intent is that you simply include the tinyxml2.cpp and
 tinyxml2.h files in your project and build with your other source code.
 
 There is also a CMake build included. CMake is the general build for TinyXML-2.
-Additional build systems are costly to maintain, and tend to bit-rot. 
+Additional build systems are costly to maintain, and tend to bit-rot.
 
 A Visual Studio project is included, but that is largely for developer convenience,
 and is not intended to integrate well with other builds.

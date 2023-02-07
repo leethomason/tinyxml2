@@ -55,7 +55,7 @@ $(function() {
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
-<iframe src="javascript:void(0)" frameborder="0" 
+<iframe src="javascript:void(0)" frameborder="0"
         name="MSearchResults" id="MSearchResults">
 </iframe>
 </div>
@@ -434,7 +434,7 @@ const <a class="el" href="classtinyxml2_1_1_x_m_l_element.html">XMLElement</a> *
 <p>An example of using <a class="el" href="classtinyxml2_1_1_x_m_l_element.html#a3ea8a40e788fb9ad876c28a32932c6d5">Accept()</a>: </p><pre class="fragment">XMLPrinter printer;
 tinyxmlDoc.Accept( &amp;printer );
 const char* xmlcstr = printer.CStr();
-</pre> 
+</pre>
 <p>Implements <a class="el" href="classtinyxml2_1_1_x_m_l_node.html#a81e66df0a44c67a7af17f3b77a152785">tinyxml2::XMLNode</a>.</p>
 
 </div>
@@ -471,7 +471,7 @@ const char* xmlcstr = printer.CStr();
 </pre><p>rather than: </p><pre class="fragment">if ( ele-&gt;Attribute( "foo" ) ) {
     if ( strcmp( ele-&gt;Attribute( "foo" ), "bar" ) == 0 ) callFooIsBar();
 }
-</pre> 
+</pre>
 </div>
 </div>
 <a id="aebd45aa7118964c30b32fe12e944628a"></a>
@@ -603,7 +603,7 @@ const char* xmlcstr = printer.CStr();
 <p>If successful, the result of the conversion will be written to 'value'. If not successful, nothing will be written to 'value'. This allows you to provide default value:</p>
 <pre class="fragment">int value = 10;
 QueryAttribute( "foo", &amp;value );        // if "foo" isn't found, value will still be 10
-</pre> 
+</pre>
 </div>
 </div>
 <a id="a8a78bc1187c1c45ad89f2690eab567b1"></a>
@@ -642,7 +642,7 @@ QueryAttribute( "foo", &amp;value );        // if "foo" isn't found, value will 
 <p>Given an attribute name, <a class="el" href="classtinyxml2_1_1_x_m_l_element.html#a8a78bc1187c1c45ad89f2690eab567b1">QueryIntAttribute()</a> returns XML_SUCCESS, XML_WRONG_ATTRIBUTE_TYPE if the conversion can't be performed, or XML_NO_ATTRIBUTE if the attribute doesn't exist. If successful, the result of the conversion will be written to 'value'. If not successful, nothing will be written to 'value'. This allows you to provide default value:</p>
 <pre class="fragment">int value = 10;
 QueryIntAttribute( "foo", &amp;value );     // if "foo" isn't found, value will still be 10
-</pre> 
+</pre>
 </div>
 </div>
 <a id="a926357996bef633cb736e1a558419632"></a>
@@ -699,7 +699,7 @@ QueryIntAttribute( "foo", &amp;value );     // if "foo" isn't found, value will 
 </pre><p>then it will not change "This is text", but rather prefix it with a text element: </p><pre class="fragment">    &lt;foo&gt;Hullaballoo!&lt;b&gt;This is text&lt;/b&gt;&lt;/foo&gt;
 </pre><p>For this XML: </p><pre class="fragment">    &lt;foo /&gt;
 </pre><p> <a class="el" href="classtinyxml2_1_1_x_m_l_element.html#a1f9c2cd61b72af5ae708d37b7ad283ce">SetText()</a> will generate </p><pre class="fragment">    &lt;foo&gt;Hullaballoo!&lt;/foo&gt;
-</pre> 
+</pre>
 </div>
 </div>
 <a id="ac035742d68b0c50c3f676374e59fe750"></a>

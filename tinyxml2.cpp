@@ -106,7 +106,7 @@ distribution.
 #elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__) || (__CYGWIN__)
 	#define TIXML_FSEEK fseeko
 	#define TIXML_FTELL ftello
-#elif defined(__ANDROID__) 
+#elif defined(__ANDROID__)
     #if __ANDROID_API__ > 24
         #define TIXML_FSEEK fseeko64
         #define TIXML_FTELL ftello64
@@ -1096,10 +1096,10 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
             // Declarations are only allowed at document level
             //
             // Multiple declarations are allowed but all declarations
-            // must occur before anything else. 
+            // must occur before anything else.
             //
-            // Optimized due to a security test case. If the first node is 
-            // a declaration, and the last node is a declaration, then only 
+            // Optimized due to a security test case. If the first node is
+            // a declaration, and the last node is a declaration, then only
             // declarations have so far been added.
             bool wellLocated = false;
 
