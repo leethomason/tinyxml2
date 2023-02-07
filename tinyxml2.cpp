@@ -822,6 +822,34 @@ XMLNode::~XMLNode()
     }
 }
 
+// ChildElementCount was originally suggested by msteiger on the sourceforge page for TinyXML and modified by KB1SPH for TinyXML-2.
+
+int XMLNode::ChildElementCount(const char *value) const {
+	int count = 0;
+
+	const XMLElement *e = FirstChildElement(value);
+
+	while (e) {
+		e = e->NextSiblingElement(value);
+		count++;
+	}
+
+	return count;
+}
+
+int XMLNode::ChildElementCount() const {
+	int count = 0;
+
+	const XMLElement *e = FirstChildElement();
+
+	while (e) {
+		e = e->NextSiblingElement();
+		count++;
+	}
+
+	return count;
+}
+
 const char* XMLNode::Value() const
 {
     // Edge case: XMLDocuments don't have a Value. Return null.
