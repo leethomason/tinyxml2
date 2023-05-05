@@ -1873,10 +1873,36 @@ int main( int argc, const char ** argv )
 		// An assert should not fire.
 		const char* xml = "<element/>";
 		XMLDocument doc;
-		doc.Parse( xml );
-		XMLTest( "Parse with self-closed element", false, doc.Error() );
-		XMLElement* ele = doc.NewElement( "unused" );		// This will get cleaned up with the 'doc' going out of scope.
-		XMLTest( "Tracking unused elements", true, ele != 0, false );
+		doc.Parse(xml);
+		XMLTest("Parse with self-closed element", false, doc.Error());
+		XMLElement* ele = doc.NewElement("unused");		// This will get cleaned up with the 'doc' going out of scope.
+		XMLTest("Tracking unused elements", true, ele != 0, false);
+	}
+
+	// Issue #242 - GetText() on element containing only whitespace characters return null - test it keeps the space
+	{
+		const char* xml = "<element> </element>";
+		XMLDocument doc(true, PRESERVERAW_WHITESPACE);
+		doc.Parse(xml);
+		char name[1024] = "";
+		sprintf(name, "Space should be the text, it is '%s'", doc.FirstChildElement()->GetText());
+		XMLTest(name, " ", doc.FirstChildElement()->GetText());
+	}
+	{
+		const char* xml = "<element>    </element>";
+		XMLDocument doc(true, PRESERVERAW_WHITESPACE);
+		doc.Parse(xml);
+		char name[1024] = "";
+		sprintf(name, "Space should be the text, it is '%s'", doc.FirstChildElement()->GetText());
+		XMLTest(name, "    ", doc.FirstChildElement()->GetText());
+	}
+	// Issue #242 - GetText() on element containing only whitespace characters return null - test it supresses the space under normal circumstances
+	{
+		const char* xml = "<element> </element>";
+		XMLDocument doc(true);
+		doc.Parse(xml);
+		XMLTest("Parse with all whitespaces", false, doc.Error());
+		XMLTest("Whitespace  all space", true, 0 == doc.FirstChildElement()->FirstChild());
 	}
 
 

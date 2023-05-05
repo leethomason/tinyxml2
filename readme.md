@@ -143,6 +143,16 @@ However, you may also use COLLAPSE_WHITESPACE, which will:
 Note that (currently) there is a performance impact for using COLLAPSE_WHITESPACE.
 It essentially causes the XML to be parsed twice.
 
+#### Preserve Raw Whitespace
+
+By default a single space between tags is ignored. e.g. <element> </element> will be represented as "".
+
+There are some cases where you need to preserve these spaces. Such as legacy systems where they extract
+everything without quotes.
+
+If you wish to preseve the raw whitespace then specify PRESERVERAW_WHITESPACE when defining the XML document.
+
+
 #### Error Reporting
 
 TinyXML-2 reports the line number of any errors in an XML document that
