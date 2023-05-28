@@ -1869,6 +1869,178 @@ int main( int argc, const char ** argv )
 		XMLTest( "Whitespace  all space", true, 0 == doc.FirstChildElement()->FirstChild() );
 	}
 
+	// ----------- Preserve Whitespace ------------
+	{
+		const char* xml = "<element>This  is  &apos;  \n\n text &apos;</element>";
+		XMLDocument doc(true, PRESERVE_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with whitespace preserved", false, doc.Error());
+		XMLTest("Whitespace preserved", "This  is  '  \n\n text '", doc.FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element> This \nis &apos;  text  &apos;  </element>";
+		XMLDocument doc(true, PRESERVE_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with whitespace preserved", false, doc.Error());
+		XMLTest("Whitespace preserved", " This \nis '  text  '  ", doc.FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element>  \n This is &apos; text &apos;  \n</element>";
+		XMLDocument doc(true, PRESERVE_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with whitespace preserved", false, doc.Error());
+		XMLTest("Whitespace preserved", "  \n This is ' text '  \n", doc.FirstChildElement()->GetText());
+	}
+
+	// Following cases are for text that is all whitespace which are not preserved intentionally
+	{
+		const char* xml = "<element> </element>";
+		XMLDocument doc(true, PRESERVE_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with whitespace preserved", false, doc.Error());
+		XMLTest("Whitespace preserved", true, 0 == doc.FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element>   </element>";
+		XMLDocument doc(true, PRESERVE_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with whitespace preserved", false, doc.Error());
+		XMLTest("Whitespace preserved", true, 0 == doc.FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element>\n\n</element>";
+		XMLDocument doc(true, PRESERVE_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with whitespace preserved", false, doc.Error());
+		XMLTest("Whitespace preserved", true, 0 == doc.FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element>  \n</element>";
+		XMLDocument doc(true, PRESERVE_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with whitespace preserved", false, doc.Error());
+		XMLTest("Whitespace preserved", true, 0 == doc.FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element> \n \n </element>";
+		XMLDocument doc(true, PRESERVE_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with whitespace preserved", false, doc.Error());
+		XMLTest("Whitespace preserved", true, 0 == doc.FirstChildElement()->GetText());
+	}
+
+	// ----------- Pedantic Whitespace ------------
+	{
+		const char* xml = "<element>This  is  &apos;  \n\n text &apos;</element>";
+		XMLDocument doc(true, PEDANTIC_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with pedantic whitespace", false, doc.Error());
+		XMLTest("Pedantic whitespace", "This  is  '  \n\n text '", doc.FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element> This \nis &apos;  text  &apos;  </element>";
+		XMLDocument doc(true, PEDANTIC_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with pedantic whitespace", false, doc.Error());
+		XMLTest("Pedantic whitespace", " This \nis '  text  '  ", doc.FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element>  \n This is &apos; text &apos;  \n</element>";
+		XMLDocument doc(true, PEDANTIC_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with pedantic whitespace", false, doc.Error());
+		XMLTest("Pedantic whitespace", "  \n This is ' text '  \n", doc.FirstChildElement()->GetText());
+	}
+
+	// Following cases are for text that is all whitespace which is preserved with pedantic mode
+	{
+		const char* xml = "<element> </element>";
+		XMLDocument doc(true, PEDANTIC_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with pedantic whitespace", false, doc.Error());
+		XMLTest("Pedantic whitespace", " ", doc.FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element>   </element>";
+		XMLDocument doc(true, PEDANTIC_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with pedantic whitespace", false, doc.Error());
+		XMLTest("Pedantic whitespace", "   ", doc.FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element>\n\n</element>\n";
+		XMLDocument doc(true, PEDANTIC_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with pedantic whitespace", false, doc.Error());
+		XMLTest("Pedantic whitespace", "\n\n", doc.FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element>  \n</element> \n ";
+		XMLDocument doc(true, PEDANTIC_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with pedantic whitespace", false, doc.Error());
+		XMLTest("Pedantic whitespace", "  \n", doc.FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element> \n  \n </element>  ";
+		XMLDocument doc(true, PEDANTIC_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse with pedantic whitespace", false, doc.Error());
+		XMLTest("Pedantic whitespace", " \n  \n ", doc.FirstChildElement()->GetText());
+	}
+
+	// Following cases are for checking nested elements are still parsed with pedantic whitespace
+	{
+		const char* xml = "<element>\n\t<a> This is nested text </a>\n</element>  ";
+		XMLDocument doc(true, PEDANTIC_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse nested elements with pedantic whitespace", false, doc.Error());
+		XMLTest("Pedantic whitespace", " This is nested text ", doc.RootElement()->FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element>  <b> </b>  </element>\n";
+		XMLDocument doc(true, PEDANTIC_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse nested elements with pedantic whitespace", false, doc.Error());
+		XMLTest("Pedantic whitespace", " ", doc.RootElement()->FirstChildElement()->GetText());
+	}
+
+	{
+		const char* xml = "<element>  <c attribute=\"test\"/>  </element>\n ";
+		XMLDocument doc(true, PEDANTIC_WHITESPACE);
+		doc.Parse(xml);
+		XMLTest("Parse nested elements with pedantic whitespace", false, doc.Error());
+		XMLTest("Pedantic whitespace", true, 0 == doc.RootElement()->FirstChildElement()->GetText());
+	}
+
+	// Check sample xml can be parsed with pedantic mode
+	{
+		XMLDocument doc(true, PEDANTIC_WHITESPACE);
+		doc.LoadFile("resources/dream.xml");
+		XMLTest("Load dream.xml with pedantic whitespace mode", false, doc.Error());
+
+		XMLTest("Dream", "xml version=\"1.0\"",
+			doc.FirstChild()->ToDeclaration()->Value());
+		XMLTest("Dream", true, doc.FirstChild()->NextSibling()->ToUnknown() != 0);
+		XMLTest("Dream", "DOCTYPE PLAY SYSTEM \"play.dtd\"",
+			doc.FirstChild()->NextSibling()->ToUnknown()->Value());
+		XMLTest("Dream", "And Robin shall restore amends.",
+			doc.LastChild()->LastChild()->LastChild()->LastChild()->LastChildElement()->GetText());
+	}
+
 	{
 		// An assert should not fire.
 		const char* xml = "<element/>";

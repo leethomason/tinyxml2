@@ -1704,7 +1704,8 @@ private:
 
 enum Whitespace {
     PRESERVE_WHITESPACE,
-    COLLAPSE_WHITESPACE
+    COLLAPSE_WHITESPACE,
+    PEDANTIC_WHITESPACE
 };
 
 
@@ -1915,7 +1916,7 @@ public:
 	void DeepCopy(XMLDocument* target) const;
 
 	// internal
-    char* Identify( char* p, XMLNode** node );
+    char* Identify( char* p, XMLNode** node, bool first );
 
 	// internal
 	void MarkInUse(const XMLNode* const);
