@@ -1,0 +1,11 @@
+"""
+Welcome to TinyXML2!
+"""
+
+module(
+    name = "tinyxml2",
+    compatibility_level = 1,
+    version = "9.0.0",
+)
+
+bazel_dep(name = "rules_cc", version = "0.0.8")

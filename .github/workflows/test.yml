@@ -109,3 +109,10 @@ jobs:
           --build-generator Ninja
           --build-options -DCMAKE_BUILD_TYPE=Release -Dtinyxml2_SHARED_LIBS=YES -DCMAKE_PREFIX_PATH=${{github.workspace}}/install
           --test-command ctest --output-on-failure
+
+      # Bazel
+      - name: "Bazel Build"
+        run: bazel build //...
+
+      - name: "Bazel Test"
+        run: bazel test //...

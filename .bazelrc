@@ -1,0 +1,14 @@
+########################################
+# Bzlmod Configuration
+########################################
+
+# Uncomment to build with bzlmod (i.e. use MODULE.bazel) or
+# use --enable_bzlmod on the command line.
+common --enable_bzlmod
+
+########################################
+# Bazel Configuration
+########################################
+
+# https://bazel.build/docs/user-manual#verbose-failures
+build --verbose_failures

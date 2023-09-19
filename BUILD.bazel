@@ -1,0 +1,21 @@
+
+cc_library(
+    name = "tinyxml2",
+    srcs = ["tinyxml2.cpp"],
+    hdrs = ["tinyxml2.h"],
+    includes = ["."],
+    visibility = ["//visibility:public"],
+)
+
+cc_test(
+    name = "xmltest",
+    srcs = ["xmltest.cpp"],
+    size = "small",
+    data = 
+        glob(["resources/*.xml"]) + # Input files
+        [ "resources/out/readme.txt" ], # Hack to create output dir
+    visibility = ["//visibility:private"],
+    deps = [
+        ":tinyxml2"
+    ]
+)

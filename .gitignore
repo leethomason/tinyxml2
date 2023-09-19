@@ -21,4 +21,4 @@ tinyxml2/temp/
 libtinyxml2.a
 xmltest
 vs/debug
-
+bazel-*
