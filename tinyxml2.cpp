@@ -531,12 +531,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
         }
         else {
             // Decimal.
-            const char* q = p+2;
-            if ( !(*q) ) {
-                return 0;
-            }
-
-            q = strchr( q, SEMICOLON );
+            const char* q = strchr( p+2, SEMICOLON );
 
             if ( !q ) {
                 return 0;
