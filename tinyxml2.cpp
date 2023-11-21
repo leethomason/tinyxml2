@@ -715,7 +715,7 @@ bool XMLUtil::ToUnsigned64(const char* str, uint64_t* value) {
 }
 
 
-char* XMLDocument::Identify( char* p, XMLNode** node )
+char* XMLDocument::Identify( char* p, XMLNode** node, bool first )
 {
     TIXMLASSERT( node );
     TIXMLASSERT( p );
@@ -767,9 +767,19 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
         p += dtdHeaderLen;
     }
     else if ( XMLUtil::StringEqual( p, elementHeader, elementHeaderLen ) ) {
-        returnNode =  CreateUnlinkedNode<XMLElement>( _elementPool );
-        returnNode->_parseLineNum = _parseCurLineNum;
-        p += elementHeaderLen;
+
+        // Preserve whitespace pedantically before closing tag, when it's immediately after opening tag
+        if (WhitespaceMode() == PEDANTIC_WHITESPACE && first && p != start && *(p + elementHeaderLen) == '/') {
+            returnNode = CreateUnlinkedNode<XMLText>(_textPool);
+            returnNode->_parseLineNum = startLine;
+            p = start;	// Back it up, all the text counts.
+            _parseCurLineNum = startLine;
+        }
+        else {
+            returnNode = CreateUnlinkedNode<XMLElement>(_elementPool);
+            returnNode->_parseLineNum = _parseCurLineNum;
+            p += elementHeaderLen;
+        }
     }
     else {
         returnNode = CreateUnlinkedNode<XMLText>( _textPool );
@@ -1098,14 +1108,16 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
 	if (_document->Error())
 		return 0;
 
+	bool first = true;
 	while( p && *p ) {
         XMLNode* node = 0;
 
-        p = _document->Identify( p, &node );
+        p = _document->Identify( p, &node, first );
         TIXMLASSERT( p );
         if ( node == 0 ) {
             break;
         }
+        first = false;
 
        const int initialLineNum = node->_parseLineNum;
 

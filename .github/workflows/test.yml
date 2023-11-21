@@ -6,7 +6,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-2019, macos-10.15, ubuntu-20.04 ]
+        os: [ windows-2019, macos-latest, ubuntu-20.04 ]
         cmake: [ 3.15, 3.x ]
         include:
           - os: windows-2019
@@ -17,7 +17,7 @@ jobs:
           - os: ubuntu-20.04
             tree: tree
 
-          - os: macos-10.15
+          - os: macos-latest
             tree: find
 
           - cmake: 3.15
