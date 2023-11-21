@@ -732,6 +732,12 @@ public:
         return 0;
     }
 
+    // ChildElementCount was originally suggested by msteiger on the sourceforge page for TinyXML and modified by KB1SPH for TinyXML-2.
+
+    int ChildElementCount(const char *value) const;
+
+    int ChildElementCount() const;
+
     /** The meaning of 'value' changes for the specific type.
     	@verbatim
     	Document:	empty (NULL is returned, not an empty string)
