@@ -10,7 +10,7 @@ ARFLAGS = cr
 RM = rm -f
 RANLIB = ranlib
 MKDIR = mkdir -p
-CXXFLAGS = -fPIC
+CXXFLAGS = -D_FILE_OFFSET_BITS=64 -fPIC
 
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)
