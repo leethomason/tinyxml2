@@ -31,6 +31,7 @@ target_compile_definitions(
     PUBLIC $<$<CONFIG:Debug>:TINYXML2_DEBUG>
     INTERFACE $<$<BOOL:${BUILD_SHARED_LIBS}>:TINYXML2_IMPORT>
     PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
+    PUBLIC _FILE_OFFSET_BITS=64
 )
 
 set_target_properties(

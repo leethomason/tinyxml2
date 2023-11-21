@@ -114,9 +114,6 @@ distribution.
         #define TIXML_FSEEK fseeko
         #define TIXML_FTELL ftello
     #endif
-#elif defined(__unix__) && defined(__x86_64__)
-	#define TIXML_FSEEK fseeko64
-	#define TIXML_FTELL ftello64
 #else
 	#define TIXML_FSEEK fseek
 	#define TIXML_FTELL ftell
