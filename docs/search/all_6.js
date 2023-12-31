@@ -1,8 +1,12 @@
 var searchData=
 [
-  ['get_20information_20out_20of_20xml_32',['Get information out of XML',['../_example_3.html',1,'']]],
-  ['getdocument_33',['GetDocument',['../classtinyxml2_1_1_x_m_l_node.html#a2de84cfa4ec3fe249bad745069d145f1',1,'tinyxml2::XMLNode::GetDocument() const'],['../classtinyxml2_1_1_x_m_l_node.html#af343d1ef0b45c0020e62d784d7e67a68',1,'tinyxml2::XMLNode::GetDocument()']]],
-  ['getlinenum_34',['GetLineNum',['../classtinyxml2_1_1_x_m_l_node.html#a9b5fc636646fda761d342c72e91cb286',1,'tinyxml2::XMLNode::GetLineNum()'],['../classtinyxml2_1_1_x_m_l_attribute.html#a02d5ea924586e35f9c13857d1671b765',1,'tinyxml2::XMLAttribute::GetLineNum()']]],
-  ['gettext_35',['GetText',['../classtinyxml2_1_1_x_m_l_element.html#a6d5c8d115561ade4e4456b71d91b6f51',1,'tinyxml2::XMLElement']]],
-  ['getuserdata_36',['GetUserData',['../classtinyxml2_1_1_x_m_l_node.html#a7f0687574afa03bc479dc44f29db0afe',1,'tinyxml2::XMLNode']]]
+  ['file_0',['Load an XML File',['../_example_1.html',1,'']]],
+  ['findattribute_1',['FindAttribute',['../classtinyxml2_1_1_x_m_l_element.html#a157750dac8037a316fd1af1a973dfa2c',1,'tinyxml2::XMLElement']]],
+  ['firstattribute_2',['FirstAttribute',['../classtinyxml2_1_1_x_m_l_element.html#a4a7c4392658833bb8138c474d15a805a',1,'tinyxml2::XMLElement']]],
+  ['firstchild_3',['FirstChild',['../classtinyxml2_1_1_x_m_l_node.html#abcc2e572dce329539689b426a0840661',1,'tinyxml2::XMLNode::FirstChild()'],['../classtinyxml2_1_1_x_m_l_handle.html#a536447dc7f54c0cd11e031dad94795ae',1,'tinyxml2::XMLHandle::FirstChild()']]],
+  ['firstchildelement_4',['FirstChildElement',['../classtinyxml2_1_1_x_m_l_node.html#a1bec132dcf085284e0a10755f2cf0d57',1,'tinyxml2::XMLNode::FirstChildElement()'],['../classtinyxml2_1_1_x_m_l_handle.html#a74b04dd0f15e0bf01860e282b840b6a3',1,'tinyxml2::XMLHandle::FirstChildElement()']]],
+  ['floatattribute_5',['FloatAttribute',['../classtinyxml2_1_1_x_m_l_element.html#ab1f4be2332e27dc640e9b6abd01d64dd',1,'tinyxml2::XMLElement']]],
+  ['floattext_6',['FloatText',['../classtinyxml2_1_1_x_m_l_element.html#a45444eb21f99ca46101545992dc2e927',1,'tinyxml2::XMLElement']]],
+  ['floatvalue_7',['FloatValue',['../classtinyxml2_1_1_x_m_l_attribute.html#a27797b45d21c981257720db94f5f8801',1,'tinyxml2::XMLAttribute']]],
+  ['from_20char_20buffer_8',['Parse an XML from char buffer',['../_example_2.html',1,'']]]
 ];
