@@ -1,10 +1,7 @@
 var searchData=
 [
-  ['cdata_5',['CData',['../classtinyxml2_1_1_x_m_l_text.html#ac1bb5ea4166c320882d9e0ad16fd385b',1,'tinyxml2::XMLText']]],
-  ['clear_6',['Clear',['../classtinyxml2_1_1_x_m_l_document.html#a65656b0b2cbc822708eb351504178aaf',1,'tinyxml2::XMLDocument']]],
-  ['clearbuffer_7',['ClearBuffer',['../classtinyxml2_1_1_x_m_l_printer.html#a690cb140ba98b7339734ff865f56b0b3',1,'tinyxml2::XMLPrinter']]],
-  ['clearerror_8',['ClearError',['../classtinyxml2_1_1_x_m_l_document.html#a4085d9c52f1d93214311459d6d1fcf17',1,'tinyxml2::XMLDocument']]],
-  ['closeelement_9',['CloseElement',['../classtinyxml2_1_1_x_m_l_printer.html#ad04d29562b46fcdb23ab320f8b664240',1,'tinyxml2::XMLPrinter']]],
-  ['cstr_10',['CStr',['../classtinyxml2_1_1_x_m_l_printer.html#a180671d73844f159f2d4aafbc11d106e',1,'tinyxml2::XMLPrinter']]],
-  ['cstrsize_11',['CStrSize',['../classtinyxml2_1_1_x_m_l_printer.html#a3256cf3523d4898b91abb18b924be04c',1,'tinyxml2::XMLPrinter']]]
+  ['boolattribute_0',['BoolAttribute',['../classtinyxml2_1_1_x_m_l_element.html#a53eda26131e1ad1031ef8ec8adb51bd8',1,'tinyxml2::XMLElement']]],
+  ['booltext_1',['BoolText',['../classtinyxml2_1_1_x_m_l_element.html#a68569f59f6382bcea7f5013ec59736d2',1,'tinyxml2::XMLElement']]],
+  ['boolvalue_2',['BoolValue',['../classtinyxml2_1_1_x_m_l_attribute.html#a98ce5207344ad33a265b0422addae1ff',1,'tinyxml2::XMLAttribute']]],
+  ['buffer_3',['Parse an XML from char buffer',['../_example_2.html',1,'']]]
 ];

@@ -1,12 +1,11 @@
 var searchData=
 [
-  ['deepclone_12',['DeepClone',['../classtinyxml2_1_1_x_m_l_node.html#a62c71b6bf8734b5424063b8d9a61c266',1,'tinyxml2::XMLNode']]],
-  ['deepcopy_13',['DeepCopy',['../classtinyxml2_1_1_x_m_l_document.html#af592ffc91514e25a39664521ac83db45',1,'tinyxml2::XMLDocument']]],
-  ['deleteattribute_14',['DeleteAttribute',['../classtinyxml2_1_1_x_m_l_element.html#aebd45aa7118964c30b32fe12e944628a',1,'tinyxml2::XMLElement']]],
-  ['deletechild_15',['DeleteChild',['../classtinyxml2_1_1_x_m_l_node.html#a363b6edbd6ebd55f8387d2b89f2b0921',1,'tinyxml2::XMLNode']]],
-  ['deletechildren_16',['DeleteChildren',['../classtinyxml2_1_1_x_m_l_node.html#a0360085cc54df5bff85d5c5da13afdce',1,'tinyxml2::XMLNode']]],
-  ['deletenode_17',['DeleteNode',['../classtinyxml2_1_1_x_m_l_document.html#ac1d6e2c7fcc1a660624ac4f68e96380d',1,'tinyxml2::XMLDocument']]],
-  ['doubleattribute_18',['DoubleAttribute',['../classtinyxml2_1_1_x_m_l_element.html#a10a90c505aea716bf073eea1c97f33b5',1,'tinyxml2::XMLElement']]],
-  ['doubletext_19',['DoubleText',['../classtinyxml2_1_1_x_m_l_element.html#a81b1ff0cf2f2cd09be8badc08b39a2b7',1,'tinyxml2::XMLElement']]],
-  ['doublevalue_20',['DoubleValue',['../classtinyxml2_1_1_x_m_l_attribute.html#a4aa73513f54ff0087d3e804f0f54e30f',1,'tinyxml2::XMLAttribute']]]
+  ['cdata_0',['CData',['../classtinyxml2_1_1_x_m_l_text.html#ac1bb5ea4166c320882d9e0ad16fd385b',1,'tinyxml2::XMLText']]],
+  ['char_20buffer_1',['Parse an XML from char buffer',['../_example_2.html',1,'']]],
+  ['clear_2',['Clear',['../classtinyxml2_1_1_x_m_l_document.html#a65656b0b2cbc822708eb351504178aaf',1,'tinyxml2::XMLDocument']]],
+  ['clearbuffer_3',['ClearBuffer',['../classtinyxml2_1_1_x_m_l_printer.html#a690cb140ba98b7339734ff865f56b0b3',1,'tinyxml2::XMLPrinter']]],
+  ['clearerror_4',['ClearError',['../classtinyxml2_1_1_x_m_l_document.html#a4085d9c52f1d93214311459d6d1fcf17',1,'tinyxml2::XMLDocument']]],
+  ['closeelement_5',['CloseElement',['../classtinyxml2_1_1_x_m_l_printer.html#ad04d29562b46fcdb23ab320f8b664240',1,'tinyxml2::XMLPrinter']]],
+  ['cstr_6',['CStr',['../classtinyxml2_1_1_x_m_l_printer.html#abfa772366c44a17cdeb8aea294d57f78',1,'tinyxml2::XMLPrinter']]],
+  ['cstrsize_7',['CStrSize',['../classtinyxml2_1_1_x_m_l_printer.html#a3256cf3523d4898b91abb18b924be04c',1,'tinyxml2::XMLPrinter']]]
 ];

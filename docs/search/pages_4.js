@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['tinyxml_2d2_286',['TinyXML-2',['../index.html',1,'']]]
+  ['file_0',['Load an XML File',['../_example_1.html',1,'']]],
+  ['from_20char_20buffer_1',['Parse an XML from char buffer',['../_example_2.html',1,'']]]
 ];
