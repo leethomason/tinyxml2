@@ -2320,6 +2320,7 @@ XMLUnknown* XMLDocument::NewUnknown( const char* str )
     return unk;
 }
 
+#if TINYXML2_FILE_SUPPORT
 static FILE* callfopen( const char* filepath, const char* mode )
 {
     TIXMLASSERT( filepath );
@@ -2335,6 +2336,7 @@ static FILE* callfopen( const char* filepath, const char* mode )
 #endif
     return fp;
 }
+#endif
 
 void XMLDocument::DeleteNode( XMLNode* node )	{
     TIXMLASSERT( node );
