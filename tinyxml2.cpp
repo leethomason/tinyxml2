@@ -2509,7 +2509,7 @@ void XMLDocument::ClearError() {
 
 void XMLDocument::SetError( XMLError error, int lineNum, const char* format, ... )
 {
-    TIXMLASSERT( error >= 0 && error < XML_ERROR_COUNT );
+    TIXMLASSERT(error >= 0 && error < XML_ERROR_COUNT);
     _errorID = error;
     _errorLineNum = lineNum;
 	_errorStr.Reset();
