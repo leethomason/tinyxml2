@@ -314,7 +314,7 @@ private:
     }
 
     T*  _mem;
-    T   _pool[static_cast<size_t>(INITIAL_SIZE)];
+    T   _pool[static_cast<size_t>(INITIAL_SIZE)] = {};
     int _allocated;		// objects allocated
     int _size;			// number objects in use
 };
