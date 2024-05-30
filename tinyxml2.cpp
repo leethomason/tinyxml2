@@ -1869,14 +1869,14 @@ XMLError XMLElement::QueryFloatText( float* fval ) const
 
 int XMLElement::IntText(int defaultValue) const
 {
-	int i = defaultValue;
+	int32_t i = defaultValue;
 	QueryIntText(&i);
 	return i;
 }
 
 unsigned XMLElement::UnsignedText(unsigned defaultValue) const
 {
-	unsigned i = defaultValue;
+	uint32_t i = defaultValue;
 	QueryUnsignedText(&i);
 	return i;
 }
