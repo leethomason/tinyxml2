@@ -1162,8 +1162,8 @@ public:
         If the value isn't an integer, 0 will be returned. There is no error checking;
     	use QueryIntValue() if you need error checking.
     */
-	int	IntValue() const {
-		int i = 0;
+    int32_t IntValue() const {
+    	int32_t i = 0;
 		QueryIntValue(&i);
 		return i;
 	}
@@ -1181,8 +1181,8 @@ public:
     }
 
     /// Query as an unsigned integer. See IntValue()
-    unsigned UnsignedValue() const			{
-        unsigned i=0;
+    uint32_t UnsignedValue() const			{
+    	uint32_t i=0;
         QueryUnsignedValue( &i );
         return i;
     }
