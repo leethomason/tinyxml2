@@ -635,7 +635,7 @@ bool XMLUtil::ToUnsigned(const char* str, unsigned* value)
 
 bool XMLUtil::ToBool( const char* str, bool* value )
 {
-    int ival = 0;
+	int32_t ival = 0;
     if ( ToInt( str, &ival )) {
         *value = (ival==0) ? false : true;
         return true;
