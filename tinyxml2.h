@@ -1432,11 +1432,11 @@ public:
     	QueryAttribute( "foo", &value );		// if "foo" isn't found, value will still be 10
     	@endverbatim
     */
-	XMLError QueryAttribute( const char* name, int* value ) const {
+	XMLError QueryAttribute( const char* name, int32_t* value ) const {
 		return QueryIntAttribute( name, value );
 	}
 
-	XMLError QueryAttribute( const char* name, unsigned int* value ) const {
+	XMLError QueryAttribute( const char* name, uint32_t* value ) const {
 		return QueryUnsignedAttribute( name, value );
 	}
 
