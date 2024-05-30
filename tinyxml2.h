@@ -1343,7 +1343,7 @@ public:
     	QueryIntAttribute( "foo", &value );		// if "foo" isn't found, value will still be 10
     	@endverbatim
     */
-    XMLError QueryIntAttribute( const char* name, int* value ) const				{
+    XMLError QueryIntAttribute( const char* name, int32_t* value ) const				{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
@@ -1352,7 +1352,7 @@ public:
     }
 
 	/// See QueryIntAttribute()
-    XMLError QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{
+    XMLError QueryUnsignedAttribute( const char* name, uint32_t* value ) const	{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
