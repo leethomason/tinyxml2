@@ -565,13 +565,13 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 
 void XMLUtil::ToStr( int32_t v, char* buffer, int bufferSize )
 {
-    TIXML_SNPRINTF( buffer, bufferSize, "%d", v );
+    TIXML_SNPRINTF( buffer, bufferSize, "%ld", v );
 }
 
 
 void XMLUtil::ToStr( uint32_t v, char* buffer, int bufferSize )
 {
-    TIXML_SNPRINTF( buffer, bufferSize, "%u", v );
+    TIXML_SNPRINTF( buffer, bufferSize, "%lu", v );
 }
 
 
