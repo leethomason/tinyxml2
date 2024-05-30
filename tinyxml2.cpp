@@ -1777,7 +1777,7 @@ void XMLElement::SetText( double v )
 }
 
 
-XMLError XMLElement::QueryIntText( int* ival ) const
+XMLError XMLElement::QueryIntText( int32_t* ival ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->Value();
@@ -1790,7 +1790,7 @@ XMLError XMLElement::QueryIntText( int* ival ) const
 }
 
 
-XMLError XMLElement::QueryUnsignedText( unsigned* uval ) const
+XMLError XMLElement::QueryUnsignedText( uint32_t* uval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->Value();

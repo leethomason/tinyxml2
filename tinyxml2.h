@@ -1626,9 +1626,9 @@ public:
     			 to the requested type, and XML_NO_TEXT_NODE if there is no child text to query.
 
     */
-    XMLError QueryIntText( int* ival ) const;
+    XMLError QueryIntText( int32_t* ival ) const;
     /// See QueryIntText()
-    XMLError QueryUnsignedText( unsigned* uval ) const;
+    XMLError QueryUnsignedText( uint32_t* uval ) const;
 	/// See QueryIntText()
 	XMLError QueryInt64Text(int64_t* uval) const;
 	/// See QueryIntText()
