@@ -618,7 +618,7 @@ bool XMLUtil::ToInt(const char* str, int* value)
         }
     }
     else {
-        if (TIXML_SSCANF(str, "%d", value) == 1) {
+        if (TIXML_SSCANF(str, "%ld", value) == 1) {
             return true;
         }
     }
@@ -627,7 +627,7 @@ bool XMLUtil::ToInt(const char* str, int* value)
 
 bool XMLUtil::ToUnsigned(const char* str, unsigned* value)
 {
-    if (TIXML_SSCANF(str, IsPrefixHex(str) ? "%x" : "%u", value) == 1) {
+    if (TIXML_SSCANF(str, IsPrefixHex(str) ? "%x" : "%lu", value) == 1) {
         return true;
     }
     return false;
