@@ -1481,7 +1481,7 @@ void XMLAttribute::SetName( const char* n )
 }
 
 
-XMLError XMLAttribute::QueryIntValue( int* value ) const
+XMLError XMLAttribute::QueryIntValue( int32_t* value ) const
 {
     if ( XMLUtil::ToInt( Value(), value )) {
         return XML_SUCCESS;
@@ -1490,7 +1490,7 @@ XMLError XMLAttribute::QueryIntValue( int* value ) const
 }
 
 
-XMLError XMLAttribute::QueryUnsignedValue( unsigned int* value ) const
+XMLError XMLAttribute::QueryUnsignedValue( uint32_t* value ) const
 {
     if ( XMLUtil::ToUnsigned( Value(), value )) {
         return XML_SUCCESS;

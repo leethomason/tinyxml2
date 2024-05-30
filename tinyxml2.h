@@ -1209,9 +1209,9 @@ public:
     	in the provided parameter. The function will return XML_SUCCESS on success,
     	and XML_WRONG_ATTRIBUTE_TYPE if the conversion is not successful.
     */
-    XMLError QueryIntValue( int* value ) const;
+    XMLError QueryIntValue( int32_t* value ) const;
     /// See QueryIntValue
-    XMLError QueryUnsignedValue( unsigned int* value ) const;
+    XMLError QueryUnsignedValue( uint32_t* value ) const;
 	/// See QueryIntValue
 	XMLError QueryInt64Value(int64_t* value) const;
     /// See QueryIntValue
