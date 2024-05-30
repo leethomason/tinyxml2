@@ -614,8 +614,8 @@ public:
     static void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
 
     // converts primitive types to strings
-    static void ToStr( int v, char* buffer, int bufferSize );
-    static void ToStr( unsigned v, char* buffer, int bufferSize );
+    static void ToStr( int32_t v, char* buffer, int bufferSize );
+    static void ToStr( uint32_t v, char* buffer, int bufferSize );
     static void ToStr( bool v, char* buffer, int bufferSize );
     static void ToStr( float v, char* buffer, int bufferSize );
     static void ToStr( double v, char* buffer, int bufferSize );
@@ -623,8 +623,8 @@ public:
     static void ToStr(uint64_t v, char* buffer, int bufferSize);
 
     // converts strings to primitive types
-    static bool	ToInt( const char* str, int* value );
-    static bool ToUnsigned( const char* str, unsigned* value );
+    static bool	ToInt( const char* str, int32_t* value );
+    static bool ToUnsigned( const char* str, uint32_t* value );
     static bool	ToBool( const char* str, bool* value );
     static bool	ToFloat( const char* str, float* value );
     static bool ToDouble( const char* str, double* value );

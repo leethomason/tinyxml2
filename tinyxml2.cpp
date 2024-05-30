@@ -563,13 +563,13 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 }
 
 
-void XMLUtil::ToStr( int v, char* buffer, int bufferSize )
+void XMLUtil::ToStr( int32_t v, char* buffer, int bufferSize )
 {
     TIXML_SNPRINTF( buffer, bufferSize, "%d", v );
 }
 
 
-void XMLUtil::ToStr( unsigned v, char* buffer, int bufferSize )
+void XMLUtil::ToStr( uint32_t v, char* buffer, int bufferSize )
 {
     TIXML_SNPRINTF( buffer, bufferSize, "%u", v );
 }
