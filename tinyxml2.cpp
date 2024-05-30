@@ -2777,7 +2777,7 @@ void XMLPrinter::PushAttribute( const char* name, const char* value )
 }
 
 
-void XMLPrinter::PushAttribute( const char* name, int v )
+void XMLPrinter::PushAttribute( const char* name, int32_t v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
@@ -2785,7 +2785,7 @@ void XMLPrinter::PushAttribute( const char* name, int v )
 }
 
 
-void XMLPrinter::PushAttribute( const char* name, unsigned v )
+void XMLPrinter::PushAttribute( const char* name, uint32_t v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );

@@ -2258,8 +2258,8 @@ public:
     void OpenElement( const char* name, bool compactMode=false );
     /// If streaming, add an attribute to an open element.
     void PushAttribute( const char* name, const char* value );
-    void PushAttribute( const char* name, int value );
-    void PushAttribute( const char* name, unsigned value );
+    void PushAttribute( const char* name, int32_t value );
+    void PushAttribute( const char* name, uint32_t value );
 	void PushAttribute( const char* name, int64_t value );
 	void PushAttribute( const char* name, uint64_t value );
 	void PushAttribute( const char* name, bool value );
