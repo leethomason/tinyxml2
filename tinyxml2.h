@@ -1226,9 +1226,9 @@ public:
     /// Set the attribute to a string value.
     void SetAttribute( const char* value );
     /// Set the attribute to value.
-    void SetAttribute( int value );
+    void SetAttribute(int32_t value );
     /// Set the attribute to value.
-    void SetAttribute( unsigned value );
+    void SetAttribute( uint32_t value );
 	/// Set the attribute to value.
 	void SetAttribute(int64_t value);
     /// Set the attribute to value.

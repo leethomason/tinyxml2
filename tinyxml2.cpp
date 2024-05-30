@@ -1550,7 +1550,7 @@ void XMLAttribute::SetAttribute( const char* v )
 }
 
 
-void XMLAttribute::SetAttribute( int v )
+void XMLAttribute::SetAttribute( int32_t v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
@@ -1558,7 +1558,7 @@ void XMLAttribute::SetAttribute( int v )
 }
 
 
-void XMLAttribute::SetAttribute( unsigned v )
+void XMLAttribute::SetAttribute( uint32_t v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
