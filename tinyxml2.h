@@ -1316,9 +1316,9 @@ public:
         or if there is an error. (For a method with error
     	checking, see QueryIntAttribute()).
     */
-	int IntAttribute(const char* name, int defaultValue = 0) const;
+    int32_t IntAttribute(const char* name, int defaultValue = 0) const;
     /// See IntAttribute()
-	unsigned UnsignedAttribute(const char* name, unsigned defaultValue = 0) const;
+    uint32_t UnsignedAttribute(const char* name, unsigned defaultValue = 0) const;
 	/// See IntAttribute()
 	int64_t Int64Attribute(const char* name, int64_t defaultValue = 0) const;
     /// See IntAttribute()

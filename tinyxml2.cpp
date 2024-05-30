@@ -1644,16 +1644,16 @@ const char* XMLElement::Attribute( const char* name, const char* value ) const
     return 0;
 }
 
-int XMLElement::IntAttribute(const char* name, int defaultValue) const
+int32_t XMLElement::IntAttribute(const char* name, int defaultValue) const
 {
-	int i = defaultValue;
+	int32_t i = defaultValue;
 	QueryIntAttribute(name, &i);
 	return i;
 }
 
-unsigned XMLElement::UnsignedAttribute(const char* name, unsigned defaultValue) const
+uint32_t XMLElement::UnsignedAttribute(const char* name, unsigned defaultValue) const
 {
-	unsigned i = defaultValue;
+	uint32_t i = defaultValue;
 	QueryUnsignedAttribute(name, &i);
 	return i;
 }
