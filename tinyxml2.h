@@ -1586,9 +1586,9 @@ public:
     */
 	void SetText( const char* inText );
     /// Convenience method for setting text inside an element. See SetText() for important limitations.
-    void SetText( int value );
+    void SetText( int32_t value );
     /// Convenience method for setting text inside an element. See SetText() for important limitations.
-    void SetText( unsigned value );
+    void SetText( uint32_t value );
 	/// Convenience method for setting text inside an element. See SetText() for important limitations.
 	void SetText(int64_t value);
     /// Convenience method for setting text inside an element. See SetText() for important limitations.

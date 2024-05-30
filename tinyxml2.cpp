@@ -1723,7 +1723,7 @@ void	XMLElement::SetText( const char* inText )
 }
 
 
-void XMLElement::SetText( int v )
+void XMLElement::SetText( int32_t v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
@@ -1731,7 +1731,7 @@ void XMLElement::SetText( int v )
 }
 
 
-void XMLElement::SetText( unsigned v )
+void XMLElement::SetText( uint32_t v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
