@@ -2270,9 +2270,9 @@ public:
     /// Add a text node.
     void PushText( const char* text, bool cdata=false );
     /// Add a text node from an integer.
-    void PushText( int value );
+    void PushText( int32_t value );
     /// Add a text node from an unsigned.
-    void PushText( unsigned value );
+    void PushText( uint32_t value );
 	/// Add a text node from a signed 64bit integer.
 	void PushText( int64_t value );
 	/// Add a text node from an unsigned 64bit integer.

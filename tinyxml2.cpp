@@ -2895,7 +2895,7 @@ void XMLPrinter::PushText( uint64_t value )
 }
 
 
-void XMLPrinter::PushText( int value )
+void XMLPrinter::PushText( int32_t value )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( value, buf, BUF_SIZE );
@@ -2903,7 +2903,7 @@ void XMLPrinter::PushText( int value )
 }
 
 
-void XMLPrinter::PushText( unsigned value )
+void XMLPrinter::PushText( uint32_t value )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( value, buf, BUF_SIZE );
