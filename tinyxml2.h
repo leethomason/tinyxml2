@@ -1470,12 +1470,12 @@ public:
         a->SetAttribute( value );
     }
     /// Sets the named attribute to value.
-    void SetAttribute( const char* name, int value )			{
+    void SetAttribute( const char* name, int32_t value )			{
         XMLAttribute* a = FindOrCreateAttribute( name );
         a->SetAttribute( value );
     }
     /// Sets the named attribute to value.
-    void SetAttribute( const char* name, unsigned value )		{
+    void SetAttribute( const char* name, uint32_t value )		{
         XMLAttribute* a = FindOrCreateAttribute( name );
         a->SetAttribute( value );
     }
