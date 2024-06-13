@@ -7,7 +7,7 @@
 
 //  In HTML5, there are 16 so-called "void" elements.  "void elements" NEVER have
 //  inner content (but they MAY have attributes), and are assumed to be self-closing.
-//  An example of a self-closig HTML5 element is "<br/>" (line break)
+//  An example of a self-closing HTML5 element is "<br/>" (line break)
 //  All other elements are called "non-void" and MUST never self-close.
 //  Examples: "<div class='lolcats'></div>".
 
