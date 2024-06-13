@@ -605,7 +605,7 @@ void XMLUtil::ToStr( int64_t v, char* buffer, int bufferSize )
 void XMLUtil::ToStr( uint64_t v, char* buffer, int bufferSize )
 {
     // horrible syntax trick to make the compiler happy about %llu
-    TIXML_SNPRINTF(buffer, bufferSize, "%llu", (long long)v);
+    TIXML_SNPRINTF(buffer, bufferSize, "%llu", static_cast<unsigned long long>(v));
 }
 
 bool XMLUtil::ToInt(const char* str, int* value)
