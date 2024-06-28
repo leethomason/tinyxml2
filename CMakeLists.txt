@@ -55,6 +55,17 @@ if (tinyxml2_BUILD_TESTING)
     set_tests_properties(xmltest PROPERTIES PASS_REGULAR_EXPRESSION ", Fail 0")
 endif ()
 
+if (QNX)
+    install(
+        TARGETS xmltest
+        DESTINATION bin/tinyxml2_tests
+    )
+    install(
+        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources
+        DESTINATION bin/tinyxml2_tests
+    )
+endif ()
+
 ##
 ## Installation
 ##

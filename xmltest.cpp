@@ -51,7 +51,13 @@ bool XMLTest (const char* testString, const char* expected, const char* found, b
 			printf( "%s\n", found );
 		}
 		else {
+#ifdef __QNX__
+			const char* expected_qnx = expected == NULL ? "(null)" : expected;
+			const char* found_qnx = found == NULL ? "(null)" : expected;
+			printf (" %s [%s][%s]\n", testString, expected_qnx, found_qnx);
+#else
 			printf (" %s [%s][%s]\n", testString, expected, found);
+#endif
 		}
 	}
 
