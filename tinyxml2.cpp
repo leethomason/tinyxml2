@@ -439,24 +439,22 @@ void XMLUtil::ConvertUTF32ToUTF8( unsigned long input, char* output, int* length
 
     output += *length;
 
-    // Scary scary fall throughs are annotated with carefully designed comments
-    // to suppress compiler warnings such as -Wimplicit-fallthrough in gcc
     switch (*length) {
         case 4:
             --output;
             *output = static_cast<char>((input | BYTE_MARK) & BYTE_MASK);
             input >>= 6;
-            //fall through
+            [[fallthrough]];
         case 3:
             --output;
             *output = static_cast<char>((input | BYTE_MARK) & BYTE_MASK);
             input >>= 6;
-            //fall through
+            [[fallthrough]];
         case 2:
             --output;
             *output = static_cast<char>((input | BYTE_MARK) & BYTE_MASK);
             input >>= 6;
-            //fall through
+            [[fallthrough]];
         case 1:
             --output;
             *output = static_cast<char>(input | FIRST_BYTE_MARK[*length]);
