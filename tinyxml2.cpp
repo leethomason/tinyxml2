@@ -2221,7 +2221,7 @@ void XMLDocument::MarkInUse(const XMLNode* const node)
 	TIXMLASSERT(node);
 	TIXMLASSERT(node->_parent == 0);
 
-	for (int i = 0; i < _unlinked.Size(); ++i) {
+	for (size_t i = 0; i < _unlinked.Size(); ++i) {
 		if (node == _unlinked[i]) {
 			_unlinked.SwapRemove(i);
 			break;
