@@ -563,15 +563,15 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 }
 
 
-void XMLUtil::ToStr( int v, char* buffer, int bufferSize )
+void XMLUtil::ToStr( int32_t v, char* buffer, int bufferSize )
 {
-    TIXML_SNPRINTF( buffer, bufferSize, "%d", v );
+    TIXML_SNPRINTF( buffer, bufferSize, "%ld", v );
 }
 
 
-void XMLUtil::ToStr( unsigned v, char* buffer, int bufferSize )
+void XMLUtil::ToStr( uint32_t v, char* buffer, int bufferSize )
 {
-    TIXML_SNPRINTF( buffer, bufferSize, "%u", v );
+    TIXML_SNPRINTF( buffer, bufferSize, "%lu", v );
 }
 
 
@@ -618,7 +618,7 @@ bool XMLUtil::ToInt(const char* str, int* value)
         }
     }
     else {
-        if (TIXML_SSCANF(str, "%d", value) == 1) {
+        if (TIXML_SSCANF(str, "%ld", value) == 1) {
             return true;
         }
     }
@@ -627,7 +627,7 @@ bool XMLUtil::ToInt(const char* str, int* value)
 
 bool XMLUtil::ToUnsigned(const char* str, unsigned* value)
 {
-    if (TIXML_SSCANF(str, IsPrefixHex(str) ? "%x" : "%u", value) == 1) {
+    if (TIXML_SSCANF(str, IsPrefixHex(str) ? "%x" : "%lu", value) == 1) {
         return true;
     }
     return false;
@@ -635,7 +635,7 @@ bool XMLUtil::ToUnsigned(const char* str, unsigned* value)
 
 bool XMLUtil::ToBool( const char* str, bool* value )
 {
-    int ival = 0;
+	int32_t ival = 0;
     if ( ToInt( str, &ival )) {
         *value = (ival==0) ? false : true;
         return true;
@@ -1481,7 +1481,7 @@ void XMLAttribute::SetName( const char* n )
 }
 
 
-XMLError XMLAttribute::QueryIntValue( int* value ) const
+XMLError XMLAttribute::QueryIntValue( int32_t* value ) const
 {
     if ( XMLUtil::ToInt( Value(), value )) {
         return XML_SUCCESS;
@@ -1490,7 +1490,7 @@ XMLError XMLAttribute::QueryIntValue( int* value ) const
 }
 
 
-XMLError XMLAttribute::QueryUnsignedValue( unsigned int* value ) const
+XMLError XMLAttribute::QueryUnsignedValue( uint32_t* value ) const
 {
     if ( XMLUtil::ToUnsigned( Value(), value )) {
         return XML_SUCCESS;
@@ -1550,7 +1550,7 @@ void XMLAttribute::SetAttribute( const char* v )
 }
 
 
-void XMLAttribute::SetAttribute( int v )
+void XMLAttribute::SetAttribute( int32_t v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
@@ -1558,7 +1558,7 @@ void XMLAttribute::SetAttribute( int v )
 }
 
 
-void XMLAttribute::SetAttribute( unsigned v )
+void XMLAttribute::SetAttribute( uint32_t v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
@@ -1644,16 +1644,16 @@ const char* XMLElement::Attribute( const char* name, const char* value ) const
     return 0;
 }
 
-int XMLElement::IntAttribute(const char* name, int defaultValue) const
+int32_t XMLElement::IntAttribute(const char* name, int defaultValue) const
 {
-	int i = defaultValue;
+	int32_t i = defaultValue;
 	QueryIntAttribute(name, &i);
 	return i;
 }
 
-unsigned XMLElement::UnsignedAttribute(const char* name, unsigned defaultValue) const
+uint32_t XMLElement::UnsignedAttribute(const char* name, unsigned defaultValue) const
 {
-	unsigned i = defaultValue;
+	uint32_t i = defaultValue;
 	QueryUnsignedAttribute(name, &i);
 	return i;
 }
@@ -1723,7 +1723,7 @@ void	XMLElement::SetText( const char* inText )
 }
 
 
-void XMLElement::SetText( int v )
+void XMLElement::SetText( int32_t v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
@@ -1731,7 +1731,7 @@ void XMLElement::SetText( int v )
 }
 
 
-void XMLElement::SetText( unsigned v )
+void XMLElement::SetText( uint32_t v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
@@ -1777,7 +1777,7 @@ void XMLElement::SetText( double v )
 }
 
 
-XMLError XMLElement::QueryIntText( int* ival ) const
+XMLError XMLElement::QueryIntText( int32_t* ival ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->Value();
@@ -1790,7 +1790,7 @@ XMLError XMLElement::QueryIntText( int* ival ) const
 }
 
 
-XMLError XMLElement::QueryUnsignedText( unsigned* uval ) const
+XMLError XMLElement::QueryUnsignedText( uint32_t* uval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->Value();
@@ -1869,14 +1869,14 @@ XMLError XMLElement::QueryFloatText( float* fval ) const
 
 int XMLElement::IntText(int defaultValue) const
 {
-	int i = defaultValue;
+	int32_t i = defaultValue;
 	QueryIntText(&i);
 	return i;
 }
 
 unsigned XMLElement::UnsignedText(unsigned defaultValue) const
 {
-	unsigned i = defaultValue;
+	uint32_t i = defaultValue;
 	QueryUnsignedText(&i);
 	return i;
 }
@@ -2777,7 +2777,7 @@ void XMLPrinter::PushAttribute( const char* name, const char* value )
 }
 
 
-void XMLPrinter::PushAttribute( const char* name, int v )
+void XMLPrinter::PushAttribute( const char* name, int32_t v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
@@ -2785,7 +2785,7 @@ void XMLPrinter::PushAttribute( const char* name, int v )
 }
 
 
-void XMLPrinter::PushAttribute( const char* name, unsigned v )
+void XMLPrinter::PushAttribute( const char* name, uint32_t v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
@@ -2895,7 +2895,7 @@ void XMLPrinter::PushText( uint64_t value )
 }
 
 
-void XMLPrinter::PushText( int value )
+void XMLPrinter::PushText( int32_t value )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( value, buf, BUF_SIZE );
@@ -2903,7 +2903,7 @@ void XMLPrinter::PushText( int value )
 }
 
 
-void XMLPrinter::PushText( unsigned value )
+void XMLPrinter::PushText( uint32_t value )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( value, buf, BUF_SIZE );
