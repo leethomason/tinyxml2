@@ -614,8 +614,8 @@ public:
     static void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
 
     // converts primitive types to strings
-    static void ToStr( int32_t v, char* buffer, int bufferSize );
-    static void ToStr( uint32_t v, char* buffer, int bufferSize );
+    static void ToStr( int v, char* buffer, int bufferSize );
+    static void ToStr( unsigned v, char* buffer, int bufferSize );
     static void ToStr( bool v, char* buffer, int bufferSize );
     static void ToStr( float v, char* buffer, int bufferSize );
     static void ToStr( double v, char* buffer, int bufferSize );
@@ -623,8 +623,8 @@ public:
     static void ToStr(uint64_t v, char* buffer, int bufferSize);
 
     // converts strings to primitive types
-    static bool	ToInt( const char* str, int32_t* value );
-    static bool ToUnsigned( const char* str, uint32_t* value );
+    static bool	ToInt( const char* str, int* value );
+    static bool ToUnsigned( const char* str, unsigned* value );
     static bool	ToBool( const char* str, bool* value );
     static bool	ToFloat( const char* str, float* value );
     static bool ToDouble( const char* str, double* value );
@@ -1162,8 +1162,8 @@ public:
         If the value isn't an integer, 0 will be returned. There is no error checking;
     	use QueryIntValue() if you need error checking.
     */
-    int32_t IntValue() const {
-    	int32_t i = 0;
+	int	IntValue() const {
+		int i = 0;
 		QueryIntValue(&i);
 		return i;
 	}
@@ -1181,8 +1181,8 @@ public:
     }
 
     /// Query as an unsigned integer. See IntValue()
-    uint32_t UnsignedValue() const			{
-    	uint32_t i=0;
+    unsigned UnsignedValue() const			{
+        unsigned i=0;
         QueryUnsignedValue( &i );
         return i;
     }
@@ -1209,9 +1209,9 @@ public:
     	in the provided parameter. The function will return XML_SUCCESS on success,
     	and XML_WRONG_ATTRIBUTE_TYPE if the conversion is not successful.
     */
-    XMLError QueryIntValue( int32_t* value ) const;
+    XMLError QueryIntValue( int* value ) const;
     /// See QueryIntValue
-    XMLError QueryUnsignedValue( uint32_t* value ) const;
+    XMLError QueryUnsignedValue( unsigned int* value ) const;
 	/// See QueryIntValue
 	XMLError QueryInt64Value(int64_t* value) const;
     /// See QueryIntValue
@@ -1226,9 +1226,9 @@ public:
     /// Set the attribute to a string value.
     void SetAttribute( const char* value );
     /// Set the attribute to value.
-    void SetAttribute(int32_t value );
+    void SetAttribute( int value );
     /// Set the attribute to value.
-    void SetAttribute( uint32_t value );
+    void SetAttribute( unsigned value );
 	/// Set the attribute to value.
 	void SetAttribute(int64_t value);
     /// Set the attribute to value.
@@ -1316,9 +1316,9 @@ public:
         or if there is an error. (For a method with error
     	checking, see QueryIntAttribute()).
     */
-    int32_t IntAttribute(const char* name, int defaultValue = 0) const;
+	int IntAttribute(const char* name, int defaultValue = 0) const;
     /// See IntAttribute()
-    uint32_t UnsignedAttribute(const char* name, unsigned defaultValue = 0) const;
+	unsigned UnsignedAttribute(const char* name, unsigned defaultValue = 0) const;
 	/// See IntAttribute()
 	int64_t Int64Attribute(const char* name, int64_t defaultValue = 0) const;
     /// See IntAttribute()
@@ -1343,7 +1343,7 @@ public:
     	QueryIntAttribute( "foo", &value );		// if "foo" isn't found, value will still be 10
     	@endverbatim
     */
-    XMLError QueryIntAttribute( const char* name, int32_t* value ) const				{
+    XMLError QueryIntAttribute( const char* name, int* value ) const				{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
@@ -1352,7 +1352,7 @@ public:
     }
 
 	/// See QueryIntAttribute()
-    XMLError QueryUnsignedAttribute( const char* name, uint32_t* value ) const	{
+    XMLError QueryUnsignedAttribute( const char* name, unsigned int* value ) const	{
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
@@ -1432,11 +1432,11 @@ public:
     	QueryAttribute( "foo", &value );		// if "foo" isn't found, value will still be 10
     	@endverbatim
     */
-	XMLError QueryAttribute( const char* name, int32_t* value ) const {
+	XMLError QueryAttribute( const char* name, int* value ) const {
 		return QueryIntAttribute( name, value );
 	}
 
-	XMLError QueryAttribute( const char* name, uint32_t* value ) const {
+	XMLError QueryAttribute( const char* name, unsigned int* value ) const {
 		return QueryUnsignedAttribute( name, value );
 	}
 
@@ -1470,12 +1470,12 @@ public:
         a->SetAttribute( value );
     }
     /// Sets the named attribute to value.
-    void SetAttribute( const char* name, int32_t value )			{
+    void SetAttribute( const char* name, int value )			{
         XMLAttribute* a = FindOrCreateAttribute( name );
         a->SetAttribute( value );
     }
     /// Sets the named attribute to value.
-    void SetAttribute( const char* name, uint32_t value )		{
+    void SetAttribute( const char* name, unsigned value )		{
         XMLAttribute* a = FindOrCreateAttribute( name );
         a->SetAttribute( value );
     }
@@ -1586,9 +1586,9 @@ public:
     */
 	void SetText( const char* inText );
     /// Convenience method for setting text inside an element. See SetText() for important limitations.
-    void SetText( int32_t value );
+    void SetText( int value );
     /// Convenience method for setting text inside an element. See SetText() for important limitations.
-    void SetText( uint32_t value );
+    void SetText( unsigned value );
 	/// Convenience method for setting text inside an element. See SetText() for important limitations.
 	void SetText(int64_t value);
     /// Convenience method for setting text inside an element. See SetText() for important limitations.
@@ -1626,9 +1626,9 @@ public:
     			 to the requested type, and XML_NO_TEXT_NODE if there is no child text to query.
 
     */
-    XMLError QueryIntText( int32_t* ival ) const;
+    XMLError QueryIntText( int* ival ) const;
     /// See QueryIntText()
-    XMLError QueryUnsignedText( uint32_t* uval ) const;
+    XMLError QueryUnsignedText( unsigned* uval ) const;
 	/// See QueryIntText()
 	XMLError QueryInt64Text(int64_t* uval) const;
 	/// See QueryIntText()
@@ -2258,8 +2258,8 @@ public:
     void OpenElement( const char* name, bool compactMode=false );
     /// If streaming, add an attribute to an open element.
     void PushAttribute( const char* name, const char* value );
-    void PushAttribute( const char* name, int32_t value );
-    void PushAttribute( const char* name, uint32_t value );
+    void PushAttribute( const char* name, int value );
+    void PushAttribute( const char* name, unsigned value );
 	void PushAttribute( const char* name, int64_t value );
 	void PushAttribute( const char* name, uint64_t value );
 	void PushAttribute( const char* name, bool value );
@@ -2270,9 +2270,9 @@ public:
     /// Add a text node.
     void PushText( const char* text, bool cdata=false );
     /// Add a text node from an integer.
-    void PushText( int32_t value );
+    void PushText( int value );
     /// Add a text node from an unsigned.
-    void PushText( uint32_t value );
+    void PushText( unsigned value );
 	/// Add a text node from a signed 64bit integer.
 	void PushText( int64_t value );
 	/// Add a text node from an unsigned 64bit integer.
