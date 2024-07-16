@@ -128,3 +128,14 @@ install(
     DESTINATION "${tinyxml2_INSTALL_PKGCONFIGDIR}"
     COMPONENT tinyxml2_development
 )
+
+if (QNX)
+    install(
+        TARGETS xmltest
+        DESTINATION bin/tinyxml2_tests
+    )
+    install(
+        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources
+        DESTINATION bin/tinyxml2_tests
+    )
+endif ()
