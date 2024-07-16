@@ -51,7 +51,8 @@ bool XMLTest (const char* testString, const char* expected, const char* found, b
 			printf( "%s\n", found );
 		}
 		else {
-#ifdef __QNX__
+#ifndef __QNX__
+			// In QNX, null pointers cannot be printed as "(null)"
 			const char* expected_qnx = expected == NULL ? "(null)" : expected;
 			const char* found_qnx = found == NULL ? "(null)" : expected;
 			printf (" %s [%s][%s]\n", testString, expected_qnx, found_qnx);
@@ -2327,7 +2328,7 @@ int main( int argc, const char ** argv )
 		XMLTest( "Should be no error initially", false, doc.Error() );
 		doc.LoadFile( "resources/no-such-file.xml" );
 		XMLTest( "No such file - should fail", true, doc.Error() );
-                
+
 		doc.LoadFile("resources/dream.xml");
 		XMLTest("Error should be cleared", false, doc.Error());
 
