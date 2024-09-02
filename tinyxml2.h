@@ -891,7 +891,7 @@ public:
 
 		If the 'target' is null, then the nodes will
 		be allocated in the current document. If 'target'
-        is specified, the memory will be allocated is the
+        is specified, the memory will be allocated in the
         specified XMLDocument.
 
 		NOTE: This is probably not the correct tool to
