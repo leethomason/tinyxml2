@@ -2314,7 +2314,7 @@ public:
     	of the XML file in memory. (Note the size returned
     	includes the terminating null.)
     */
-    int CStrSize() const {
+    size_t CStrSize() const {
         return _buffer.Size();
     }
     /**
