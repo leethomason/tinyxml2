@@ -2374,7 +2374,7 @@ private:
 };
 
 
-}	// tinyxml2
+} // namespace tinyxml2
 
 #if defined(_MSC_VER)
 #   pragma warning(pop)
