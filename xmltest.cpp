@@ -4,11 +4,37 @@
 	#endif
 #endif
 
-#include "tinyxml2.h"
 #include <cerrno>
 #include <cstdlib>
+#include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <ctime>
+
+#ifdef TINYXML2_USE_MODULE
+// modules doesn't export macros
+#if !defined(TIXMLASSERT)
+#if defined(TINYXML2_DEBUG)
+#   if defined(_MSC_VER)
+#       // "(void)0," is for suppressing C4127 warning in "assert(false)", "assert(true)" and the like
+#       define TIXMLASSERT( x )           do { if ( !((void)0,(x))) { __debugbreak(); } } while(false)
+#   elif defined (ANDROID_NDK)
+#       include <android/log.h>
+#       define TIXMLASSERT( x )           do { if ( !(x)) { __android_log_assert( "assert", "grinliz", "ASSERT in '%s' at %d.", __FILE__, __LINE__ ); } } while(false)
+#   else
+#       include <assert.h>
+#       define TIXMLASSERT                assert
+#   endif
+#else
+#   define TIXMLASSERT( x )               do {} while(false)
+#endif
+#endif
+#undef NULL
+#define NULL nullptr
+import tinyxml2;
+#else
+#include "tinyxml2.h"
+#endif
 
 #if defined( _MSC_VER ) || defined (WIN32)
 	#include <crtdbg.h>
