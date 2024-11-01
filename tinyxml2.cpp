@@ -473,10 +473,10 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
     *length = 0;
 
     if ( *(p+1) == '#' && *(p+2) ) {
-        unsigned long ucs = 0;
+        unsigned long long ucs = 0;
         TIXMLASSERT( sizeof( ucs ) >= 4 );
         ptrdiff_t delta = 0;
-        unsigned mult = 1;
+        unsigned long long mult = 1;
         static const char SEMICOLON = ';';
 
         if ( *(p+2) == 'x' ) {
@@ -494,6 +494,11 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
             TIXMLASSERT( *q == SEMICOLON );
 
             delta = q-p;
+
+            if ( delta > 8 + 3 ) { // allow maximum 8 digits in hex format and '&#x'
+                return 0;
+            }
+
             --q;
 
             while ( *q != 'x' ) {
@@ -512,11 +517,8 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
                     return 0;
                 }
                 TIXMLASSERT( digit < 16 );
-                TIXMLASSERT( digit == 0 || mult <= UINT_MAX / digit );
-                const unsigned int digitScaled = mult * digit;
-                TIXMLASSERT( ucs <= ULONG_MAX - digitScaled );
+                const unsigned long long digitScaled = mult * digit;
                 ucs += digitScaled;
-                TIXMLASSERT( mult <= UINT_MAX / 16 );
                 mult *= 16;
                 --q;
             }
@@ -536,27 +538,36 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
             TIXMLASSERT( *q == SEMICOLON );
 
             delta = q-p;
+
+            if (delta > 10 + 2) { // allow maximum 10 digits and '&#'
+                return 0;
+            }
+
             --q;
 
             while ( *q != '#' ) {
                 if ( *q >= '0' && *q <= '9' ) {
                     const unsigned int digit = *q - '0';
                     TIXMLASSERT( digit < 10 );
-                    TIXMLASSERT( digit == 0 || mult <= UINT_MAX / digit );
-                    const unsigned int digitScaled = mult * digit;
-                    TIXMLASSERT( ucs <= ULONG_MAX - digitScaled );
+                    const unsigned long long digitScaled = mult * digit;
                     ucs += digitScaled;
                 }
                 else {
                     return 0;
                 }
-                TIXMLASSERT( mult <= UINT_MAX / 10 );
                 mult *= 10;
                 --q;
             }
         }
+
+        if (ucs > ULONG_MAX)
+            return 0;
+
         // convert the UCS to UTF-8
-        ConvertUTF32ToUTF8( ucs, value, length );
+        ConvertUTF32ToUTF8( (unsigned long)ucs, value, length );
+        if (*length == 0)
+            return 0;
+
         return p + delta + 1;
     }
     return p+1;

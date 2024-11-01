@@ -2666,6 +2666,32 @@ int main( int argc, const char ** argv )
     	doc.PrintError();
     }
 
+    {
+    	const char* xml = "<Hello value='12&#65;34' value2='56&#x42;78'>Text</Hello>";
+    	XMLDocument doc;
+    	doc.Parse(xml);
+    	const char* value = doc.FirstChildElement()->Attribute("value");
+    	const char* value2 = doc.FirstChildElement()->Attribute("value2");
+    	XMLTest("Test attribute encode", false, doc.Error());
+    	XMLTest("Test decimal value", value, "12A34");
+    	XMLTest("Test hex encode", value2, "56B78");
+    }
+
+    {
+    	const char* xml = "<Hello value='&#ABC9000000065;' value2='&#xffffffff;' value3='&#5000000000;' value4='&#x00000045;'>Text</Hello>";
+    	XMLDocument doc;
+    	doc.Parse(xml);
+    	const char* value = doc.FirstChildElement()->Attribute("value");
+    	const char* value2 = doc.FirstChildElement()->Attribute("value2");
+    	const char* value3 = doc.FirstChildElement()->Attribute("value3");
+    	const char* value4 = doc.FirstChildElement()->Attribute("value4");
+    	XMLTest("Test attribute encode", false, doc.Error());
+    	XMLTest("Test attribute encode too long value", value, "&#ABC9000000065;"); // test long value
+    	XMLTest("Test attribute encode out of unicode range", value2, "&#xffffffff;"); // out of unicode range
+    	XMLTest("Test attribute encode out of int max value", value3, "&#5000000000;"); // out of int max value
+    	XMLTest("Test attribute encode with a Hex value", value4, "E"); // hex value in unicode value
+    }
+
     // ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )
