@@ -2678,18 +2678,20 @@ int main( int argc, const char ** argv )
     }
 
     {
-    	const char* xml = "<Hello value='&#ABC9000000065;' value2='&#xffffffff;' value3='&#5000000000;' value4='&#x00000045;'>Text</Hello>";
+    	const char* xml = "<Hello value='&#ABC9000000065;' value2='&#xffffffff;' value3='&#5000000000;' value4='&#x00000045;' value5='&#x000000000000000021;'>Text</Hello>";
     	XMLDocument doc;
     	doc.Parse(xml);
     	const char* value = doc.FirstChildElement()->Attribute("value");
     	const char* value2 = doc.FirstChildElement()->Attribute("value2");
     	const char* value3 = doc.FirstChildElement()->Attribute("value3");
     	const char* value4 = doc.FirstChildElement()->Attribute("value4");
+		const char* value5 = doc.FirstChildElement()->Attribute("value5");
     	XMLTest("Test attribute encode", false, doc.Error());
     	XMLTest("Test attribute encode too long value", value, "&#ABC9000000065;"); // test long value
     	XMLTest("Test attribute encode out of unicode range", value2, "&#xffffffff;"); // out of unicode range
     	XMLTest("Test attribute encode out of int max value", value3, "&#5000000000;"); // out of int max value
     	XMLTest("Test attribute encode with a Hex value", value4, "E"); // hex value in unicode value
+		XMLTest("Test attribute encode with a Hex value", value5, "!"); // hex value in unicode value
     }
 
     // ----------- Performance tracking --------------

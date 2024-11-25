@@ -474,7 +474,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
 
     if ( *(p+1) == '#' && *(p+2) ) {
         unsigned long long ucs = 0;
-        TIXMLASSERT( sizeof( ucs ) >= 4 );
+        TIXMLASSERT( sizeof( ucs ) >= 8 );
         ptrdiff_t delta = 0;
         unsigned long long mult = 1;
         static const char SEMICOLON = ';';
@@ -494,11 +494,6 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
             TIXMLASSERT( *q == SEMICOLON );
 
             delta = q-p;
-
-            if ( delta > 8 + 3 ) { // allow maximum 8 digits in hex format and '&#x'
-                return 0;
-            }
-
             --q;
 
             while ( *q != 'x' ) {
@@ -519,6 +514,8 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
                 TIXMLASSERT( digit < 16 );
                 const unsigned long long digitScaled = mult * digit;
                 ucs += digitScaled;
+                if (ucs > ULONG_MAX)
+                    return 0;
                 mult *= 16;
                 --q;
             }
@@ -538,11 +535,6 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
             TIXMLASSERT( *q == SEMICOLON );
 
             delta = q-p;
-
-            if (delta > 10 + 2) { // allow maximum 10 digits and '&#'
-                return 0;
-            }
-
             --q;
 
             while ( *q != '#' ) {
@@ -551,6 +543,8 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
                     TIXMLASSERT( digit < 10 );
                     const unsigned long long digitScaled = mult * digit;
                     ucs += digitScaled;
+                    if (ucs > ULONG_MAX)
+                        return 0;
                 }
                 else {
                     return 0;
