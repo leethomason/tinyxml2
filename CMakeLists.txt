@@ -63,7 +63,9 @@ endif ()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-## Custom locations
+## Custom settings
+option(tinyxml2_INSTALL_PKGCONFIG "Create and install pkgconfig files" ON)
+
 set(tinyxml2_INSTALL_PKGCONFIGDIR "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
     CACHE PATH "Directory for pkgconfig files")
 
@@ -121,10 +123,12 @@ install(
 
 ## pkg-config
 
-configure_file(cmake/tinyxml2.pc.in tinyxml2.pc.gen @ONLY)
-file(GENERATE OUTPUT tinyxml2.pc INPUT "${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc.gen")
-install(
-    FILES "${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc"
-    DESTINATION "${tinyxml2_INSTALL_PKGCONFIGDIR}"
-    COMPONENT tinyxml2_development
-)
+if (tinyxml2_INSTALL_PKGCONFIG)
+    configure_file(cmake/tinyxml2.pc.in tinyxml2.pc.gen @ONLY)
+    file(GENERATE OUTPUT tinyxml2.pc INPUT "${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc.gen")
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc"
+        DESTINATION "${tinyxml2_INSTALL_PKGCONFIGDIR}"
+        COMPONENT tinyxml2_development
+    )
+endif ()
