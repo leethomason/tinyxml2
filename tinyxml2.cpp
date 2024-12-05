@@ -234,13 +234,13 @@ char* StrPair::ParseName( char* p )
     if ( !p || !(*p) ) {
         return 0;
     }
-    if ( !XMLUtil::IsNameStartChar( (unsigned char) *p ) ) {
+    if ( !XMLUtil::IsNameStartChar( static_cast<unsigned char>(*p) ) ) {
         return 0;
     }
 
     char* const start = p;
     ++p;
-    while ( *p && XMLUtil::IsNameChar( (unsigned char) *p ) ) {
+    while ( *p && XMLUtil::IsNameChar( static_cast<unsigned char>(*p) ) ) {
         ++p;
     }
 
@@ -700,7 +700,7 @@ bool XMLUtil::ToInt64(const char* str, int64_t* value)
 bool XMLUtil::ToUnsigned64(const char* str, uint64_t* value) {
     unsigned long long v = 0;	// horrible syntax trick to make the compiler happy about %llu
     if(TIXML_SSCANF(str, IsPrefixHex(str) ? "%llx" : "%llu", &v) == 1) {
-        *value = (uint64_t)v;
+        *value = static_cast<uint64_t>(v);
         return true;
     }
     return false;
@@ -1977,7 +1977,7 @@ char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
         }
 
         // attribute.
-        if (XMLUtil::IsNameStartChar( (unsigned char) *p ) ) {
+        if (XMLUtil::IsNameStartChar( static_cast<unsigned char>(*p) ) ) {
             XMLAttribute* attrib = CreateAttribute();
             TIXMLASSERT( attrib );
             attrib->_parseLineNum = _document->_parseCurLineNum;
