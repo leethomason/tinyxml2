@@ -467,101 +467,88 @@ void XMLUtil::ConvertUTF32ToUTF8( unsigned long input, char* output, int* length
 }
 
 
-const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
+const char* XMLUtil::GetCharacterRef(const char* p, char* value, int* length)
 {
-    // Presume an entity, and pull it out.
+    // Assume an entity, and pull it out.
     *length = 0;
 
-    if ( *(p+1) == '#' && *(p+2) ) {
-        unsigned long ucs = 0;
-        TIXMLASSERT( sizeof( ucs ) >= 4 );
+    static const uint32_t MAX_CODE_POINT = 0x10FFFF;
+
+    if (*(p + 1) == '#' && *(p + 2)) {
+        uint32_t ucs = 0;
         ptrdiff_t delta = 0;
-        unsigned mult = 1;
+        uint32_t mult = 1;
         static const char SEMICOLON = ';';
 
-        if ( *(p+2) == 'x' ) {
+        bool hex = false;
+        uint32_t radix = 10;
+        const char* q = 0;
+        char terminator = '#';
+
+        if (*(p + 2) == 'x') {
             // Hexadecimal.
-            const char* q = p+3;
-            if ( !(*q) ) {
-                return 0;
-            }
+            hex = true;
+            radix = 16;
+            terminator = 'x';
 
-            q = strchr( q, SEMICOLON );
-
-            if ( !q ) {
-                return 0;
-            }
-            TIXMLASSERT( *q == SEMICOLON );
-
-            delta = q-p;
-            --q;
-
-            while ( *q != 'x' ) {
-                unsigned int digit = 0;
-
-                if ( *q >= '0' && *q <= '9' ) {
-                    digit = *q - '0';
-                }
-                else if ( *q >= 'a' && *q <= 'f' ) {
-                    digit = *q - 'a' + 10;
-                }
-                else if ( *q >= 'A' && *q <= 'F' ) {
-                    digit = *q - 'A' + 10;
-                }
-                else {
-                    return 0;
-                }
-                TIXMLASSERT( digit < 16 );
-                TIXMLASSERT( digit == 0 || mult <= UINT_MAX / digit );
-                const unsigned int digitScaled = mult * digit;
-                TIXMLASSERT( ucs <= ULONG_MAX - digitScaled );
-                ucs += digitScaled;
-                TIXMLASSERT( mult <= UINT_MAX / 16 );
-                mult *= 16;
-                --q;
-            }
+            q = p + 3;
         }
         else {
             // Decimal.
-            const char* q = p+2;
-            if ( !(*q) ) {
+            q = p + 2;
+        }
+        if (!(*q)) {
+            return 0;
+        }
+
+        q = strchr(q, SEMICOLON);
+        if (!q) {
+            return 0;
+        }
+        TIXMLASSERT(*q == SEMICOLON);
+
+        delta = q - p;
+        --q;
+
+        while (*q != terminator) {
+            uint32_t digit = 0;
+
+            if (*q >= '0' && *q <= '9') {
+                digit = *q - '0';
+            }
+            else if (hex && (*q >= 'a' && *q <= 'f')) {
+                digit = *q - 'a' + 10;
+            }
+            else if (hex && (*q >= 'A' && *q <= 'F')) {
+                digit = *q - 'A' + 10;
+            }
+            else {
                 return 0;
             }
+            TIXMLASSERT(digit < radix);
 
-            q = strchr( q, SEMICOLON );
-
-            if ( !q ) {
-                return 0;
+            const unsigned int digitScaled = mult * digit;
+            ucs += digitScaled;
+            mult *= radix;       
+            
+            // Security check: could a value exist that is out of range?
+            // Easily; limit to the MAX_CODE_POINT, which also allows for a
+            // bunch of leading zeroes.
+            if (mult > MAX_CODE_POINT) {
+                mult = MAX_CODE_POINT;
             }
-            TIXMLASSERT( *q == SEMICOLON );
-
-            delta = q-p;
             --q;
-
-            while ( *q != '#' ) {
-                if ( *q >= '0' && *q <= '9' ) {
-                    const unsigned int digit = *q - '0';
-                    TIXMLASSERT( digit < 10 );
-                    TIXMLASSERT( digit == 0 || mult <= UINT_MAX / digit );
-                    const unsigned int digitScaled = mult * digit;
-                    TIXMLASSERT( ucs <= ULONG_MAX - digitScaled );
-                    ucs += digitScaled;
-                }
-                else {
-                    return 0;
-                }
-                TIXMLASSERT( mult <= UINT_MAX / 10 );
-                mult *= 10;
-                --q;
-            }
+        }
+        // Out of range:
+        if (ucs > MAX_CODE_POINT) {
+            return 0;
         }
         // convert the UCS to UTF-8
-        ConvertUTF32ToUTF8( ucs, value, length );
+        ConvertUTF32ToUTF8(ucs, value, length);
         return p + delta + 1;
     }
-    return p+1;
+    return p + 1;
 }
-
 
 void XMLUtil::ToStr( int v, char* buffer, int bufferSize )
 {
