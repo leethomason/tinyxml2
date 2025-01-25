@@ -1005,7 +1005,7 @@ int main( int argc, const char ** argv )
 			FILE* fp1 = fopen("resources/out/printer_1.xml", "w");
 			XMLPrinter printer(fp1);
 
-			printer.PushDeclaration("version = '1.0' enconding = 'utf-8'");
+			printer.PushDeclaration("version = '1.0' encoding = 'utf-8'");
 
 			printer.OpenElement("foo");
 			printer.PushAttribute("attrib-text", "text");
@@ -1096,7 +1096,7 @@ int main( int argc, const char ** argv )
 
 			const XMLDeclaration* declaration = cdoc.FirstChild()->ToDeclaration();
 			const char* declaration_value = declaration->Value();
-			XMLTest("PushDeclaration() test", "version = '1.0' enconding = 'utf-8'", declaration_value);
+			XMLTest("PushDeclaration() test", "version = '1.0' encoding = 'utf-8'", declaration_value);
 		}
 	}
 
@@ -2639,7 +2639,7 @@ int main( int argc, const char ** argv )
             "<?xml version=\"1.0\"?>\n"					// 2 DecL
             "<root>\r\n"								// 3 Element
             "\n"										// 4
-            "text contining new line \n"				// 5 Text
+            "text containing new line \n"				// 5 Text
             " and also containing crlf \r\n"			// 6
             "<sub><![CDATA[\n"							// 7 Element Text
             "cdata containing new line \n"				// 8
