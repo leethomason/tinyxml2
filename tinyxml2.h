@@ -266,7 +266,6 @@ public:
     }
 
     size_t Size() const {
-        TIXMLASSERT( _size >= 0 );
         return _size;
     }
 
