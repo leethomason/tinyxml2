@@ -2577,7 +2577,7 @@ void XMLDocument::PopDepth()
 	--_parsingDepth;
 }
 
-XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :
+XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth, EscapeAposCharsInAttributes aposInAttributes ) :
     _elementJustOpened( false ),
     _stack(),
     _firstElement( true ),
@@ -2594,9 +2594,11 @@ XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :
     }
     for( int i=0; i<NUM_ENTITIES; ++i ) {
         const char entityValue = entities[i].value;
-        const unsigned char flagIndex = static_cast<unsigned char>(entityValue);
-        TIXMLASSERT( flagIndex < ENTITY_RANGE );
-        _entityFlag[flagIndex] = true;
+        if ((aposInAttributes == ESCAPE_APOS_CHARS_IN_ATTRIBUTES) || (entityValue != SINGLE_QUOTE)) {
+            const unsigned char flagIndex = static_cast<unsigned char>(entityValue);
+            TIXMLASSERT( flagIndex < ENTITY_RANGE );
+            _entityFlag[flagIndex] = true;
+        }
     }
     _restrictedEntityFlag[static_cast<unsigned char>('&')] = true;
     _restrictedEntityFlag[static_cast<unsigned char>('<')] = true;
