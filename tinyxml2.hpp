@@ -1,4 +1,9 @@
 /*
+
+2025 - This is an modified version by Kalana Ratnayake by combining original
+header file and cpp file into a single header only file for easier
+integration into ROS related projects.
+
 Original code by Lee Thomason (www.grinninglizard.com)
 
 This software is provided 'as-is', without any express or implied
@@ -19,12 +24,6 @@ must not be misrepresented as being the original software.
 
 3. This notice may not be removed or altered from any source
 distribution.
-*/
-
-/*
-This is an modified version by Kalana Ratnayake by combining original
-header file and cpp file into a single header only file for easier
-integration into ROS related projects
 */
 
 #ifndef TINYXML2_COMBINDED
