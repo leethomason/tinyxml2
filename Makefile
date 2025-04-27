@@ -11,6 +11,11 @@ RM = rm -f
 RANLIB = ranlib
 MKDIR = mkdir -p
 CXXFLAGS = -D_FILE_OFFSET_BITS=64 -fPIC
+CXXFLAGS_EFFC = -Werror -Wall -Wextra -Wshadow -Wpedantic -Wformat-nonliteral \
+	-Wformat-security -Wswitch-default -Wuninitialized -Wundef \
+	-Wpointer-arith -Woverloaded-virtual -Wctor-dtor-privacy \
+	-Wnon-virtual-dtor -Woverloaded-virtual -Wsign-promo \
+	-Wno-unused-parameter -Weffc++
 
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)
@@ -21,32 +26,27 @@ bindir = $(prefix)/bin
 libdir = $(prefix)/lib
 includedir = $(prefix)/include
 
-all: xmltest staticlib
+all: xmltest xmltest2 staticlib
 
 rebuild: clean all
 
-xmltest: xmltest.cpp libtinyxml2.a
-
 effc:
-	gcc -Werror -Wall -Wextra -Wshadow -Wpedantic -Wformat-nonliteral \
-        -Wformat-security -Wswitch-default -Wuninitialized -Wundef \
-        -Wpointer-arith -Woverloaded-virtual -Wctor-dtor-privacy \
-        -Wnon-virtual-dtor -Woverloaded-virtual -Wsign-promo \
-        -Wno-unused-parameter -Weffc++ xmltest.cpp tinyxml2.cpp -o xmltest
+	gcc $(CXXFLAGS_EFFC) xmltest.cpp tinyxml2.cpp -o xmltest
 
-clean:
-	-$(RM) *.o xmltest libtinyxml2.a
+effc2:
+	gcc $(CXXFLAGS_EFFC) xmltest2.cpp -o xmltest2
 
-# Standard GNU target
-distclean:
-	-$(RM) *.o xmltest libtinyxml2.a
+# ----------------- Build Original xmltest -----------------
 
-test: xmltest
-	./xmltest
+xmltest: xmltest.cpp libtinyxml2.a
+	$(CXX) $(CXXFLAGS) xmltest.cpp tinyxml2.cpp -o xmltest
 
-# Standard GNU target
-check: xmltest
-	./xmltest
+# ----------------- Build New xmltest2 -----------------
+
+xmltest2: xmltest2.cpp
+	$(CXX) $(CXXFLAGS) xmltest2.cpp -o xmltest2
+
+# ----------------- Static Library -----------------
 
 staticlib: libtinyxml2.a
 
@@ -56,19 +56,41 @@ libtinyxml2.a: tinyxml2.o
 
 tinyxml2.o: tinyxml2.cpp tinyxml2.h
 
+# ----------------- Cleaning -----------------
+
+clean:
+	-$(RM) *.o xmltest xmltest2 libtinyxml2.a
+
+# Standard GNU target
+distclean:
+	-$(RM) *.o xmltest xmltest2 libtinyxml2.a
+
+
+# ----------------- Testing -----------------
+
+test: xmltest
+	./xmltest
+
+test2: xmltest2
+	./xmltest2
+
+# Standard GNU targets
+check: test
+check2: test2
+
+# ----------------- Installation -----------------
+
 directories:
 	$(MKDIR) $(DESTDIR)$(prefix)
 	$(MKDIR) $(DESTDIR)$(bindir)
 	$(MKDIR) $(DESTDIR)$(libdir)
 	$(MKDIR) $(DESTDIR)$(includedir)
 
-# Standard GNU target.
 install: xmltest staticlib directories
 	$(INSTALL_PROGRAM) xmltest $(DESTDIR)$(bindir)/xmltest
 	$(INSTALL_DATA) tinyxml2.h $(DESTDIR)$(includedir)/tinyxml2.h
 	$(INSTALL_DATA) libtinyxml2.a $(DESTDIR)$(libdir)/libtinyxml2.a
 
-# Standard GNU target
 uninstall:
 	$(RM) $(DESTDIR)$(bindir)/xmltest
 	$(RM) $(DESTDIR)$(includedir)/tinyxml2.h
