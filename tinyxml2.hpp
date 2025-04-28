@@ -1,8 +1,8 @@
 /*
 
-2025 - This is an modified version by Kalana Ratnayake by combining original
-header file and cpp file into a single header only file for easier
-integration into ROS related projects.
+2025 - This is an modified version by Kalana Ratnayake by combining
+original header file and cpp file into a single header only file for 
+easier integration into ROS related projects.
 
 Original code by Lee Thomason (www.grinninglizard.com)
 
