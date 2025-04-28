@@ -12,9 +12,6 @@ https://github.com/leethomason/tinyxml2
 The online HTML version of these docs:
 http://leethomason.github.io/tinyxml2/
 
-The new Header only file is hosted on github:
-https://github.com/KalanaRatnayake/tinyxml2
-
 Examples are in the "related pages" tab of the HTML docs.
 
 What it does.
