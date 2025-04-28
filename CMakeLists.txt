@@ -53,6 +53,16 @@ if (tinyxml2_BUILD_TESTING)
     )
 
     set_tests_properties(xmltest PROPERTIES PASS_REGULAR_EXPRESSION ", Fail 0")
+
+    add_executable(xmltest2 xmltest2.cpp)
+
+    add_test(
+        NAME xmltest2
+        COMMAND xmltest2
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+
+    set_tests_properties(xmltest2 PROPERTIES PASS_REGULAR_EXPRESSION ", Fail 0")
 endif ()
 
 ##
