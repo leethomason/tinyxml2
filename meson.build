@@ -22,7 +22,7 @@
 project(
     'tinyxml2',
     ['cpp'],
-    version : '10.0.0',
+    version : '11.0.0',
     meson_version : '>= 0.49.0',
 )
 
