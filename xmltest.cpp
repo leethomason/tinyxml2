@@ -2695,6 +2695,41 @@ int main( int argc, const char ** argv )
 		XMLTest("Test attribute encode with a Hex value", value5, "!"); // hex value in unicode value
 	}
 
+	// ---------- XMLPrinter Apos Escaping ------
+	{
+		const char* testText = "text containing a ' character";
+		XMLDocument doc;
+		XMLElement* element = doc.NewElement( "element" );
+		doc.InsertEndChild( element );
+		element->SetAttribute( "attrib", testText );
+		{
+			XMLPrinter defaultPrinter;
+			doc.Print( &defaultPrinter );
+			const char* defaultOutput = defaultPrinter.CStr();
+			const bool foundTextWithUnescapedApos = (strstr(defaultOutput, testText) != nullptr); 
+			XMLTest("Default XMLPrinter should escape ' characters", false, foundTextWithUnescapedApos);
+			{
+				XMLDocument parsingDoc;
+				parsingDoc.Parse(defaultOutput);
+				const XMLAttribute* attrib = parsingDoc.FirstChildElement("element")->FindAttribute("attrib");
+				XMLTest("Default XMLPrinter should output parsable xml", testText, attrib->Value(), true);
+			}
+		}
+		{
+			XMLPrinter customPrinter(0, false, 0, XMLPrinter::DONT_ESCAPE_APOS_CHARS_IN_ATTRIBUTES);
+			doc.Print( &customPrinter );
+			const char* customOutput = customPrinter.CStr();
+			const bool foundTextWithUnescapedApos = (strstr(customOutput, testText) != nullptr); 
+			XMLTest("Custom XMLPrinter should not escape ' characters", true, foundTextWithUnescapedApos);
+			{
+				XMLDocument parsingDoc;
+				parsingDoc.Parse(customOutput);
+				const XMLAttribute* attrib = parsingDoc.FirstChildElement("element")->FindAttribute("attrib");
+				XMLTest("Custom XMLPrinter should output parsable xml", testText, attrib->Value(), true);
+			}
+		}
+	}
+	
     // ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )

@@ -2239,13 +2239,18 @@ private:
 class TINYXML2_LIB XMLPrinter : public XMLVisitor
 {
 public:
+    enum EscapeAposCharsInAttributes {
+        ESCAPE_APOS_CHARS_IN_ATTRIBUTES,
+        DONT_ESCAPE_APOS_CHARS_IN_ATTRIBUTES
+    };
+
     /** Construct the printer. If the FILE* is specified,
     	this will print to the FILE. Else it will print
     	to memory, and the result is available in CStr().
     	If 'compact' is set to true, then output is created
     	with only required whitespace and newlines.
     */
-    XMLPrinter( FILE* file=0, bool compact = false, int depth = 0 );
+    XMLPrinter( FILE* file=0, bool compact = false, int depth = 0, EscapeAposCharsInAttributes aposInAttributes = ESCAPE_APOS_CHARS_IN_ATTRIBUTES );
     virtual ~XMLPrinter()	{}
 
     /** If streaming, write the BOM and declaration. */
