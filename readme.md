@@ -1,7 +1,7 @@
 TinyXML-2
 =========
 
-[![Test](https://github.com/leethomason/tinyxml2/actions/workflows/test.yml/badge.svg)](https://github.com/leethomason/tinyxml2/actions/workflows/test.yml)
+[![Test](https://github.com/KalanaRatnayake/tinyxml2/actions/workflows/test.yml/badge.svg)](https://github.com/KalanaRatnayake/tinyxml2/actions/workflows/test.yml)
 
 TinyXML-2 is a simple, small, efficient, C++ XML parser that can be
 easily integrated into other programs.
@@ -267,6 +267,10 @@ And additionally a test file:
 
 Generally speaking, the intent is that you simply include the tinyxml2.cpp and 
 tinyxml2.h files in your project and build with your other source code.
+
+*Update:* Now the single file header "tinyxml2.hpp" can directly be included in 
+your project directly without worrying about the cpp file and additional integration.
+This can be useful when used in robotics projects.
 
 There is also a CMake build included. CMake is the general build for TinyXML-2.
 
