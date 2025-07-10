@@ -6,15 +6,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-2019, macos-latest, ubuntu-22.04 ]
+        os: [ windows-latest, macos-latest, ubuntu-latest ]
         cmake: [ 3.15, 3.x ]
         include:
-          - os: windows-2019
+          - os: windows-latest
             static_postfix: _static
             tree: tree /F
             CXX: cl
 
-          - os: ubuntu-22.04
+          - os: ubuntu-latest
             tree: tree
 
           - os: macos-latest
@@ -33,7 +33,7 @@ jobs:
       # System set-up
       - uses: actions/checkout@v4
       - uses: ilammy/msvc-dev-cmd@v1
-      - uses: seanmiddleditch/gha-setup-ninja@master
+      - uses: seanmiddleditch/gha-setup-ninja@v4
       - uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: ${{ matrix.cmake }}
