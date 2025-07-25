@@ -2729,6 +2729,26 @@ int main( int argc, const char ** argv )
 			}
 		}
 	}
+
+        // ---------- Testing IsNameStartChar ----------
+    {
+
+        XMLUtil test;
+        XMLTest("IsNameStartChar(':')", true, test.IsNameStartChar(':'));
+        XMLTest("IsNameStartChar('_')", true, test.IsNameStartChar('_'));
+        XMLTest("IsNameStartChar('@')", false, test.IsNameStartChar('@'));
+        XMLTest("IsNameStartChar('A')", true, test.IsNameStartChar('A'));
+        XMLTest("IsNameStartChar('Z')", true, test.IsNameStartChar('Z'));
+        XMLTest("IsNameStartChar('[')", false, test.IsNameStartChar('['));
+        XMLTest("IsNameStartChar('`')", false, test.IsNameStartChar('`'));
+        XMLTest("IsNameStartChar('a')", true, test.IsNameStartChar('a'));
+        XMLTest("IsNameStartChar('z')", true, test.IsNameStartChar('z'));
+        XMLTest("IsNameStartChar('{')", false, test.IsNameStartChar('{'));
+        XMLTest("IsNameStartChar(127)", false, test.IsNameStartChar(static_cast<unsigned char>(127)));
+        XMLTest("IsNameStartChar(128)", true, test.IsNameStartChar(static_cast<unsigned char>(128)));
+        XMLTest("IsNameStartChar(255)", true, test.IsNameStartChar(static_cast<unsigned char>(255)));
+    }
+
 	
     // ----------- Performance tracking --------------
 	{
