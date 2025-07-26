@@ -2732,8 +2732,8 @@ int main( int argc, const char ** argv )
 
         // ---------- Testing IsNameStartChar ----------
     {
-
         XMLUtil test;
+        // Tests validate key edge cases for IsNameStartChar without exhaustive coverage 
         XMLTest("IsNameStartChar(':')", true, test.IsNameStartChar(':'));
         XMLTest("IsNameStartChar('_')", true, test.IsNameStartChar('_'));
         XMLTest("IsNameStartChar('@')", false, test.IsNameStartChar('@'));
