@@ -675,7 +675,7 @@ int main( int argc, const char ** argv )
 		const unsigned char correctValue[] = {	0xd1U, 0x86U, 0xd0U, 0xb5U, 0xd0U, 0xbdU, 0xd0U, 0xbdU,
 												0xd0U, 0xbeU, 0xd1U, 0x81U, 0xd1U, 0x82U, 0xd1U, 0x8cU, 0 };
 
-		XMLTest( "UTF-8: Russian value.", (const char*)correctValue, element->Attribute( "value" ) );
+		XMLTest( "UTF-8: Russian value.", reinterpret_cast<const char*>(correctValue), element->Attribute( "value" ) );
 
 		const unsigned char russianElementName[] = {	0xd0U, 0xa0U, 0xd1U, 0x83U,
 														0xd1U, 0x81U, 0xd1U, 0x81U,
@@ -683,7 +683,7 @@ int main( int argc, const char ** argv )
 														0xd0U, 0xb9U, 0 };
 		const char russianText[] = "<\xD0\xB8\xD0\xBC\xD0\xB5\xD0\xB5\xD1\x82>";
 
-		XMLText* text = doc.FirstChildElement( "document" )->FirstChildElement( (const char*) russianElementName )->FirstChild()->ToText();
+		XMLText* text = doc.FirstChildElement( "document" )->FirstChildElement( reinterpret_cast<const char*>(russianElementName) )->FirstChild()->ToText();
 		XMLTest( "UTF-8: Browsing russian element name.",
 				 russianText,
 				 text->Value() );
@@ -1068,15 +1068,15 @@ int main( int argc, const char ** argv )
 
 			unsigned  unsigned_value;
 			unsigned_value = root->FirstChildElement("unsigned")->UnsignedText();
-			XMLTest("PushText( unsigned value ) test", (unsigned)12, unsigned_value);
+			XMLTest("PushText( unsigned value ) test", static_cast<unsigned>(12), unsigned_value);
 
 			int64_t  int64_t_value;
 			int64_t_value = root->FirstChildElement("int64_t")->Int64Text();
-			XMLTest("PushText( int64_t value ) test", (int64_t) 13, int64_t_value);
+			XMLTest("PushText( int64_t value ) test", static_cast<int64_t>(13), int64_t_value);
 
 			uint64_t uint64_t_value;
 			uint64_t_value = root->FirstChildElement("uint64_t")->Unsigned64Text();
-			XMLTest("PushText( uint64_t value ) test", (uint64_t) 14, uint64_t_value);
+			XMLTest("PushText( uint64_t value ) test", static_cast<uint64_t>(14), uint64_t_value);
 
 			float  float_value;
 			float_value = root->FirstChildElement("float")->FloatText();
@@ -1397,7 +1397,7 @@ int main( int argc, const char ** argv )
 		buf[61] = 0;
 
 		XMLDocument doc;
-		doc.Parse( (const char*)buf);
+		doc.Parse( reinterpret_cast<const char*>(buf) );
 		XMLTest( "Broken CDATA", true, doc.Error() );
 	}
 
@@ -1753,7 +1753,7 @@ int main( int argc, const char ** argv )
 			unsigned unsignedValue = 0;
 			XMLError queryResult = pointElement->FirstChildElement( "y" )->QueryUnsignedText( &unsignedValue );
 			XMLTest( "QueryUnsignedText result", XML_SUCCESS, queryResult, false );
-			XMLTest( "QueryUnsignedText", (unsigned)1, unsignedValue, false );
+			XMLTest( "QueryUnsignedText", static_cast<unsigned>(1), unsignedValue, false );
 		}
 
 		{
