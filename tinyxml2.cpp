@@ -810,7 +810,14 @@ XMLNode::XMLNode( XMLDocument* doc ) :
 
 XMLNode::~XMLNode()
 {
-    DeleteChildren();
+    XMLNode *currentChild = _firstChild;
+    while (currentChild != NULL) {
+        XMLNode *next = currentChild->_next;
+        currentChild->_parent = 0;
+        DeleteNode(currentChild);
+        currentChild = next;
+    }
+
     if ( _parent ) {
         _parent->Unlink( this );
     }
