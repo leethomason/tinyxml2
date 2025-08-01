@@ -572,16 +572,14 @@ public:
         if ( ch > 32 ) {
             return false;
         }
-        return ( mask >> ( ch & 63 ) ) & 1;
+        return mask >> ch & 1;
     }
 
-    // Anything in the high order range of UTF-8 is assumed to not be whitespace. This isn't
-    // correct, but simple, and usually works.
     static bool IsWhiteSpace( char p )					{
-        return !IsUTF8Continuation(p) && IsSpace( static_cast<unsigned char>(p) );
+        return IsSpace( static_cast<unsigned char>(p) );
     }
 
-    // The method checks the char for matching ':', '_', alphabetic symbols and char >= 128 by bit mask 
+    // The method checks a char for matching ':', '_', alphabetic symbols or char >= 128 by bit mask 
     inline static bool IsNameStartChar( unsigned char ch ) {
         static constexpr uint64_t mask[4] = { 1ULL << 58 , 1ULL << 31 | 0x07FFFFFE07FFFFFE , ~0ULL, ~0ULL};
         return ( mask[ch >> 6] >> ( ch & 63 ) ) & 1;
