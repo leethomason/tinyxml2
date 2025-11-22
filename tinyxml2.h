@@ -93,12 +93,21 @@ distribution.
 #endif
 #endif
 
+
+#if defined(__cplusplus) && __cplusplus >= 201703L
+#define TINYXML2_CONSTANT inline constexpr
+#elif defined(__cplusplus) && __cplusplus >= 201103L
+#define TINYXML2_CONSTANT static constexpr
+#else 
+#define TINYXML2_CONSTANT static const
+#endif
+
 /* Versioning, past 1.0.14:
 	http://semver.org/
 */
-static const int TIXML2_MAJOR_VERSION = 11;
-static const int TIXML2_MINOR_VERSION = 0;
-static const int TIXML2_PATCH_VERSION = 0;
+TINYXML2_CONSTANT int TIXML2_MAJOR_VERSION = 11;
+TINYXML2_CONSTANT int TIXML2_MINOR_VERSION = 0;
+TINYXML2_CONSTANT int TIXML2_PATCH_VERSION = 0;
 
 #define TINYXML2_MAJOR_VERSION 11
 #define TINYXML2_MINOR_VERSION 0
@@ -109,7 +118,7 @@ static const int TIXML2_PATCH_VERSION = 0;
 // system, and the capacity of the stack. On the other hand, it's a trivial
 // attack that can result from ill, malicious, or even correctly formed XML,
 // so there needs to be a limit in place.
-static const int TINYXML2_MAX_ELEMENT_DEPTH = 500;
+TINYXML2_CONSTANT int TINYXML2_MAX_ELEMENT_DEPTH = 500;
 
 namespace tinyxml2
 {
