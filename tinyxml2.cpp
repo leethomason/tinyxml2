@@ -32,6 +32,45 @@ distribution.
 #   include <cstdarg>
 #endif
 
+// Handle fallthrough attribute for different compilers
+#ifndef __has_attribute
+#   define __has_attribute(x) 0
+#endif
+#ifdef __cplusplus
+#   ifndef __has_cpp_attribute
+#      define __has_cpp_attribute(x) 0
+#   endif
+#else
+#   ifndef __has_c_attribute
+#      define __has_c_attribute(x) 0
+#   endif
+#endif
+
+#ifdef __cplusplus
+#   if defined(_MSC_VER)
+#      define TIXML_FALLTHROUGH (void(0))
+#   elif (__cplusplus >= 201703L && __has_cpp_attribute(fallthrough))
+#      define TIXML_FALLTHROUGH [[fallthrough]]
+#   elif __has_cpp_attribute(clang::fallthrough)
+#      define TIXML_FALLTHROUGH [[clang::fallthrough]]
+#   elif __has_attribute(fallthrough)
+#      define TIXML_FALLTHROUGH __attribute__((fallthrough))
+#   else
+#      define TIXML_FALLTHROUGH (void(0))
+#   endif
+#else
+#   if defined(_MSC_VER)
+#      define TIXML_FALLTHROUGH (void(0))
+#   elif __has_c_attribute(fallthrough)
+#      define TIXML_FALLTHROUGH [[fallthrough]]
+#   elif __has_attribute(fallthrough)
+#      define TIXML_FALLTHROUGH __attribute__((fallthrough))
+#   else
+#      define TIXML_FALLTHROUGH (void(0))
+#   endif
+#endif
+
+
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
 	// Microsoft Visual Studio, version 2005 and higher. Not WinCE.
 	/*int _snprintf_s(
