@@ -32,6 +32,27 @@ distribution.
 #   include <cstdarg>
 #endif
 
+// Handle fallthrough attribute for different compilers
+#ifndef __has_attribute
+#   define __has_attribute(x) 0
+#endif
+#ifndef __has_cpp_attribute
+#  define __has_cpp_attribute(x) 0
+#endif
+
+#if defined(_MSC_VER)
+#   define TIXML_FALLTHROUGH (void(0))
+#elif (__cplusplus >= 201703L && __has_cpp_attribute(fallthrough))
+#   define TIXML_FALLTHROUGH [[fallthrough]]
+#elif __has_cpp_attribute(clang::fallthrough)
+#   define TIXML_FALLTHROUGH [[clang::fallthrough]]
+#elif __has_attribute(fallthrough)
+#   define TIXML_FALLTHROUGH __attribute__((fallthrough))
+#else
+#   define TIXML_FALLTHROUGH (void(0))
+#endif
+
+
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
 	// Microsoft Visual Studio, version 2005 and higher. Not WinCE.
 	/*int _snprintf_s(
@@ -446,17 +467,17 @@ void XMLUtil::ConvertUTF32ToUTF8( unsigned long input, char* output, int* length
             --output;
             *output = static_cast<char>((input | BYTE_MARK) & BYTE_MASK);
             input >>= 6;
-            //fall through
+            TIXML_FALLTHROUGH;
         case 3:
             --output;
             *output = static_cast<char>((input | BYTE_MARK) & BYTE_MASK);
             input >>= 6;
-            //fall through
+            TIXML_FALLTHROUGH;
         case 2:
             --output;
             *output = static_cast<char>((input | BYTE_MARK) & BYTE_MASK);
             input >>= 6;
-            //fall through
+            TIXML_FALLTHROUGH;
         case 1:
             --output;
             *output = static_cast<char>(input | FIRST_BYTE_MARK[*length]);
