@@ -5,7 +5,7 @@
 TinyXML-2 is a simple, small, efficient, C++ XML parser that can be
 easily integrated into other programs.
 
-The master is hosted on github:
+The master is hosted on GitHub:
 https://github.com/leethomason/tinyxml2
 
 The online HTML version of these docs:
@@ -64,7 +64,7 @@ rich test cases. But the implementation of the parser is completely re-written
 to make it more appropriate for use in a game. It uses less memory, is faster,
 and uses far fewer memory allocations.
 
-TinyXML-2 has no dependency on the C++ Standard Library, and does not adapt any
+TinyXML-2 has no dependency on the C++ Standard Library, and does not adapt or use any
 of its collection types either.
 
 ## Features
@@ -166,7 +166,7 @@ line number information for error messages.
 TinyXML-2 recognizes the pre-defined "character entities", meaning special
 characters. Namely:
 
-```xml
+```html
 &amp;	&
 &lt;	<
 &gt;	>
@@ -306,7 +306,7 @@ The TinyXML-2 port in vcpkg is kept up to date by Microsoft team members and com
 
 ## Versioning
 
-TinyXML-2 uses semantic versioning. http://semver.org/ Releases are now tagged in github.
+TinyXML-2 uses semantic versioning. http://semver.org/ Releases are now tagged in GitHub.
 
 Note that the major version will (probably) change fairly rapidly. API changes are fairly
 common.
