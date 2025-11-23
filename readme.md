@@ -166,7 +166,7 @@ line number information for error messages.
 TinyXML-2 recognizes the pre-defined "character entities", meaning special
 characters. Namely:
 
-```xml
+```html
 &amp;	&
 &lt;	<
 &gt;	>
