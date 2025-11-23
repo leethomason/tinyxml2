@@ -59,7 +59,7 @@ browsers or have more complete XML needs, TinyXML-2 is not the parser for you.
 TinyXML-1 vs. TinyXML-2
 -----------------------
 
-TinyXML-2 long been the focus of all development. It is well tested 
+TinyXML-2 has long been the focus of all development. It is well tested 
 and should be used instead of TinyXML-1.
 
 TinyXML-2 uses a similar API to TinyXML-1 and the same
@@ -145,7 +145,7 @@ It essentially causes the XML to be parsed twice.
 
 For applications that need to know about text nodes that are composed entirely of 
 whitespace, PEDANTIC_WHITESPACE is available. PEDANTIC_WHITESPACE maintains all the
-whilespace between elements. 
+whitespace between elements. 
 
 PEDANTIC_WHITESPACE is a new mode and not as tested as the other whitespace modes.
 
@@ -178,7 +178,7 @@ will have the Value() of "Far & Away" when queried from the XMLText object,
 and will be written back to the XML stream/file as an ampersand.
 
 Additionally, any character can be specified by its Unicode code point:
-The syntax `&#xA0;` or `&#160;` are both to the non-breaking space character.
+The syntax `&#xA0;` or `&#160;` both refer to the non-breaking space character.
 This is called a 'numeric character reference'. Any numeric character reference
 that isn't one of the special entities above, will be read, but written as a
 regular code point. The output is correct, but the entity syntax isn't preserved.
@@ -270,7 +270,7 @@ tinyxml2.h files in your project and build with your other source code.
 
 There is also a CMake build included. CMake is the general build for TinyXML-2.
 
-(Additional build systems are costly to maintain, and tend to bit-rot. They are
+(Additional build systems are costly to maintain, and tend to become outdated. They are
 being removed over time.)
 
 Building TinyXML-2 - Using vcpkg
