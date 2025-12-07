@@ -2025,7 +2025,13 @@ int main( int argc, const char ** argv )
 		XMLTest("Parse nested elements with pedantic whitespace", false, doc.Error());
 		XMLTest("Pedantic whitespace", true, 0 == doc.RootElement()->FirstChildElement()->GetText());
 	}
-
+	//Check the robustness of the DeleteNode function in handling null pointers.
+	{
+		XMLDocument doc;
+		doc.DeleteNode(nullptr);
+		XMLTest("DeleteNode with null pointer", true, doc.Error() == XML_SUCCESS);
+	}
+		
 	// Check sample xml can be parsed with pedantic mode
 	{
 		XMLDocument doc(true, PEDANTIC_WHITESPACE);
