@@ -114,6 +114,9 @@ distribution.
 	#define TIXML_VSNPRINTF	vsnprintf
 	static inline int TIXML_VSCPRINTF( const char* format, va_list va )
 	{
+	    if (!format) {
+	        return 0;
+	    }
 		int len = vsnprintf( 0, 0, format, va );
 		TIXMLASSERT( len >= 0 );
 		return len;
@@ -2344,9 +2347,12 @@ static FILE* callfopen( const char* filepath, const char* mode )
     return fp;
 }
 
-void XMLDocument::DeleteNode( XMLNode* node )	{
+void XMLDocument::DeleteNode( XMLNode* node )	{   
     TIXMLASSERT( node );
     TIXMLASSERT(node->_document == this );
+    if(node == 0) {
+        return; // check for null pointer
+    }
     if (node->_parent) {
         node->_parent->DeleteChild( node );
     }
