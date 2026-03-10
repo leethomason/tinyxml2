@@ -24,7 +24,7 @@ distribution.
 #include "tinyxml2.h"
 
 #include <new>		// yes, this one new style header, is in the Android SDK.
-#if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__) || defined(__CC_ARM)
+#if defined(ANDROID_NDK)
 #   include <stddef.h>
 #   include <stdarg.h>
 #else
@@ -40,9 +40,7 @@ distribution.
 #  define __has_cpp_attribute(x) 0
 #endif
 
-#if defined(_MSC_VER)
-#   define TIXML_FALLTHROUGH (void(0))
-#elif (__cplusplus >= 201703L && __has_cpp_attribute(fallthrough))
+#if (__cplusplus >= 201703L && __has_cpp_attribute(fallthrough))
 #   define TIXML_FALLTHROUGH [[fallthrough]]
 #elif __has_cpp_attribute(clang::fallthrough)
 #   define TIXML_FALLTHROUGH [[clang::fallthrough]]
@@ -53,15 +51,8 @@ distribution.
 #endif
 
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
-	// Microsoft Visual Studio, version 2005 and higher. Not WinCE.
-	/*int _snprintf_s(
-	   char *buffer,
-	   size_t sizeOfBuffer,
-	   size_t count,
-	   const char *format [,
-		  argument] ...
-	);*/
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+	// Microsoft Visual Studio, version 2005 and higher.
 	static inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
 	{
 		va_list va;
@@ -80,33 +71,11 @@ distribution.
 	#define TIXML_VSCPRINTF	_vscprintf
 	#define TIXML_SSCANF	sscanf_s
 #elif defined _MSC_VER
-	// Microsoft Visual Studio 2003 and earlier or WinCE
+	// Microsoft Visual Studio 2003 and earlier.
 	#define TIXML_SNPRINTF	_snprintf
 	#define TIXML_VSNPRINTF _vsnprintf
 	#define TIXML_SSCANF	sscanf
-	#if (_MSC_VER < 1400 ) && (!defined WINCE)
-		// Microsoft Visual Studio 2003 and not WinCE.
-		#define TIXML_VSCPRINTF   _vscprintf // VS2003's C runtime has this, but VC6 C runtime or WinCE SDK doesn't have.
-	#else
-		// Microsoft Visual Studio 2003 and earlier or WinCE.
-		static inline int TIXML_VSCPRINTF( const char* format, va_list va )
-		{
-			int len = 512;
-			for (;;) {
-				len = len*2;
-				char* str = new char[len]();
-				const int required = _vsnprintf(str, len, format, va);
-				delete[] str;
-				if ( required != -1 ) {
-					TIXMLASSERT( required >= 0 );
-					len = required;
-					break;
-				}
-			}
-			TIXMLASSERT( len >= 0 );
-			return len;
-		}
-	#endif
+	#define TIXML_VSCPRINTF	_vscprintf
 #else
 	// GCC version 3 and higher
 	//#warning( "Using sn* functions." )
@@ -124,7 +93,7 @@ distribution.
 	#define TIXML_SSCANF   sscanf
 #endif
 
-#if defined(_WIN64)
+#if defined(_MSC_VER)
 	#define TIXML_FSEEK _fseeki64
 	#define TIXML_FTELL _ftelli64
 #elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__) || defined(__CYGWIN__)
@@ -2260,7 +2229,7 @@ void XMLDocument::Clear()
     delete [] _charBuffer;
     _charBuffer = 0;
 	_parsingDepth = 0;
-
+    
 #if 0
     _textPool.Trace( "text" );
     _elementPool.Trace( "element" );
@@ -2335,7 +2304,7 @@ static FILE* callfopen( const char* filepath, const char* mode )
 {
     TIXMLASSERT( filepath );
     TIXMLASSERT( mode );
-#if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
     FILE* fp = 0;
     const errno_t err = fopen_s( &fp, filepath, mode );
     if ( err ) {
