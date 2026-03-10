@@ -2701,6 +2701,56 @@ int main( int argc, const char ** argv )
 		XMLTest("Test attribute encode with a Hex value", value5, "!"); // hex value in unicode value
 	}
 
+	// ---------- Security: numeric character reference bounds ----------
+	{
+		// Regression: U+10FFFF is the last valid Unicode code point and must
+		// parse correctly. Fix #2 must not reject the maximum valid value.
+		XMLDocument doc;
+		doc.Parse( "<t v='&#x10FFFF;'/>" );
+		XMLTest( "Numeric ref U+10FFFF: no error", false, doc.Error() );
+		const char* v = doc.FirstChildElement()->Attribute( "v" );
+		// U+10FFFF encodes to the 4-byte UTF-8 sequence F4 8F BF BF.
+		const char expected[] = {
+			static_cast<char>(0xF4), static_cast<char>(0x8F),
+			static_cast<char>(0xBF), static_cast<char>(0xBF), 0
+		};
+		XMLTest( "Numeric ref U+10FFFF: correct UTF-8 output", expected, v );
+	}
+	{
+		// Fix #2 boundary: U+110000 is one above the maximum code point.
+		// The in-loop overflow guard must catch this before ucs is written,
+		// leaving the entity as a literal (starting with '&').
+		XMLDocument doc;
+		doc.Parse( "<t v='&#x110000;'/>" );
+		XMLTest( "Numeric ref U+110000: no parse error", false, doc.Error() );
+		const char* v = doc.FirstChildElement()->Attribute( "v" );
+		XMLTest( "Numeric ref U+110000: not resolved (left as literal)", true,
+		         v != nullptr && v[0] == '&' );
+	}
+	{
+		// Fix #2: a hex entity with enough digits to overflow uint32_t must
+		// be rejected by the in-loop guard before the accumulator wraps.
+		// Before the fix, ucs could wrap around and pass the post-loop range
+		// check, producing an attacker-chosen character in the parsed output.
+		// Build "&#x" + 300 'F' digits + ";" -- far beyond what fits in uint32_t.
+		const char prefix[] = "<t v='&#x";
+		const char suffix[] = ";'/>";
+		static const int NDIGITS = 300;
+		char xml[sizeof(prefix) + NDIGITS + sizeof(suffix)];
+		strcpy( xml, prefix );
+		memset( xml + strlen(prefix), 'F', NDIGITS );
+		strcpy( xml + strlen(prefix) + NDIGITS, suffix );
+
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLTest( "Overflow hex entity: no parse error", false, doc.Error() );
+		const char* v = doc.FirstChildElement()->Attribute( "v" );
+		// GetCharacterRef returns 0 for rejected refs; the caller then copies
+		// the literal '&', so the attribute must start with '&', not a char.
+		XMLTest( "Overflow hex entity: not resolved to a character", true,
+		         v != nullptr && v[0] == '&' );
+	}
+
 	// ---------- XMLPrinter Apos Escaping ------
 	{
 		const char* testText = "text containing a ' character";

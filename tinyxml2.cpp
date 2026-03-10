@@ -552,12 +552,15 @@ const char* XMLUtil::GetCharacterRef(const char* p, char* value, int* length)
             TIXMLASSERT(digit < radix);
 
             const unsigned int digitScaled = mult * digit;
+            // Reject before adding: if digitScaled alone exceeds MAX_CODE_POINT,
+            // or if adding it to ucs would exceed it (checked without overflow by
+            // testing ucs > MAX_CODE_POINT - digitScaled, safe since digitScaled
+            // <= MAX_CODE_POINT at this point).
+            if (digitScaled > MAX_CODE_POINT || ucs > MAX_CODE_POINT - digitScaled) {
+                return 0;
+            }
             ucs += digitScaled;
-            mult *= radix;       
-            
-            // Security check: could a value exist that is out of range?
-            // Easily; limit to the MAX_CODE_POINT, which also allows for a
-            // bunch of leading zeroes.
+            mult *= radix;
             if (mult > MAX_CODE_POINT) {
                 mult = MAX_CODE_POINT;
             }
@@ -569,11 +572,11 @@ const char* XMLUtil::GetCharacterRef(const char* p, char* value, int* length)
         }
         // convert the UCS to UTF-8
         ConvertUTF32ToUTF8(ucs, value, length);
-		if (length == 0) {
-            // If length is 0, there was an error. (Security? Bad input?)
+        if (*length == 0) {
+            // If *length is 0, ConvertUTF32ToUTF8 rejected the code point.
             // Fail safely.
-			return 0;
-		}
+            return 0;
+        }
         return p + delta + 1;
     }
     return p + 1;
