@@ -1164,7 +1164,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
                 }
             }
             if ( !wellLocated ) {
-                _document->SetError( XML_ERROR_PARSING_DECLARATION, initialLineNum, "XMLDeclaration value=%s", decl->Value());
+                _document->SetError( XML_ERROR_PARSING_DECLARATION, initialLineNum, "declaration <%s>", decl->Value());
                 _document->DeleteNode( node );
                 break;
             }
@@ -1199,7 +1199,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
                 }
             }
             if ( mismatch ) {
-                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, initialLineNum, "XMLElement name=%s", ele->Name());
+                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, initialLineNum, "element <%s>", ele->Name());
                 _document->DeleteNode( node );
                 break;
             }
@@ -1988,7 +1988,7 @@ char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
     while( p ) {
         p = XMLUtil::SkipWhiteSpace( p, curLineNumPtr );
         if ( !(*p) ) {
-            _document->SetError( XML_ERROR_PARSING_ELEMENT, _parseLineNum, "XMLElement name=%s", Name() );
+            _document->SetError( XML_ERROR_PARSING_ELEMENT, _parseLineNum, "element <%s>", Name() );
             return 0;
         }
 
@@ -2003,7 +2003,7 @@ char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
             p = attrib->ParseDeep( p, _document->ProcessEntities(), curLineNumPtr );
             if ( !p || Attribute( attrib->Name() ) ) {
                 DeleteAttribute( attrib );
-                _document->SetError( XML_ERROR_PARSING_ATTRIBUTE, attrLineNum, "XMLElement name=%s", Name() );
+                _document->SetError( XML_ERROR_PARSING_ATTRIBUTE, attrLineNum, "in element <%s>", Name() );
                 return 0;
             }
             // There is a minor bug here: if the attribute in the source xml
@@ -2371,14 +2371,14 @@ XMLError XMLDocument::LoadFile( const char* filename )
 {
     if ( !filename ) {
         TIXMLASSERT( false );
-        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "filename=<null>" );
+        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, 0 );
         return _errorID;
     }
 
     Clear();
     FILE* fp = callfopen( filename, "rb" );
     if ( !fp ) {
-        SetError( XML_ERROR_FILE_NOT_FOUND, 0, "filename=%s", filename );
+        SetError( XML_ERROR_FILE_NOT_FOUND, 0, "\"%s\"", filename );
         return _errorID;
     }
     LoadFile( fp );
@@ -2444,13 +2444,13 @@ XMLError XMLDocument::SaveFile( const char* filename, bool compact )
 {
     if ( !filename ) {
         TIXMLASSERT( false );
-        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "filename=<null>" );
+        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, 0 );
         return _errorID;
     }
 
     FILE* fp = callfopen( filename, "w" );
     if ( !fp ) {
-        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "filename=%s", filename );
+        SetError( XML_ERROR_FILE_COULD_NOT_BE_OPENED, 0, "\"%s\"", filename );
         return _errorID;
     }
     SaveFile(fp, compact);
@@ -2530,9 +2530,7 @@ void XMLDocument::SetError( XMLError error, int lineNum, const char* format, ...
     const size_t BUFFER_SIZE = 1000;
     char* buffer = new char[BUFFER_SIZE];
 
-    TIXMLASSERT(sizeof(error) <= sizeof(int));
-    TIXML_SNPRINTF(buffer, BUFFER_SIZE, "Error=%s ErrorID=%d (0x%x) Line number=%d",
-        ErrorIDToName(error), static_cast<int>(error), static_cast<unsigned int>(error), lineNum);
+    TIXML_SNPRINTF(buffer, BUFFER_SIZE, "%s", ErrorIDToName(error));
 
 	if (format) {
 		size_t len = strlen(buffer);
@@ -2544,6 +2542,12 @@ void XMLDocument::SetError( XMLError error, int lineNum, const char* format, ...
 		TIXML_VSNPRINTF(buffer + len, BUFFER_SIZE - len, format, va);
 		va_end(va);
 	}
+
+	if (lineNum > 0) {
+		size_t len = strlen(buffer);
+		TIXML_SNPRINTF(buffer + len, BUFFER_SIZE - len, " (line %d)", lineNum);
+	}
+
 	_errorStr.SetStr(buffer);
 	delete[] buffer;
 }
@@ -2593,7 +2597,7 @@ void XMLDocument::PushDepth()
 {
 	_parsingDepth++;
 	if (_parsingDepth == TINYXML2_MAX_ELEMENT_DEPTH) {
-		SetError(XML_ELEMENT_DEPTH_EXCEEDED, _parseCurLineNum, "Element nesting is too deep." );
+		SetError(XML_ELEMENT_DEPTH_EXCEEDED, _parseCurLineNum, "element nesting is too deep" );
 	}
 }
 

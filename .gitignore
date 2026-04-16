@@ -22,3 +22,4 @@ libtinyxml2.a
 xmltest
 vs/debug
 
+.cache/clangd/index

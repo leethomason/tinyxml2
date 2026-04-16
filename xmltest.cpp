@@ -576,7 +576,7 @@ int main( int argc, const char ** argv )
 		XMLTest( "Bad XML", XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );
 		const char* errorStr = doc.ErrorStr();
 		XMLTest("Formatted error string",
-			"Error=XML_ERROR_PARSING_ATTRIBUTE ErrorID=7 (0x7) Line number=3: XMLElement name=wrong",
+			"XML_ERROR_PARSING_ATTRIBUTE: in element <wrong> (line 3)",
 			errorStr);
 	}
 
@@ -1311,7 +1311,7 @@ int main( int argc, const char ** argv )
 		// But be sure there is an error string!
 		const char* errorStr = doc.ErrorStr();
 		XMLTest("Error string should be set",
-			"Error=XML_ERROR_EMPTY_DOCUMENT ErrorID=13 (0xd) Line number=0",
+			"XML_ERROR_EMPTY_DOCUMENT",
 			errorStr);
 	}
 
@@ -2316,6 +2316,7 @@ int main( int argc, const char ** argv )
 		XMLTest( "Issue 302. Should be no error initially", "XML_SUCCESS", doc.ErrorName() );
 		doc.SaveFile( "./no/such/path/pretty.xml" );
 		XMLTest( "Issue 302. Fail to save", "XML_ERROR_FILE_COULD_NOT_BE_OPENED", doc.ErrorName() );
+		XMLTest( "File could not be opened error string", "XML_ERROR_FILE_COULD_NOT_BE_OPENED: \"./no/such/path/pretty.xml\"", doc.ErrorStr() );
 		doc.SaveFile( "./resources/out/compact.xml", true );
 		XMLTest( "Issue 302. Subsequent success in saving", "XML_SUCCESS", doc.ErrorName() );
 	}
@@ -2327,7 +2328,8 @@ int main( int argc, const char ** argv )
 		XMLTest( "Should be no error initially", false, doc.Error() );
 		doc.LoadFile( "resources/no-such-file.xml" );
 		XMLTest( "No such file - should fail", true, doc.Error() );
-                
+		XMLTest( "File not found error string", "XML_ERROR_FILE_NOT_FOUND: \"resources/no-such-file.xml\"", doc.ErrorStr() );
+
 		doc.LoadFile("resources/dream.xml");
 		XMLTest("Error should be cleared", false, doc.Error());
 
@@ -2366,6 +2368,30 @@ int main( int argc, const char ** argv )
 	    XMLTest("Test that declaration inside a child is not allowed", XML_ERROR_PARSING_DECLARATION, doc.ErrorID() );
 	}
 
+	{
+		XMLDocument doc;
+		const char* xml = "<first /><?xml version=\"1.0\" ?>";
+		doc.Parse(xml);
+		XMLTest("Parsing declaration error with context", XML_ERROR_PARSING_DECLARATION, doc.ErrorID());
+		XMLTest("Parsing declaration error string", "XML_ERROR_PARSING_DECLARATION: declaration <xml version=\"1.0\" > (line 1)", doc.ErrorStr());
+	}
+
+	{
+		XMLDocument doc;
+		const char* xml = "<?xml version=\"1.0\" ";
+		doc.Parse(xml);
+		XMLTest("Parsing declaration syntax error", XML_ERROR_PARSING_DECLARATION, doc.ErrorID());
+		XMLTest("Parsing declaration syntax error string", "XML_ERROR_PARSING_DECLARATION (line 1)", doc.ErrorStr());
+	}
+
+	{
+		XMLDocument doc;
+		const char* xml = "<first /><?xml version=\"1.0\" ";
+		doc.Parse(xml);
+		XMLTest("Parsing declaration error - syntax and position error", XML_ERROR_PARSING_DECLARATION, doc.ErrorID());
+		XMLTest("Parsing declaration error string - syntax and position error", "XML_ERROR_PARSING_DECLARATION (line 1)", doc.ErrorStr());
+	}
+
     {
 	    // No matter - before or after successfully parsing a text -
 	    // calling XMLDocument::Value() used to cause an assert in debug.
@@ -2380,6 +2406,22 @@ int main( int argc, const char ** argv )
 	    XMLTest( "XMLDocument::Value() returns null?", NULL, doc->Value() );
 	    delete doc;
     }
+
+	{
+		XMLDocument doc;
+		const char* xml = "<root>\n<unclosed";
+		doc.Parse(xml);
+		XMLTest("Parsing element error", XML_ERROR_PARSING_ELEMENT, doc.ErrorID());
+		XMLTest("Parsing element error string", "XML_ERROR_PARSING_ELEMENT: element <unclosed> (line 2)", doc.ErrorStr());
+	}
+
+	{
+		XMLDocument doc;
+		const char* xml = "<root>\n foo \n<unclosed/>";
+		doc.Parse(xml);
+		XMLTest("Parsing error", XML_ERROR_PARSING, doc.ErrorID());
+		XMLTest("Parsing error string", "XML_ERROR_PARSING (line 1)", doc.ErrorStr());
+	}
 
 	{
 		XMLDocument doc;
@@ -2451,6 +2493,13 @@ int main( int argc, const char ** argv )
 			doc.LoadFile(TESTS[i]);
 			XMLTest("Stack overflow prevented.", XML_ELEMENT_DEPTH_EXCEEDED, doc.ErrorID());
 		}
+	}
+
+	{
+		XMLDocument doc;
+		doc.LoadFile("./resources/xmltest-5330.xml");
+		XMLTest("Element depth exceeded error", XML_ELEMENT_DEPTH_EXCEEDED, doc.ErrorID());
+		XMLTest("Element depth exceeded error string", "XML_ELEMENT_DEPTH_EXCEEDED: element nesting is too deep (line 1)", doc.ErrorStr());
 	}
     {
         const char* TESTS[] = {
@@ -2666,10 +2715,7 @@ int main( int argc, const char ** argv )
     	doc.Parse(xml);
     	XMLTest("Test mismatched elements.", true, doc.Error());
     	XMLTest("Test mismatched elements.", XML_ERROR_MISMATCHED_ELEMENT, doc.ErrorID());
-    	// For now just make sure calls work & doesn't crash.
-    	// May solidify the error output in the future.
-    	printf("%s\n", doc.ErrorStr());
-    	doc.PrintError();
+    	XMLTest("Mismatched element error string", "XML_ERROR_MISMATCHED_ELEMENT: element <Hello> (line 1)", doc.ErrorStr());
     }
 
 	// ---------- CVE-2024-50615 -----------
