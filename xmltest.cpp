@@ -2376,6 +2376,22 @@ int main( int argc, const char ** argv )
 		XMLTest("Parsing declaration error string", "XML_ERROR_PARSING_DECLARATION: declaration <xml version=\"1.0\" > (line 1)", doc.ErrorStr());
 	}
 
+	{
+		XMLDocument doc;
+		const char* xml = "<?xml version=\"1.0\" ";
+		doc.Parse(xml);
+		XMLTest("Parsing declaration syntax error", XML_ERROR_PARSING_DECLARATION, doc.ErrorID());
+		XMLTest("Parsing declaration syntax error string", "XML_ERROR_PARSING_DECLARATION (line 1)", doc.ErrorStr());
+	}
+
+	{
+		XMLDocument doc;
+		const char* xml = "<first /><?xml version=\"1.0\" ";
+		doc.Parse(xml);
+		XMLTest("Parsing declaration error - syntax and position error", XML_ERROR_PARSING_DECLARATION, doc.ErrorID());
+		XMLTest("Parsing declaration error string - syntax and position error", "XML_ERROR_PARSING_DECLARATION (line 1)", doc.ErrorStr());
+	}
+
     {
 	    // No matter - before or after successfully parsing a text -
 	    // calling XMLDocument::Value() used to cause an assert in debug.
