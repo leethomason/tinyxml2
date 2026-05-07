@@ -302,7 +302,10 @@ private:
             const size_t newAllocated = cap * 2;
             T* newMem = new T[newAllocated];
             TIXMLASSERT( newAllocated >= _size );
-            memcpy( newMem, _mem, sizeof(T) * _size );	// warning: not using constructors, only works for PODs
+            // Intermediate variable avoids bugprone-sizeof-expression false positive
+            // when T is a pointer type (checker suspects sizeof(ptr) is unintentional).
+            const size_t bytesToCopy = _size * sizeof(T);
+            memcpy( newMem, _mem, bytesToCopy );	// not using constructors, only works for PODs
             if ( _mem != _pool ) {
                 delete [] _mem;
             }
@@ -586,9 +589,22 @@ public:
                || ch == '-';
     }
 
-    inline static bool IsPrefixHex( const char* p) {
+    struct NumPrefix {
+        enum Base { Dec = 10, Hex = 16 };
+        size_t skip;
+        Base base;
+    };
+
+    inline static NumPrefix GetNumPrefix( const char* p) {
+        const char* start = p;
         p = SkipWhiteSpace(p, 0);
-        return p && *p == '0' && ( *(p + 1) == 'x' || *(p + 1) == 'X');
+        size_t wsLen = static_cast<size_t>(p - start);
+        if ( p && *p == '0' && ( *(p + 1) == 'x' || *(p + 1) == 'X') ) {
+            NumPrefix r = { wsLen + 2, NumPrefix::Hex };
+            return r;
+        }
+        NumPrefix r = { wsLen, NumPrefix::Dec };
+        return r;
     }
 
     inline static bool StringEqual( const char* p, const char* q, int nChar=INT_MAX )  {
