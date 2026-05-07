@@ -25,11 +25,13 @@ distribution.
 
 #include <new>		// yes, this one new style header, is in the Android SDK.
 #if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__) || defined(__CC_ARM)
-#   include <stddef.h>
+#   include <errno.h>
 #   include <stdarg.h>
+#   include <stddef.h>
 #else
-#   include <cstddef>
+#   include <cerrno>
 #   include <cstdarg>
+#   include <cstddef>
 #endif
 
 // Handle fallthrough attribute for different compilers
@@ -78,12 +80,10 @@ distribution.
 	}
 
 	#define TIXML_VSCPRINTF	_vscprintf
-	#define TIXML_SSCANF	sscanf_s
 #elif defined _MSC_VER
 	// Microsoft Visual Studio 2003 and earlier or WinCE
 	#define TIXML_SNPRINTF	_snprintf
 	#define TIXML_VSNPRINTF _vsnprintf
-	#define TIXML_SSCANF	sscanf
 	#if (_MSC_VER < 1400 ) && (!defined WINCE)
 		// Microsoft Visual Studio 2003 and not WinCE.
 		#define TIXML_VSCPRINTF   _vscprintf // VS2003's C runtime has this, but VC6 C runtime or WinCE SDK doesn't have.
@@ -121,7 +121,6 @@ distribution.
 		TIXMLASSERT( len >= 0 );
 		return len;
 	}
-	#define TIXML_SSCANF   sscanf
 #endif
 
 #if defined(_WIN64)
@@ -156,6 +155,20 @@ static const unsigned char TIXML_UTF_LEAD_2 = 0xbfU;
 
 namespace tinyxml2
 {
+
+namespace {
+
+template<typename T, typename Fn>
+bool StrTo(const char* str, size_t skip, T* value, Fn fn) {
+    char* endptr = nullptr;
+    errno = 0;
+    auto v = fn(str + skip, &endptr);
+    if (endptr == str + skip || errno == ERANGE) { return false; }
+    *value = static_cast<T>(v);
+    return true;
+}
+
+} // anonymous namespace
 
 struct Entity {
     const char* pattern;
@@ -626,27 +639,16 @@ void XMLUtil::ToStr( uint64_t v, char* buffer, int bufferSize )
 
 bool XMLUtil::ToInt(const char* str, int* value)
 {
-    if (IsPrefixHex(str)) {
-        unsigned v;
-        if (TIXML_SSCANF(str, "%x", &v) == 1) {
-            *value = static_cast<int>(v);
-            return true;
-        }
-    }
-    else {
-        if (TIXML_SSCANF(str, "%d", value) == 1) {
-            return true;
-        }
-    }
-    return false;
+    NumPrefix pfx = GetNumPrefix(str);
+    if ( pfx.base == NumPrefix::Hex )
+        return StrTo(str, pfx.skip, value, [](const char* s, char** e) { return strtoul(s, e, NumPrefix::Hex); });
+    return StrTo(str, pfx.skip, value, [](const char* s, char** e) { return strtol(s, e, NumPrefix::Dec); });
 }
 
 bool XMLUtil::ToUnsigned(const char* str, unsigned* value)
 {
-    if (TIXML_SSCANF(str, IsPrefixHex(str) ? "%x" : "%u", value) == 1) {
-        return true;
-    }
-    return false;
+    NumPrefix pfx = GetNumPrefix(str);
+    return StrTo(str, pfx.skip, value, [pfx](const char* s, char** e) { return strtoul(s, e, pfx.base); });
 }
 
 bool XMLUtil::ToBool( const char* str, bool* value )
@@ -677,49 +679,28 @@ bool XMLUtil::ToBool( const char* str, bool* value )
 
 bool XMLUtil::ToFloat( const char* str, float* value )
 {
-    if ( TIXML_SSCANF( str, "%f", value ) == 1 ) {
-        return true;
-    }
-    return false;
+    return StrTo(str, 0, value, strtof);
 }
 
 
 bool XMLUtil::ToDouble( const char* str, double* value )
 {
-    if ( TIXML_SSCANF( str, "%lf", value ) == 1 ) {
-        return true;
-    }
-    return false;
+    return StrTo(str, 0, value, strtod);
 }
 
 
 bool XMLUtil::ToInt64(const char* str, int64_t* value)
 {
-    if (IsPrefixHex(str)) {
-        unsigned long long v = 0;	// horrible syntax trick to make the compiler happy about %llx
-        if (TIXML_SSCANF(str, "%llx", &v) == 1) {
-            *value = static_cast<int64_t>(v);
-            return true;
-        }
-    }
-    else {
-        long long v = 0;	// horrible syntax trick to make the compiler happy about %lld
-        if (TIXML_SSCANF(str, "%lld", &v) == 1) {
-            *value = static_cast<int64_t>(v);
-            return true;
-        }
-    }
-	return false;
+    NumPrefix pfx = GetNumPrefix(str);
+    if ( pfx.base == NumPrefix::Hex )
+        return StrTo(str, pfx.skip, value, [](const char* s, char** e) { return strtoull(s, e, NumPrefix::Hex); });
+    return StrTo(str, pfx.skip, value, [](const char* s, char** e) { return strtoll(s, e, NumPrefix::Dec); });
 }
 
 
 bool XMLUtil::ToUnsigned64(const char* str, uint64_t* value) {
-    unsigned long long v = 0;	// horrible syntax trick to make the compiler happy about %llu
-    if(TIXML_SSCANF(str, IsPrefixHex(str) ? "%llx" : "%llu", &v) == 1) {
-        *value = static_cast<uint64_t>(v);
-        return true;
-    }
-    return false;
+    NumPrefix pfx = GetNumPrefix(str);
+    return StrTo(str, pfx.skip, value, [pfx](const char* s, char** e) { return strtoull(s, e, pfx.base); });
 }
 
 
@@ -2649,7 +2630,7 @@ void XMLPrinter::Print( const char* format, ... )
         va_start( va, format );
         TIXMLASSERT( _buffer.Size() > 0 && _buffer[_buffer.Size() - 1] == 0 );
         char* p = _buffer.PushArr( len ) - 1;	// back up over the null terminator.
-		TIXML_VSNPRINTF( p, len+1, format, va );
+		TIXML_VSNPRINTF( p, static_cast<size_t>(len)+1, format, va );
     }
     va_end( va );
 }
