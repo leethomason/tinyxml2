@@ -282,6 +282,9 @@ There are 2 files in TinyXML-2:
 And additionally a test file:
 * `xmltest.cpp`
 
+And additionally a module:
+* `tinyxml2.cppm`
+
 Generally speaking, the intent is that you simply include the `tinyxml2.cpp` and 
 `tinyxml2.h` files in your project and build with your other source code.
 
@@ -289,6 +292,9 @@ There is also a CMake build included. CMake is the general build for TinyXML-2.
 
 (Additional build systems are costly to maintain, and tend to become outdated. They are
 being removed over time.)
+
+If using C++20 or later and CMake 3.28+, the option `tinyxml2_BUILD_MODULE` may be enabled,
+which enables building the `tinyxml2` module.
 
 ### Building TinyXML-2 - Using vcpkg
 
