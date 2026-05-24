@@ -22,8 +22,8 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
 add_library(tinyxml2 tinyxml2.cpp tinyxml2.h)
 add_library(tinyxml2::tinyxml2 ALIAS tinyxml2)
 
-# Uncomment the following line to require C++11 (or greater) to use tinyxml2
-# target_compile_features(tinyxml2 PUBLIC cxx_std_11)
+# Require C++11 (or greater) to use tinyxml2
+target_compile_features(tinyxml2 PUBLIC cxx_std_11)
 target_include_directories(tinyxml2 PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")
 
 target_compile_definitions(

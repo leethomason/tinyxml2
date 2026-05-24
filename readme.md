@@ -5,6 +5,8 @@
 TinyXML-2 is a simple, small, efficient, C++ XML parser that can be
 easily integrated into other programs.
 
+It is written in C++ 11 and does not use any Standard Library (std::) features.
+
 The master is hosted on GitHub:
 https://github.com/leethomason/tinyxml2
 
