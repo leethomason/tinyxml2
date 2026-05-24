@@ -4,6 +4,12 @@ project(tinyxml2 VERSION 11.0.0)
 include(CTest)
 option(tinyxml2_BUILD_TESTING "Build tests for tinyxml2" "${BUILD_TESTING}")
 
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.28)
+    option(tinyxml2_BUILD_MODULE "Build C++ module for tinyxml2" OFF)
+else ()
+    set(tinyxml2_BUILD_MODULE OFF)
+endif ()
+
 ##
 ## Honor tinyxml2_SHARED_LIBS to match install interface
 ##
@@ -56,6 +62,30 @@ if (tinyxml2_BUILD_TESTING)
 endif ()
 
 ##
+## C++ Module build
+##
+
+if (tinyxml2_BUILD_MODULE AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.28)
+    
+    add_library(tinyxml2_module)
+    target_sources(tinyxml2_module
+        PUBLIC
+            FILE_SET CXX_MODULES FILES
+            tinyxml2.cppm
+    )
+    target_link_libraries(tinyxml2_module PUBLIC tinyxml2::tinyxml2)
+    target_compile_features(tinyxml2_module PUBLIC cxx_std_20)
+    add_library(tinyxml2::tinyxml2_module ALIAS tinyxml2_module)
+    
+    set_target_properties(
+        tinyxml2_module
+        PROPERTIES
+        VERSION "${tinyxml2_VERSION}"
+        SOVERSION "${tinyxml2_VERSION_MAJOR}"
+    )
+endif ()
+
+##
 ## Installation
 ##
 
@@ -82,6 +112,17 @@ install(
     ARCHIVE COMPONENT tinyxml2_development
     INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
+
+if (tinyxml2_BUILD_MODULE)
+    install(
+        TARGETS tinyxml2_module EXPORT tinyxml2-targets
+        RUNTIME COMPONENT tinyxml2_runtime
+        LIBRARY COMPONENT tinyxml2_runtime
+        NAMELINK_COMPONENT tinyxml2_development
+        ARCHIVE COMPONENT tinyxml2_development
+        FILE_SET CXX_MODULES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+    )
+endif ()
 
 # Type-specific targets
 
