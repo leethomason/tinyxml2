@@ -347,6 +347,11 @@ const char* StrPair::GetStr()
                         }
                         if ( !entityFound ) {
                             // fixme: treat as error?
+                            // Not a recognized entity: copy the '&' through
+                            // verbatim. The write pointer 'q' can lag behind the
+                            // read pointer 'p' after an earlier entity expansion,
+                            // so '*q' must be assigned or a stale byte is emitted.
+                            *q = *p;
                             ++p;
                             ++q;
                         }
