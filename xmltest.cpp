@@ -1204,6 +1204,18 @@ int main( int argc, const char ** argv )
 	}
 
 	{
+		// An unrecognized entity following a recognized (expanded) entity must
+		// not corrupt the '&'. After "&amp;" is collapsed the write pointer lags
+		// the read pointer, and the following "&bogus;" used to emit a stale
+		// buffer byte in place of the '&'. See issue #1082.
+		XMLDocument doc;
+		doc.Parse( "<a>&amp;&bogus;</a>" );
+		XMLTest( "Unrecognized entity after expansion: parse", false, doc.Error() );
+		XMLTest( "Unrecognized entity after expansion: text",
+				 "&&bogus;", doc.FirstChildElement( "a" )->GetText() );
+	}
+
+	{
 		// Suppress entities.
 		const char* passages =
 			"<?xml version=\"1.0\" standalone=\"no\" ?>"
