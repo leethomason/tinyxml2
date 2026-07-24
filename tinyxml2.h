@@ -296,6 +296,13 @@ private:
         TIXMLASSERT( cap > 0 );
         if ( cap > _allocated ) {
             TIXMLASSERT( cap <= SIZE_MAX / 2 / sizeof(T));
+            if ( cap > SIZE_MAX / 2 / sizeof(T) ) {
+                // cap*2 below would overflow size_t and wrap to a tiny
+                // value, giving a too-small allocation followed by an
+                // out-of-bounds memcpy. TIXMLASSERT is a no-op in release
+                // builds, so this needs to be a real check.
+                abort();
+            }
             const size_t newAllocated = cap * 2;
             T* newMem = new T[newAllocated];
             TIXMLASSERT( newAllocated >= _size );
