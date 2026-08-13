@@ -1,5 +1,8 @@
 name: Test
 on: [ push, pull_request, workflow_dispatch ]
+
+permissions:
+  contents: read
 jobs:
   test:
     name: ${{ matrix.os }}, ${{ matrix.cmake_name }}
