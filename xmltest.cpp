@@ -2787,7 +2787,39 @@ int main( int argc, const char ** argv )
 			}
 		}
 	}
-	
+
+	{
+		// A tree assembled at runtime isn't bounded by the parser's
+		// DepthTracker, so a long chain of single-child elements used to
+		// blow the stack in DeepClone/DeepCopy (both walked it recursively,
+		// one call frame per level). 60000 levels reliably overflowed the
+		// default thread stack before the fix and completes in well under
+		// a second after it.
+		const int depth = 60000;
+		XMLDocument doc;
+		XMLElement* parent = doc.NewElement("root");
+		doc.InsertEndChild(parent);
+		for (int i = 0; i < depth; ++i) {
+			parent = parent->InsertNewChildElement("child");
+		}
+
+		XMLDocument cloned;
+		doc.DeepCopy(&cloned);
+		int clonedDepth = 0;
+		for (XMLElement* e = cloned.FirstChildElement(); e; e = e->FirstChildElement()) {
+			++clonedDepth;
+		}
+		XMLTest("DeepCopy of a deeply nested tree doesn't overflow the stack", depth + 1, clonedDepth);
+
+		XMLDocument cloneTarget;
+		XMLNode* clonedSubtree = doc.FirstChildElement()->DeepClone(&cloneTarget);
+		int subtreeDepth = 0;
+		for (XMLNode* n = clonedSubtree; n; n = n->FirstChild()) {
+			++subtreeDepth;
+		}
+		XMLTest("DeepClone of a deeply nested subtree doesn't overflow the stack", depth + 1, subtreeDepth);
+	}
+
     // ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )

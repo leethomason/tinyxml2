@@ -806,15 +806,41 @@ XMLNode::XMLNode( XMLDocument* doc ) :
 
 XMLNode::~XMLNode()
 {
-    // Fast path: this node is dying, so maintaining _firstChild/_lastChild and
-    // sibling _prev/_next links is unnecessary. Only _parent must be zeroed to
-    // satisfy the MarkInUse assertion inside DeleteNode.
-    XMLNode *currentChild = _firstChild;
-    while (currentChild != NULL) {
-        XMLNode *next = currentChild->_next;
-        currentChild->_parent = 0;
-        DeleteNode(currentChild);
-        currentChild = next;
+    // This node is dying, so maintaining _firstChild/_lastChild and sibling
+    // _prev/_next links on the way down is unnecessary.
+    //
+    // The subtree below is gathered with an explicit, heap-backed stack
+    // rather than by recursing into each child's own destructor. A tree
+    // built up at runtime isn't bounded by XMLDocument::DepthTracker the way
+    // a parsed one is, so a long enough chain of single-child nodes used to
+    // take down the whole call stack here, one frame per level. Every
+    // descendant gets its _firstChild cleared before anything is actually
+    // destroyed, so when DeleteNode later runs each one's own (possibly
+    // virtual, derived-class) destructor, that destructor finds no children
+    // left to recurse into, since they're already queued for destruction
+    // in this same pass.
+    if ( _firstChild ) {
+        DynArray<XMLNode*, 10> toVisit;
+        DynArray<XMLNode*, 10> descendants;
+        for ( XMLNode* child = _firstChild; child; child = child->_next ) {
+            toVisit.Push( child );
+        }
+        while ( toVisit.Size() > 0 ) {
+            XMLNode* node = toVisit.Pop();
+            descendants.Push( node );
+            for ( XMLNode* child = node->_firstChild; child; child = child->_next ) {
+                toVisit.Push( child );
+            }
+        }
+
+        for ( size_t i = 0; i < descendants.Size(); ++i ) {
+            descendants[i]->_firstChild = 0;
+            descendants[i]->_parent = 0;
+        }
+        for ( size_t i = 0; i < descendants.Size(); ++i ) {
+            DeleteNode( descendants[i] );
+        }
+        _firstChild = _lastChild = 0;
     }
 
     if ( _parent ) {
@@ -873,10 +899,29 @@ XMLNode* XMLNode::DeepClone(XMLDocument* target) const
 	XMLNode* clone = this->ShallowClone(target);
 	if (!clone) return 0;
 
-	for (const XMLNode* child = this->FirstChild(); child; child = child->NextSibling()) {
-		XMLNode* childClone = child->DeepClone(target);
-		TIXMLASSERT(childClone);
-		clone->InsertEndChild(childClone);
+	// Walk the tree with an explicit, heap-backed stack instead of recursing
+	// per level. A tree built up at runtime (rather than parsed, where depth
+	// is bounded by XMLDocument::DepthTracker) can be nested arbitrarily deep,
+	// and one call frame per level is enough to blow the stack long before
+	// that. The two stacks below always stay in lockstep: srcStack holds a
+	// node whose clone has already been made and linked in, dstStack holds
+	// that clone, and we still owe it a pass over its own children.
+	DynArray<const XMLNode*, 10> srcStack;
+	DynArray<XMLNode*, 10> dstStack;
+	srcStack.Push(this);
+	dstStack.Push(clone);
+
+	while (srcStack.Size() > 0) {
+		const XMLNode* srcNode = srcStack.Pop();
+		XMLNode* dstNode = dstStack.Pop();
+
+		for (const XMLNode* child = srcNode->FirstChild(); child; child = child->NextSibling()) {
+			XMLNode* childClone = child->ShallowClone(target);
+			TIXMLASSERT(childClone);
+			dstNode->InsertEndChild(childClone);
+			srcStack.Push(child);
+			dstStack.Push(childClone);
+		}
 	}
 	return clone;
 }
