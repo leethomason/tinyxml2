@@ -2149,14 +2149,52 @@ bool XMLElement::ShallowEqual( const XMLNode* compare ) const
 bool XMLElement::Accept( XMLVisitor* visitor ) const
 {
     TIXMLASSERT( visitor );
-    if ( visitor->VisitEnter( *this, _rootAttribute ) ) {
-        for ( const XMLNode* node=FirstChild(); node; node=node->NextSibling() ) {
-            if ( !node->Accept( visitor ) ) {
-                break;
+
+    // A chain of nested elements walked through here the same way DeepClone's
+    // did before #1091: one call frame per level, recursing through this
+    // function via node->Accept() for every element child. A tree built up at
+    // runtime isn't bounded by XMLDocument::DepthTracker the way a parsed one
+    // is, so it can be nested deep enough to overflow the stack.
+    //
+    // Only element children can nest further (text/comment/declaration/unknown
+    // are always leaves), so those are still visited directly through their own
+    // Accept(); an explicit, heap-backed stack takes over just for descending
+    // into element children, standing in for the call stack a recursive
+    // version would have used.
+    struct Frame {
+        const XMLElement* elem;
+        const XMLNode* next;
+    };
+    DynArray<Frame, 10> stack;
+
+    const XMLElement* elem = this;
+    const XMLNode* next = visitor->VisitEnter( *elem, elem->_rootAttribute ) ? elem->FirstChild() : 0;
+
+    for (;;) {
+        while ( next ) {
+            const XMLElement* childElem = next->ToElement();
+            if ( !childElem ) {
+                if ( !next->Accept( visitor ) ) {
+                    next = 0;
+                    break;
+                }
+                next = next->NextSibling();
+                continue;
             }
+            stack.Push( Frame{ elem, next->NextSibling() } );
+            elem = childElem;
+            next = visitor->VisitEnter( *elem, elem->_rootAttribute ) ? elem->FirstChild() : 0;
         }
+
+        const bool ok = visitor->VisitExit( *elem );
+        if ( stack.Size() == 0 ) {
+            return ok;
+        }
+
+        const Frame parent = stack.Pop();
+        elem = parent.elem;
+        next = ok ? parent.next : 0;
     }
-    return visitor->VisitExit( *this );
 }
 
 

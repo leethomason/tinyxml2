@@ -2787,7 +2787,44 @@ int main( int argc, const char ** argv )
 			}
 		}
 	}
-	
+
+	{
+		// Accept() recurses into element children the same way DeepClone did
+		// before #1091 fixed that (see #839): one call frame per level, so a
+		// chain of single-child elements assembled at runtime (and thus not
+		// bounded by the parser's DepthTracker) could overflow the stack.
+		// 60000 levels reliably crashed the old recursive version and now
+		// completes without issue.
+		//
+		// Node teardown has its own, separate recursion (tracked by #1091,
+		// not fixed here), so the chain is unwound one leaf at a time below
+		// rather than left for the destructor to walk recursively when doc
+		// goes out of scope - that would crash regardless of this fix.
+		const int depth = 60000;
+		XMLDocument doc;
+		XMLElement** chain = new XMLElement*[depth + 1];
+		chain[0] = doc.NewElement("root");
+		doc.InsertEndChild(chain[0]);
+		for (int i = 0; i < depth; ++i) {
+			chain[i + 1] = chain[i]->InsertNewChildElement("child");
+		}
+
+		XMLPrinter printer(0, true); // compact: avoids O(depth^2) output from indentation
+		const bool acceptResult = doc.Accept(&printer);
+		XMLTest("Accept() on a deeply nested tree doesn't overflow the stack", true, acceptResult);
+
+		int childTagCount = 0;
+		for (const char* p = printer.CStr(); (p = strstr(p, "<child")) != nullptr; p += 6) {
+			++childTagCount;
+		}
+		XMLTest("Accept() on a deeply nested tree visits every level", depth, childTagCount);
+
+		for (int i = depth; i > 0; --i) {
+			chain[i - 1]->DeleteChild(chain[i]);
+		}
+		delete [] chain;
+	}
+
     // ----------- Performance tracking --------------
 	{
 #if defined( _MSC_VER )
