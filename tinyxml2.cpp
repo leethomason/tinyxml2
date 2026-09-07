@@ -876,6 +876,11 @@ XMLNode* XMLNode::DeepClone(XMLDocument* target) const
 	for (const XMLNode* child = this->FirstChild(); child; child = child->NextSibling()) {
 		XMLNode* childClone = child->DeepClone(target);
 		TIXMLASSERT(childClone);
+        if (!childClone) {
+            DeleteNode(clone);
+            return 0;
+        }
+
 		clone->InsertEndChild(childClone);
 	}
 	return clone;
@@ -1779,7 +1784,7 @@ XMLError XMLElement::QueryIntText( int* ival ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->Value();
-        if ( XMLUtil::ToInt( t, ival ) ) {
+        if (t && XMLUtil::ToInt( t, ival ) ) {
             return XML_SUCCESS;
         }
         return XML_CAN_NOT_CONVERT_TEXT;
@@ -1792,7 +1797,7 @@ XMLError XMLElement::QueryUnsignedText( unsigned* uval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->Value();
-        if ( XMLUtil::ToUnsigned( t, uval ) ) {
+        if (t &&  XMLUtil::ToUnsigned( t, uval ) ) {
             return XML_SUCCESS;
         }
         return XML_CAN_NOT_CONVERT_TEXT;
@@ -1805,7 +1810,7 @@ XMLError XMLElement::QueryInt64Text(int64_t* ival) const
 {
 	if (FirstChild() && FirstChild()->ToText()) {
 		const char* t = FirstChild()->Value();
-		if (XMLUtil::ToInt64(t, ival)) {
+		if (t && XMLUtil::ToInt64(t, ival)) {
 			return XML_SUCCESS;
 		}
 		return XML_CAN_NOT_CONVERT_TEXT;
@@ -1818,7 +1823,7 @@ XMLError XMLElement::QueryUnsigned64Text(uint64_t* uval) const
 {
     if(FirstChild() && FirstChild()->ToText()) {
         const char* t = FirstChild()->Value();
-        if(XMLUtil::ToUnsigned64(t, uval)) {
+        if(t && XMLUtil::ToUnsigned64(t, uval)) {
             return XML_SUCCESS;
         }
         return XML_CAN_NOT_CONVERT_TEXT;
@@ -1831,7 +1836,7 @@ XMLError XMLElement::QueryBoolText( bool* bval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->Value();
-        if ( XMLUtil::ToBool( t, bval ) ) {
+        if (t &&  XMLUtil::ToBool( t, bval ) ) {
             return XML_SUCCESS;
         }
         return XML_CAN_NOT_CONVERT_TEXT;
@@ -1844,7 +1849,7 @@ XMLError XMLElement::QueryDoubleText( double* dval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->Value();
-        if ( XMLUtil::ToDouble( t, dval ) ) {
+        if (t &&  XMLUtil::ToDouble( t, dval ) ) {
             return XML_SUCCESS;
         }
         return XML_CAN_NOT_CONVERT_TEXT;
@@ -1857,7 +1862,7 @@ XMLError XMLElement::QueryFloatText( float* fval ) const
 {
     if ( FirstChild() && FirstChild()->ToText() ) {
         const char* t = FirstChild()->Value();
-        if ( XMLUtil::ToFloat( t, fval ) ) {
+        if (t &&  XMLUtil::ToFloat( t, fval ) ) {
             return XML_SUCCESS;
         }
         return XML_CAN_NOT_CONVERT_TEXT;
