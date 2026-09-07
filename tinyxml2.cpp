@@ -2867,6 +2867,12 @@ void XMLPrinter::SealElementIfJustOpened()
 
 void XMLPrinter::PushText( const char* text, bool cdata )
 {
+    TIXMLASSERT( text );
+    if ( text == 0 ) {
+        // Reject a null text pointer in release builds too:
+        // Write() and PrintString() below would strlen(text) and deref.
+        return;
+    }
     _textDepth = _depth-1;
 
     SealElementIfJustOpened();
