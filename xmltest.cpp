@@ -807,6 +807,63 @@ int main( int argc, const char ** argv )
 		XMLTest( "SetText types", "1.5", element->GetText() );
 	}
 
+	/* 2026-10-04：替换前导注释后的原有文本，保留节点身份、顺序和 CDATA 类型。 */
+	{
+		const char* input[] = {
+			"<foo><!--first-->old<bar/>tail</foo>",
+			"<foo><!--first--><!--second-->old</foo>",
+			"<foo><!--first--><![CDATA[old]]></foo>"
+		};
+		const char* expected[] = {
+			"<foo><!--first-->new<bar/>tail</foo>",
+			"<foo><!--first--><!--second-->new</foo>",
+			"<foo><!--first--><![CDATA[new]]></foo>"
+		};
+		for ( size_t i = 0; i < sizeof(input) / sizeof(input[0]); ++i ) {
+			XMLDocument doc;
+			XMLTest( "SetText() comment input.", XML_SUCCESS, doc.Parse( input[i] ) );
+			XMLElement* element = doc.RootElement();
+			XMLNode* first = element->FirstChild();
+			XMLNode* text = first;
+			while ( text && text->ToComment() ) {
+				text = text->NextSibling();
+			}
+			XMLTest( "GetText() before SetText().", "old", element->GetText() );
+			element->SetText( "new" );
+			XMLTest( "SetText() after comments.", "new", element->GetText() );
+			XMLTest( "SetText() preserves first comment.", true, first == element->FirstChild() );
+			XMLTest( "SetText() updates existing text node.", "new", text->Value() );
+			XMLPrinter printer( 0, true );
+			doc.Print( &printer );
+			XMLTest( "SetText() comment output.", expected[i], printer.CStr() );
+			element->SetText( 42 );
+			XMLTest( "SetText() numeric value after comments.", "42", text->Value() );
+			XMLTest( "GetText() numeric value after comments.", "42", element->GetText() );
+		}
+	}
+
+	/* 2026-10-04：没有可替换文本时仍插入首节点，不跨越嵌套元素查找后续文本。 */
+	{
+		const char* input[] = {
+			"<foo><!--first--></foo>",
+			"<foo><!--first--><!--second--></foo>",
+			"<foo><!--first--><bar/>old</foo>"
+		};
+		const char* expected[] = {
+			"<foo>new<!--first--></foo>",
+			"<foo>new<!--first--><!--second--></foo>",
+			"<foo>new<!--first--><bar/>old</foo>"
+		};
+		for ( size_t i = 0; i < sizeof(input) / sizeof(input[0]); ++i ) {
+			XMLDocument doc;
+			XMLTest( "SetText() non-text input.", XML_SUCCESS, doc.Parse( input[i] ) );
+			doc.RootElement()->SetText( "new" );
+			XMLPrinter printer( 0, true );
+			doc.Print( &printer );
+			XMLTest( "SetText() retains first-child insertion.", expected[i], printer.CStr() );
+		}
+	}
+
 	// ---------- Attributes ---------
 	{
 		static const int64_t BIG = -123456789012345678;

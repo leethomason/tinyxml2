@@ -1549,7 +1549,7 @@ public:
     	and concise, SetText() is limited compared to creating an XMLText child
     	and mutating it directly.
 
-    	If the first child of 'this' is a XMLText, SetText() sets its value to
+	If the first non-comment child of 'this' is a XMLText, SetText() sets its value to
 		the given string, otherwise it will create a first child that is an XMLText.
 
     	This is a convenient method for setting the text of simple contained text:

@@ -1712,8 +1712,13 @@ const char* XMLElement::GetText() const
 
 void	XMLElement::SetText( const char* inText )
 {
-	if ( FirstChild() && FirstChild()->ToText() )
-		FirstChild()->SetValue( inText );
+	/* 2026-10-04：跳过前导注释，替换与 GetText 相同的文本节点。 */
+	XMLNode* node = FirstChild();
+	while ( node && node->ToComment() ) {
+		node = node->NextSibling();
+	}
+	if ( node && node->ToText() )
+		node->SetValue( inText );
 	else {
 		XMLText*	theText = GetDocument()->NewText( inText );
 		InsertFirstChild( theText );
