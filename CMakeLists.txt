@@ -124,11 +124,32 @@ install(
 ## pkg-config
 
 if (tinyxml2_INSTALL_PKGCONFIG)
+    if (IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}")
+        set(tinyxml2_PC_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
+    else ()
+        set(tinyxml2_PC_LIBDIR "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
+    endif ()
+    if (IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
+        set(tinyxml2_PC_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}")
+    else ()
+        set(tinyxml2_PC_INCLUDEDIR "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+    endif ()
     configure_file(cmake/tinyxml2.pc.in tinyxml2.pc.gen @ONLY)
     file(GENERATE OUTPUT tinyxml2.pc INPUT "${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc.gen")
     install(
         FILES "${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc"
         DESTINATION "${tinyxml2_INSTALL_PKGCONFIGDIR}"
         COMPONENT tinyxml2_development
+    )
+endif ()
+
+if (tinyxml2_BUILD_TESTING AND tinyxml2_INSTALL_PKGCONFIG)
+    add_test(
+        NAME pkgconfig
+        COMMAND "${CMAKE_COMMAND}"
+            "-DPKGCONFIG_FILE=${CMAKE_CURRENT_BINARY_DIR}/tinyxml2.pc"
+            "-DINSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}"
+            "-DINSTALL_INCLUDEDIR=${CMAKE_INSTALL_INCLUDEDIR}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/test/pkgconfig.cmake"
     )
 endif ()

@@ -74,6 +74,16 @@ jobs:
         run: ctest --output-on-failure
         working-directory: build-shared-rel
 
+      # Absolute installation directories in pkg-config metadata
+      - name: "Test pkg-config: Configure absolute paths"
+        run: >-
+          cmake -G Ninja -S . -B build-pkgconfig-absolute
+          "-DCMAKE_INSTALL_LIBDIR=${{runner.temp}}/tinyxml2-install-absolute/lib"
+          "-DCMAKE_INSTALL_INCLUDEDIR=${{runner.temp}}/tinyxml2-install-absolute/include"
+      - name: "Test pkg-config: Absolute paths"
+        run: ctest -R pkgconfig --output-on-failure
+        working-directory: build-pkgconfig-absolute
+
       # Joint install
       - name: Install
         run: |
