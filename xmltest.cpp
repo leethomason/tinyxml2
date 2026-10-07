@@ -2295,8 +2295,19 @@ int main( int argc, const char ** argv )
 		// Issue 291. Should not crash
 		const char* xml = "&#0</a>";
 		XMLDocument doc;
+		const XMLError parseError = doc.Parse( xml );
+		XMLTest( "Parse hex with closing tag", XML_ERROR_MISMATCHED_ELEMENT, parseError );
+		XMLTest( "Parse hex with closing tag reports error", true, doc.Error() );
+		XMLTest( "Parse hex with closing tag line", 1, doc.ErrorLineNum() );
+
+		XMLPrinter printer;
+		doc.Print( &printer );
+	}
+	{
+		const char* xml = "<a>&#0</a>";
+		XMLDocument doc;
 		doc.Parse( xml );
-		XMLTest( "Parse hex with closing tag", false, doc.Error() );
+		XMLTest( "Parse wrapped numeric reference control", false, doc.Error() );
 
 		XMLPrinter printer;
 		doc.Print( &printer );
@@ -2618,6 +2629,12 @@ int main( int argc, const char ** argv )
 		tester.TestParseError("ErrorLine-Parsing", "\n<root>\n foo \n<unclosed/>", XML_ERROR_PARSING, 2);
         tester.TestParseError("ErrorLine-Declaration", "<root>\n<?xml version=\"1.0\"?>", XML_ERROR_PARSING_DECLARATION, 2);
         tester.TestParseError("ErrorLine-Mismatch", "\n<root>\n</mismatch>", XML_ERROR_MISMATCHED_ELEMENT, 2);
+        tester.TestParseError("ErrorLine-UnmatchedEndTag-Declaration", "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n</data>", XML_ERROR_MISMATCHED_ELEMENT, 2);
+        tester.TestParseError("ErrorLine-UnmatchedEndTag-Standalone", "</data>", XML_ERROR_MISMATCHED_ELEMENT, 1);
+        tester.TestParseError("ErrorLine-UnmatchedEndTag-AfterRoot", "<data/>\n</data>", XML_ERROR_MISMATCHED_ELEMENT, 2);
+        tester.TestParseError("ErrorLine-UnmatchedEndTag-AfterText", "text\n</data>", XML_ERROR_MISMATCHED_ELEMENT, 2);
+        tester.TestParseError("ErrorLine-UnmatchedEndTag-DeclarationText", "<?xml version=\"1.0\" encoding=\"utf-8\"?>\ntext\n</data>", XML_ERROR_MISMATCHED_ELEMENT, 3);
+        tester.TestParseError("ErrorLine-UnmatchedEndTag-CommentAndWhitespace", "<!-- lead -->\n  </data>", XML_ERROR_MISMATCHED_ELEMENT, 2);
         tester.TestParseError("ErrorLine-CData", "\n<root><![CDATA[ \n foo bar \n", XML_ERROR_PARSING_CDATA, 2);
         tester.TestParseError("ErrorLine-Text", "\n<root>\n foo bar \n", XML_ERROR_PARSING_TEXT, 3);
         tester.TestParseError("ErrorLine-Comment", "\n<root>\n<!-- >\n", XML_ERROR_PARSING_COMMENT, 3);
@@ -2660,6 +2677,49 @@ int main( int argc, const char ** argv )
             "LineNumbers-File",
             "resources/utf8test.xml",
             "D01L01E02E03A03A03T03E04A04A04T04E05A05A05T05E06A06A06T06E07A07A07T07E08A08A08T08E09T09E10T10");
+    }
+
+    {
+        XMLDocument doc;
+        doc.Parse( "<a/>\n<b/>" );
+        XMLTest( "Multiple top-level fragments remain accepted.", false, doc.Error() );
+        XMLElement* root = doc.RootElement();
+        XMLTest( "Multiple top-level fragments keep first root.", true,
+                 root != 0 && XMLUtil::StringEqual( root->Name(), "a" ) );
+        XMLElement* sibling = root ? root->NextSiblingElement() : 0;
+        XMLTest( "Multiple top-level fragments keep second sibling.", true,
+                 sibling != 0 && XMLUtil::StringEqual( sibling->Name(), "b" ) );
+
+        XMLTest( "Leading text fragment remains accepted.", XML_SUCCESS, doc.Parse( "text<a/>" ) );
+        XMLText* text = doc.FirstChild() ? doc.FirstChild()->ToText() : 0;
+        XMLTest( "Leading text fragment retains its value.", true,
+                 text != 0 && XMLUtil::StringEqual( text->Value(), "text" ) );
+    }
+
+    {
+        XMLDocument doc;
+        doc.Parse( "<root></mismatch>" );
+        XMLTest( "Nested mismatch remains an error.", true, doc.Error() );
+        XMLTest( "Nested mismatch error ID unchanged.", XML_ERROR_MISMATCHED_ELEMENT, doc.ErrorID() );
+    }
+
+    {
+        XMLDocument doc;
+        const XMLError firstError = doc.Parse( "<data/>\n</data>" );
+        XMLTest( "Rejected unmatched end tag returns mismatch.", XML_ERROR_MISMATCHED_ELEMENT, firstError );
+        XMLTest( "Rejected unmatched end tag leaves no root.", true, doc.RootElement() == 0 );
+        XMLTest( "Rejected unmatched end tag leaves no children.", true, doc.NoChildren() );
+        const XMLError secondError = doc.Parse( "<outer><inner/></outer>" );
+        XMLTest( "Document reuse after rejected unmatched end tag succeeds.", XML_SUCCESS, secondError );
+        XMLTest( "Document reuse after rejected unmatched end tag clears error.", false, doc.Error() );
+        XMLElement* root = doc.RootElement();
+        XMLTest( "Document reuse after rejected unmatched end tag parses nested root.", true,
+                 root != 0 && XMLUtil::StringEqual( root->Name(), "outer" ) );
+        XMLElement* inner = root ? root->FirstChildElement("inner") : 0;
+        XMLTest( "Document reuse after rejected unmatched end tag keeps self-closing child.", true,
+                 inner != 0 );
+        XMLTest( "Document reuse after rejected unmatched end tag leaves one child.", true,
+                 inner != 0 && inner->NextSibling() == 0 );
     }
 
     {

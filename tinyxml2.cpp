@@ -1159,9 +1159,13 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
                 if ( parentEndTag ) {
                     ele->_value.TransferTo( parentEndTag );
                 }
+                else {
+                    // A closing tag at document level has no matching opener at this parse depth.
+                    _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, initialLineNum, "XMLElement name=%s", ele->Name() );
+                }
                 node->_memPool->SetTracked();   // created and then immediately deleted.
                 DeleteNode( node );
-                return p;
+                return parentEndTag ? p : 0;
             }
 
             // Handle an end tag returned to this level.
