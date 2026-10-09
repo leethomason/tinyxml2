@@ -1140,6 +1140,77 @@ int main( int argc, const char ** argv )
 								 false );
 	}
 
+    // CDATA end markers must be split without changing the text (#1097).
+    {
+        const char* cases[] = { "", "plain text", "]]>", "a]]>b", "]]>]]>",
+                                "]]]]>", "<tag>&value", "line 1\nline 2" };
+        for ( size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i ) {
+            XMLDocument doc;
+            XMLElement* root = doc.NewElement( "r" );
+            doc.InsertEndChild( root );
+            XMLText* text = doc.NewText( cases[i] );
+            text->SetCData( true );
+            root->InsertEndChild( text );
+
+            XMLPrinter documentPrinter( 0, true );
+            doc.Print( &documentPrinter );
+            XMLPrinter directPrinter( 0, true );
+            directPrinter.OpenElement( "r" );
+            directPrinter.PushText( cases[i], true );
+            directPrinter.CloseElement( true );
+            XMLTest( "CDATA document and direct output match", documentPrinter.CStr(), directPrinter.CStr() );
+
+            XMLDocument parsed;
+            XMLTest( "CDATA output parses", XML_SUCCESS, parsed.Parse( directPrinter.CStr() ) );
+            if ( !parsed.Error() && parsed.RootElement() ) {
+                char reconstructed[128] = { 0 };
+                size_t length = 0;
+                for ( const XMLNode* child = parsed.RootElement()->FirstChild(); child; child = child->NextSibling() ) {
+                    XMLTest( "CDATA remains text", true, child->ToText() != 0 );
+                    const size_t n = strlen( child->Value() );
+                    if ( length + n < sizeof(reconstructed) ) {
+                        memcpy( reconstructed + length, child->Value(), n + 1 );
+                        length += n;
+                    }
+                }
+                XMLTest( "CDATA round-trip preserves text", cases[i], reconstructed );
+            }
+        }
+        XMLPrinter printer( 0, true );
+        printer.OpenElement( "r" );
+        printer.PushText( "a]]>b", true );
+        printer.CloseElement( true );
+        XMLTest( "CDATA split encoding", "<r><![CDATA[a]]]]><![CDATA[>b]]></r>", printer.CStr() );
+
+        // Exercise the FILE-backed path as well as the memory printer.
+        const char* fileCases[] = { "a]]>b]]>c", "prefix]]>" };
+        const char* fileExpected[] = {
+            "<r><![CDATA[a]]]]><![CDATA[>b]]]]><![CDATA[>c]]></r>",
+            "<r><![CDATA[prefix]]]]><![CDATA[>]]></r>"
+        };
+        for ( size_t i = 0; i < sizeof(fileCases) / sizeof(fileCases[0]); ++i ) {
+            FILE* file = tmpfile();
+            XMLTest( "CDATA temporary file opens", true, file != 0 );
+            if ( !file ) {
+                continue;
+            }
+            {
+                XMLPrinter filePrinter( file, true );
+                filePrinter.OpenElement( "r" );
+                filePrinter.PushText( fileCases[i], true );
+                filePrinter.CloseElement( true );
+            }
+            XMLTest( "CDATA file flushes", true, fflush( file ) == 0 );
+            rewind( file );
+            char actual[128];
+            const size_t n = fread( actual, 1, sizeof(actual) - 1, file );
+            actual[n] = 0;
+            XMLTest( "CDATA file output", fileExpected[i], actual );
+            XMLTest( "CDATA file length", true, n == strlen( fileExpected[i] ) && !ferror( file ) );
+            XMLTest( "CDATA file closes", true, fclose( file ) == 0 );
+        }
+    }
+
 	// InsertAfterChild causes crash.
 	{
 		// InsertBeforeChild and InsertAfterChild causes crash.

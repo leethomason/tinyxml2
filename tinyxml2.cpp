@@ -2872,7 +2872,15 @@ void XMLPrinter::PushText( const char* text, bool cdata )
     SealElementIfJustOpened();
     if ( cdata ) {
         Write( "<![CDATA[" );
-        Write( text );
+        const char* start = text;
+        const char* end = 0;
+        while ( (end = strstr( start, "]]>" )) != 0 ) {
+            // Close after the two brackets, then reopen before the greater-than sign.
+            Write( start, static_cast<size_t>( end - start ) + 2 );
+            Write( "]]><![CDATA[" );
+            start = end + 2;
+        }
+        Write( start );
         Write( "]]>" );
     }
     else {
