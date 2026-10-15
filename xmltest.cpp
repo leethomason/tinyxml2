@@ -5,7 +5,6 @@
 #endif
 
 #include "tinyxml2.h"
-#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
@@ -16,9 +15,6 @@
 	#include <windows.h>
 	_CrtMemState startMemState;
 	_CrtMemState endMemState;
-#else
-	#include <sys/stat.h>
-	#include <sys/types.h>
 #endif
 
 using namespace tinyxml2;
