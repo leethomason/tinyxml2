@@ -423,6 +423,60 @@ int main( int argc, const char ** argv )
 	}
 
 	{
+		// Issue 1101: InsertAfterChild dereferenced NULL when addThis was
+		// already the next sibling of afterThis. Re-inserting an adjacent
+		// last node in place must return it and preserve all links.
+		XMLDocument doc;
+		doc.Parse( "<r><a/><b/></r>" );
+		XMLTest( "Issue 1101 parse (adjacent last)", false, doc.Error() );
+		XMLElement* r = doc.RootElement();
+		XMLNode* a = r->FirstChildElement( "a" );
+		XMLNode* b = r->FirstChildElement( "b" );
+
+		XMLNode* result = r->InsertAfterChild( a, b );
+		XMLTest( "Issue 1101: adjacent last re-insert returns addThis", true, result == b );
+		XMLTest( "Issue 1101: adjacent last first", true, r->FirstChild() == a );
+		XMLTest( "Issue 1101: adjacent last last", true, r->LastChild() == b );
+		XMLTest( "Issue 1101: adjacent last next", true, a->NextSibling() == b );
+		XMLTest( "Issue 1101: adjacent last prev", true, b->PreviousSibling() == a );
+		XMLTest( "Issue 1101: adjacent last no prev before", true, a->PreviousSibling() == 0 );
+		XMLTest( "Issue 1101: adjacent last no next after", true, b->NextSibling() == 0 );
+		XMLTest( "Issue 1101: adjacent last parent", true, b->Parent() == r );
+
+		// Idempotent: doing it again must not corrupt or duplicate links.
+		result = r->InsertAfterChild( a, b );
+		XMLTest( "Issue 1101: adjacent last re-insert again returns addThis", true, result == b );
+		XMLTest( "Issue 1101: adjacent last first (again)", true, r->FirstChild() == a );
+		XMLTest( "Issue 1101: adjacent last last (again)", true, r->LastChild() == b );
+		XMLTest( "Issue 1101: adjacent last next (again)", true, a->NextSibling() == b );
+		XMLTest( "Issue 1101: adjacent last prev (again)", true, b->PreviousSibling() == a );
+		XMLTest( "Issue 1101: adjacent last no duplicate", true, a->PreviousSibling() == 0 && b->NextSibling() == 0 );
+	}
+
+	{
+		// Interior adjacent re-insertion must also be a no-op that keeps the chain.
+		XMLDocument doc;
+		doc.Parse( "<r><a/><b/><c/></r>" );
+		XMLTest( "Issue 1101 parse (adjacent middle)", false, doc.Error() );
+		XMLElement* r = doc.RootElement();
+		XMLNode* a = r->FirstChildElement( "a" );
+		XMLNode* b = r->FirstChildElement( "b" );
+		XMLNode* c = r->FirstChildElement( "c" );
+
+		XMLNode* result = r->InsertAfterChild( a, b );
+		XMLTest( "Issue 1101: adjacent middle re-insert returns addThis", true, result == b );
+		XMLTest( "Issue 1101: adjacent middle first", true, r->FirstChild() == a );
+		XMLTest( "Issue 1101: adjacent middle last", true, r->LastChild() == c );
+		XMLTest( "Issue 1101: adjacent middle a->next", true, a->NextSibling() == b );
+		XMLTest( "Issue 1101: adjacent middle b->next", true, b->NextSibling() == c );
+		XMLTest( "Issue 1101: adjacent middle c->prev", true, c->PreviousSibling() == b );
+		XMLTest( "Issue 1101: adjacent middle b->prev", true, b->PreviousSibling() == a );
+		XMLTest( "Issue 1101: adjacent middle no prev before", true, a->PreviousSibling() == 0 );
+		XMLTest( "Issue 1101: adjacent middle no next after", true, c->NextSibling() == 0 );
+		XMLTest( "Issue 1101: adjacent middle parent", true, b->Parent() == r );
+	}
+
+	{
 		static const char* test = "<element>Text before.</element>";
 		XMLDocument doc;
 		doc.Parse( test );
