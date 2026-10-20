@@ -2752,6 +2752,17 @@ int main( int argc, const char ** argv )
 		XMLTest( "Overflow hex entity: not resolved to a character", true,
 		         v != nullptr && v[0] == '&' );
 	}
+	{
+		// A non-digit between "&#" and ';' must reject the reference, even
+		// when the run before ';' ends in the 'x' of a hex prefix.
+		XMLDocument doc;
+		doc.Parse( "<t a='&#x12x41;' b='&#1a;' c='&#&#65;'/>" );
+		XMLTest( "Malformed char ref: no parse error", false, doc.Error() );
+		const XMLElement* t = doc.FirstChildElement();
+		XMLTest( "Malformed hex char ref not resolved", "&#x12x41;", t->Attribute( "a" ) );
+		XMLTest( "Malformed dec char ref not resolved", "&#1a;", t->Attribute( "b" ) );
+		XMLTest( "Char ref after unterminated one resolved", "&#A", t->Attribute( "c" ) );
+	}
 
 	// ---------- XMLPrinter Apos Escaping ------
 	{

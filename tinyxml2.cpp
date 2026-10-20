@@ -494,9 +494,15 @@ const char* XMLUtil::GetCharacterRef(const char* p, char* value, int* length)
             return 0;
         }
 
-        q = strchr(q, SEMICOLON);
-        if (!q) {
-            return 0;
+        // Scan forward over the digits only. Searching the rest of the
+        // string for ';' makes every unterminated "&#" a full scan.
+        while (*q != SEMICOLON) {
+            const bool isDigit = (*q >= '0' && *q <= '9')
+                || (hex && ((*q >= 'a' && *q <= 'f') || (*q >= 'A' && *q <= 'F')));
+            if (!isDigit) {
+                return 0;
+            }
+            ++q;
         }
         TIXMLASSERT(*q == SEMICOLON);
 
