@@ -2752,6 +2752,29 @@ int main( int argc, const char ** argv )
 		XMLTest( "Overflow hex entity: not resolved to a character", true,
 		         v != nullptr && v[0] == '&' );
 	}
+	{
+		// References to U+0000 (including the empty "&#;" and "&#x;") must not
+		// be resolved: the decoded NUL would silently truncate the value.
+		// Surrogate halves must not be resolved into invalid UTF-8.
+		const char* refs[][2] = {
+			{ "<t v='a&#0;b'/>",     "a&#0;b" },
+			{ "<t v='a&#;b'/>",      "a&#;b" },
+			{ "<t v='a&#x;b'/>",     "a&#x;b" },
+			{ "<t v='a&#x0000;b'/>", "a&#x0000;b" },
+			{ "<t v='a&#xD800;b'/>", "a&#xD800;b" },
+			{ "<t v='a&#57343;b'/>", "a&#57343;b" },
+		};
+		for ( size_t i = 0; i < sizeof(refs) / sizeof(refs[0]); ++i ) {
+			const char* xml = refs[i][0];
+			const char* expected = refs[i][1];
+
+			XMLDocument doc;
+			doc.Parse( xml );
+			XMLTest( "Illegal numeric ref: no parse error", false, doc.Error() );
+			const char* v = doc.FirstChildElement()->Attribute( "v" );
+			XMLTest( "Illegal numeric ref: left as literal", expected, v );
+		}
+	}
 
 	// ---------- XMLPrinter Apos Escaping ------
 	{

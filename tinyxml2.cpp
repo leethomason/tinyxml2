@@ -535,8 +535,10 @@ const char* XMLUtil::GetCharacterRef(const char* p, char* value, int* length)
             }
             --q;
         }
-        // Out of range:
-        if (ucs > MAX_CODE_POINT) {
+        // Out of range, or not a legal XML character: U+0000 (which also
+        // covers an empty "&#;" or "&#x;") would truncate the string, and
+        // surrogate halves would be encoded as invalid UTF-8.
+        if (ucs == 0 || ucs > MAX_CODE_POINT || (ucs >= 0xD800 && ucs <= 0xDFFF)) {
             return 0;
         }
         // convert the UCS to UTF-8
