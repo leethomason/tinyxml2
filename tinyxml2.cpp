@@ -1011,6 +1011,12 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
         return addThis;
     }
 
+    if ( afterThis->_next == addThis ) {
+        // addThis is already immediately after afterThis; leave it in
+        // place so the surrounding links are not torn down and rebuilt.
+        return addThis;
+    }
+
     if ( afterThis->_next == 0 ) {
         // The last node or the only node.
         return InsertEndChild( addThis );
