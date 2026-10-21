@@ -1293,6 +1293,34 @@ int main( int argc, const char ** argv )
 		XMLTest( "Parsing repeated attributes.", XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );	// is an  error to tinyxml (didn't use to be, but caused issues)
 		doc.PrintError();
 	}
+	{
+		// Many attributes: past a small count the duplicate check switches to
+		// a hash set, which must still accept unique names and catch repeats.
+		static const int NATTR = 1000;
+		for ( int repeat = 0; repeat < 2; ++repeat ) {
+			XMLPrinter printer;
+			printer.OpenElement( "element" );
+			char name[32] = "a";
+			for ( int i = 0; i < NATTR; ++i ) {
+				XMLUtil::ToStr( i, name + 1, sizeof( name ) - 1 );
+				printer.PushAttribute( name, i );
+			}
+			if ( repeat ) {
+				printer.PushAttribute( "a500", "x" );
+			}
+			printer.CloseElement();
+
+			XMLDocument doc;
+			doc.Parse( printer.CStr() );
+			if ( repeat ) {
+				XMLTest( "Parsing many attributes, one repeated.", XML_ERROR_PARSING_ATTRIBUTE, doc.ErrorID() );
+			}
+			else {
+				XMLTest( "Parsing many attributes.", XML_SUCCESS, doc.ErrorID() );
+				XMLTest( "Parsing many attributes: last value.", NATTR - 1, doc.RootElement()->IntAttribute( "a999" ) );
+			}
+		}
+	}
 
 	{
 		// Embedded null in stream.

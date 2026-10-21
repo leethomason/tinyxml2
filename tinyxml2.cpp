@@ -1962,9 +1962,43 @@ void XMLElement::DeleteAttribute( const char* name )
 }
 
 
+// Duplicate attribute detection. A linear scan of the attributes already
+// parsed is fine for typical elements, but is quadratic in the attribute
+// count, so past a small count switch to an open-addressed hash set of names.
+static const int ATTRIBUTE_HASH_THRESHOLD = 16;
+
+static size_t HashAttributeName( const char* name )
+{
+    // FNV-1a
+    size_t h = 2166136261U;
+    for( ; *name; ++name ) {
+        h = ( h ^ static_cast<unsigned char>( *name ) ) * 16777619U;
+    }
+    return h;
+}
+
+// Returns false if 'name' is already in the table. The table size is a
+// power of two and is kept at most half full.
+static bool InsertAttributeName( DynArray<const char*, 1>& table, const char* name )
+{
+    const size_t mask = table.Size() - 1;
+    size_t i = HashAttributeName( name ) & mask;
+    while( table[i] ) {
+        if ( XMLUtil::StringEqual( table[i], name ) ) {
+            return false;
+        }
+        i = ( i + 1 ) & mask;
+    }
+    table[i] = name;
+    return true;
+}
+
+
 char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
 {
     XMLAttribute* prevAttribute = 0;
+    int attributeCount = 0;
+    DynArray<const char*, 1> nameTable;
 
     // Read the attributes.
     while( p ) {
@@ -1983,7 +2017,24 @@ char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
             const int attrLineNum = attrib->_parseLineNum;
 
             p = attrib->ParseDeep( p, _document->ProcessEntities(), curLineNumPtr );
-            if ( !p || Attribute( attrib->Name() ) ) {
+            bool duplicate = false;
+            if ( p ) {
+                if ( attributeCount < ATTRIBUTE_HASH_THRESHOLD ) {
+                    duplicate = Attribute( attrib->Name() ) != 0;
+                }
+                else {
+                    if ( static_cast<size_t>( attributeCount ) * 2 >= nameTable.Size() ) {
+                        const size_t size = nameTable.Size() ? nameTable.Size() * 2 : ATTRIBUTE_HASH_THRESHOLD * 4;
+                        nameTable.Clear();
+                        memset( nameTable.PushArr( size ), 0, size * sizeof( const char* ) );
+                        for( const XMLAttribute* a = _rootAttribute; a; a = a->_next ) {
+                            InsertAttributeName( nameTable, a->Name() );
+                        }
+                    }
+                    duplicate = !InsertAttributeName( nameTable, attrib->Name() );
+                }
+            }
+            if ( !p || duplicate ) {
                 DeleteAttribute( attrib );
                 _document->SetError( XML_ERROR_PARSING_ATTRIBUTE, attrLineNum, "XMLElement name=%s", Name() );
                 return 0;
@@ -2002,6 +2053,7 @@ char* XMLElement::ParseAttributes( char* p, int* curLineNumPtr )
                 _rootAttribute = attrib;
             }
             prevAttribute = attrib;
+            ++attributeCount;
         }
         // end of the tag
         else if ( *p == '>' ) {
