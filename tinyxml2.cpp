@@ -1075,6 +1075,30 @@ const XMLElement* XMLNode::PreviousSiblingElement( const char* name ) const
 }
 
 
+// XMLDeclaration also represents processing instructions. Only named targets
+// other than the reserved XML name may appear outside the prolog.
+static bool IsProcessingInstruction( const char* value )
+{
+    TIXMLASSERT( value );
+    const unsigned char* p = reinterpret_cast<const unsigned char*>( value );
+    if ( !XMLUtil::IsNameStartChar(*p) ) {
+        return false;
+    }
+    const unsigned char* const start = p;
+    while ( XMLUtil::IsNameChar(*p) ) {
+        ++p;
+    }
+    if ( *p && *p != ' ' && *p != '\t' && *p != '\r' && *p != '\n' ) {
+        return false;
+    }
+    const bool reservedXML = p - start == 3
+        && (start[0] == 'x' || start[0] == 'X')
+        && (start[1] == 'm' || start[1] == 'M')
+        && (start[2] == 'l' || start[2] == 'L');
+    return !reservedXML;
+}
+
+
 char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
 {
     // This is a recursive method, but thinking about it "at the current level"
@@ -1122,8 +1146,8 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr )
         }
 
         const XMLDeclaration* const decl = node->ToDeclaration();
-        if ( decl ) {
-            // Declarations are only allowed at document level
+        if ( decl && !IsProcessingInstruction(decl->Value()) ) {
+            // XML declarations are only allowed at document level
             //
             // Multiple declarations are allowed but all declarations
             // must occur before anything else. 
