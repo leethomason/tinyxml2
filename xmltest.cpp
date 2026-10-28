@@ -102,6 +102,54 @@ template< class T > bool XMLTest( const char* testString, T expected, T found, b
 }
 
 
+class ProcessingInstructionVisitor : public XMLVisitor
+{
+public:
+    ProcessingInstructionVisitor() : count( 0 ), value( 0 ) {}
+
+    bool Visit( const XMLDeclaration& declaration ) override
+    {
+        ++count;
+        value = declaration.Value();
+        return true;
+    }
+
+    int count;
+    const char* value;
+};
+
+
+static void TestProcessingInstruction( const char* value, const char* expectedValue, size_t locationCount )
+{
+    const char* prefixes[] = { "<root><?", "<root/><?", "<!--before--><?", "<?" };
+    const char* suffixes[] = { "?></root>", "?>", "?><root/>", "?><root/>" };
+    const char* names[] = { "PI inside root", "PI after root", "PI after comment", "PI in prolog" };
+    for ( size_t i = 0; i < locationCount; ++i ) {
+        char xml[512];
+        TIXMLASSERT( strlen(prefixes[i]) + strlen(value) + strlen(suffixes[i]) < sizeof(xml) );
+        strcpy( xml, prefixes[i] );
+        strcat( xml, value );
+        strcat( xml, suffixes[i] );
+        XMLDocument doc;
+        if ( XMLTest( names[i], XML_SUCCESS, doc.Parse(xml) ) ) {
+            ProcessingInstructionVisitor visitor;
+            doc.Accept( &visitor );
+            XMLTest( "PI keeps the XMLDeclaration visitor", 1, visitor.count );
+            XMLTest( "PI target and data", expectedValue, visitor.value );
+            XMLPrinter printer( 0, true );
+            doc.Print( &printer );
+            XMLDocument reparsed;
+            if ( XMLTest( "PI print and reparse", XML_SUCCESS, reparsed.Parse(printer.CStr()) ) ) {
+                ProcessingInstructionVisitor reparseVisitor;
+                reparsed.Accept( &reparseVisitor );
+                XMLTest( "Reparsed PI keeps the XMLDeclaration visitor", 1, reparseVisitor.count );
+                XMLTest( "Reparsed PI target and data", expectedValue, reparseVisitor.value );
+            }
+        }
+    }
+}
+
+
 void NullLineEndings( char* p )
 {
 	while( p && *p ) {
@@ -2367,6 +2415,64 @@ int main( int argc, const char ** argv )
 	    doc.Parse(xml4);
 	    XMLTest("Test that declaration inside a child is not allowed", XML_ERROR_PARSING_DECLARATION, doc.ErrorID() );
 	}
+
+    {
+        // Processing instructions use XMLDeclaration nodes without its prolog-only restriction.
+        const char* values[] = {
+            "pi_target pi_content",
+            "pi_target",
+            "xml-stylesheet type=\"text/xsl\" href=\"style.xsl\"",
+            "xmlx data",
+            "xml:thing data",
+            "\xCF\x80 data",
+            "p_name-1.2:target data",
+            "pi data > more",
+            "pi\tdata",
+            "pi\ndata",
+            "pi\rdata"
+        };
+        for ( size_t i = 0; i < sizeof(values) / sizeof(*values); ++i ) {
+            const char* expected = i == 10 ? "pi\ndata" : values[i];
+            TestProcessingInstruction( values[i], expected, i == 0 ? 4 : 1 );
+        }
+    }
+
+    {
+        // Keep the original location checks for reserved and malformed targets.
+        const char* values[] = {
+            "xml", "xmL", "xMl", "xML", "Xml", "XmL", "XMl", "XML",
+            "", " pi data", "1target data", "pi=bad", "pi?bad", "pi\fdata", "pi\vdata"
+        };
+        for ( size_t i = 0; i < sizeof(values) / sizeof(*values); ++i ) {
+            char xml[128];
+            TIXMLASSERT( strlen(values[i]) + 24 < sizeof(xml) );
+            strcpy( xml, "<root>\n<?" );
+            strcat( xml, values[i] );
+            strcat( xml, "?></root>" );
+            XMLDocument nested;
+            XMLTest( "Reserved or malformed PI target keeps location error",
+                     XML_ERROR_PARSING_DECLARATION, nested.Parse(xml) );
+            XMLTest( "PI location error keeps line number", 2, nested.ErrorLineNum() );
+
+            // These opaque prolog values were accepted before; do not add validation.
+            strcpy( xml, "<?" );
+            strcat( xml, values[i] );
+            strcat( xml, "?><root/>" );
+            XMLDocument prolog;
+            XMLTest( "Opaque prolog declaration handling is unchanged", XML_SUCCESS, prolog.Parse(xml) );
+        }
+    }
+
+    {
+        XMLDocument doc;
+        XMLElement* root = doc.NewElement( "root" );
+        doc.InsertEndChild( root );
+        root->InsertEndChild( doc.NewDeclaration("pi_target data > more") );
+        XMLPrinter printer( 0, true );
+        doc.Print( &printer );
+        XMLDocument reparsed;
+        XMLTest( "Programmatic PI print and reparse", XML_SUCCESS, reparsed.Parse(printer.CStr()) );
+    }
 
     {
 	    // No matter - before or after successfully parsing a text -
