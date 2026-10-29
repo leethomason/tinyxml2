@@ -1602,6 +1602,37 @@ int main( int argc, const char ** argv )
 		XMLTest( "Infinite loop in shallow equal.", true, equal );
 	}
 
+	{
+		// Equal attribute values do not make different attribute names equal.
+		XMLDocument doc0;
+		XMLDocument doc1;
+		XMLElement* ele0 = doc0.NewElement( "element" );
+		XMLElement* ele1 = doc1.NewElement( "element" );
+		doc0.InsertEndChild( ele0 );
+		doc1.InsertEndChild( ele1 );
+		ele0->SetAttribute( "id", "7" );
+		ele1->SetAttribute( "count", "7" );
+		XMLTest( "Shallow equal, different attribute names", false, ele0->ShallowEqual( ele1 ) );
+		XMLTest( "Shallow equal, different attribute names reversed", false, ele1->ShallowEqual( ele0 ) );
+
+		ele1->DeleteAttribute( "count" );
+		ele1->SetAttribute( "id", "7" );
+		XMLTest( "Shallow equal, matching attribute", true, ele0->ShallowEqual( ele1 ) );
+		ele1->SetAttribute( "id", "8" );
+		XMLTest( "Shallow equal, different attribute values", false, ele0->ShallowEqual( ele1 ) );
+
+		ele1->SetAttribute( "id", "7" );
+		ele1->SetAttribute( "extra", "9" );
+		XMLTest( "Shallow equal, different attribute counts", false, ele0->ShallowEqual( ele1 ) );
+		ele0->SetAttribute( "another", "9" );
+		XMLTest( "Shallow equal, different second attribute names", false, ele0->ShallowEqual( ele1 ) );
+		ele1->DeleteAttribute( "extra" );
+		ele1->SetAttribute( "another", "9" );
+		XMLTest( "Shallow equal, matching attributes", true, ele0->ShallowEqual( ele1 ) );
+		ele0->InsertEndChild( doc0.NewElement( "child" ) );
+		XMLTest( "Shallow equal ignores children", true, ele0->ShallowEqual( ele1 ) );
+	}
+
 	// -------- Handles ------------
 	{
 		static const char* xml = "<element attrib='bar'><sub>Text</sub></element>";

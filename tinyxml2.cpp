@@ -2130,7 +2130,8 @@ bool XMLElement::ShallowEqual( const XMLNode* compare ) const
         const XMLAttribute* b=other->FirstAttribute();
 
         while ( a && b ) {
-            if ( !XMLUtil::StringEqual( a->Value(), b->Value() ) ) {
+            if ( !XMLUtil::StringEqual( a->Name(), b->Name() ) ||
+                 !XMLUtil::StringEqual( a->Value(), b->Value() ) ) {
                 return false;
             }
             a = a->Next();
