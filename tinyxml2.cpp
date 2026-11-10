@@ -1709,6 +1709,16 @@ const char* XMLElement::GetText() const
     return 0;
 }
 
+XMLError XMLElement::QueryText( const char** value ) const
+{
+    const char* text = GetText();
+    if ( !text ) {
+        return XML_NO_TEXT_NODE;
+    }
+    *value = text;
+    return XML_SUCCESS;
+}
+
 
 void	XMLElement::SetText( const char* inText )
 {
