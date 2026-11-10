@@ -1545,6 +1545,13 @@ public:
     */
     const char* GetText() const;
 
+    /** Query the text returned by GetText(). On success, value points to text
+        owned by the document and remains valid until the text node is modified
+        or deleted, or the document is destroyed. If no text node is available,
+        XML_NO_TEXT_NODE is returned and value is unchanged.
+    */
+    XMLError QueryText( const char** value ) const;
+
     /** Convenience function for easy access to the text inside an element. Although easy
     	and concise, SetText() is limited compared to creating an XMLText child
     	and mutating it directly.

@@ -748,6 +748,78 @@ int main( int argc, const char ** argv )
 		XMLTest( "GetText() contained element.", element->GetText() == 0, true );
 	}
 
+	// --------QueryText()-----------
+	{
+		XMLDocument doc;
+		doc.Parse( "<foo>This is text</foo>" );
+		const XMLElement* element = doc.RootElement();
+		const char* value = "default";
+		XMLError result = element->QueryText( &value );
+		XMLTest( "QueryText() ordinary text result.", XML_SUCCESS, result, true );
+		XMLTest( "QueryText() ordinary text.", "This is text", value );
+	}
+
+	{
+		XMLDocument doc;
+		doc.Parse( "<foo/>" );
+		const XMLElement* element = doc.RootElement();
+		const char* value = "default";
+		XMLError result = element->QueryText( &value );
+		XMLTest( "QueryText() absent text result.", XML_NO_TEXT_NODE, result, true );
+		XMLTest( "QueryText() preserves default on failure.", "default", value );
+	}
+
+	{
+		XMLDocument doc;
+		doc.Parse( "<foo><bar>nested</bar>text after child</foo>" );
+		const XMLElement* element = doc.RootElement();
+		const char* value = "default";
+		XMLError result = element->QueryText( &value );
+		XMLTest( "QueryText() nested child precedes text result.", XML_NO_TEXT_NODE, result, true );
+		XMLTest( "QueryText() nested child precedes text default.", "default", value );
+	}
+
+	{
+		XMLDocument doc;
+		doc.Parse( "<foo><!--leading comment-->text after comment</foo>" );
+		const XMLElement* element = doc.RootElement();
+		const char* value = "default";
+		XMLError result = element->QueryText( &value );
+		XMLTest( "QueryText() skips leading comment result.", XML_SUCCESS, result, true );
+		XMLTest( "QueryText() skips leading comment.", "text after comment", value );
+	}
+
+	{
+		XMLDocument doc;
+		doc.Parse( "<foo><![CDATA[cdata text]]></foo>" );
+		const XMLElement* element = doc.RootElement();
+		const char* value = "default";
+		XMLError result = element->QueryText( &value );
+		XMLTest( "QueryText() CDATA result.", XML_SUCCESS, result, true );
+		XMLTest( "QueryText() CDATA.", "cdata text", value );
+	}
+
+	{
+		XMLDocument doc;
+		doc.Parse( "<foo>caf\xC3\xA9 &amp; tea</foo>" );
+		const XMLElement* element = doc.RootElement();
+		const char* value = "default";
+		XMLError result = element->QueryText( &value );
+		XMLTest( "QueryText() UTF-8 and entity result.", XML_SUCCESS, result, true );
+		XMLTest( "QueryText() UTF-8 and entity.", "caf\xC3\xA9 & tea", value );
+	}
+
+	{
+		XMLDocument doc;
+		XMLElement* element = doc.NewElement( "foo" );
+		doc.InsertEndChild( element );
+		element->InsertNewText( "" );
+		const char* value = "default";
+		XMLError result = element->QueryText( &value );
+		XMLTest( "QueryText() empty text node result.", XML_SUCCESS, result, true );
+		XMLTest( "QueryText() empty text node is non-null.", true, value != 0 );
+		XMLTest( "QueryText() empty text node.", "", value );
+	}
 
 	// --------SetText()-----------
 	{
