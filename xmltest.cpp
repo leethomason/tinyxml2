@@ -1736,8 +1736,13 @@ int main( int argc, const char ** argv )
 	}
 
 	// QueryXYZText
-	{
-		const char* xml = "<point> <x>1.2</x> <y>1</y> <z>38</z> <valid>true</valid> </point>";
+	const char* queryTextCases[] = {
+		"<point> <x>1.2</x> <y>1</y> <z>38</z> <valid>true</valid> </point>",
+		"<point><x><!--comment-->1.2</x><y><!--comment-->1</y><valid><!--comment-->true</valid></point>",
+		"<point><x><!--a--><!--b--><![CDATA[1.2]]></x><y><!--a--><!--b--><![CDATA[1]]></y><valid><!--a--><!--b--><![CDATA[true]]></valid></point>"
+	};
+	for ( unsigned i = 0; i < sizeof(queryTextCases) / sizeof(queryTextCases[0]); ++i ) {
+		const char* xml = queryTextCases[i];
 		XMLDocument doc;
 		doc.Parse( xml );
 		XMLTest( "Parse points", false, doc.Error() );
@@ -1756,6 +1761,18 @@ int main( int argc, const char ** argv )
 			XMLError queryResult = pointElement->FirstChildElement( "y" )->QueryUnsignedText( &unsignedValue );
 			XMLTest( "QueryUnsignedText result", XML_SUCCESS, queryResult, false );
 			XMLTest( "QueryUnsignedText", static_cast<unsigned>(1), unsignedValue, false );
+		}
+
+		{
+			int64_t intValue = 0;
+			XMLTest( "QueryInt64Text result", XML_SUCCESS, pointElement->FirstChildElement( "y" )->QueryInt64Text( &intValue ) );
+			XMLTest( "QueryInt64Text", static_cast<int64_t>(1), intValue );
+		}
+
+		{
+			uint64_t unsignedValue = 0;
+			XMLTest( "QueryUnsigned64Text result", XML_SUCCESS, pointElement->FirstChildElement( "y" )->QueryUnsigned64Text( &unsignedValue ) );
+			XMLTest( "QueryUnsigned64Text", static_cast<uint64_t>(1), unsignedValue );
 		}
 
 		{
@@ -1778,6 +1795,20 @@ int main( int argc, const char ** argv )
 			XMLTest( "QueryBoolText result", XML_SUCCESS, queryResult, false );
 			XMLTest( "QueryBoolText", true, boolValue, false );
 		}
+	}
+
+	const char* queryTextErrorCases[] = {
+		"<value><!--comment-->invalid</value>",
+		"<value><!--comment--></value>",
+		"<value><!--comment--><child/>42</value>"
+	};
+	for ( unsigned i = 0; i < sizeof(queryTextErrorCases) / sizeof(queryTextErrorCases[0]); ++i ) {
+		XMLDocument doc;
+		doc.Parse( queryTextErrorCases[i] );
+		int value = 42;
+		XMLTest( "QueryIntText error", i == 0 ? XML_CAN_NOT_CONVERT_TEXT : XML_NO_TEXT_NODE,
+			doc.RootElement()->QueryIntText( &value ) );
+		XMLTest( "QueryIntText preserves output on error", 42, value );
 	}
 
 	{
