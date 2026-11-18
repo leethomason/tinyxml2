@@ -836,7 +836,7 @@ public:
 		If the child node is already part of the document,
 		it is moved from its old location to the new location.
 		Returns the addThis argument or 0 if the node does not
-		belong to the same document.
+		belong to the same document or would create a cycle.
     */
     XMLNode* InsertEndChild( XMLNode* addThis );
 
@@ -848,7 +848,7 @@ public:
 		If the child node is already part of the document,
 		it is moved from its old location to the new location.
 		Returns the addThis argument or 0 if the node does not
-		belong to the same document.
+		belong to the same document or would create a cycle.
     */
     XMLNode* InsertFirstChild( XMLNode* addThis );
     /**
@@ -856,8 +856,8 @@ public:
 		If the child node is already part of the document,
 		it is moved from its old location to the new location.
 		Returns the addThis argument or 0 if the afterThis node
-		is not a child of this node, or if the node does not
-		belong to the same document.
+		is not a child of this node, if the node does not
+		belong to the same document, or if it would create a cycle.
     */
     XMLNode* InsertAfterChild( XMLNode* afterThis, XMLNode* addThis );
 
@@ -966,7 +966,7 @@ private:
     MemPool*		_memPool;
     void Unlink( XMLNode* child );
     static void DeleteNode( XMLNode* node );
-    void InsertChildPreamble( XMLNode* insertThis ) const;
+    bool InsertChildPreamble( XMLNode* insertThis ) const;
     const XMLElement* ToElementWithName( const char* name ) const;
 
     XMLNode( const XMLNode& );	// not supported
