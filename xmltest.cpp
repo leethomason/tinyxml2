@@ -459,6 +459,91 @@ int main( int argc, const char ** argv )
 		XMLTest( "New element inserted middle", true, middleAfterInsertion == middle );
 	}
 	{
+		const char* xml = "<root><parent><child><marker/><tail/></child></parent><sibling/></root>";
+		const char* moved = "<root><parent><child><marker/><tail/><sibling/></child></parent></root>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLElement* root = doc.RootElement();
+		XMLElement* parent = root->FirstChildElement( "parent" );
+		XMLElement* child = parent->FirstChildElement( "child" );
+		XMLElement* sibling = root->FirstChildElement( "sibling" );
+
+		XMLTest( "InsertEndChild rejects self insertion", true, child->InsertEndChild( child ) == 0 );
+		XMLTest( "InsertEndChild rejects ancestor insertion", true, child->InsertEndChild( parent ) == 0 );
+
+		XMLPrinter printer( 0, true );
+		XMLTest( "Tree after rejected InsertEndChild - Accept()", true, doc.Accept( &printer ) );
+		XMLTest( "Tree unchanged after rejected InsertEndChild", xml, printer.CStr() );
+
+		XMLDocument clone;
+		clone.InsertEndChild( doc.RootElement()->DeepClone( &clone ) );
+		XMLPrinter clonePrinter( 0, true );
+		clone.Print( &clonePrinter );
+		XMLTest( "Tree after rejected InsertEndChild - DeepClone()", xml, clonePrinter.CStr() );
+
+		XMLTest( "InsertEndChild still moves existing nodes", sibling, child->InsertEndChild( sibling ) );
+		XMLPrinter movedPrinter( 0, true );
+		doc.Print( &movedPrinter );
+		XMLTest( "Tree after valid InsertEndChild move", moved, movedPrinter.CStr() );
+	}
+	{
+		const char* xml = "<root><parent><child><marker/><tail/></child></parent><sibling/></root>";
+		const char* moved = "<root><parent><child><sibling/><marker/><tail/></child></parent></root>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLElement* root = doc.RootElement();
+		XMLElement* parent = root->FirstChildElement( "parent" );
+		XMLElement* child = parent->FirstChildElement( "child" );
+		XMLElement* sibling = root->FirstChildElement( "sibling" );
+
+		XMLTest( "InsertFirstChild rejects self insertion", true, child->InsertFirstChild( child ) == 0 );
+		XMLTest( "InsertFirstChild rejects ancestor insertion", true, child->InsertFirstChild( parent ) == 0 );
+
+		XMLPrinter printer( 0, true );
+		XMLTest( "Tree after rejected InsertFirstChild - Accept()", true, doc.Accept( &printer ) );
+		XMLTest( "Tree unchanged after rejected InsertFirstChild", xml, printer.CStr() );
+
+		XMLDocument clone;
+		clone.InsertEndChild( doc.RootElement()->DeepClone( &clone ) );
+		XMLPrinter clonePrinter( 0, true );
+		clone.Print( &clonePrinter );
+		XMLTest( "Tree after rejected InsertFirstChild - DeepClone()", xml, clonePrinter.CStr() );
+
+		XMLTest( "InsertFirstChild still moves existing nodes", sibling, child->InsertFirstChild( sibling ) );
+		XMLPrinter movedPrinter( 0, true );
+		doc.Print( &movedPrinter );
+		XMLTest( "Tree after valid InsertFirstChild move", moved, movedPrinter.CStr() );
+	}
+	{
+		const char* xml = "<root><parent><child><marker/><tail/></child></parent><sibling/></root>";
+		const char* moved = "<root><parent><child><marker/><sibling/><tail/></child></parent></root>";
+		XMLDocument doc;
+		doc.Parse( xml );
+		XMLElement* root = doc.RootElement();
+		XMLElement* parent = root->FirstChildElement( "parent" );
+		XMLElement* child = parent->FirstChildElement( "child" );
+		XMLElement* marker = child->FirstChildElement( "marker" );
+		XMLElement* sibling = root->FirstChildElement( "sibling" );
+
+		XMLTest( "InsertAfterChild rejects self insertion", true, child->InsertAfterChild( marker, child ) == 0 );
+		XMLTest( "InsertAfterChild rejects ancestor insertion", true, child->InsertAfterChild( marker, parent ) == 0 );
+
+		XMLPrinter printer( 0, true );
+		XMLTest( "Tree after rejected InsertAfterChild - Accept()", true, doc.Accept( &printer ) );
+		XMLTest( "Tree unchanged after rejected InsertAfterChild", xml, printer.CStr() );
+
+		XMLDocument clone;
+		clone.InsertEndChild( doc.RootElement()->DeepClone( &clone ) );
+		XMLPrinter clonePrinter( 0, true );
+		clone.Print( &clonePrinter );
+		XMLTest( "Tree after rejected InsertAfterChild - DeepClone()", xml, clonePrinter.CStr() );
+
+		XMLTest( "InsertAfterChild still moves existing nodes", sibling, child->InsertAfterChild( marker, sibling ) );
+		XMLPrinter movedPrinter( 0, true );
+		doc.Print( &movedPrinter );
+		XMLTest( "Tree after valid InsertAfterChild move", moved, movedPrinter.CStr() );
+	}
+	{
 		// Test: Programmatic DOM
 		// Build:
 		//		<element>
