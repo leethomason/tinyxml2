@@ -2720,6 +2720,22 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
             Write( p, toPrint );
         }
     }
+    else if ( !restricted ) {
+        // Entities are passed through, but attribute values are always written
+        // in double quotes; a value read from a single-quoted attribute can hold
+        // a raw '"' that would otherwise end the value early.
+        while ( *q ) {
+            if ( *q == DOUBLE_QUOTE ) {
+                Write( p, static_cast<size_t>( q - p ) );
+                Write( "&quot;" );
+                p = q + 1;
+            }
+            ++q;
+        }
+        if ( p < q ) {
+            Write( p, static_cast<size_t>( q - p ) );
+        }
+    }
     else {
         Write( p );
     }

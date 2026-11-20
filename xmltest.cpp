@@ -2411,6 +2411,31 @@ int main( int argc, const char ** argv )
 	}
 
 	{
+		// Without entity processing, a '"' inside a single-quoted attribute is
+		// kept raw. The printer always writes attributes with double quotes, so
+		// the '"' must still be escaped or the rest of the value is re-read as
+		// new attributes.
+		const char* xml = "<user name='bob\" role=\"admin'/>";
+		XMLDocument doc(false);
+		doc.Parse(xml);
+		XMLTest("Raw quote in attribute without entity processing: parse", false, doc.Error());
+
+		XMLPrinter printer(0, true);
+		doc.Print(&printer);
+		XMLTest("Raw quote in attribute without entity processing: print",
+		        "<user name=\"bob&quot; role=&quot;admin\"/>", printer.CStr());
+
+		XMLDocument reparsed;
+		reparsed.Parse(printer.CStr());
+		XMLTest("Raw quote in attribute without entity processing: reparse", false, reparsed.Error());
+		const XMLElement* user = reparsed.FirstChildElement("user");
+		XMLTest("Raw quote in attribute without entity processing: no new attribute",
+		        true, user != 0 && user->FindAttribute("role") == 0);
+		XMLTest("Raw quote in attribute without entity processing: value kept",
+		        "bob\" role=\"admin", user ? user->Attribute("name") : 0);
+	}
+
+	{
 		// Evil memory leaks.
 		// If an XMLElement (etc) is allocated via NewElement() (etc.)
 		// and NOT added to the XMLDocument, what happens?
